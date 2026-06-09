@@ -47,6 +47,27 @@
       "url": "http://localhost:3000/status",
       "screenCapture": ".pa11y-screenshots/status.png",
       "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "// Note": "RescueDogs MVP pages. Unauthenticated, so ProtectedRoute renders the sign-in card — that shell (nav, card, form controls) is what gets audited here. Authenticated-state a11y is covered by the per-component jest-axe tests.",
+      "url": "http://localhost:3000/adopt",
+      "screenCapture": ".pa11y-screenshots/adopt.png",
+      "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/applications",
+      "screenCapture": ".pa11y-screenshots/applications.png",
+      "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/applications/status",
+      "screenCapture": ".pa11y-screenshots/applications-status.png",
+      "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/shelter",
+      "screenCapture": ".pa11y-screenshots/shelter.png",
+      "actions": ["wait for element footer to be visible"]
     }
   ]
 }

@@ -13,6 +13,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import AvatarDisplay from '@/components/atomic/AvatarDisplay';
 import { useUnreadCount } from '@/hooks/useUnreadCount';
 import { AdminAuthService } from '@/services/admin/admin-auth-service';
+import { ShelterApplicationService } from '@/services/applications';
 import { createClient } from '@/lib/supabase/client';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -31,6 +32,7 @@ export function GlobalNav() {
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isShelterStaff, setIsShelterStaff] = useState(false);
 
   useEffect(() => {
     if (!user?.id) {
@@ -40,6 +42,18 @@ export function GlobalNav() {
     const supabase = createClient();
     const service = new AdminAuthService(supabase);
     service.checkIsAdmin(user.id).then(setIsAdmin);
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setIsShelterStaff(false);
+      return;
+    }
+    const supabase = createClient();
+    const service = new ShelterApplicationService(supabase);
+    service
+      .getMyShelterMembership(user.id)
+      .then((membership) => setIsShelterStaff(membership !== null));
   }, [user?.id]);
 
   // Theme management — read existing theme, don't overwrite ThemeScript's work.
@@ -123,9 +137,11 @@ export function GlobalNav() {
 
   const navItems = [
     { href: '/', label: 'Home' },
+    { href: '/adopt', label: 'Adopt' },
+    ...(user ? [{ href: '/applications', label: 'My Applications' }] : []),
+    ...(isShelterStaff ? [{ href: '/shelter', label: 'Shelter' }] : []),
     { href: '/blog', label: 'Blog' },
     { href: '/docs', label: 'Docs' },
-    { href: '/wireframes', label: 'Wireframes' },
   ];
 
   const themes = [
