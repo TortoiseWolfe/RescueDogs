@@ -1,16 +1,64 @@
-# RescueDogs - Modern Next.js Template with PWA
+# RescueDogs — the Anti-Ghosting Adoption Tracker
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/TortoiseWolfe/RescueDogs)
-[![Use Template](https://img.shields.io/badge/Use%20this%20template-2ea44f?style=for-the-badge)](https://github.com/TortoiseWolfe/RescueDogs/generate)
 [![Stars](https://img.shields.io/github/stars/TortoiseWolfe/RescueDogs?style=social)](https://github.com/TortoiseWolfe/RescueDogs)
 
-A comprehensive Next.js starter kit featuring 32 themes, PWA capabilities, component gallery, and extensive testing infrastructure.
+Adopters pour themselves into a five-page adoption application and never hear
+back. RescueDogs ends that: **one universal application, a pipeline dashboard
+a shelter volunteer can run, and a Domino's-style status tracker the
+applicant watches update live.** Built on the ScriptHammer template
+(Next.js 15 / React 19 / Supabase / DaisyUI, static export to GitHub Pages).
 
-## 🚀 Live Demos
+Constitution: [`.specify/memory/constitution.md`](.specify/memory/constitution.md)
+— Principle I: _No One Gets Ghosted._
 
-- **Main App**: [https://www.rescuedogs.com/](https://www.rescuedogs.com/)
-- **Storybook**: [https://www.rescuedogs.com/storybook/](https://www.rescuedogs.com/storybook/)
-- **Status Dashboard**: [https://www.rescuedogs.com/status](https://www.rescuedogs.com/status)
+## 🚀 Live Demo — Try the Loop
+
+Everything runs against a seeded demo shelter (**Second Chance Rescue**) with
+two demo accounts. **Sign in first** — these pages are gated, and `/shelter`
+bounces non-staff accounts back to the home page (that's the gate working).
+
+**Sign in:** <https://tortoisewolfe.github.io/RescueDogs/sign-in/>
+
+| Role                | Email               | Password       |
+| ------------------- | ------------------- | -------------- |
+| Adopter (Dana)      | `adopter@demo.test` | `DemoPass123!` |
+| Shelter staff (Sam) | `staff@demo.test`   | `DemoPass123!` |
+
+> Demo-only credentials, published on purpose. The seeded data lives in
+> [`supabase/seed-rescue-demo.sql`](supabase/seed-rescue-demo.sql).
+
+### Adopter pages (sign in as `adopter@demo.test`)
+
+- **Apply to adopt** (prefilled from the saved universal application):
+  <https://tortoisewolfe.github.io/RescueDogs/adopt/>
+- **My applications** (Biscuit submitted, Pepper in reference check, Tank not selected):
+  <https://tortoisewolfe.github.io/RescueDogs/applications/>
+- **Live status tracker** for Pepper:
+  <https://tortoisewolfe.github.io/RescueDogs/applications/status/?id=55555555-5555-5555-5555-555555555502>
+
+### Shelter staff pages (sign in as `staff@demo.test`)
+
+- **Pipeline dashboard** (filter tabs + counts):
+  <https://tortoisewolfe.github.io/RescueDogs/shelter/>
+- **Review Biscuit** (Submitted — advance it!):
+  <https://tortoisewolfe.github.io/RescueDogs/shelter/application/?id=55555555-5555-5555-5555-555555555501>
+- **Review Pepper** (Reference Check):
+  <https://tortoisewolfe.github.io/RescueDogs/shelter/application/?id=55555555-5555-5555-5555-555555555502>
+- **Review Tank** (Not Selected — terminal, no further actions):
+  <https://tortoisewolfe.github.io/RescueDogs/shelter/application/?id=55555555-5555-5555-5555-555555555503>
+
+### The two-window demo (the whole point)
+
+1. Window 1: sign in as **staff** → open Biscuit's review page.
+2. Window 2 (incognito / second profile): sign in as the **adopter** → open
+   Biscuit's tracker at
+   `https://tortoisewolfe.github.io/RescueDogs/applications/status/?id=55555555-5555-5555-5555-555555555501`.
+3. In window 1, set the status to _Under Review_ and add a note.
+4. Watch window 2: the tracker advances and the note appears — **no reload**.
+   That's the anti-ghosting loop (Supabase Realtime + RLS-scoped events).
+
+The Shelter nav link only appears for staff accounts; adopters never see it.
 
 ## ✨ Key Features
 
