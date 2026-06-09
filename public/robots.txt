@@ -1,4 +1,4 @@
-# ScriptHammer Robots.txt
+# RescueDogs Robots.txt
 User-agent: *
 Allow: /
 
@@ -15,4 +15,4 @@ Disallow: /messages/
 Disallow: /conversations/
 Disallow: /payment-demo/
 
-Sitemap: https://tortoisewolfe.github.io/ScriptHammer/sitemap.xml
+Sitemap: https://tortoisewolfe.github.io/RescueDogs/sitemap.xml

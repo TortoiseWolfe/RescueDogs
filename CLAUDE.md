@@ -2,6 +2,34 @@
 
 This file provides guidance to Claude Code when working with this repository.
 
+## Fork Notes (RescueDogs ← ScriptHammer)
+
+RescueDogs is a fork of ScriptHammer (upstream remote configured). The
+product is a pet adoption application tracker — universal application →
+shelter pipeline dashboard → live applicant status tracker. Constitution:
+`.specify/memory/constitution.md` v1.0.0 (rescue-domain principles I–V on
+top, ScriptHammer disciplines as Mandatory Constraints).
+
+**After every `git merge upstream/main`, re-run the rebrand and re-check:**
+
+```bash
+./scripts/rebrand.sh RescueDogs TortoiseWolfe "Pet adoption application tracker" --preserve-ssh --keep-cname --force
+```
+
+- `public/CNAME` must NOT exist (any CNAME breaks basePath auto-detection
+  for tortoisewolfe.github.io/RescueDogs; `--keep-cname` only prevents the
+  script from rewriting it — delete the file if the merge restores it)
+- `package.json` name must be `rescuedogs` (HatCoatAndBoots' upstream sync
+  silently reverted it to the upstream name)
+- Do NOT restore `supabase/migrations/999_drop_all_tables.sql` — it sorts
+  after the monolithic migration and a naive `supabase db push` would
+  create-then-drop every table
+- `.specify/memory/constitution.md` is RescueDogs v1.0.0 — never let an
+  upstream merge overwrite it
+
+Supabase project: `RescueDogs` ref `wwcpbaigvegsoysmgiiz` (us-east-1).
+Live site: https://tortoisewolfe.github.io/RescueDogs
+
 ## Core Development Principles
 
 1. **Proper Solutions Over Quick Fixes** - Implement correctly the first time
