@@ -79,21 +79,24 @@ interface TestUser {
   displayName: string;
 }
 
+// Emails come from the same env vars the E2E suite signs in with
+// (auth.setup.ts reads TEST_USER_*_EMAIL), so seeded users and test
+// sign-ins can never drift apart. Fallbacks preserve legacy behavior.
 const TEST_USERS: TestUser[] = [
   {
-    email: 'test@example.com',
+    email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
     password: PRIMARY_PASSWORD,
     username: 'testuser',
     displayName: 'Test User',
   },
   {
-    email: 'test-user-b@example.com',
+    email: process.env.TEST_USER_SECONDARY_EMAIL || 'test-user-b@example.com',
     password: SECONDARY_PASSWORD,
     username: 'testuser-b',
     displayName: 'Test User B',
   },
   {
-    email: 'test-user-c@example.com',
+    email: process.env.TEST_USER_TERTIARY_EMAIL || 'test-user-c@example.com',
     password: TERTIARY_PASSWORD,
     username: 'testuser-c',
     displayName: 'Test User C',

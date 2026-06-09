@@ -2473,5 +2473,358 @@ BEGIN
   END IF;
 END $$;
 
+-- ============================================================================
+-- RESCUEDOGS: ANTI-GHOSTING MVP
+-- Shelters, pets, adopter profiles, applications, status tracking
+-- Constitution: Principle I (No One Gets Ghosted) — every status mutation
+-- writes an auditable history row that powers the applicant-facing timeline.
+-- Principle III (Applicant Data Is a Trust) — own-row RLS; staff see the
+-- frozen application snapshot, never the adopter's live profile.
+-- ============================================================================
+
+-- ─── Tables ─────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS shelters (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL CHECK (length(name) >= 2 AND length(name) <= 120),
+  city TEXT CHECK (length(city) <= 100),
+  state TEXT CHECK (length(state) <= 50),
+  contact_email TEXT CHECK (length(contact_email) <= 255),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+COMMENT ON TABLE shelters IS 'Rescue organizations; MVP seeds exactly one (Second Chance Rescue)';
+
+CREATE TABLE IF NOT EXISTS shelter_members (
+  shelter_id UUID NOT NULL REFERENCES shelters(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'staff' CHECK (role IN ('staff', 'manager')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (shelter_id, user_id)
+);
+
+COMMENT ON TABLE shelter_members IS 'Shelter staff membership; powers is_shelter_staff() RLS checks. Distinct from user_profiles.is_admin (platform admin).';
+
+CREATE TABLE IF NOT EXISTS pets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  shelter_id UUID NOT NULL REFERENCES shelters(id) ON DELETE CASCADE,
+  name TEXT NOT NULL CHECK (length(name) >= 1 AND length(name) <= 60),
+  species TEXT NOT NULL DEFAULT 'dog' CHECK (species IN ('dog', 'cat')),
+  breed TEXT CHECK (length(breed) <= 100),
+  sex TEXT CHECK (sex IN ('male', 'female')),
+  age_years NUMERIC(4,1) CHECK (age_years >= 0 AND age_years <= 40),
+  size TEXT CHECK (size IN ('small', 'medium', 'large')),
+  photo_url TEXT,
+  status TEXT NOT NULL DEFAULT 'available'
+    CHECK (status IN ('available', 'pending', 'adopted')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pets_shelter_available
+  ON pets(shelter_id) WHERE status = 'available';
+
+COMMENT ON TABLE pets IS 'Minimal pet records: application dropdown + shelter context. NOT a discovery/browse feature (Constitution Principle V).';
+
+CREATE TABLE IF NOT EXISTS adopter_profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name TEXT NOT NULL CHECK (length(full_name) >= 2 AND length(full_name) <= 100),
+  phone TEXT CHECK (length(phone) <= 30),
+  address_line TEXT CHECK (length(address_line) <= 200),
+  city TEXT CHECK (length(city) <= 100),
+  state TEXT CHECK (length(state) <= 50),
+  zip TEXT CHECK (length(zip) <= 20),
+  housing_type TEXT NOT NULL CHECK (housing_type IN
+    ('own_house', 'own_condo', 'rent_house', 'rent_apartment', 'other')),
+  landlord_approval BOOLEAN,
+  landlord_contact TEXT CHECK (length(landlord_contact) <= 200),
+  has_yard BOOLEAN NOT NULL DEFAULT FALSE,
+  yard_fenced BOOLEAN,
+  household_adults SMALLINT NOT NULL DEFAULT 1 CHECK (household_adults >= 1 AND household_adults <= 20),
+  household_children SMALLINT NOT NULL DEFAULT 0 CHECK (household_children >= 0 AND household_children <= 20),
+  other_pets TEXT CHECK (length(other_pets) <= 1000),
+  vet_name TEXT CHECK (length(vet_name) <= 120),
+  vet_phone TEXT CHECK (length(vet_phone) <= 30),
+  experience TEXT CHECK (length(experience) <= 2000),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+COMMENT ON TABLE adopter_profiles IS 'The reusable universal application: fill once, prefill every future application. landlord_approval required-when-renting is enforced by Zod at submit, not the DB.';
+
+DROP TRIGGER IF EXISTS update_adopter_profiles_updated_at ON adopter_profiles;
+CREATE TRIGGER update_adopter_profiles_updated_at
+  BEFORE UPDATE ON adopter_profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TABLE IF NOT EXISTS applications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  adopter_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  pet_id UUID NOT NULL REFERENCES pets(id) ON DELETE CASCADE,
+  shelter_id UUID NOT NULL REFERENCES shelters(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'submitted' CHECK (status IN
+    ('submitted', 'under_review', 'reference_check', 'home_visit',
+     'approved', 'not_selected', 'withdrawn')),
+  profile_snapshot JSONB NOT NULL CHECK (jsonb_typeof(profile_snapshot) = 'object'),
+  why_this_pet TEXT CHECK (length(why_this_pet) <= 2000),
+  status_changed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT one_application_per_pet UNIQUE (adopter_id, pet_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_applications_adopter
+  ON applications(adopter_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_applications_shelter_status
+  ON applications(shelter_id, status, status_changed_at DESC);
+
+COMMENT ON TABLE applications IS 'profile_snapshot freezes the adopter profile at submit time — staff review what was actually submitted; later profile edits never mutate in-flight applications.';
+
+CREATE TABLE IF NOT EXISTS application_status_history (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+  from_status TEXT,
+  to_status TEXT NOT NULL,
+  changed_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  note TEXT CHECK (length(note) <= 1000),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_status_history_app
+  ON application_status_history(application_id, created_at);
+
+COMMENT ON TABLE application_status_history IS 'Adopter-visible audit trail powering the status tracker timeline. note is shown to the adopter (e.g. "Home visit scheduled for Saturday"). Rows written only by SECURITY DEFINER functions.';
+
+-- ─── Helper: staff membership check (avoids recursive RLS policies) ────────
+
+CREATE OR REPLACE FUNCTION is_shelter_staff(p_shelter UUID, check_user_id UUID DEFAULT auth.uid())
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM shelter_members
+    WHERE shelter_id = p_shelter
+      AND user_id = check_user_id
+  );
+$$;
+
+-- ─── Status transitions: SECURITY DEFINER RPCs (the only write path) ───────
+-- applications has NO client UPDATE/DELETE policies; with output:'export'
+-- there is no server runtime, so Postgres is the only trusted layer.
+
+CREATE OR REPLACE FUNCTION advance_application_status(
+  p_application_id UUID,
+  p_to_status TEXT,
+  p_note TEXT DEFAULT NULL
+)
+RETURNS applications
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_app applications;
+  v_from_status TEXT;
+BEGIN
+  SELECT * INTO v_app FROM applications WHERE id = p_application_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'application not found';
+  END IF;
+
+  -- Guard first: only staff of the application's shelter may advance
+  IF NOT is_shelter_staff(v_app.shelter_id) THEN
+    RAISE EXCEPTION 'not authorized';
+  END IF;
+
+  v_from_status := v_app.status;
+
+  IF NOT (CASE v_from_status
+    WHEN 'submitted'       THEN p_to_status IN ('under_review', 'not_selected')
+    WHEN 'under_review'    THEN p_to_status IN ('reference_check', 'home_visit', 'approved', 'not_selected')
+    WHEN 'reference_check' THEN p_to_status IN ('home_visit', 'approved', 'not_selected')
+    WHEN 'home_visit'      THEN p_to_status IN ('approved', 'not_selected')
+    ELSE FALSE  -- approved / not_selected / withdrawn are terminal
+  END) THEN
+    RAISE EXCEPTION 'illegal transition % -> %', v_from_status, p_to_status;
+  END IF;
+
+  UPDATE applications
+  SET status = p_to_status, status_changed_at = NOW()
+  WHERE id = p_application_id
+  RETURNING * INTO v_app;
+
+  INSERT INTO application_status_history
+    (application_id, from_status, to_status, changed_by, note)
+  VALUES
+    (p_application_id, v_from_status, p_to_status, auth.uid(), p_note);
+
+  -- Approval marks the pet pending so the dropdown stops offering it
+  IF p_to_status = 'approved' THEN
+    UPDATE pets SET status = 'pending' WHERE id = v_app.pet_id;
+  END IF;
+
+  RETURN v_app;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION withdraw_application(p_application_id UUID)
+RETURNS applications
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_app applications;
+  v_from_status TEXT;
+BEGIN
+  SELECT * INTO v_app FROM applications WHERE id = p_application_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'application not found';
+  END IF;
+
+  -- Guard first: only the adopter may withdraw their own application
+  IF v_app.adopter_id IS DISTINCT FROM auth.uid() THEN
+    RAISE EXCEPTION 'not authorized';
+  END IF;
+
+  v_from_status := v_app.status;
+
+  IF v_from_status IN ('approved', 'not_selected', 'withdrawn') THEN
+    RAISE EXCEPTION 'cannot withdraw a % application', v_from_status;
+  END IF;
+
+  UPDATE applications
+  SET status = 'withdrawn', status_changed_at = NOW()
+  WHERE id = p_application_id
+  RETURNING * INTO v_app;
+
+  INSERT INTO application_status_history
+    (application_id, from_status, to_status, changed_by)
+  VALUES
+    (p_application_id, v_from_status, 'withdrawn', auth.uid());
+
+  RETURN v_app;
+END;
+$$;
+
+-- Initial history row is never forgotten (Constitution Principle I)
+CREATE OR REPLACE FUNCTION log_application_submitted()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO application_status_history
+    (application_id, from_status, to_status, changed_by)
+  VALUES
+    (NEW.id, NULL, 'submitted', NEW.adopter_id);
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_application_created ON applications;
+CREATE TRIGGER on_application_created
+  AFTER INSERT ON applications
+  FOR EACH ROW
+  EXECUTE FUNCTION log_application_submitted();
+
+-- ─── Row Level Security ─────────────────────────────────────────────────────
+
+ALTER TABLE shelters ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shelter_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE adopter_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE application_status_history ENABLE ROW LEVEL SECURITY;
+
+-- shelters: read-only reference data (seeded via service role)
+DROP POLICY IF EXISTS "Authenticated users can view shelters" ON shelters;
+CREATE POLICY "Authenticated users can view shelters" ON shelters
+  FOR SELECT TO authenticated USING (true);
+
+-- shelter_members: users see own memberships (powers ShelterGate)
+DROP POLICY IF EXISTS "Users can view own shelter memberships" ON shelter_members;
+CREATE POLICY "Users can view own shelter memberships" ON shelter_members
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- pets: signed-in users can read (application dropdown + tracker context)
+DROP POLICY IF EXISTS "Authenticated users can view pets" ON pets;
+CREATE POLICY "Authenticated users can view pets" ON pets
+  FOR SELECT TO authenticated USING (true);
+
+-- adopter_profiles: strictly own-row; shelter staff never read it
+-- (they see applications.profile_snapshot instead — Principle III)
+DROP POLICY IF EXISTS "Users view own adopter profile" ON adopter_profiles;
+CREATE POLICY "Users view own adopter profile" ON adopter_profiles
+  FOR SELECT USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Users create own adopter profile" ON adopter_profiles;
+CREATE POLICY "Users create own adopter profile" ON adopter_profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+DROP POLICY IF EXISTS "Users update own adopter profile" ON adopter_profiles;
+CREATE POLICY "Users update own adopter profile" ON adopter_profiles
+  FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+
+-- applications: adopters see own; staff see their shelter's.
+-- INSERT only as yourself, only at 'submitted', only for an available pet
+-- whose shelter matches. NO UPDATE/DELETE policies — RPCs are the write path.
+DROP POLICY IF EXISTS "Adopters view own applications" ON applications;
+CREATE POLICY "Adopters view own applications" ON applications
+  FOR SELECT USING (auth.uid() = adopter_id);
+DROP POLICY IF EXISTS "Shelter staff view shelter applications" ON applications;
+CREATE POLICY "Shelter staff view shelter applications" ON applications
+  FOR SELECT USING (is_shelter_staff(shelter_id));
+DROP POLICY IF EXISTS "Adopters submit own applications" ON applications;
+CREATE POLICY "Adopters submit own applications" ON applications
+  FOR INSERT WITH CHECK (
+    auth.uid() = adopter_id
+    AND status = 'submitted'
+    AND EXISTS (
+      SELECT 1 FROM pets p
+      WHERE p.id = pet_id
+        AND p.shelter_id = applications.shelter_id
+        AND p.status = 'available'
+    )
+  );
+
+-- status history: readable by the application's parties; written only by
+-- SECURITY DEFINER functions (no client INSERT/UPDATE/DELETE policies)
+DROP POLICY IF EXISTS "Application parties view status history" ON application_status_history;
+CREATE POLICY "Application parties view status history" ON application_status_history
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM applications a
+      WHERE a.id = application_id
+        AND (a.adopter_id = auth.uid() OR is_shelter_staff(a.shelter_id))
+    )
+  );
+
+-- ─── Realtime: live status tracker ──────────────────────────────────────────
+-- REPLICA IDENTITY FULL is required for Realtime UPDATE events; publication
+-- membership is required for postgres_changes delivery. Events respect the
+-- subscriber's SELECT policies, so adopters only receive their own rows.
+
+ALTER TABLE applications REPLICA IDENTITY FULL;
+ALTER TABLE application_status_history REPLICA IDENTITY FULL;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND tablename = 'applications'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.applications;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND tablename = 'application_status_history'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.application_status_history;
+  END IF;
+END $$;
+
 -- Commit the transaction - everything succeeded
 COMMIT;
