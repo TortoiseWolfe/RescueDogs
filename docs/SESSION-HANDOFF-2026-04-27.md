@@ -22,7 +22,7 @@ Issues filed during the session that remain open: #49, #53, #57.
 - **Family A (stability hotspots) is empty.** All four originally-flagged hotspots in STATUS.md are now resolved (two were already fixed in earlier work — ConversationView, PaymentConsentModal — and the other two shipped today via PR #56 and PR #59). The "18+ reverts in 3 months" pattern that haunted the post-remake era now has regression test coverage on every shape that produced it.
 - **CI signal is loud.** PR #58 made the `Start server` step fail in 90 seconds with captured diagnostics instead of cascading 50 minutes of ECONNREFUSED. The next time CI looks broken, the failed step's output will tell you why.
 - **Offline payment queue is exactly-once-observable.** Tab crashes mid-sync no longer leave items in limbo, and a retry of a successful INSERT is a server-side no-op (partial unique index on `payment_intents.idempotency_key`).
-- **`pnpm test:rls` recovers from killed prior runs.** A globalSetup hook walks the FK chain (`payment_intents → subscriptions → user_profiles → auth.deleteUser`) for every `*@scripthammer.test` user before tests collect, so the manual cleanup that was needed on 2026-04-26 is no longer needed.
+- **`pnpm test:rls` recovers from killed prior runs.** A globalSetup hook walks the FK chain (`payment_intents → subscriptions → user_profiles → auth.deleteUser`) for every `*@rescuedogs.test` user before tests collect, so the manual cleanup that was needed on 2026-04-26 is no longer needed.
 - **Three consecutive green chromium-msg shards.** PR #58, PR #59, PR #60 all passed messaging E2E on first try. The "9 rounds of flake mitigation" framing in STATUS.md may overstate the current frequency; #57 is probably P2, not P1, but I haven't downgraded its label yet.
 
 ## Recommended next pickup: B1 (#43, `/payment-result` retry-UX gaps)
@@ -45,7 +45,7 @@ Alternatives the next session might prefer:
 ## Sharp edges to know about
 
 - **Supabase Cloud auth admin rate limit.** The cleanup-stale hook makes us slightly more likely to brush against it on cloud — running `pnpm test:rls` immediately after the hook cleans a stale user can hit "Request rate limit reached" on `createTestUser`. The fix is to wait ~75 seconds; not a code bug. CI hasn't tripped this in any of today's runs, so no follow-up filed.
-- **`fileParallelism: false` is load-bearing in `vitest.rls.config.ts`.** Don't remove it — RLS test files share `*@scripthammer.test` users and parallel runs would race the create/delete cycles.
+- **`fileParallelism: false` is load-bearing in `vitest.rls.config.ts`.** Don't remove it — RLS test files share `*@rescuedogs.test` users and parallel runs would race the create/delete cycles.
 - **`subscription_update` operation in payment-adapter is intentionally without idempotency-key handling.** UPDATE is implicitly idempotent by primary key. Don't extend the watchdog/idempotency machinery there without a real failure case.
 - **The `payment_intents.idempotency_key` partial unique index** is `WHERE idempotency_key IS NOT NULL`. Direct-server INSERTs (admin tooling, edge functions) without a key remain valid — only client-queued INSERTs participate in dedupe. If a future feature does direct INSERTs and _expects_ dedupe, it must supply its own key.
 
@@ -74,7 +74,7 @@ Alternatives the next session might prefer:
 | #43 | 040 Payment Retry UI: `/payment-result` retry-UX gaps (route shipped 2026-04-16) | **B1**       | **Recommended next**                                                           |
 | #45 | 044 Error Handler Integrations: Sentry/LogRocket                                 | (audit-tier) | Pre-existing                                                                   |
 | #46 | 045 Disqus Theme: 32-theme mapping                                               | (audit-tier) | Pre-existing                                                                   |
-| #47 | gdpr-compliance.spec.ts: ENOTFOUND scripthammer-supabase-kong-1                  | (audit-tier) | Pre-existing — real bug, not in any family yet                                 |
+| #47 | gdpr-compliance.spec.ts: ENOTFOUND rescuedogs-supabase-kong-1                  | (audit-tier) | Pre-existing — real bug, not in any family yet                                 |
 | #49 | auth_audit_logs sign_up events not written for all signup paths                  | **D2**       | Filed in this session                                                          |
 | #53 | tests/e2e/payment/: 84 test.skip — index by blocker                              | **B5**       | Filed in this session; closes incrementally as B1–B4 ship                      |
 | #57 | Messaging E2E: chromium-msg cross-window propagation                             | —            | Filed in this session; possibly de-prioritize to P2 given 3 consecutive greens |
@@ -90,17 +90,17 @@ git rev-parse --abbrev-ref HEAD   # main
 git log --oneline -1              # ed21c21 (or later if more landed)
 
 # 2. Read the recommended pickup
-gh issue view 43 --repo TortoiseWolfe/ScriptHammer
+gh issue view 43 --repo TortoiseWolfe/RescueDogs
 cat features/payments/040-payment-retry-ui/spec.md   # if it exists
 
 # 3. Branch and brainstorm
-docker compose exec scripthammer git checkout -b 043/payment-result-page
+docker compose exec rescuedogs git checkout -b 043/payment-result-page
 # Then invoke superpowers:brainstorming for the design conversation
 ```
 
 ## Things I would not bother doing in the next session
 
-- **Don't unify #50 and #57** — yesterday I proposed it; today I withdrew it. Different user pools (`*@scripthammer.test` for RLS vs `TEST_USER_PRIMARY_EMAIL` for E2E). They're genuinely separate problems.
+- **Don't unify #50 and #57** — yesterday I proposed it; today I withdrew it. Different user pools (`*@rescuedogs.test` for RLS vs `TEST_USER_PRIMARY_EMAIL` for E2E). They're genuinely separate problems.
 - **Don't refactor `BaseOfflineQueue` to share with the messaging offline-queue service** — different design surfaces (encryption + FIFO). Premature.
 - **Don't speculatively bump the wait-on timeout in `.github/workflows/e2e.yml`** — the diagnostic-loud version that landed in PR #58 will tell you if 60s is genuinely too short. Wait for evidence.
 - **Don't try to make the watchdog use `navigator.locks.request()`** unless a regression test empirically fails on Dexie's atomic-modify guarantees. The current implementation passes tests + cloud verification.

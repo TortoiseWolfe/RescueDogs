@@ -81,7 +81,7 @@ function MyComponent() {
 Playwright is configured with 8 mobile + 2 tablet viewports:
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test
+docker compose exec rescuedogs pnpm exec playwright test
 # Tests automatically run against all configured mobile viewports
 ```
 

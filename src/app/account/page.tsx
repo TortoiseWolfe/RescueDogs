@@ -5,7 +5,7 @@ import AccountSettings from '@/components/auth/AccountSettings';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Account Settings - ScriptHammer',
+  title: 'Account Settings - RescueDogs',
   description: 'Manage your account settings and preferences',
   robots: {
     index: false,

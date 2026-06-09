@@ -12,14 +12,14 @@
 
 ```bash
 # Generate all 8 atomic components
-docker compose exec scripthammer pnpm run generate:component SocialShareButton blog
-docker compose exec scripthammer pnpm run generate:component SocialShareGroup blog
-docker compose exec scripthammer pnpm run generate:component AuthorAvatar blog
-docker compose exec scripthammer pnpm run generate:component AuthorBio blog
-docker compose exec scripthammer pnpm run generate:component SocialLink blog
-docker compose exec scripthammer pnpm run generate:component AuthorSocialLinks blog
-docker compose exec scripthammer pnpm run generate:component AuthorProfile blog
-docker compose exec scripthammer pnpm run generate:component ShareMetadata blog
+docker compose exec rescuedogs pnpm run generate:component SocialShareButton blog
+docker compose exec rescuedogs pnpm run generate:component SocialShareGroup blog
+docker compose exec rescuedogs pnpm run generate:component AuthorAvatar blog
+docker compose exec rescuedogs pnpm run generate:component AuthorBio blog
+docker compose exec rescuedogs pnpm run generate:component SocialLink blog
+docker compose exec rescuedogs pnpm run generate:component AuthorSocialLinks blog
+docker compose exec rescuedogs pnpm run generate:component AuthorProfile blog
+docker compose exec rescuedogs pnpm run generate:component ShareMetadata blog
 ```
 
 ### 2. Create Configuration Files
@@ -34,13 +34,13 @@ touch src/config/social.ts
 
 ```bash
 # Run all tests (should fail initially - TDD)
-docker compose exec scripthammer pnpm test
+docker compose exec rescuedogs pnpm test
 
 # Run specific component tests
-docker compose exec scripthammer pnpm test SocialShareButton
+docker compose exec rescuedogs pnpm test SocialShareButton
 
 # Run accessibility tests
-docker compose exec scripthammer pnpm test:a11y
+docker compose exec rescuedogs pnpm test:a11y
 ```
 
 ## Basic Usage Examples
@@ -150,7 +150,7 @@ export const authors = {
 
 ```bash
 # Start Storybook
-docker compose exec scripthammer pnpm run storybook
+docker compose exec rescuedogs pnpm run storybook
 
 # View components at http://localhost:6006
 # Navigate to Blog/SocialShareButton
@@ -161,7 +161,7 @@ docker compose exec scripthammer pnpm run storybook
 
 ```bash
 # Run Pa11y tests
-docker compose exec scripthammer pnpm run test:a11y
+docker compose exec rescuedogs pnpm run test:a11y
 
 # Manual keyboard testing
 1. Tab through all share buttons
@@ -174,8 +174,8 @@ docker compose exec scripthammer pnpm run test:a11y
 
 ```bash
 # Check bundle size
-docker compose exec scripthammer pnpm run build
-docker compose exec scripthammer pnpm run analyze
+docker compose exec rescuedogs pnpm run build
+docker compose exec rescuedogs pnpm run analyze
 
 # Verify Lighthouse scores
 1. Open Chrome DevTools

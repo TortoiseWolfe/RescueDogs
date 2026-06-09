@@ -112,9 +112,9 @@
 
 **Purpose**: Final verification all issues resolved
 
-- [x] T020 Run full test suite: `docker compose exec scripthammer pnpm test` (207 passed, 2 skipped)
-- [x] T021 Run type check: `docker compose exec scripthammer pnpm run type-check` (passed)
-- [x] T022 Run lint: `docker compose exec scripthammer pnpm run lint` (passed)
+- [x] T020 Run full test suite: `docker compose exec rescuedogs pnpm test` (207 passed, 2 skipped)
+- [x] T021 Run type check: `docker compose exec rescuedogs pnpm run type-check` (passed)
+- [x] T022 Run lint: `docker compose exec rescuedogs pnpm run lint` (passed)
 - [ ] T023 Manual test: Avatar upload → verify navbar updates within 1 second
 - [ ] T024 Manual test: Invalid password → verify error in Change Password card
 - [ ] T025 Manual test: Valid password change → logout → login with new password

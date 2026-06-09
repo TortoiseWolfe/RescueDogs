@@ -25,7 +25,7 @@ All 5 P0 (must-ship) features have completed acceptance criteria review and wire
 
 ## Motivation
 
-P0 features form the security and compliance foundation for ScriptHammer. They are:
+P0 features form the security and compliance foundation for RescueDogs. They are:
 
 - **000-RLS**: Row-Level Security - data isolation for all tables
 - **002-Cookie-Consent**: GDPR compliance - required for EU operation

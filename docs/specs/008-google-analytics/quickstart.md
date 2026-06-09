@@ -46,7 +46,7 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=your_ga4_measurement_id_here
 Run the component generator:
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 ```
 
 When prompted:

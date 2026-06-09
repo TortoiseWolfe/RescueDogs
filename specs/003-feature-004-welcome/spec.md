@@ -28,7 +28,7 @@ The current welcome message implementation (Feature 002) has a critical architec
 
 ### User Story 1 - New User Receives Welcome Message (Priority: P1)
 
-A new user signs up and initializes their encryption keys. They automatically receive a welcome message from ScriptHammer admin explaining E2E encryption.
+A new user signs up and initializes their encryption keys. They automatically receive a welcome message from RescueDogs admin explaining E2E encryption.
 
 **Why this priority**: Core feature - users must understand the E2E encryption system to use messaging effectively.
 
@@ -101,7 +101,7 @@ If the admin public key is missing from the database (seed script not run), the 
 ### Key Entities
 
 - **Admin Public Key**: Pre-generated ECDH P-256 public key stored in `user_encryption_keys` as JWK format with required fields: `{ kty: "EC", crv: "P-256", x: "<base64url>", y: "<base64url>" }`
-- **Admin User**: UUID `00000000-0000-0000-0000-000000000001`, username `scripthammer`
+- **Admin User**: UUID `00000000-0000-0000-0000-000000000001`, username `rescuedogs`
 - **Welcome Message Content**: Static constant `WELCOME_MESSAGE_CONTENT` defined in `specs/003-feature-004-welcome/contracts/welcome-service.ts` and copied to `src/services/messaging/welcome-service.ts` during implementation
 
 ## Technical Approach
@@ -151,7 +151,7 @@ Since ECDH shared secrets are symmetric, the user can encrypt a message "from" a
 Full admin setup is handled by `scripts/seed-test-users.ts`:
 
 1. Creates admin auth user (ID: `00000000-0000-0000-0000-000000000001`) if missing
-2. Creates admin profile (username: `scripthammer`) if missing
+2. Creates admin profile (username: `rescuedogs`) if missing
 3. Generates ECDH P-256 keypair
 4. Stores public key in `user_encryption_keys` table
 5. Private key is discarded (not needed for welcome messages)

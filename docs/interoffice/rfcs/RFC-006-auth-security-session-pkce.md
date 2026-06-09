@@ -48,7 +48,7 @@ Both findings are rated MEDIUM severity and should be addressed before implement
 
 **Current State**: Feature 005 specifies OAuth state parameter validation (FR-005-007) but does not explicitly require PKCE.
 
-**Risk**: ScriptHammer deploys as a static site (GitHub Pages). Without PKCE, authorization code interception attacks are possible, especially on mobile browsers or shared networks.
+**Risk**: RescueDogs deploys as a static site (GitHub Pages). Without PKCE, authorization code interception attacks are possible, especially on mobile browsers or shared networks.
 
 **OWASP Recommendation**: PKCE is now required for ALL OAuth clients (not just mobile/native) per OAuth 2.1 draft specification.
 

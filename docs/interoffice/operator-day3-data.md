@@ -60,7 +60,7 @@ Read full context below, then run startup sequence.
 <!-- WRONG -->
 <text x="960" y="1060" text-anchor="middle" ...>
 <!-- CORRECT -->
-<text x="40" y="1060" font-size="18" font-weight="bold" fill="#374151">NNN:NN | Feature Name | ScriptHammer</text>
+<text x="40" y="1060" font-size="18" font-weight="bold" fill="#374151">NNN:NN | Feature Name | RescueDogs</text>
 ```
 
 **Rounded Corners (G-044):**
@@ -81,8 +81,8 @@ Read full context below, then run startup sequence.
 
 ### Startup Sequence
 
-1. `tmux attach -t scripthammer`
+1. `tmux attach -t rescuedogs`
 2. Reprime Inspector: `/clear` then `/prime inspector`
-3. Check terminals: `for win in PreviewHost WireframeQA Validator Inspector Auditor; do tmux capture-pane -t scripthammer:$win -p | grep "% free"; done`
+3. Check terminals: `for win in PreviewHost WireframeQA Validator Inspector Auditor; do tmux capture-pane -t rescuedogs:$win -p | grep "% free"; done`
 4. Dispatch PATCH tasks to Generator terminals
 5. Push 28 commits when ready

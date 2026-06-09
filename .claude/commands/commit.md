@@ -6,8 +6,8 @@ tags: workflow
 Please follow these steps to commit code changes:
 
 1. **Run Quality Checks**:
-   - Execute `docker compose exec scripthammer pnpm run lint`
-   - Execute `docker compose exec scripthammer pnpm run type-check`
+   - Execute `docker compose exec rescuedogs pnpm run lint`
+   - Execute `docker compose exec rescuedogs pnpm run type-check`
    - If either check fails, stop and report the errors
 
 2. **Stage and Commit**:

@@ -1,4 +1,4 @@
-# Pre-commit hooks for ScriptHammer
+# Pre-commit hooks for RescueDogs
 # Install: pip install pre-commit && pre-commit install
 # For commit-msg hooks: pre-commit install --hook-type commit-msg
 # Run manually: pre-commit run --all-files

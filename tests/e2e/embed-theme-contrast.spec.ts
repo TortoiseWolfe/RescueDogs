@@ -34,8 +34,8 @@ import { test, expect } from '@playwright/test';
 // never a silent skip.
 
 const THEMES = [
-  'scripthammer-dark',
-  'scripthammer-light',
+  'rescuedogs-dark',
+  'rescuedogs-light',
   'light',
   'dark',
   'cupcake',
@@ -72,7 +72,7 @@ const THEMES = [
 
 // Mirrors src/utils/theme-utils.ts DARK_THEMES (drives the Disqus bg choice).
 const DARK_THEMES = new Set([
-  'scripthammer-dark',
+  'rescuedogs-dark',
   'dark',
   'synthwave',
   'halloween',

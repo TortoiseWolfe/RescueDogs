@@ -199,7 +199,7 @@ The 2-terminal signal is smaller than RFC-001's 5-terminal consensus, but both t
 
 While this role wasn't in my direct audit feedback, I support it from a user experience perspective:
 
-1. **Developer experience is user experience** - Developers integrating with ScriptHammer's APIs are users too. Quality API documentation and integration guides directly impact their experience. Technical Writer ensures this audience is served well.
+1. **Developer experience is user experience** - Developers integrating with RescueDogs's APIs are users too. Quality API documentation and integration guides directly impact their experience. Technical Writer ensures this audience is served well.
 
 2. **Documentation supports onboarding** - Constitution principle VI (Privacy First) requires GDPR compliance. Clear technical documentation of data flows, consent mechanisms, and privacy controls helps developers implement correctly. This serves end users indirectly by reducing compliance bugs.
 

@@ -60,7 +60,7 @@ As a developer, I need to run E2E tests inside Docker locally before pushing to 
 
 **Why this priority**: Critical safety requirement. The user explicitly stated they were harmed by untested code being pushed to production ("now I'm back to not being able to sing in at all").
 
-**Independent Test**: Can be tested by running `docker compose exec scripthammer pnpm exec playwright test` and verifying tests execute within the container.
+**Independent Test**: Can be tested by running `docker compose exec rescuedogs pnpm exec playwright test` and verifying tests execute within the container.
 
 **Acceptance Scenarios**:
 
@@ -95,7 +95,7 @@ As a developer, I need to run E2E tests inside Docker locally before pushing to 
 - **FR-007**: E2E tests MUST verify message decryption displays correct plaintext content
 - **FR-008**: E2E tests MUST verify reply functionality works bidirectionally
 - **FR-009**: E2E tests MUST verify sign-out functionality works correctly
-- **FR-010**: E2E tests MUST run inside Docker container via `docker compose exec scripthammer pnpm exec playwright test`
+- **FR-010**: E2E tests MUST run inside Docker container via `docker compose exec rescuedogs pnpm exec playwright test`
 - **FR-011**: System MUST NOT allow code push to production until all E2E tests pass locally
 - **FR-012**: Tests MUST use test users from .env configuration (TEST_USER_PRIMARY_EMAIL, TEST_USER_TERTIARY_EMAIL)
 - **FR-013**: Tests MUST clean up test data (connections, messages) between test runs to ensure idempotency

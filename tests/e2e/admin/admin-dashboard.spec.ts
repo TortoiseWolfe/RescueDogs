@@ -13,7 +13,7 @@
  *
  * Run from inside the Docker container:
  *   docker exec -e SKIP_WEBSERVER=1 -e BASE_URL=http://localhost:3000 \
- *     sh-feat-scripthammer-1 npx playwright test tests/e2e/admin/ --project=chromium
+ *     sh-feat-rescuedogs-1 npx playwright test tests/e2e/admin/ --project=chromium
  */
 
 import { test, expect } from '@playwright/test';
@@ -23,7 +23,7 @@ const ADMIN_EMAIL = 'test@example.com';
 const ADMIN_PASSWORD = 'TestPassword123!';
 
 // Next.js basePath — all routes must be prefixed
-const BP = '/ScriptHammer';
+const BP = '/RescueDogs';
 
 // Local-only spec (skipped in CI). The Node test process reaches local Kong via
 // SUPABASE_ADMIN_URL (compose-internal supabase-kong:8000); the browser reaches

@@ -35,7 +35,7 @@ Find the admin user INSERT (around line 1271) and update:
 
 ```sql
 INSERT INTO user_profiles (id, username, display_name, welcome_message_sent, is_admin)
-VALUES ('00000000-0000-0000-0000-000000000001', 'scripthammer', 'ScriptHammer', TRUE, TRUE)
+VALUES ('00000000-0000-0000-0000-000000000001', 'rescuedogs', 'RescueDogs', TRUE, TRUE)
 ON CONFLICT (id) DO UPDATE SET is_admin = TRUE;
 ```
 
@@ -238,7 +238,7 @@ $$;
 **Step 5: Execute migration via Supabase Management API**
 
 ```bash
-docker compose exec scripthammer bash -c '
+docker compose exec rescuedogs bash -c '
   source .env
   PROJECT_REF=$(echo $NEXT_PUBLIC_SUPABASE_URL | sed "s|https://||" | sed "s|\.supabase\.co||")
   curl -s -X POST "https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query" \
@@ -253,8 +253,8 @@ Then execute the RLS policies and RPC functions similarly. Run each policy and f
 **Step 6: Commit**
 
 ```bash
-docker compose exec scripthammer git add supabase/migrations/20251006_complete_monolithic_setup.sql
-docker compose exec scripthammer git commit -m "feat(admin): add is_admin column, admin RLS policies, and RPC aggregation functions"
+docker compose exec rescuedogs git add supabase/migrations/20251006_complete_monolithic_setup.sql
+docker compose exec rescuedogs git commit -m "feat(admin): add is_admin column, admin RLS policies, and RPC aggregation functions"
 ```
 
 ---
@@ -312,8 +312,8 @@ export type { AdminProfile } from './admin-auth-service';
 **Step 3: Commit**
 
 ```bash
-docker compose exec scripthammer git add src/services/admin/
-docker compose exec scripthammer git commit -m "feat(admin): add AdminAuthService for admin identity checks"
+docker compose exec rescuedogs git add src/services/admin/
+docker compose exec rescuedogs git commit -m "feat(admin): add AdminAuthService for admin identity checks"
 ```
 
 ---
@@ -405,8 +405,8 @@ export default function AdminLayout({
 **Step 2: Commit**
 
 ```bash
-docker compose exec scripthammer git add src/app/admin/
-docker compose exec scripthammer git commit -m "feat(admin): add admin layout with auth guard and tab navigation"
+docker compose exec rescuedogs git add src/app/admin/
+docker compose exec rescuedogs git commit -m "feat(admin): add admin layout with auth guard and tab navigation"
 ```
 
 ---
@@ -422,7 +422,7 @@ Generate via component generator, then implement.
 **Step 1: Generate component scaffold**
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 # Name: AdminStatCard
 # Level: molecular
 ```
@@ -624,14 +624,14 @@ describe('AdminStatCard Accessibility', () => {
 **Step 6: Run tests**
 
 ```bash
-docker compose exec scripthammer pnpm test -- --run src/components/molecular/AdminStatCard/
+docker compose exec rescuedogs pnpm test -- --run src/components/molecular/AdminStatCard/
 ```
 
 **Step 7: Commit**
 
 ```bash
-docker compose exec scripthammer git add src/components/molecular/AdminStatCard/
-docker compose exec scripthammer git commit -m "feat(admin): add AdminStatCard molecular component"
+docker compose exec rescuedogs git add src/components/molecular/AdminStatCard/
+docker compose exec rescuedogs git commit -m "feat(admin): add AdminStatCard molecular component"
 ```
 
 ---
@@ -645,7 +645,7 @@ docker compose exec scripthammer git commit -m "feat(admin): add AdminStatCard m
 **Step 1: Generate component scaffold**
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 # Name: AdminDataTable
 # Level: molecular
 ```
@@ -785,9 +785,9 @@ export default AdminDataTable;
 **Step 4: Run tests and commit**
 
 ```bash
-docker compose exec scripthammer pnpm test -- --run src/components/molecular/AdminDataTable/
-docker compose exec scripthammer git add src/components/molecular/AdminDataTable/
-docker compose exec scripthammer git commit -m "feat(admin): add AdminDataTable molecular component"
+docker compose exec rescuedogs pnpm test -- --run src/components/molecular/AdminDataTable/
+docker compose exec rescuedogs git add src/components/molecular/AdminDataTable/
+docker compose exec rescuedogs git commit -m "feat(admin): add AdminDataTable molecular component"
 ```
 
 ---
@@ -889,8 +889,8 @@ export type { AdminPaymentStats } from './admin-payment-service';
 **Step 3: Commit**
 
 ```bash
-docker compose exec scripthammer git add src/services/admin/
-docker compose exec scripthammer git commit -m "feat(admin): add AdminPaymentService with RPC stats + transaction queries"
+docker compose exec rescuedogs git add src/services/admin/
+docker compose exec rescuedogs git commit -m "feat(admin): add AdminPaymentService with RPC stats + transaction queries"
 ```
 
 ---
@@ -972,8 +972,8 @@ export class AdminAuditService {
 **Step 2: Update barrel export and commit**
 
 ```bash
-docker compose exec scripthammer git add src/services/admin/
-docker compose exec scripthammer git commit -m "feat(admin): add AdminAuditService with auth stats and event log queries"
+docker compose exec rescuedogs git add src/services/admin/
+docker compose exec rescuedogs git commit -m "feat(admin): add AdminAuditService with auth stats and event log queries"
 ```
 
 ---
@@ -1046,8 +1046,8 @@ export class AdminUserService {
 **Step 2: Update barrel export and commit**
 
 ```bash
-docker compose exec scripthammer git add src/services/admin/
-docker compose exec scripthammer git commit -m "feat(admin): add AdminUserService with user stats and listing queries"
+docker compose exec rescuedogs git add src/services/admin/
+docker compose exec rescuedogs git commit -m "feat(admin): add AdminUserService with user stats and listing queries"
 ```
 
 ---
@@ -1102,8 +1102,8 @@ export class AdminMessagingService {
 **Step 2: Update barrel export and commit**
 
 ```bash
-docker compose exec scripthammer git add src/services/admin/
-docker compose exec scripthammer git commit -m "feat(admin): add AdminMessagingService with messaging metadata stats"
+docker compose exec rescuedogs git add src/services/admin/
+docker compose exec rescuedogs git commit -m "feat(admin): add AdminMessagingService with messaging metadata stats"
 ```
 
 ---
@@ -1118,7 +1118,7 @@ docker compose exec scripthammer git commit -m "feat(admin): add AdminMessagingS
 **Step 1: Generate component scaffold**
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 # Name: AdminDashboardOverview
 # Level: organisms
 ```
@@ -1397,9 +1397,9 @@ export default function AdminOverviewPage() {
 **Step 5: Run tests and commit**
 
 ```bash
-docker compose exec scripthammer pnpm test -- --run src/components/organisms/AdminDashboardOverview/
-docker compose exec scripthammer git add src/components/organisms/AdminDashboardOverview/ src/app/admin/page.tsx
-docker compose exec scripthammer git commit -m "feat(admin): add overview page with 4-domain stat card grid"
+docker compose exec rescuedogs pnpm test -- --run src/components/organisms/AdminDashboardOverview/
+docker compose exec rescuedogs git add src/components/organisms/AdminDashboardOverview/ src/app/admin/page.tsx
+docker compose exec rescuedogs git commit -m "feat(admin): add overview page with 4-domain stat card grid"
 ```
 
 ---
@@ -1546,19 +1546,19 @@ describe('Admin Access Contract Tests', () => {
 **Step 1: Run full test suite**
 
 ```bash
-docker compose exec scripthammer pnpm run test:suite
+docker compose exec rescuedogs pnpm run test:suite
 ```
 
 **Step 2: Run type-check**
 
 ```bash
-docker compose exec scripthammer pnpm run type-check
+docker compose exec rescuedogs pnpm run type-check
 ```
 
 **Step 3: Run lint**
 
 ```bash
-docker compose exec scripthammer pnpm run lint
+docker compose exec rescuedogs pnpm run lint
 ```
 
 **Step 4: Visual verification with Playwright**
@@ -1567,7 +1567,7 @@ Screenshot all admin pages across desktop and mobile.
 
 **Step 5: Theme verification**
 
-Check admin pages against 3 themes (scripthammer-dark, scripthammer-light, dracula).
+Check admin pages against 3 themes (rescuedogs-dark, rescuedogs-light, dracula).
 
 **Step 6: Update documentation**
 
@@ -1576,5 +1576,5 @@ Update README.md session continuation prompt and design doc status.
 **Step 7: Final commit**
 
 ```bash
-docker compose exec scripthammer git commit -m "docs: mark admin dashboard feature complete"
+docker compose exec rescuedogs git commit -m "docs: mark admin dashboard feature complete"
 ```

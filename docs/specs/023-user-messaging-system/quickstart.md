@@ -6,10 +6,10 @@
 
 ✅ Before starting, ensure you have completed:
 
-- [x] ScriptHammer development environment set up (Docker + Supabase)
-- [x] Read `/home/turtle_wolfe/repos/ScriptHammer/specs/023-user-messaging-system/spec.md`
-- [x] Read `/home/turtle_wolfe/repos/ScriptHammer/specs/023-user-messaging-system/research.md`
-- [x] Read `/home/turtle_wolfe/repos/ScriptHammer/specs/023-user-messaging-system/data-model.md`
+- [x] RescueDogs development environment set up (Docker + Supabase)
+- [x] Read `/home/turtle_wolfe/repos/RescueDogs/specs/023-user-messaging-system/spec.md`
+- [x] Read `/home/turtle_wolfe/repos/RescueDogs/specs/023-user-messaging-system/research.md`
+- [x] Read `/home/turtle_wolfe/repos/RescueDogs/specs/023-user-messaging-system/data-model.md`
 
 **Estimated Time**: 8-11 days (4 phases)
 
@@ -19,7 +19,7 @@
 
 ### Step 1.1: Create Database Migration
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/supabase/migrations/20251008_user_messaging_system.sql`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/supabase/migrations/20251008_user_messaging_system.sql`
 
 ```bash
 # Create migration file
@@ -37,24 +37,24 @@ touch supabase/migrations/20251008_user_messaging_system.sql
 
 ```bash
 # Apply migration locally
-docker compose exec scripthammer pnpm supabase db reset
+docker compose exec rescuedogs pnpm supabase db reset
 
 # Verify tables created
-docker compose exec scripthammer pnpm supabase db diff
+docker compose exec rescuedogs pnpm supabase db diff
 ```
 
 ### Step 1.2: Regenerate Supabase Types
 
 ```bash
 # Generate TypeScript types from database schema
-docker compose exec scripthammer pnpm supabase gen types typescript --local > src/lib/supabase/types.ts
+docker compose exec rescuedogs pnpm supabase gen types typescript --local > src/lib/supabase/types.ts
 ```
 
 ### Step 1.3: Create Application Types
 
 **File**: `src/types/messaging.ts`
 
-Copy from `/home/turtle_wolfe/repos/ScriptHammer/specs/023-user-messaging-system/contracts/types.ts`
+Copy from `/home/turtle_wolfe/repos/RescueDogs/specs/023-user-messaging-system/contracts/types.ts`
 
 ### Step 1.4: Build ConnectionService (TDD)
 
@@ -221,14 +221,14 @@ export class ConnectionService implements IConnectionService {
 
 ```bash
 # UserSearch component
-docker compose exec scripthammer pnpm run generate:component -- \
+docker compose exec rescuedogs pnpm run generate:component -- \
   --name UserSearch \
   --category molecular \
   --hasProps true \
   --withHooks true
 
 # ConnectionManager component
-docker compose exec scripthammer pnpm run generate:component -- \
+docker compose exec rescuedogs pnpm run generate:component -- \
   --name ConnectionManager \
   --category organisms \
   --hasProps true \
@@ -359,7 +359,7 @@ test('complete friend request flow', async ({ page, context }) => {
 ### Step 2.1: Install Dexie.js
 
 ```bash
-docker compose exec scripthammer pnpm add dexie@^4.0.10
+docker compose exec rescuedogs pnpm add dexie@^4.0.10
 ```
 
 ### Step 2.2: Create IndexedDB Database
@@ -659,16 +659,16 @@ _(Remaining phases omitted for brevity - see tasks.md for detailed breakdown)_
 
 ```bash
 # Run all tests
-docker compose exec scripthammer pnpm run test:suite
+docker compose exec rescuedogs pnpm run test:suite
 
 # Run specific test file
-docker compose exec scripthammer pnpm test src/lib/messaging/encryption.test.ts
+docker compose exec rescuedogs pnpm test src/lib/messaging/encryption.test.ts
 
 # E2E tests
-docker compose exec scripthammer pnpm exec playwright test e2e/messaging/
+docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/
 
 # Check test coverage
-docker compose exec scripthammer pnpm run test:coverage
+docker compose exec rescuedogs pnpm run test:coverage
 ```
 
 ---

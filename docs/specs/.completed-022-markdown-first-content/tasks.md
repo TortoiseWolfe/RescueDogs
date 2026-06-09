@@ -17,7 +17,7 @@ Building a NEW blog system from scratch with markdown-first content architecture
 - File: `package.json`
 - Add: dexie, lz-string, markdown-to-jsx, gray-matter, prismjs, chokidar
 - Add dev dependencies: @types/prismjs, msw for API mocking
-- Run: `docker compose exec scripthammer pnpm install`
+- Run: `docker compose exec rescuedogs pnpm install`
 
 **[X] T002** - Configure TypeScript paths for blog system [P] ✅
 
@@ -255,29 +255,29 @@ Building a NEW blog system from scratch with markdown-first content architecture
 
 **T039** - Generate BlogPostCard component
 
-- Run: `docker compose exec scripthammer pnpm run generate:component BlogPostCard`
+- Run: `docker compose exec rescuedogs pnpm run generate:component BlogPostCard`
 - Implement: post preview with metadata
 - Location: `/src/components/blog/`
 
 **T040** - Generate BlogPostViewer component
 
-- Run: `docker compose exec scripthammer pnpm run generate:component BlogPostViewer`
+- Run: `docker compose exec rescuedogs pnpm run generate:component BlogPostViewer`
 - Implement: full post display with TOC
 - Depends on: T024
 
 **T041** - Generate AuthorProfile component
 
-- Run: `docker compose exec scripthammer pnpm run generate:component AuthorProfile`
+- Run: `docker compose exec rescuedogs pnpm run generate:component AuthorProfile`
 - Implement: author bio and social links
 
 **T042** - Generate SocialShareButtons component
 
-- Run: `docker compose exec scripthammer pnpm run generate:component SocialShareButtons`
+- Run: `docker compose exec rescuedogs pnpm run generate:component SocialShareButtons`
 - Implement: platform-specific share buttons
 
 **T043** - Generate ConflictResolver component
 
-- Run: `docker compose exec scripthammer pnpm run generate:component ConflictResolver`
+- Run: `docker compose exec rescuedogs pnpm run generate:component ConflictResolver`
 - Implement: three-way merge UI
 - Depends on: T025
 
@@ -392,19 +392,19 @@ Task agent T025 "Conflict resolver"
 
 ```bash
 # Run contract tests
-docker compose exec scripthammer pnpm test src/tests/contract/blog-*.test.ts
+docker compose exec rescuedogs pnpm test src/tests/contract/blog-*.test.ts
 
 # Run integration tests
-docker compose exec scripthammer pnpm test src/tests/integration/blog-*.test.ts
+docker compose exec rescuedogs pnpm test src/tests/integration/blog-*.test.ts
 
 # Generate blog data
-docker compose exec scripthammer pnpm run generate:blog
+docker compose exec rescuedogs pnpm run generate:blog
 
 # Check TypeScript
-docker compose exec scripthammer pnpm run type-check
+docker compose exec rescuedogs pnpm run type-check
 
 # Run full test suite
-docker compose exec scripthammer pnpm run test:suite
+docker compose exec rescuedogs pnpm run test:suite
 ```
 
 ## Notes

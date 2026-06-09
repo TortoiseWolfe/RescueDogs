@@ -11,7 +11,7 @@
  * / Chime selection, GDPR consent gating, offline queueing — without
  * rebuilding any of it.
  *
- * Reframes US3 (Update Payment Method, FR-011-FR-015) for ScriptHammer's
+ * Reframes US3 (Update Payment Method, FR-011-FR-015) for RescueDogs's
  * static-export architecture: there are no saved cards to "update", but
  * there is a meaningful user-facing action — picking a different provider
  * after a decline.

@@ -33,7 +33,7 @@ Welcome-message helper extraction so both modal-setup AND page-setup paths share
 
 ### Story checkpoint
 
-- [ ] T008 [US1] Verify all tests green inside Docker: `docker compose exec scripthammer pnpm test src/components/auth/ReAuthModal/ src/components/auth/EncryptionKeyGate/` and `docker compose exec scripthammer pnpm exec playwright test tests/e2e/messaging/oauth-setup-modal.spec.ts`. US-1 acceptance scenarios from spec.md lines 46-48 must pass.
+- [ ] T008 [US1] Verify all tests green inside Docker: `docker compose exec rescuedogs pnpm test src/components/auth/ReAuthModal/ src/components/auth/EncryptionKeyGate/` and `docker compose exec rescuedogs pnpm exec playwright test tests/e2e/messaging/oauth-setup-modal.spec.ts`. US-1 acceptance scenarios from spec.md lines 46-48 must pass.
 
 ## Phase 4 — User Story 2: Returning OAuth User Unlocks Messages (P2)
 
@@ -76,9 +76,9 @@ No code changes for US-3 — it's regression-only. The conditional rendering shi
 ## Phase 6 — Polish & cross-cutting
 
 - [ ] T016 [P] Extend `src/components/auth/ReAuthModal/ReAuthModal.stories.tsx` from 1 → 5 stories: `EmailUnlock` (default), `OAuthGoogleSetup`, `OAuthGoogleUnlock`, `OAuthGitHubSetup`, `OAuthGitHubUnlock`. Each story sets up a mock user via the existing `decorators` pattern.
-- [ ] T017 [P] Run `docker compose exec scripthammer pnpm test:a11y` — Pa11y AAA must remain green across all 4 audited URLs (no contrast regression on the new modal copy or provider badge).
+- [ ] T017 [P] Run `docker compose exec rescuedogs pnpm test:a11y` — Pa11y AAA must remain green across all 4 audited URLs (no contrast regression on the new modal copy or provider badge).
 - [ ] T018 Manual smoke-test against local Supabase profile (`docker compose --profile supabase up`): walk all 5 user-flow combinations (US-1, US-2 Google + GitHub, US-3 email, deep-link to `/messages/setup`). Capture screenshots into `features/auth-oauth/013-oauth-messaging-password/wireframes/screenshots/` per Constitution III tail step (`/speckit.wireframe.screenshots`).
-- [ ] T019 Run `docker compose exec scripthammer python3 .specify/extensions/wireframe/scripts/validate.py features/auth-oauth/013-oauth-messaging-password/wireframes/01-oauth-password-setup.svg` and the 02 SVG. Both must still PASS — feature 013's wireframes are unchanged but a fresh validation closes the post-implement loop.
+- [ ] T019 Run `docker compose exec rescuedogs python3 .specify/extensions/wireframe/scripts/validate.py features/auth-oauth/013-oauth-messaging-password/wireframes/01-oauth-password-setup.svg` and the 02 SVG. Both must still PASS — feature 013's wireframes are unchanged but a fresh validation closes the post-implement loop.
 
 ## Dependencies & user-story completion order
 

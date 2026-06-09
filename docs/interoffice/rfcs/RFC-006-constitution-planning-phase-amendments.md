@@ -23,7 +23,7 @@
 
 ## Summary
 
-The constitution (v1.0.0, ratified 2025-12-29) describes enforcement mechanisms that do not exist in the codebase. ScriptHammer is a **planning template** with 46 feature specs but no application code. This RFC proposes amendments to align constitutional language with the project's planning-phase status and establishes concrete prerequisites for implementation.
+The constitution (v1.0.0, ratified 2025-12-29) describes enforcement mechanisms that do not exist in the codebase. RescueDogs is a **planning template** with 46 feature specs but no application code. This RFC proposes amendments to align constitutional language with the project's planning-phase status and establishes concrete prerequisites for implementation.
 
 ---
 

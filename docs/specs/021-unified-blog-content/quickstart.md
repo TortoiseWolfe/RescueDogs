@@ -10,11 +10,11 @@
 
 ```bash
 # Install new dependencies
-docker compose exec scripthammer pnpm add chokidar remark remark-html rehype-highlight crypto-js
-docker compose exec scripthammer pnpm add -D @types/crypto-js
+docker compose exec rescuedogs pnpm add chokidar remark remark-html rehype-highlight crypto-js
+docker compose exec rescuedogs pnpm add -D @types/crypto-js
 
 # Run migration
-docker compose exec scripthammer pnpm run migrate:blog
+docker compose exec rescuedogs pnpm run migrate:blog
 ```
 
 ## Quick Verification
@@ -23,7 +23,7 @@ docker compose exec scripthammer pnpm run migrate:blog
 
 ```bash
 # Start dev server
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 
 # In another terminal, edit a blog post
 echo "Test edit" >> blog/test-post.md
@@ -59,17 +59,17 @@ echo "Test edit" >> blog/test-post.md
 cp -r blog blog.backup
 
 # Run migration
-docker compose exec scripthammer pnpm run migrate:blog
+docker compose exec rescuedogs pnpm run migrate:blog
 
 # Verify all posts migrated
-docker compose exec scripthammer pnpm run test:migration
+docker compose exec rescuedogs pnpm run test:migration
 ```
 
 ### 5. Test Performance
 
 ```bash
 # Run performance benchmarks
-docker compose exec scripthammer pnpm run test:perf
+docker compose exec rescuedogs pnpm run test:perf
 
 # Expected results:
 # - File change to UI: <1 second
@@ -87,7 +87,7 @@ docker compose exec scripthammer pnpm run test:perf
 
 ```bash
 # Test command
-docker compose exec scripthammer pnpm test src/tests/integration/auto-generation.test.ts
+docker compose exec rescuedogs pnpm test src/tests/integration/auto-generation.test.ts
 ```
 
 ### Scenario 2: Offline Sync
@@ -98,7 +98,7 @@ docker compose exec scripthammer pnpm test src/tests/integration/auto-generation
 
 ```bash
 # Test command
-docker compose exec scripthammer pnpm test src/tests/integration/offline-sync.test.ts
+docker compose exec rescuedogs pnpm test src/tests/integration/offline-sync.test.ts
 ```
 
 ### Scenario 3: Conflict Detection
@@ -109,7 +109,7 @@ docker compose exec scripthammer pnpm test src/tests/integration/offline-sync.te
 
 ```bash
 # Test command
-docker compose exec scripthammer pnpm test src/tests/integration/conflict-detection.test.ts
+docker compose exec rescuedogs pnpm test src/tests/integration/conflict-detection.test.ts
 ```
 
 ### Scenario 4: Migration Integrity
@@ -120,7 +120,7 @@ docker compose exec scripthammer pnpm test src/tests/integration/conflict-detect
 
 ```bash
 # Test command
-docker compose exec scripthammer pnpm test src/tests/integration/migration.test.ts
+docker compose exec rescuedogs pnpm test src/tests/integration/migration.test.ts
 ```
 
 ### Scenario 5: Enhanced Processing
@@ -131,7 +131,7 @@ docker compose exec scripthammer pnpm test src/tests/integration/migration.test.
 
 ```bash
 # Test command
-docker compose exec scripthammer pnpm test src/tests/integration/enhanced-processing.test.ts
+docker compose exec rescuedogs pnpm test src/tests/integration/enhanced-processing.test.ts
 ```
 
 ## API Testing
@@ -218,10 +218,10 @@ curl http://localhost:3000/api/blog/cache/status
 
 ```bash
 # Restart file watcher
-docker compose exec scripthammer pnpm run dev:restart
+docker compose exec rescuedogs pnpm run dev:restart
 
 # Check logs
-docker compose logs scripthammer | grep chokidar
+docker compose logs rescuedogs | grep chokidar
 ```
 
 ### Sync Failures

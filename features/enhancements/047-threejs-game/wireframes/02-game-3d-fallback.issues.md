@@ -22,7 +22,7 @@
 
 The hand-drawn "hammer + anvil silhouette" composition was replaced with the same three canonical brand SVG symbols used by the main wireframe (`#brand-printing-mallet`, `#brand-cog`, `#brand-script-tags`), wrapped in a parent group with `opacity="0.5"` to read as "off / unavailable".
 
-Composition matches `src/components/atomic/SpinningLogo/LayeredScriptHammerLogo.tsx` layering rules (mallet BACK, cog MIDDLE, brackets FRONT) at a smaller scale (240×240 desktop cog, 116×116 mobile).
+Composition matches `src/components/atomic/SpinningLogo/LayeredRescueDogsLogo.tsx` layering rules (mallet BACK, cog MIDDLE, brackets FRONT) at a smaller scale (240×240 desktop cog, 116×116 mobile).
 
 The earlier "diagonal stripe over headline" cue was dropped — the group opacity alone communicates "unavailable."
 

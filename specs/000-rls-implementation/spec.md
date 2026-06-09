@@ -9,7 +9,7 @@
 
 ### User Story 1 - User Data Isolation (Priority: P0)
 
-As a user of ScriptHammer, I need assurance that my personal data (profile, preferences, activity) is completely isolated from other users, so that no one can view, modify, or delete my information without my explicit consent.
+As a user of RescueDogs, I need assurance that my personal data (profile, preferences, activity) is completely isolated from other users, so that no one can view, modify, or delete my information without my explicit consent.
 
 **Why this priority**: Data isolation is the foundational security requirement. Without it, all other features are compromised. A single data leak invalidates user trust.
 

@@ -28,8 +28,8 @@ yarn install
 npx <anything>
 
 # ✅ CORRECT - Always use Docker
-docker compose exec scripthammer pnpm install
-docker compose exec scripthammer pnpm add <package>
+docker compose exec rescuedogs pnpm install
+docker compose exec rescuedogs pnpm add <package>
 ```
 
 **Why this is critical:**
@@ -43,7 +43,7 @@ docker compose exec scripthammer pnpm add <package>
 
 ```bash
 docker compose down
-docker compose run --rm scripthammer rm -rf node_modules
+docker compose run --rm rescuedogs rm -rf node_modules
 docker compose up
 ```
 
@@ -57,8 +57,8 @@ sudo chown -R $USER:$USER .next
 sudo rm -rf node_modules
 
 # ✅ CORRECT - Use Docker
-docker compose exec scripthammer rm -rf .next
-docker compose exec scripthammer rm -rf node_modules
+docker compose exec rescuedogs rm -rf .next
+docker compose exec rescuedogs rm -rf node_modules
 docker compose down && docker compose up
 ```
 
@@ -67,7 +67,7 @@ docker compose down && docker compose up
 **Permission errors? Always try:**
 
 1. `docker compose down && docker compose up` (restarts container, cleans .next)
-2. `docker compose exec scripthammer pnpm run docker:clean`
+2. `docker compose exec rescuedogs pnpm run docker:clean`
 
 ### Essential Commands
 
@@ -76,24 +76,24 @@ docker compose down && docker compose up
 docker compose up
 
 # Development server
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 
 # Run tests
-docker compose exec scripthammer pnpm test
-docker compose exec scripthammer pnpm run test:suite    # Full suite
+docker compose exec rescuedogs pnpm test
+docker compose exec rescuedogs pnpm run test:suite    # Full suite
 
 # Storybook
-docker compose exec scripthammer pnpm run storybook
+docker compose exec rescuedogs pnpm run storybook
 
 # E2E tests
-docker compose exec scripthammer pnpm exec playwright test
+docker compose exec rescuedogs pnpm exec playwright test
 
 # Type checking & linting
-docker compose exec scripthammer pnpm run type-check
-docker compose exec scripthammer pnpm run lint
+docker compose exec rescuedogs pnpm run type-check
+docker compose exec rescuedogs pnpm run lint
 
 # Clean start if issues
-docker compose exec scripthammer pnpm run docker:clean
+docker compose exec rescuedogs pnpm run docker:clean
 ```
 
 ### Git Commits from Docker
@@ -106,8 +106,8 @@ GIT_AUTHOR_NAME=Your Name
 GIT_AUTHOR_EMAIL=your@email.com
 
 # Commit from container (hooks run correctly)
-docker compose exec scripthammer git add -A
-docker compose exec scripthammer git commit -m "Your commit message"
+docker compose exec rescuedogs git add -A
+docker compose exec rescuedogs git commit -m "Your commit message"
 
 # Push from host (uses your SSH keys)
 git push
@@ -118,7 +118,7 @@ git push
 Supabase Cloud free tier auto-pauses after 7 days. If paused:
 
 ```bash
-docker compose exec scripthammer pnpm run prime
+docker compose exec rescuedogs pnpm run prime
 ```
 
 ## Component Structure (MANDATORY)
@@ -137,7 +137,7 @@ ComponentName/
 **Always use the generator:**
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 ```
 
 See `docs/CREATING_COMPONENTS.md` for details.
@@ -237,7 +237,7 @@ docker compose down && docker compose up
 Instance paused after inactivity:
 
 ```bash
-docker compose exec scripthammer pnpm run prime
+docker compose exec rescuedogs pnpm run prime
 ```
 
 ### Tailwind CSS Not Loading
@@ -417,7 +417,7 @@ Apply this any time test code sets `scrollTop` and expects a scroll-event-driven
 
 ## Planning Factory (Multi-Terminal Workflow)
 
-This repo also contains the planning factory tooling from the ScriptHammer planning template. The sections below govern the multi-terminal spec-driven workflow.
+This repo also contains the planning factory tooling from the RescueDogs planning template. The sections below govern the multi-terminal spec-driven workflow.
 
 ### Multi-Terminal Assembly Line
 
@@ -472,7 +472,7 @@ When operating as a terminal in the multi-terminal workflow:
 
 ### Fork Guide
 
-After forking ScriptHammer:
+After forking RescueDogs:
 
 1. Run `/refresh-inventories` — Regenerates context files for your specs
 2. Update `.claude/inventories/` — Reflects your project's features

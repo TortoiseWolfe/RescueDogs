@@ -133,13 +133,13 @@ Task agent: "Integration test consent flow"
 Task agent: "E2E test map page"
 
 # Phase 3.3 - Generate all components in parallel (T016-T019):
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 # Select: atomic, MapContainer
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 # Select: atomic, LocationButton
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 # Select: atomic, LocationMarker
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 # Select: atomic, GeolocationConsent
 
 # Phase 3.5 - Polish tasks in parallel (T031-T034):

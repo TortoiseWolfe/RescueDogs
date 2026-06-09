@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-The constitution defines mature development practices that do not yet exist in the codebase. ScriptHammer is a planning template with 46 feature specs but no application code. The constitution reads as if enforcement mechanisms are in place, but implementation gaps exist in all three focus areas.
+The constitution defines mature development practices that do not yet exist in the codebase. RescueDogs is a planning template with 46 feature specs but no application code. The constitution reads as if enforcement mechanisms are in place, but implementation gaps exist in all three focus areas.
 
 ## Gap Analysis
 

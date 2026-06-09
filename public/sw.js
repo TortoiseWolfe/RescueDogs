@@ -1,8 +1,8 @@
-// ScriptHammer Service Worker v1.0.0
+// RescueDogs Service Worker v1.0.0
 // Provides offline support, caching, and background sync
 // Note: Cache name includes project name - updated by rebrand script
 
-const CACHE_VERSION = 'scripthammer-v1.0.0'; // Updated by scripts/rebrand.sh
+const CACHE_VERSION = 'rescuedogs-v1.0.0'; // Updated by scripts/rebrand.sh
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -49,7 +49,7 @@ self.addEventListener('activate', (event) => {
           cacheNames
             .filter((cacheName) => {
               return (
-                cacheName.startsWith('scripthammer-') &&
+                cacheName.startsWith('rescuedogs-') &&
                 cacheName !== STATIC_CACHE &&
                 cacheName !== DYNAMIC_CACHE &&
                 cacheName !== IMAGE_CACHE
@@ -214,7 +214,7 @@ self.addEventListener('message', (event) => {
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames
-            .filter((cacheName) => cacheName.startsWith('scripthammer-'))
+            .filter((cacheName) => cacheName.startsWith('rescuedogs-'))
             .map((cacheName) => caches.delete(cacheName))
         );
       })
@@ -236,7 +236,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('ScriptHammer Notification', options)
+    self.registration.showNotification('RescueDogs Notification', options)
   );
 });
 

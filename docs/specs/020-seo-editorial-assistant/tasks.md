@@ -131,7 +131,7 @@
 
 ### 3.1 Create SEOPanel Component
 
-- [ ] Run `docker compose exec scripthammer pnpm run generate:component SEOPanel`
+- [ ] Run `docker compose exec rescuedogs pnpm run generate:component SEOPanel`
 - [ ] Move generated component to `src/components/blog/SEOPanel/`
 - [ ] Implement main panel container logic in SEOPanel.tsx
 - [ ] Add expand/collapse state management
@@ -145,7 +145,7 @@
 
 ### 3.2 Create SEOScoreCard Component
 
-- [ ] Run `docker compose exec scripthammer pnpm run generate:component SEOScoreCard`
+- [ ] Run `docker compose exec rescuedogs pnpm run generate:component SEOScoreCard`
 - [ ] Move generated component to `src/components/blog/SEOScoreCard/`
 - [ ] Implement circular progress indicator
 - [ ] Add traffic light system (red/yellow/green)
@@ -160,7 +160,7 @@
 
 ### 3.3 Create SEOSuggestions Component
 
-- [ ] Run `docker compose exec scripthammer pnpm run generate:component SEOSuggestions`
+- [ ] Run `docker compose exec rescuedogs pnpm run generate:component SEOSuggestions`
 - [ ] Move generated component to `src/components/blog/SEOSuggestions/`
 - [ ] Implement suggestion cards
 - [ ] Add priority indicators
@@ -175,7 +175,7 @@
 
 ### 3.4 Create Terminal Output Component
 
-- [ ] Run `docker compose exec scripthammer pnpm run generate:component TerminalOutput`
+- [ ] Run `docker compose exec rescuedogs pnpm run generate:component TerminalOutput`
 - [ ] Move generated component to `src/components/blog/TerminalOutput/`
 - [ ] Implement monospace display
 - [ ] Add syntax highlighting
@@ -205,7 +205,7 @@
 
 ### 4.1 Create Export Selection UI
 
-- [ ] Run `docker compose exec scripthammer pnpm run generate:component ExportDialog`
+- [ ] Run `docker compose exec rescuedogs pnpm run generate:component ExportDialog`
 - [ ] Move generated component to `src/components/blog/ExportDialog/`
 - [ ] Add post selection checkboxes
 - [ ] Implement select all/none

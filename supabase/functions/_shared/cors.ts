@@ -34,7 +34,7 @@ export function corsHeaders(req: Request): HeadersInit {
   const requestOrigin = req.headers.get('origin') ?? '';
   const siteUrl = Deno.env.get('NEXT_PUBLIC_SITE_URL') ?? '';
 
-  // Allow the configured site, plus localhost dev (3000/3001) for ScriptHammer.
+  // Allow the configured site, plus localhost dev (3000/3001) for RescueDogs.
   const allowed = [
     siteUrl,
     'http://localhost:3000',

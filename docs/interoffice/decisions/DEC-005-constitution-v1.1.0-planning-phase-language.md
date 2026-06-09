@@ -19,7 +19,7 @@
 
 ## Decision
 
-Amend Constitution Section I to correct two provably false statements about the component generator and build failure enforcement. These corrections align the document with ScriptHammer's planning-phase reality while preserving the architectural intent.
+Amend Constitution Section I to correct two provably false statements about the component generator and build failure enforcement. These corrections align the document with RescueDogs's planning-phase reality while preserving the architectural intent.
 
 ## Rationale
 

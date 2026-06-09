@@ -87,7 +87,7 @@ const { data: convos, error: convError } = await withTimeout(
 
 ```bash
 # Run E2E test
-docker compose exec scripthammer pnpm exec playwright test tests/e2e/conversations/
+docker compose exec rescuedogs pnpm exec playwright test tests/e2e/conversations/
 
 # Manual test
 # 1. Sign in as test@example.com

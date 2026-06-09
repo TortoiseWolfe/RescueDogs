@@ -17,7 +17,7 @@
 
 ### 2. Missing Signature Blocks (G-025)
 
-- **Standard**: "NNN:NN | Feature | ScriptHammer" at y=1060, 18px bold
+- **Standard**: "NNN:NN | Feature | RescueDogs" at y=1060, 18px bold
 - **Current**: Only Feature 003 has proper signatures (3 files)
 - **Affected**: 18/21 files missing or malformed
 - **Classification**: PATCH - add ~5 lines per file

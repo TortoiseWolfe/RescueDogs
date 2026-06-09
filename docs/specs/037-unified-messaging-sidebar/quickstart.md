@@ -5,7 +5,7 @@
 
 ## Prerequisites
 
-- Docker running with ScriptHammer container
+- Docker running with RescueDogs container
 - On feature branch `037-unified-messaging-sidebar`
 - Test user account available (`test@example.com`)
 
@@ -145,7 +145,7 @@ Add Message button in `renderConnectionItem` for `type === 'accepted'`:
 3. **Generate component skeleton**
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 # Name: UnifiedSidebar
 # Category: organisms
 ```
@@ -265,17 +265,17 @@ Change `/messages/connections` link to `/messages?tab=connections`.
 
 ```bash
 # Run all tests
-docker compose exec scripthammer pnpm test
+docker compose exec rescuedogs pnpm test
 
 # Run specific component tests
-docker compose exec scripthammer pnpm test ConnectionManager
-docker compose exec scripthammer pnpm test UnifiedSidebar
+docker compose exec rescuedogs pnpm test ConnectionManager
+docker compose exec rescuedogs pnpm test UnifiedSidebar
 
 # Type check
-docker compose exec scripthammer pnpm run type-check
+docker compose exec rescuedogs pnpm run type-check
 
 # Lint
-docker compose exec scripthammer pnpm run lint
+docker compose exec rescuedogs pnpm run lint
 ```
 
 ## Verification Checklist

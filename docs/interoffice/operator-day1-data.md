@@ -58,7 +58,7 @@ Read full context below, then run startup sequence.
 ### Startup
 ./scripts/tmux-session.sh --all      # Launch workers
 ./scripts/tmux-dispatch.sh --status  # Check state
-tmux attach -t scripthammer          # Observe (Ctrl+b d to detach)
+tmux attach -t rescuedogs          # Observe (Ctrl+b d to detach)
 ```
 
 ---

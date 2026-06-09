@@ -2,7 +2,7 @@
 
 **Feature ID**: 039
 **Category**: payments
-**Source**: ScriptHammer README (SPEC-055)
+**Source**: RescueDogs README (SPEC-055)
 **Status**: Logic Built, UI Affordances Missing (2026-04-08). Built: `src/lib/payments/offline-queue.ts` + `src/lib/offline-queue/payment-adapter.ts` + `connection-listener.ts` — the queue itself works. Missing: UI components for queue status indicator, sync-state pill, count badge, persistence display, retry button with max-retry handling, overflow alert, clear-queue control. Also missing: `/payment/history` route (the `PaymentHistory` component exists but has no page.tsx wrapping it). 18 E2E stubs in `tests/e2e/payment/05-offline-queue.spec.ts` define each missing UI element. Depends on 024 API keys for end-to-end flow.
 
 ## Description

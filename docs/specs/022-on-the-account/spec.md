@@ -126,7 +126,7 @@ A user wants to remove their custom avatar and revert to a default state.
 ### Constraints
 
 - **Constraint 1**: Must use existing Supabase infrastructure (no additional cloud storage services)
-- **Constraint 2**: Must follow ScriptHammer's 5-file component pattern (AvatarUpload component)
+- **Constraint 2**: Must follow RescueDogs's 5-file component pattern (AvatarUpload component)
 - **Constraint 3**: Must maintain mobile-first design with 44px minimum touch targets
 - **Constraint 4**: Storage costs must remain under $5/month for 1000 active users
 - **Constraint 5**: Implementation must include comprehensive unit tests, Storybook stories, and accessibility tests

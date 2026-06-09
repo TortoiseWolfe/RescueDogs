@@ -1,4 +1,4 @@
-# ScriptHammer Design System Redesign
+# RescueDogs Design System Redesign
 
 **Date:** 2026-02-13
 **Status:** Complete (Phases 0-6 done)
@@ -12,7 +12,7 @@
 
 **Brand identity:**
 
-- "ScriptHammer" evokes craftsmanship, power tools, building software
+- "RescueDogs" evokes craftsmanship, power tools, building software
 - Logo: silver mallet icon
 - Existing wireframe panel color: `#e8d4b8` (warm amber / hammered metal tone)
 - As a template, the design must be bold but also easy for forks to rebrand
@@ -53,7 +53,7 @@ Apply validated component moves from SpokeToWork's design-system-redesign branch
 - `DiceTray` to `organisms/` (full game interface with drag-drop, stats, multiple sub-components)
 - 6 components to `molecular/`: AvatarUpload, FontSwitcher, ColorblindToggle, TagCloud, CodeBlock, MessageInput (all compose multiple primitives)
 
-**ScriptHammer-specific:** ScriptHammer has 33 atomic directories (vs SpokeToWork's 29). Audit the extras for misplacement before moving.
+**RescueDogs-specific:** RescueDogs has 33 atomic directories (vs SpokeToWork's 29). Audit the extras for misplacement before moving.
 
 **Gotchas from SpokeToWork:**
 
@@ -76,7 +76,7 @@ Upgrade from 9.1.5 to 10.x to restore the full addon ecosystem.
 
 ### Phase 2: Custom DaisyUI Theme
 
-Build ScriptHammer brand theme with dark and light variants.
+Build RescueDogs brand theme with dark and light variants.
 
 - Define theme in globals.css using `[data-theme]` CSS custom properties
 - Dark variant as default (charcoal base, silver primary, warm amber secondary, electric accent)
@@ -103,11 +103,11 @@ Priority order:
 2. Card - border radius, shadow, spacing
 3. Input/Form fields - text inputs, selects, textareas
 4. Badge/Tag - filters, status indicators
-5. AnimatedLogo / SpinningLogo (ScriptHammer's mallet)
+5. AnimatedLogo / SpinningLogo (RescueDogs's mallet)
 
-ScriptHammer-specific:
+RescueDogs-specific:
 
-- Dice / DiceTray (gaming elements, unique to ScriptHammer)
+- Dice / DiceTray (gaming elements, unique to RescueDogs)
 - CaptainShipCrew (game component)
 - SetupBanner (first-time user experience)
 

@@ -111,7 +111,7 @@ async function seedMessages() {
     if (keyError || !keyData?.encryption_salt) {
       console.error(`No valid encryption key for ${username}`);
       console.error(
-        'Run: docker compose exec scripthammer pnpm exec tsx scripts/initialize-test-keys.ts'
+        'Run: docker compose exec rescuedogs pnpm exec tsx scripts/initialize-test-keys.ts'
       );
       process.exit(1);
     }

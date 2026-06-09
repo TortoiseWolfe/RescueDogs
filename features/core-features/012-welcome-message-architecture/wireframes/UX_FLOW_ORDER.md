@@ -36,7 +36,7 @@ Desktop Messages View (split panel):
 │    Welcome to...   │ System Administrator                     │
 │    [E2E badge]     │                                          │
 │                    │ ② MESSAGE CONTENT                        │
-│ No other convos    │    "Welcome to ScriptHammer!"            │
+│ No other convos    │    "Welcome to RescueDogs!"            │
 │                    │    Your messages are protected with E2E  │
 │                    │    - Messages encrypted before sending   │
 │                    │    - Only you hold decryption keys       │

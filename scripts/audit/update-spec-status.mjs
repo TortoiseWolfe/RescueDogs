@@ -7,7 +7,7 @@
  * based on scripts/audit/truth-table.json.
  *
  * Run inside Docker:
- *   docker compose exec scripthammer node scripts/audit/update-spec-status.mjs
+ *   docker compose exec rescuedogs node scripts/audit/update-spec-status.mjs
  *
  * Re-running is safe — section is replaced, not appended.
  */

@@ -64,7 +64,7 @@
 
 ### Primary Security Story
 
-As a user with a ScriptHammer account, I need my payment data and personal information to be completely isolated from other users, protected from unauthorized access, and secured against common web attacks so that my financial information and account cannot be compromised.
+As a user with a RescueDogs account, I need my payment data and personal information to be completely isolated from other users, protected from unauthorized access, and secured against common web attacks so that my financial information and account cannot be compromised.
 
 ### Critical Security Scenarios
 

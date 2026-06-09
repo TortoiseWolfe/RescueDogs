@@ -29,4 +29,4 @@
 
 - Cleared during Feature 013 v1.0.2 wireframe-gate review.
 - No code-side regen needed — annotation colors already conform.
-- Run validator to refresh: `docker compose exec scripthammer python3 .specify/extensions/wireframe/scripts/validate.py features/auth-oauth/013-oauth-messaging-password/wireframes/02-oauth-password-unlock.svg`
+- Run validator to refresh: `docker compose exec rescuedogs python3 .specify/extensions/wireframe/scripts/validate.py features/auth-oauth/013-oauth-messaging-password/wireframes/02-oauth-password-unlock.svg`

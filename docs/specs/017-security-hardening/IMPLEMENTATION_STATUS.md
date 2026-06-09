@@ -352,7 +352,7 @@ export function useIdleTimeout({
 
 **T045-T046: Create IdleTimeoutModal**
 
-- Command: `docker compose exec scripthammer pnpm run generate:component -- --name IdleTimeoutModal --category molecular --hasProps true`
+- Command: `docker compose exec rescuedogs pnpm run generate:component -- --name IdleTimeoutModal --category molecular --hasProps true`
 - File: `/src/components/molecular/IdleTimeoutModal/IdleTimeoutModal.tsx`
 - Props needed:
 
@@ -433,9 +433,9 @@ interface IdleTimeoutModalProps {
 
 ### Phase 5: Final Validation - NOT STARTED
 
-- Run full test suite: `docker compose exec scripthammer pnpm test`
-- Run TypeScript check: `docker compose exec scripthammer pnpm run type-check`
-- Run ESLint: `docker compose exec scripthammer pnpm run lint`
+- Run full test suite: `docker compose exec rescuedogs pnpm test`
+- Run TypeScript check: `docker compose exec rescuedogs pnpm run type-check`
+- Run ESLint: `docker compose exec rescuedogs pnpm run lint`
 - Update tasks.md marking all 72 tasks complete
 
 ## 📊 Test Status
@@ -490,17 +490,17 @@ interface IdleTimeoutModalProps {
 
 ```bash
 # Run all tests
-docker compose exec scripthammer pnpm test
+docker compose exec rescuedogs pnpm test
 
 # Run specific test file
-docker compose exec scripthammer pnpm test src/lib/payments/__tests__/metadata-validator.test.ts
+docker compose exec rescuedogs pnpm test src/lib/payments/__tests__/metadata-validator.test.ts
 
 # TypeScript check
-docker compose exec scripthammer pnpm run type-check
+docker compose exec rescuedogs pnpm run type-check
 
 # ESLint
-docker compose exec scripthammer pnpm run lint
+docker compose exec rescuedogs pnpm run lint
 
 # Generate component
-docker compose exec scripthammer pnpm run generate:component -- --name ComponentName --category molecular --hasProps true
+docker compose exec rescuedogs pnpm run generate:component -- --name ComponentName --category molecular --hasProps true
 ```

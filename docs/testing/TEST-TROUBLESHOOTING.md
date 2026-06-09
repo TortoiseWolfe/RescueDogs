@@ -9,12 +9,12 @@ This guide helps resolve common issues with the CRUDkit test suite.
 ./scripts/test-suite.sh
 
 # Run individual test commands
-docker compose exec scripthammer pnpm run type-check    # TypeScript
-docker compose exec scripthammer pnpm run lint           # ESLint
-docker compose exec scripthammer pnpm run format:check   # Prettier
-docker compose exec scripthammer pnpm test              # Unit tests
-docker compose exec scripthammer pnpm run test:coverage # Coverage
-docker compose exec scripthammer pnpm run test:a11y     # Accessibility
+docker compose exec rescuedogs pnpm run type-check    # TypeScript
+docker compose exec rescuedogs pnpm run lint           # ESLint
+docker compose exec rescuedogs pnpm run format:check   # Prettier
+docker compose exec rescuedogs pnpm test              # Unit tests
+docker compose exec rescuedogs pnpm run test:coverage # Coverage
+docker compose exec rescuedogs pnpm run test:a11y     # Accessibility
 ```
 
 ## Common Issues and Solutions
@@ -48,7 +48,7 @@ If coverage still shows issues, check that vitest.config.ts excludes all generat
 **Alternative**: Use Playwright E2E tests for accessibility:
 
 ```bash
-docker compose exec scripthammer pnpm run e2e:accessibility
+docker compose exec rescuedogs pnpm run e2e:accessibility
 ```
 
 ### 3. Prettier Formatting Errors
@@ -64,7 +64,7 @@ docker compose exec scripthammer pnpm run e2e:accessibility
 To fix formatting issues:
 
 ```bash
-docker compose exec scripthammer pnpm run format
+docker compose exec rescuedogs pnpm run format
 ```
 
 ### 4. Docker Permission Issues
@@ -113,10 +113,10 @@ docker compose up
 
 ```bash
 # Quick check (type, lint, unit tests)
-docker compose exec scripthammer pnpm run test:quick
+docker compose exec rescuedogs pnpm run test:quick
 
 # Full validation before commit
-docker compose exec scripthammer pnpm run test:suite
+docker compose exec rescuedogs pnpm run test:suite
 ```
 
 ## Debugging Tips
@@ -125,7 +125,7 @@ docker compose exec scripthammer pnpm run test:suite
 
 ```bash
 # Generate HTML coverage report
-docker compose exec scripthammer pnpm run test:coverage
+docker compose exec rescuedogs pnpm run test:coverage
 # Open coverage/index.html in browser
 ```
 
@@ -133,7 +133,7 @@ docker compose exec scripthammer pnpm run test:coverage
 
 ```bash
 # Generate screenshots during tests
-docker compose exec scripthammer pnpm run test:a11y
+docker compose exec rescuedogs pnpm run test:a11y
 # Check .pa11y-screenshots/ directory
 ```
 
@@ -141,7 +141,7 @@ docker compose exec scripthammer pnpm run test:a11y
 
 ```bash
 # Validate all components
-docker compose exec scripthammer node scripts/validate-structure.js
+docker compose exec rescuedogs node scripts/validate-structure.js
 ```
 
 ## When All Else Fails
@@ -162,5 +162,5 @@ docker compose exec scripthammer node scripts/validate-structure.js
 
 3. Reinstall dependencies:
    ```bash
-   docker compose exec scripthammer pnpm install
+   docker compose exec rescuedogs pnpm install
    ```

@@ -5,7 +5,7 @@
 
 ## Summary
 
-Improve the ScriptHammer template forking experience based on real-world feedback from the SpokeToWork fork. Primary deliverable is a `scripts/rebrand.sh` script that automates 200+ file updates, reducing fork setup time from 2 hours to under 5 minutes. Secondary improvements include comprehensive Supabase mocking for tests, GitHub Pages deployment fixes, and graceful degradation UI.
+Improve the RescueDogs template forking experience based on real-world feedback from the SpokeToWork fork. Primary deliverable is a `scripts/rebrand.sh` script that automates 200+ file updates, reducing fork setup time from 2 hours to under 5 minutes. Secondary improvements include comprehensive Supabase mocking for tests, GitHub Pages deployment fixes, and graceful degradation UI.
 
 ## Technical Context
 
@@ -222,7 +222,7 @@ CLAUDE.md                    # MODIFY: Document Supabase secrets requirement
 ## Success Verification
 
 - [ ] `./scripts/rebrand.sh TestApp testuser "Test"` completes without errors
-- [ ] `grep -r "ScriptHammer"` returns 0 matches after rebrand
+- [ ] `grep -r "RescueDogs"` returns 0 matches after rebrand
 - [ ] `pnpm test` passes with no .env file
 - [ ] `pnpm run build` succeeds after rebrand
 - [ ] Fork deploys to GitHub Pages without basePath secret

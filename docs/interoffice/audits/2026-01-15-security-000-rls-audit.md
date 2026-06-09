@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Feature 000 establishes the **foundational security layer** for all ScriptHammer data. RLS is the first line of defense against unauthorized data access, implementing the principle of least privilege at the database level. The spec is comprehensive and well-structured with clear P0-P2 prioritization.
+Feature 000 establishes the **foundational security layer** for all RescueDogs data. RLS is the first line of defense against unauthorized data access, implementing the principle of least privilege at the database level. The spec is comprehensive and well-structured with clear P0-P2 prioritization.
 
 **Overall Risk Rating**: LOW (after implementation)
 
@@ -345,5 +345,5 @@ Feature 000 provides a robust foundation for data isolation. The minor findings 
 ---
 
 **Security Lead**
-ScriptHammer Council
+RescueDogs Council
 2026-01-15

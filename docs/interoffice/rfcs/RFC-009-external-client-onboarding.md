@@ -22,7 +22,7 @@
 
 ## Summary
 
-Establish a formal process for how the ScriptHammer assembly line takes on external client projects while maintaining internal work. This includes:
+Establish a formal process for how the RescueDogs assembly line takes on external client projects while maintaining internal work. This includes:
 
 1. A new **Client Liaison** role type for managing client-specific sessions
 2. Separate tmux sessions per client (e.g., `stw` for SpokeToWork)
@@ -41,9 +41,9 @@ SpokeToWork is our first external client with:
 
 We need a process that:
 
-- Keeps internal ScriptHammer work separate from client deliverables
+- Keeps internal RescueDogs work separate from client deliverables
 - Allows parallel work on multiple projects
-- Maintains ScriptHammer quality standards for client output
+- Maintains RescueDogs quality standards for client output
 - Scales to future clients
 
 ## Proposal
@@ -57,7 +57,7 @@ A **Client Liaison** is a specialized Operator that manages a single client proj
 | Tier        | Operator (runs outside tmux)                                 |
 | Reports To  | Main Operator / CTO                                          |
 | Authority   | Manages client session, dispatches work, escalates decisions |
-| Restriction | Cannot modify ScriptHammer terminals, cannot push            |
+| Restriction | Cannot modify RescueDogs terminals, cannot push            |
 
 **Naming Convention**: `{ClientCode}-Liaison` (e.g., `StW-Liaison`)
 
@@ -69,7 +69,7 @@ Each client gets a separate tmux session:
 
 ```
 tmux sessions:
-├── scripthammer    # 26 terminals (Main Operator)
+├── rescuedogs    # 26 terminals (Main Operator)
 └── stw             # 9 terminals (StW-Liaison)
     ├── UIDesigner
     ├── UXDesigner
@@ -148,7 +148,7 @@ Standard process for new clients:
 1. Launch stw tmux session
    └── ./scripts/client-session.sh --client stw --all
 
-2. Present RFC-009 to Council (in scripthammer session)
+2. Present RFC-009 to Council (in rescuedogs session)
    └── Council terminals can now review client context
 
 3. Council votes on onboarding process
@@ -164,7 +164,7 @@ Standard process for new clients:
 
 ### Alternative A: Single Session with Namespacing
 
-Keep all work in `scripthammer` session with client prefixes on window names.
+Keep all work in `rescuedogs` session with client prefixes on window names.
 
 **Rejected because**:
 
@@ -174,7 +174,7 @@ Keep all work in `scripthammer` session with client prefixes on window names.
 
 ### Alternative B: Full Fork per Client
 
-Fork ScriptHammer for each client project.
+Fork RescueDogs for each client project.
 
 **Rejected because**:
 
@@ -205,21 +205,21 @@ Handle client projects ad-hoc.
 
 ### Operator 2026-01-16 - Initial Proposal
 
-SpokeToWork is ready for the assembly line. We need a clean way to onboard them without disrupting ScriptHammer internal work.
+SpokeToWork is ready for the assembly line. We need a clean way to onboard them without disrupting RescueDogs internal work.
 
 **Questions for Council**:
 
 1. **CTO**: Is the Client Liaison role authority level correct? Should they have RFC creation rights for client-specific decisions?
 
-2. **Architect**: Any concerns about the session isolation approach? Should client sessions use a subset of ScriptHammer terminals or completely independent configurations?
+2. **Architect**: Any concerns about the session isolation approach? Should client sessions use a subset of RescueDogs terminals or completely independent configurations?
 
 3. **Security**: Are the client data protection measures sufficient? Should we add encryption for client contact info?
 
 4. **Toolsmith**: The `client-session.sh` script is ready. Any improvements needed before production use?
 
-5. **DevOps**: Should client sessions have their own CI/CD triggers, or share ScriptHammer's?
+5. **DevOps**: Should client sessions have their own CI/CD triggers, or share RescueDogs's?
 
-6. **ProductOwner**: How do we handle client requirements that conflict with ScriptHammer standards?
+6. **ProductOwner**: How do we handle client requirements that conflict with RescueDogs standards?
 
 7. **UXDesigner**: Client wireframes should meet our quality bar. How do we enforce this without blocking client deadlines?
 

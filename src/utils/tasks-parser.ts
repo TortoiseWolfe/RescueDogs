@@ -37,7 +37,7 @@ export interface TaskProgress {
 export async function parseTasksFile(): Promise<TaskProgress> {
   try {
     // Determine the base URL based on the current location
-    // For custom domains (like scripthammer.com), use root
+    // For custom domains (like rescuedogs.com), use root
     // For GitHub Pages, use the project name as subdirectory
     // For localhost, use root
     let baseUrl = '';
@@ -45,11 +45,11 @@ export async function parseTasksFile(): Promise<TaskProgress> {
     // Check if we're on GitHub Pages (*.github.io)
     if (window.location.hostname.endsWith('.github.io')) {
       const projectName =
-        process.env.NEXT_PUBLIC_PROJECT_NAME || 'ScriptHammer';
+        process.env.NEXT_PUBLIC_PROJECT_NAME || 'RescueDogs';
       baseUrl = `/${projectName}`;
     }
     // For localhost and custom domains, use root
-    // (scripthammer.com, localhost, etc.)
+    // (rescuedogs.com, localhost, etc.)
 
     // Add cache-busting timestamp to ensure fresh data
     // Look for current sprint tasks in specs folder

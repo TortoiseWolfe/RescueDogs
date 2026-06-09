@@ -1,4 +1,4 @@
-# ScriptHammer Architecture
+# RescueDogs Architecture
 
 System design reference for developers and architects.
 
@@ -21,7 +21,7 @@ System design reference for developers and architects.
 
 ## Architecture Overview
 
-ScriptHammer is a **static-first web application** designed for deployment on GitHub Pages with Supabase as the backend-as-a-service.
+RescueDogs is a **static-first web application** designed for deployment on GitHub Pages with Supabase as the backend-as-a-service.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -105,7 +105,7 @@ ScriptHammer is a **static-first web application** designed for deployment on Gi
 
 ### The Constraint
 
-ScriptHammer deploys to **GitHub Pages**, which only serves static files. This means:
+RescueDogs deploys to **GitHub Pages**, which only serves static files. This means:
 
 ```
 ❌ NO server-side rendering (SSR)

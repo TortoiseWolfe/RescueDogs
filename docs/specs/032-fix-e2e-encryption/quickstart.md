@@ -19,7 +19,7 @@ This feature replaces the broken random-key encryption with password-derived det
 1. **Install Argon2 dependency**
 
    ```bash
-   docker compose exec scripthammer pnpm add argon2-wasm-esm
+   docker compose exec rescuedogs pnpm add argon2-wasm-esm
    ```
 
 2. **Create key derivation service**
@@ -115,10 +115,10 @@ After implementation, run:
 
 ```bash
 # E2E test: multi-device scenario
-docker compose exec scripthammer pnpm exec playwright test e2e/messaging/multi-device-encryption.spec.ts
+docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/multi-device-encryption.spec.ts
 
 # Unit tests: key derivation
-docker compose exec scripthammer pnpm test src/lib/messaging/__tests__/key-derivation.test.ts
+docker compose exec rescuedogs pnpm test src/lib/messaging/__tests__/key-derivation.test.ts
 ```
 
 ## Rollback Plan

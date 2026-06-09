@@ -133,7 +133,7 @@ async function runPWATests() {
       );
       console.error(`Error: ${error.message}`);
       console.error('\nMake sure the dev server is running:');
-      console.error('  docker compose exec scripthammer pnpm run dev');
+      console.error('  docker compose exec rescuedogs pnpm run dev');
       process.exit(1);
     }
 
@@ -258,25 +258,25 @@ async function runPWATests() {
           });
         } else {
           const cacheNames = await caches.keys();
-          const scripthammerCaches = cacheNames.filter((name) =>
-            name.startsWith('scripthammer-')
+          const rescuedogsCaches = cacheNames.filter((name) =>
+            name.startsWith('rescuedogs-')
           );
 
-          if (scripthammerCaches.length === 0) {
+          if (rescuedogsCaches.length === 0) {
             testResults.push({
               feature: 'Offline Capability',
               status: 'warning',
               message: 'No caches found - offline mode may not work',
             });
           } else {
-            const cache = await caches.open(scripthammerCaches[0]);
+            const cache = await caches.open(rescuedogsCaches[0]);
             const keys = await cache.keys();
             testResults.push({
               feature: 'Offline Capability',
               status: 'pass',
               message: `Offline cache active with ${keys.length} cached resources`,
               details: {
-                cacheNames: scripthammerCaches,
+                cacheNames: rescuedogsCaches,
                 resourceCount: keys.length,
               },
             });

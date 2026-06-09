@@ -76,7 +76,7 @@ Only 4 wireframes have "Key Concepts:" row:
 016:01 message-input-visibility has:
 
 - Centered signature (x=960) instead of left-aligned (x=40)
-- Wrong format: "ScriptHammer v0.1 - ..." instead of "016:01 | ... | ScriptHammer"
+- Wrong format: "RescueDogs v0.1 - ..." instead of "016:01 | ... | RescueDogs"
 
 ---
 

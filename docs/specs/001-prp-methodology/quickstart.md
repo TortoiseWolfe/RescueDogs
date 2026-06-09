@@ -191,7 +191,7 @@ vim docs/prp-docs/<feature-name>-prp.md
 /plan Use component generator, follow 5-file pattern
 /tasks
 # 3. Execute
-docker compose exec scripthammer pnpm run generate:component MyButton
+docker compose exec rescuedogs pnpm run generate:component MyButton
 # ... implement following tasks.md
 ```
 

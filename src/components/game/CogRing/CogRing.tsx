@@ -19,7 +19,7 @@ export interface CogRingProps {
  *
  * Feature 047 — Three.js Game (T039)
  *
- * Procedural cog ring mirroring `public/scripthammer-logo.svg`. The rim is a
+ * Procedural cog ring mirroring `public/rescuedogs-logo.svg`. The rim is a
  * `<torusGeometry>`. The 20 trapezoidal gear teeth are individual
  * `<boxGeometry>` meshes rotated around the center via `useMemo`-cached
  * positions. Rivets are small `<sphereGeometry>` instances every 18°.

@@ -200,16 +200,16 @@ return () => {
 
 ```bash
 # Verify current state
-docker compose exec scripthammer pnpm run type-check
-docker compose exec scripthammer pnpm run lint
+docker compose exec rescuedogs pnpm run type-check
+docker compose exec rescuedogs pnpm run lint
 
 # After implementing each phase, verify:
-docker compose exec scripthammer pnpm run type-check  # No any type errors
-docker compose exec scripthammer pnpm run lint        # No ESLint warnings
-docker compose exec scripthammer pnpm test            # All tests pass
+docker compose exec rescuedogs pnpm run type-check  # No any type errors
+docker compose exec rescuedogs pnpm run lint        # No ESLint warnings
+docker compose exec rescuedogs pnpm test            # All tests pass
 
 # Final verification
-docker compose exec scripthammer pnpm run build       # Production build clean
+docker compose exec rescuedogs pnpm run build       # Production build clean
 ```
 
 ## Success Verification
@@ -221,7 +221,7 @@ docker compose exec scripthammer pnpm run build       # Production build clean
 | SC-003: No memory leaks        | Manual test: navigate away from messages during toast, check console        |
 | SC-004: No console.warn        | `grep -r "console.warn" src/app/messages/` returns empty                    |
 | SC-005: Connection badge works | Manual test: create pending request, verify badge updates                   |
-| SC-006: A11y passes            | `docker compose exec scripthammer pnpm run test:a11y`                       |
+| SC-006: A11y passes            | `docker compose exec rescuedogs pnpm run test:a11y`                       |
 | SC-007: Error boundary works   | Manually throw error in ChatWindow, verify boundary catches                 |
 | SC-008: All 18 issues resolved | Code review checklist complete                                              |
 

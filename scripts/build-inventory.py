@@ -306,7 +306,7 @@ def cmd_export(specs: list[dict], args) -> dict:
 
     export_data = {
         "generated": datetime.now(timezone.utc).isoformat(),
-        "project": "ScriptHammer",
+        "project": "RescueDogs",
         "total_specs": len(specs),
         "specs": specs,
     }

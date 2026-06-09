@@ -11,16 +11,16 @@ You are the user's proxy, keeping the system productive.
 
 ```bash
 # WRONG - command queued but never submitted:
-tmux send-keys -t scripthammer:RoleName "/clear"
-tmux send-keys -t scripthammer:RoleName "/exit"
+tmux send-keys -t rescuedogs:RoleName "/clear"
+tmux send-keys -t rescuedogs:RoleName "/exit"
 
 # CORRECT - command is actually executed:
-tmux send-keys -t scripthammer:RoleName "/clear" Enter
+tmux send-keys -t rescuedogs:RoleName "/clear" Enter
 sleep 3
-tmux send-keys -t scripthammer:RoleName "/prime [role]" Enter
+tmux send-keys -t rescuedogs:RoleName "/prime [role]" Enter
 
 # CORRECT - exit is actually executed:
-tmux send-keys -t scripthammer:RoleName "/exit" Enter
+tmux send-keys -t rescuedogs:RoleName "/exit" Enter
 ```
 
 This applies to ALL commands: /clear, /exit, /prime, prompts, everything.
@@ -32,10 +32,10 @@ Dispatch by **role name**, not window number.
 
 ```bash
 # Find terminal by role name
-tmux list-windows -t scripthammer -F "#{window_index}:#{window_name}" | grep RoleName
+tmux list-windows -t rescuedogs -F "#{window_index}:#{window_name}" | grep RoleName
 
 # Send to terminal by NAME (not window number)
-tmux send-keys -t scripthammer:Toolsmith "command" Enter
+tmux send-keys -t rescuedogs:Toolsmith "command" Enter
 ```
 
 ## Architecture
@@ -54,9 +54,9 @@ tmux send-keys -t scripthammer:Toolsmith "command" Enter
                             │ manages via tmux send-keys + Enter
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  TMUX SESSION "scripthammer" (26 windows)                   │
+│  TMUX SESSION "rescuedogs" (26 windows)                   │
 │  Windows named by ROLE, not number                          │
-│  Access via: tmux send-keys -t scripthammer:RoleName        │
+│  Access via: tmux send-keys -t rescuedogs:RoleName        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -89,16 +89,16 @@ Release:    DevOps → DockerCaptain → ReleaseManager → Coordinator
 ./scripts/tmux-dispatch.sh --all     # Everything
 
 # 4. Monitor specific terminal BY NAME
-tmux capture-pane -t scripthammer:Toolsmith -p | tail -30
+tmux capture-pane -t rescuedogs:Toolsmith -p | tail -30
 
 # 5. Check completion
 grep -c '✅' docs/interoffice/audits/*.md
 
 # 6. Attach to observe (Ctrl+b d to detach)
-tmux attach -t scripthammer
+tmux attach -t rescuedogs
 
 # 7. Kill session when done
-tmux kill-session -t scripthammer
+tmux kill-session -t rescuedogs
 ```
 
 ## Your Responsibilities
@@ -115,14 +115,14 @@ tmux kill-session -t scripthammer
 
 ```bash
 # List all windows by name
-tmux list-windows -t scripthammer -F "#{window_index}:#{window_name}"
+tmux list-windows -t rescuedogs -F "#{window_index}:#{window_name}"
 
 # Check specific terminal by name
-tmux capture-pane -t scripthammer:Developer -p | tail -30
+tmux capture-pane -t rescuedogs:Developer -p | tail -30
 
 # Find stuck terminals (waiting on permission)
-for win in $(tmux list-windows -t scripthammer -F "#{window_name}"); do
-  if tmux capture-pane -t scripthammer:$win -p | grep -q "Do you want to proceed"; then
+for win in $(tmux list-windows -t rescuedogs -F "#{window_name}"); do
+  if tmux capture-pane -t rescuedogs:$win -p | grep -q "Do you want to proceed"; then
     echo "$win stuck on permission prompt"
   fi
 done

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to ScriptHammer are documented here.
+All notable changes to RescueDogs are documented here.
 
 ## [Unreleased] - 2026-01-16
 

@@ -128,7 +128,7 @@ serve(async (req) => {
           price_data: {
             currency: intent.currency,
             product_data: {
-              name: intent.description || 'ScriptHammer payment',
+              name: intent.description || 'RescueDogs payment',
             },
             unit_amount: intent.amount,
           },

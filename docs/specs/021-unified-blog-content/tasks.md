@@ -49,8 +49,8 @@
 ## Phase 3.1: Setup & Dependencies
 
 - [x] T001 Verify feature branch `021-unified-blog-content` is checked out
-- [x] T002 Install new dependencies: `docker compose exec scripthammer pnpm add chokidar remark remark-html rehype-highlight crypto-js`
-- [x] T003 Install dev dependencies: `docker compose exec scripthammer pnpm add -D @types/crypto-js @types/chokidar`
+- [x] T002 Install new dependencies: `docker compose exec rescuedogs pnpm add chokidar remark remark-html rehype-highlight crypto-js`
+- [x] T003 Install dev dependencies: `docker compose exec rescuedogs pnpm add -D @types/crypto-js @types/chokidar`
 - [x] T004 [P] Create backup of existing blog posts: `cp -r blog blog.backup-$(date +%Y%m%d)`
 - [x] T005 [P] Update TypeScript config to include new type definitions
 
@@ -187,10 +187,10 @@
 
 ### Validation
 
-- [ ] T074 Run full test suite: `docker compose exec scripthammer pnpm test`
-- [ ] T075 Run E2E tests: `docker compose exec scripthammer pnpm test:e2e`
-- [ ] T076 Run performance benchmarks: `docker compose exec scripthammer pnpm test:perf`
-- [ ] T077 Validate accessibility: `docker compose exec scripthammer pnpm test:a11y`
+- [ ] T074 Run full test suite: `docker compose exec rescuedogs pnpm test`
+- [ ] T075 Run E2E tests: `docker compose exec rescuedogs pnpm test:e2e`
+- [ ] T076 Run performance benchmarks: `docker compose exec rescuedogs pnpm test:perf`
+- [ ] T077 Validate accessibility: `docker compose exec rescuedogs pnpm test:a11y`
 
 ## Parallel Execution Examples
 
@@ -198,7 +198,7 @@
 
 ```bash
 # Terminal 1
-docker compose exec scripthammer pnpm add chokidar remark remark-html rehype-highlight crypto-js
+docker compose exec rescuedogs pnpm add chokidar remark remark-html rehype-highlight crypto-js
 
 # Terminal 2
 cp -r blog blog.backup-$(date +%Y%m%d)

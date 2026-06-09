@@ -37,7 +37,7 @@ describe('Project Configuration', () => {
 
       const config = getProjectConfig();
 
-      expect(config.projectName).toBe('ScriptHammer');
+      expect(config.projectName).toBe('RescueDogs');
       expect(config.projectOwner).toBe('TortoiseWolfe');
       expect(config.projectDescription).toContain(
         'Opinionated Next.js template'
@@ -182,8 +182,8 @@ describe('Project Configuration', () => {
     it('should generate a valid PWA manifest', () => {
       const manifest = generateManifest();
 
-      expect(manifest.name).toContain('ScriptHammer');
-      expect(manifest.short_name).toBe('ScriptHammer');
+      expect(manifest.name).toContain('RescueDogs');
+      expect(manifest.short_name).toBe('RescueDogs');
       expect(manifest.description).toContain('Opinionated Next.js template');
       expect(manifest.start_url).toBe('/');
       expect(manifest.display).toBe('standalone');
@@ -258,7 +258,7 @@ describe('Project Configuration', () => {
   describe('projectConfig singleton', () => {
     it('should export a singleton configuration object', () => {
       expect(projectConfig).toBeDefined();
-      expect(projectConfig.projectName).toBe('ScriptHammer');
+      expect(projectConfig.projectName).toBe('RescueDogs');
       expect(projectConfig.projectOwner).toBe('TortoiseWolfe');
     });
 
@@ -284,7 +284,7 @@ describe('Project Configuration', () => {
       const config = getProjectConfig();
 
       // Should fall back to defaults
-      expect(config.projectName).toBe('ScriptHammer');
+      expect(config.projectName).toBe('RescueDogs');
       expect(config.projectOwner).toBe('TortoiseWolfe');
     });
 
@@ -295,7 +295,7 @@ describe('Project Configuration', () => {
       const config = getProjectConfig();
 
       // Should fall back to defaults
-      expect(config.projectName).toBe('ScriptHammer');
+      expect(config.projectName).toBe('RescueDogs');
       expect(config.projectOwner).toBe('TortoiseWolfe');
     });
 

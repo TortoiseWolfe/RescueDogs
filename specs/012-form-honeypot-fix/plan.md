@@ -63,7 +63,7 @@ Use label-based detection for robustness.
 
 ## Testing Strategy
 
-1. Run modified test locally: `docker compose exec scripthammer pnpm exec playwright test form-submission.spec.ts`
+1. Run modified test locally: `docker compose exec rescuedogs pnpm exec playwright test form-submission.spec.ts`
 2. Verify all 12 tests pass
 3. Verify no changes to src/ directory
 4. Manual verification: honeypot still blocks bots (optional)

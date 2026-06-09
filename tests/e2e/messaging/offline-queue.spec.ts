@@ -387,7 +387,7 @@ test.describe('Offline Message Queue', () => {
         await page.evaluate(async () => {
           window.dispatchEvent(new Event('online'));
           const fn = (window as unknown as Record<string, unknown>)
-            .__scripthammer_syncQueue as (() => Promise<unknown>) | undefined;
+            .__rescuedogs_syncQueue as (() => Promise<unknown>) | undefined;
           if (fn) await fn();
         });
       };

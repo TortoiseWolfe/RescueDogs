@@ -1,7 +1,7 @@
 # Implementation Plan: User Messaging System with E2E Encryption
 
 **Branch**: `023-user-messaging-system` | **Date**: 2025-10-08 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `/home/turtle_wolfe/repos/ScriptHammer/specs/023-user-messaging-system/spec.md`
+**Input**: Feature specification from `/home/turtle_wolfe/repos/RescueDogs/specs/023-user-messaging-system/spec.md`
 
 ## Summary
 
@@ -53,7 +53,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 ✅ **I. Component Structure Compliance**
 
 - All React components will follow 5-file pattern (index.tsx, Component.tsx, .test.tsx, .stories.tsx, .accessibility.test.tsx)
-- Use component generator: `docker compose exec scripthammer pnpm run generate:component`
+- Use component generator: `docker compose exec rescuedogs pnpm run generate:component`
 - Components: MessageBubble, MessageThread, MessageInput, ChatWindow, ConversationList, ConversationListItem, UserSearch, ConnectionManager, TypingIndicator, etc.
 
 ✅ **II. Test-First Development**
@@ -74,7 +74,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 ✅ **IV. Docker-First Development**
 
 - All development in Docker containers: `docker compose up`
-- Commands executed via: `docker compose exec scripthammer pnpm run <command>`
+- Commands executed via: `docker compose exec rescuedogs pnpm run <command>`
 - No local npm/pnpm commands
 
 ✅ **V. Progressive Enhancement**
@@ -182,7 +182,7 @@ e2e/messaging/              # NEW: End-to-end Playwright tests
 └── offline-sync.spec.ts
 ```
 
-**Structure Decision**: Web application structure (Option 2) selected. ScriptHammer uses Next.js App Router with:
+**Structure Decision**: Web application structure (Option 2) selected. RescueDogs uses Next.js App Router with:
 
 - Frontend: `src/app/` (pages) + `src/components/` (UI)
 - Backend: Supabase (PostgreSQL + Realtime + Auth)
@@ -193,7 +193,7 @@ e2e/messaging/              # NEW: End-to-end Playwright tests
 
 _No constitutional violations - this section is empty._
 
-All requirements align with ScriptHammer constitution v1.0.1. No complexity exceptions needed.
+All requirements align with RescueDogs constitution v1.0.1. No complexity exceptions needed.
 
 ## Progress Tracking
 

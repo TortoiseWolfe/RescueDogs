@@ -1,4 +1,4 @@
-# ScriptHammer Scripts
+# RescueDogs Scripts
 
 Automation scripts for the multi-terminal Claude Code workflow.
 

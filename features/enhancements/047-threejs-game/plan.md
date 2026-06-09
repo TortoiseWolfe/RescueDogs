@@ -3,11 +3,11 @@
 **Branch**: `047-threejs-game` | **Date**: 2026-05-16 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification at `features/enhancements/047-threejs-game/spec.md`
 
-**Note**: Phase 0.5 of the ScriptHammer-family strategy plan (`~/.claude/plans/gleaming-kitten-execution.md`) — the R&D stepping stone before GrimGlow Phase 1a (browser fork). Wireframe gate PASSED 2026-05-15 (regenerated with canonical brand-SVG symbols 2026-05-16). This file is the cascade's `/speckit.plan` step.
+**Note**: Phase 0.5 of the RescueDogs-family strategy plan (`~/.claude/plans/gleaming-kitten-execution.md`) — the R&D stepping stone before GrimGlow Phase 1a (browser fork). Wireframe gate PASSED 2026-05-15 (regenerated with canonical brand-SVG symbols 2026-05-16). This file is the cascade's `/speckit.plan` step.
 
 ## Summary
 
-A new `/game/3d` route that mounts a Three.js scene composing the three canonical ScriptHammer brand assets (silver cog ring, golden `< >` code-tag brackets, printing-mallet) in 3D, all built from procedural primitives. The scene is theme-aware (re-extracts DaisyUI CSS custom properties on `data-theme` change, mirroring the existing `useMapTheme` precedent), respects `prefers-reduced-motion` (disables auto-orbit + idle animations), and degrades gracefully when WebGL is unavailable or the context is lost (themed CSS/SVG silhouette + user-actionable Retry button).
+A new `/game/3d` route that mounts a Three.js scene composing the three canonical RescueDogs brand assets (silver cog ring, golden `< >` code-tag brackets, printing-mallet) in 3D, all built from procedural primitives. The scene is theme-aware (re-extracts DaisyUI CSS custom properties on `data-theme` change, mirroring the existing `useMapTheme` precedent), respects `prefers-reduced-motion` (disables auto-orbit + idle animations), and degrades gracefully when WebGL is unavailable or the context is lost (themed CSS/SVG silhouette + user-actionable Retry button).
 
 The technical approach is pure-additive: a new client-only route under `src/app/game/3d/` using the existing `dynamic(() => import(...), { ssr: false })` pattern from `src/app/game/page.tsx`; four new components under `src/components/game/` following the mandatory 5-file pattern (Scene, Controls, Loader, FallbackPanel); a small theme-utils extension mirroring `useMapTheme`; a Pa11y exclusion scoped to `/game/3d` only. No backend changes, no schema changes, no shared-state changes elsewhere.
 
@@ -67,7 +67,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 | I. Component Structure Compliance                | ✅         | Four new components (Scene, Controls, Loader, FallbackPanel) each scaffolded via `pnpm run generate:component` to enforce the 5-file pattern. Validated by `pnpm run validate:structure` (SC-008).                                                                                                                                 |
 | II. Test-First Development                       | ✅         | RED tests authored first per `tasks.md` ordering: theme-extraction unit test asserts re-extraction on `data-theme` change before the hook ships; FallbackPanel a11y test asserts Retry-button focusability before the WebGL-detection path is wired; E2E spec for /game/3d asserts canvas mounts before the route page is written. |
 | III. PRP Methodology w/ Mandatory Wireframe Gate | ✅         | Wireframes 01 + 02 PASSED 2026-05-15 (validator v5.0, 0 errors). `## UI Mockup` section in spec.md links both. This file is the cascade's `/speckit.plan` step.                                                                                                                                                                    |
-| IV. Docker-First Development                     | ✅         | All commands via `docker compose exec scripthammer ...`. `pnpm add three @react-three/fiber @react-three/drei` runs inside the container per CLAUDE.md. Tests, builds, validation all containerized.                                                                                                                               |
+| IV. Docker-First Development                     | ✅         | All commands via `docker compose exec rescuedogs ...`. `pnpm add three @react-three/fiber @react-three/drei` runs inside the container per CLAUDE.md. Tests, builds, validation all containerized.                                                                                                                               |
 | V. Progressive Enhancement                       | ✅         | The route degrades gracefully: WebGL unavailable → themed fallback panel (FR-008). prefers-reduced-motion → auto-orbit disabled (FR-004). Touch input → drei OrbitControls handles natively. Mobile breakpoint validated against wireframe 01.                                                                                     |
 | VI. Privacy & Compliance First                   | ✅         | NFR-006: GA4 default page view only — no custom scene-loaded, scene-interaction, or theme-switched-in-scene events. No localStorage writes for v1. No third-party calls (Three.js bundles locally; CDNs explicitly avoided). No PII surfaces.                                                                                      |
 
@@ -178,7 +178,7 @@ See [`quickstart.md`](./quickstart.md). Smoke-test recipes for:
 
 ```bash
 .specify/scripts/bash/update-agent-context.sh claude
-# Expected: stderr "[update-agent-context] No-op for ScriptHammer..."
+# Expected: stderr "[update-agent-context] No-op for RescueDogs..."
 # (CLAUDE.md is hand-curated; this is intentional)
 ```
 

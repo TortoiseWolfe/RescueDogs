@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # update-agent-context.sh — referenced by /speckit.plan but absent from upstream
-# github/spec-kit. ScriptHammer's stance: CLAUDE.md is hand-curated, not auto-rewritten.
+# github/spec-kit. RescueDogs's stance: CLAUDE.md is hand-curated, not auto-rewritten.
 #
 # This script intentionally NO-OPs. Future enhancement could append per-feature
 # tech-stack notes to a dedicated `.specify/agent-context/<feature>.md` file
@@ -22,7 +22,7 @@ Usage: update-agent-context.sh [agent-name]
 
 Updates agent-specific context file with new tech-stack details from current plan.md.
 
-ScriptHammer behavior: NO-OP. CLAUDE.md is hand-curated and not auto-rewritten.
+RescueDogs behavior: NO-OP. CLAUDE.md is hand-curated and not auto-rewritten.
 The /speckit.plan command calls this as a documented step; we acknowledge the
 call without touching CLAUDE.md.
 
@@ -33,7 +33,7 @@ EOF
         exit 0
         ;;
     claude)
-        echo "[update-agent-context] No-op for ScriptHammer: CLAUDE.md is hand-curated." >&2
+        echo "[update-agent-context] No-op for RescueDogs: CLAUDE.md is hand-curated." >&2
         exit 0
         ;;
     *)

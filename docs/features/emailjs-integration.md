@@ -195,7 +195,7 @@ const statuses = await emailService.getStatus();
 Run provider tests:
 
 ```bash
-docker compose exec scripthammer pnpm test src/utils/email/
+docker compose exec rescuedogs pnpm test src/utils/email/
 ```
 
 ### Integration Tests
@@ -203,7 +203,7 @@ docker compose exec scripthammer pnpm test src/utils/email/
 The contact form tests automatically verify email integration:
 
 ```bash
-docker compose exec scripthammer pnpm test src/components/forms/ContactForm/
+docker compose exec rescuedogs pnpm test src/components/forms/ContactForm/
 ```
 
 ## Security Considerations

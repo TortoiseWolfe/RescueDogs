@@ -84,15 +84,15 @@ Extract `[target]` and `[command]` from the arguments.
 **For single terminal** - RUN THIS COMMAND:
 
 ```bash
-tmux send-keys -t scripthammer:[WINDOW] '[COMMAND]' Enter
+tmux send-keys -t rescuedogs:[WINDOW] '[COMMAND]' Enter
 ```
 
 **For group (e.g., all-generators)** - RUN THESE COMMANDS:
 
 ```bash
-tmux send-keys -t scripthammer:7 '[COMMAND]' Enter && sleep 0.3
-tmux send-keys -t scripthammer:8 '[COMMAND]' Enter && sleep 0.3
-tmux send-keys -t scripthammer:9 '[COMMAND]' Enter
+tmux send-keys -t rescuedogs:7 '[COMMAND]' Enter && sleep 0.3
+tmux send-keys -t rescuedogs:8 '[COMMAND]' Enter && sleep 0.3
+tmux send-keys -t rescuedogs:9 '[COMMAND]' Enter
 ```
 
 **IMPORTANT**:
@@ -119,19 +119,19 @@ Sent via tmux to window(s): [list]
 ### Dispatch /queue-check to all generators:
 
 ```bash
-tmux send-keys -t scripthammer:7 '/queue-check' Enter && sleep 0.3 && tmux send-keys -t scripthammer:8 '/queue-check' Enter && sleep 0.3 && tmux send-keys -t scripthammer:9 '/queue-check' Enter
+tmux send-keys -t rescuedogs:7 '/queue-check' Enter && sleep 0.3 && tmux send-keys -t rescuedogs:8 '/queue-check' Enter && sleep 0.3 && tmux send-keys -t rescuedogs:9 '/queue-check' Enter
 ```
 
 ### Dispatch to single generator:
 
 ```bash
-tmux send-keys -t scripthammer:7 '/queue-check' Enter
+tmux send-keys -t rescuedogs:7 '/queue-check' Enter
 ```
 
 ### Dispatch wireframe-fix to generator-1:
 
 ```bash
-tmux send-keys -t scripthammer:7 '/wireframe-fix [feature] [svg]' Enter
+tmux send-keys -t rescuedogs:7 '/wireframe-fix [feature] [svg]' Enter
 ```
 
 ## Error Handling
@@ -139,7 +139,7 @@ tmux send-keys -t scripthammer:7 '/wireframe-fix [feature] [svg]' Enter
 Before dispatching, verify tmux session exists:
 
 ```bash
-tmux has-session -t scripthammer 2>/dev/null && echo "Session exists" || echo "ERROR: No scripthammer session"
+tmux has-session -t rescuedogs 2>/dev/null && echo "Session exists" || echo "ERROR: No rescuedogs session"
 ```
 
 ## DO NOT

@@ -26,7 +26,7 @@ twitterCard: summary_large_image
 
 Authentication is the foundation of any application that handles user data. Get it wrong, and you're exposing your users to account takeovers, data breaches, and compliance nightmares. Get it right, and your users don't even notice—they just trust you.
 
-This post documents our implementation of production-ready authentication in ScriptHammer using [Supabase](https://supabase.com/), complete with OAuth (Open Authorization) providers, server-side rate limiting, and database-level security policies. This isn't a "hello world" tutorial—this is what we learned building authentication that actually ships to production.
+This post documents our implementation of production-ready authentication in RescueDogs using [Supabase](https://supabase.com/), complete with OAuth (Open Authorization) providers, server-side rate limiting, and database-level security policies. This isn't a "hello world" tutorial—this is what we learned building authentication that actually ships to production.
 
 ## 🗄️ Why Supabase? (vs Auth0/Firebase)
 
@@ -706,7 +706,7 @@ export function useAuth() {
 
 ### Client-Side Route Protection with `<ProtectedRoute>`
 
-> 📝 **Note (updated):** an earlier version of this post documented Next.js middleware (`src/middleware.ts`) for route protection. That pattern conflicts with `output: 'export'` (the static-export config ScriptHammer uses to deploy to GitHub Pages) — Next.js logs a `Middleware cannot be used with "output: export"` warning, and the middleware silently doesn't run in production. The implementation moved to a client-side guard component; the rewrite below reflects what actually ships on scripthammer.com.
+> 📝 **Note (updated):** an earlier version of this post documented Next.js middleware (`src/middleware.ts`) for route protection. That pattern conflicts with `output: 'export'` (the static-export config RescueDogs uses to deploy to GitHub Pages) — Next.js logs a `Middleware cannot be used with "output: export"` warning, and the middleware silently doesn't run in production. The implementation moved to a client-side guard component; the rewrite below reflects what actually ships on rescuedogs.com.
 
 For static-site deployments, route protection happens in a **client component** that wraps the page content and checks the auth context. The protected page imports the guard and renders its content inside:
 
@@ -983,4 +983,4 @@ Next up: [Offline-First Payment System with Stripe and PayPal](/blog/offline-pay
 
 ---
 
-**Want to see the full implementation?** Check out the [ScriptHammer GitHub repository](https://github.com/TortoiseWolfe/ScriptHammer).
+**Want to see the full implementation?** Check out the [RescueDogs GitHub repository](https://github.com/TortoiseWolfe/RescueDogs).

@@ -34,7 +34,7 @@
   - Verify: `docker compose ps`
 
 - [x] **T003** [P] Verify all dependencies installed
-  - Command: `docker compose exec scripthammer pnpm install`
+  - Command: `docker compose exec rescuedogs pnpm install`
   - Check: `pnpm list @supabase/supabase-js uuid`
 
 ---
@@ -281,7 +281,7 @@
 ### Password Strength Indicator
 
 - [x] **T037** Generate PasswordStrengthIndicator component
-  - Command: `docker compose exec scripthammer pnpm run generate:component -- --name PasswordStrengthIndicator --category atomic --hasProps true`
+  - Command: `docker compose exec rescuedogs pnpm run generate:component -- --name PasswordStrengthIndicator --category atomic --hasProps true`
   - Output: Creates 5 files (index, component, test, stories, a11y test) ✅ COMPLETE
 
 - [x] **T038** Implement password strength logic
@@ -403,13 +403,13 @@
 ### Integration Test Suite
 
 - [x] **T056** [P] Run all unit tests ✅ COMPLETE
-  - Command: `docker compose exec scripthammer pnpm test -- --run`
+  - Command: `docker compose exec rescuedogs pnpm test -- --run`
   - Result: 1578/1592 tests passing (99.1%)
   - 14 failures are database connection issues in rate-limit tests (expected)
   - All security feature tests passing
 
 - [x] **T057** [P] Run integration tests ✅ COMPLETE
-  - Command: `docker compose exec scripthammer pnpm test src/tests/integration/`
+  - Command: `docker compose exec rescuedogs pnpm test src/tests/integration/`
   - Included in T056 test suite
   - Payment isolation tests passing
   - Auth flow tests passing
@@ -457,14 +457,14 @@
 ## Phase 3.9: Code Quality & CI/CD
 
 - [x] **T062** Run TypeScript type checking
-  - Command: `docker compose exec scripthammer pnpm run type-check`
+  - Command: `docker compose exec rescuedogs pnpm run type-check`
   - Status: Type errors found ⚠️
   - Issue: Database types need regeneration for new tables (oauth_states, rate_limit_attempts)
   - Resolution: Run `pnpm supabase gen types typescript` after migrations applied
   - Note: Functionality works correctly, type errors are due to missing type definitions
 
 - [x] **T063** Run ESLint ✅ COMPLETE
-  - Command: `docker compose exec scripthammer pnpm run lint`
+  - Command: `docker compose exec rescuedogs pnpm run lint`
   - Result: All checks passed, no errors
   - Fixed: Storybook import in IdleTimeoutModal.stories.tsx
 
@@ -517,7 +517,7 @@
   - P2/P3 features deferred to future releases
 
 - [x] **T070** Run full test suite
-  - Command: `docker compose exec scripthammer pnpm test` ✅ COMPLETE
+  - Command: `docker compose exec rescuedogs pnpm test` ✅ COMPLETE
   - Results: 1537 passed, 46 failed (test file issues, not implementation)
   - ESLint: Passed ✅
   - TypeScript: Type errors (needs DB types regen)
@@ -583,7 +583,7 @@ Documentation (T067-T072)
 
 ```bash
 # These can run simultaneously - different files
-docker compose exec scripthammer bash -c "
+docker compose exec rescuedogs bash -c "
   # Terminal 1: Rate limiting table
   ./scripts/create-migration.sh rate_limiting &
   # Terminal 2: OAuth states table

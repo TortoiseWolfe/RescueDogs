@@ -62,23 +62,23 @@ Signature must be left-aligned at `x="40"`, NOT centered at `x="960"` with `text
 
 ## SIGNATURE-004 / G-043 Failures (12 SVGs)
 
-Signature must use format: `NNN:NN | Feature Name | ScriptHammer`
+Signature must use format: `NNN:NN | Feature Name | RescueDogs`
 
 | Feature                      | SVG                                | Current Format                         | Correct Format |
 | ---------------------------- | ---------------------------------- | -------------------------------------- | -------------- | ------------------------ | ------------- |
-| 003-user-authentication      | 01-registration-sign-in.svg        | `ScriptHammer Wireframe v5 - 003...`   | `003:01        | User Authentication      | ScriptHammer` |
-| 003-user-authentication      | 02-verification-password-reset.svg | `ScriptHammer Wireframe v5 - 003...`   | `003:02        | User Authentication      | ScriptHammer` |
-| 003-user-authentication      | 03-profile-session-management.svg  | `ScriptHammer Wireframe v5 - 003...`   | `003:03        | User Authentication      | ScriptHammer` |
-| 008-on-the-account           | 01-avatar-upload-flow.svg          | `ScriptHammer Wireframe v5 - 008...`   | `008:01        | On The Account           | ScriptHammer` |
-| 010-unified-blog-content     | 01-editor-and-preview.svg          | `ScriptHammer Wireframe v5 - 010...`   | `010:01        | Unified Blog Content     | ScriptHammer` |
-| 010-unified-blog-content     | 02-conflict-resolution.svg         | `ScriptHammer Wireframe v5 - 010...`   | `010:02        | Unified Blog Content     | ScriptHammer` |
-| 014-admin-welcome-email-gate | 01-verification-gate.svg           | `ScriptHammer Wireframe v5 - 014...`   | `014:01        | Admin Welcome Email Gate | ScriptHammer` |
-| 014-admin-welcome-email-gate | 02-admin-setup-process.svg         | `ScriptHammer Wireframe v5 - 014...`   | `014:02        | Admin Welcome Email Gate | ScriptHammer` |
-| 016-messaging-critical-fixes | 01-message-input-visibility.svg    | `ScriptHammer v0.1 - Messaging UX...`  | `016:01        | Messaging Critical Fixes | ScriptHammer` |
-| 016-messaging-critical-fixes | 02-oauth-setup-flow.svg            | `ScriptHammer v0.1 - OAuth Setup...`   | `016:02        | Messaging Critical Fixes | ScriptHammer` |
-| 016-messaging-critical-fixes | 03-conversation-error-states.svg   | `ScriptHammer v0.1 - Conversation...`  | `016:03        | Messaging Critical Fixes | ScriptHammer` |
-| 021-geolocation-map          | 01-map-interface-permission.svg    | `ScriptHammer v0.1 - Map Interface...` | `021:01        | Geolocation Map          | ScriptHammer` |
-| 021-geolocation-map          | 02-markers-and-accessibility.svg   | `ScriptHammer v0.1 - Markers and...`   | `021:02        | Geolocation Map          | ScriptHammer` |
+| 003-user-authentication      | 01-registration-sign-in.svg        | `RescueDogs Wireframe v5 - 003...`   | `003:01        | User Authentication      | RescueDogs` |
+| 003-user-authentication      | 02-verification-password-reset.svg | `RescueDogs Wireframe v5 - 003...`   | `003:02        | User Authentication      | RescueDogs` |
+| 003-user-authentication      | 03-profile-session-management.svg  | `RescueDogs Wireframe v5 - 003...`   | `003:03        | User Authentication      | RescueDogs` |
+| 008-on-the-account           | 01-avatar-upload-flow.svg          | `RescueDogs Wireframe v5 - 008...`   | `008:01        | On The Account           | RescueDogs` |
+| 010-unified-blog-content     | 01-editor-and-preview.svg          | `RescueDogs Wireframe v5 - 010...`   | `010:01        | Unified Blog Content     | RescueDogs` |
+| 010-unified-blog-content     | 02-conflict-resolution.svg         | `RescueDogs Wireframe v5 - 010...`   | `010:02        | Unified Blog Content     | RescueDogs` |
+| 014-admin-welcome-email-gate | 01-verification-gate.svg           | `RescueDogs Wireframe v5 - 014...`   | `014:01        | Admin Welcome Email Gate | RescueDogs` |
+| 014-admin-welcome-email-gate | 02-admin-setup-process.svg         | `RescueDogs Wireframe v5 - 014...`   | `014:02        | Admin Welcome Email Gate | RescueDogs` |
+| 016-messaging-critical-fixes | 01-message-input-visibility.svg    | `RescueDogs v0.1 - Messaging UX...`  | `016:01        | Messaging Critical Fixes | RescueDogs` |
+| 016-messaging-critical-fixes | 02-oauth-setup-flow.svg            | `RescueDogs v0.1 - OAuth Setup...`   | `016:02        | Messaging Critical Fixes | RescueDogs` |
+| 016-messaging-critical-fixes | 03-conversation-error-states.svg   | `RescueDogs v0.1 - Conversation...`  | `016:03        | Messaging Critical Fixes | RescueDogs` |
+| 021-geolocation-map          | 01-map-interface-permission.svg    | `RescueDogs v0.1 - Map Interface...` | `021:01        | Geolocation Map          | RescueDogs` |
+| 021-geolocation-map          | 02-markers-and-accessibility.svg   | `RescueDogs v0.1 - Markers and...`   | `021:02        | Geolocation Map          | RescueDogs` |
 
 **Action**: PATCH - Replace signature text content
 

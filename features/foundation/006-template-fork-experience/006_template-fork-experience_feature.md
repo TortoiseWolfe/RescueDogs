@@ -19,7 +19,7 @@
 
 ### User Story 1 - Automated Rebranding (Priority: P1)
 
-A developer forks ScriptHammer to create their own project. They run a single rebrand script that automatically updates all 200+ hardcoded references (project name, owner, descriptions) and renames files, reducing setup from 2 hours to under 5 minutes.
+A developer forks RescueDogs to create their own project. They run a single rebrand script that automatically updates all 200+ hardcoded references (project name, owner, descriptions) and renames files, reducing setup from 2 hours to under 5 minutes.
 
 **Why this priority**: This is the core pain point - manual updates across 200+ files is the primary barrier to adoption. Automating this delivers immediate, measurable value.
 
@@ -27,9 +27,9 @@ A developer forks ScriptHammer to create their own project. They run a single re
 
 **Acceptance Scenarios**:
 
-1. **Given** a fresh fork of ScriptHammer, **When** user runs `./scripts/rebrand.sh MyApp myuser "My app description"`, **Then** all occurrences of "ScriptHammer" and "scripthammer" are replaced with "MyApp" and "myapp" respectively
+1. **Given** a fresh fork of RescueDogs, **When** user runs `./scripts/rebrand.sh MyApp myuser "My app description"`, **Then** all occurrences of "RescueDogs" and "rescuedogs" are replaced with "MyApp" and "myapp" respectively
 2. **Given** the rebrand script has run, **When** user runs `docker compose up && docker compose exec myapp pnpm run build`, **Then** the build succeeds with zero errors
-3. **Given** files named with "ScriptHammer" (e.g., `ScriptHammerLogo.tsx`), **When** rebrand script runs, **Then** files are renamed to use the new project name (e.g., `MyAppLogo.tsx`)
+3. **Given** files named with "RescueDogs" (e.g., `RescueDogsLogo.tsx`), **When** rebrand script runs, **Then** files are renamed to use the new project name (e.g., `MyAppLogo.tsx`)
 4. **Given** the rebrand script runs, **When** user checks `public/CNAME`, **Then** the file has been deleted (unless custom domain specified)
 
 ---
@@ -40,7 +40,7 @@ A developer forks the template and wants to run tests before setting up Supabase
 
 **Why this priority**: Tests failing immediately after fork creates a poor first impression and blocks CI/CD setup. This is the second-biggest friction point.
 
-**Independent Test**: Can be tested by removing Supabase env vars from .env and running `docker compose exec scripthammer pnpm test` - all tests should pass.
+**Independent Test**: Can be tested by removing Supabase env vars from .env and running `docker compose exec rescuedogs pnpm test` - all tests should pass.
 
 **Acceptance Scenarios**:
 
@@ -72,7 +72,7 @@ A developer working in the Docker-first environment can commit changes without "
 
 **Why this priority**: Git workflow friction affects daily development but has documented workarounds.
 
-**Independent Test**: Can be tested by running `docker compose exec scripthammer git commit -m "test"` after making a change.
+**Independent Test**: Can be tested by running `docker compose exec rescuedogs git commit -m "test"` after making a change.
 
 **Acceptance Scenarios**:
 
@@ -113,14 +113,14 @@ A developer deploys to GitHub Pages before configuring Supabase. The app should 
 **Rebrand Script (scripts/rebrand.sh)**
 
 - **FR-001**: Script MUST accept project name, owner, and description as arguments
-- **FR-002**: Script MUST replace all case variations of "ScriptHammer" with the new name
-- **FR-003**: Script MUST rename files containing "ScriptHammer" in their names
+- **FR-002**: Script MUST replace all case variations of "RescueDogs" with the new name
+- **FR-003**: Script MUST rename files containing "RescueDogs" in their names
 - **FR-004**: Script MUST update docker-compose.yml service name
-- **FR-005**: Script MUST delete public/CNAME unless `--keep-cname` flag is provided or CNAME contains a non-scripthammer.com domain
+- **FR-005**: Script MUST delete public/CNAME unless `--keep-cname` flag is provided or CNAME contains a non-rescuedogs.com domain
 - **FR-006**: Script MUST update package.json name, description, and repository fields
 - **FR-007**: Script MUST be idempotent (safe to run multiple times)
 - **FR-007a**: Script MUST auto-sanitize project names (convert spaces to hyphens, remove special characters silently)
-- **FR-007b**: Script MUST detect if repo was previously rebranded (no "ScriptHammer" references found) and prompt user for confirmation before proceeding
+- **FR-007b**: Script MUST detect if repo was previously rebranded (no "RescueDogs" references found) and prompt user for confirmation before proceeding
 - **FR-007c**: Script MUST provide verbose output, printing each file path as it is modified or renamed
 - **FR-007d**: Script MUST update git remote `origin` URL to `github.com/<new-owner>/<new-name>`
 
@@ -147,14 +147,14 @@ A developer deploys to GitHub Pages before configuring Supabase. The app should 
 **Dynamic Configuration**
 
 - **FR-019**: public/sw.js MUST use dynamic cache name from project config
-- **FR-020**: Admin email MUST be configurable via ADMIN_EMAIL env var with fallback to `admin@scripthammer.com`
+- **FR-020**: Admin email MUST be configurable via ADMIN_EMAIL env var with fallback to `admin@rescuedogs.com`
 - **FR-021**: public/manifest.json MUST be in .gitignore (it's generated)
 
 **Documentation**
 
 - **FR-022**: README MUST include "Forking This Template" section with step-by-step guide
 - **FR-023**: CLAUDE.md MUST document Supabase GitHub secrets requirement
-- **FR-024**: Footer component MUST include attribution link to ScriptHammer.com
+- **FR-024**: Footer component MUST include attribution link to RescueDogs.com
 
 ### Key Entities
 

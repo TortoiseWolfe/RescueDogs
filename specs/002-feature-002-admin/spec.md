@@ -3,7 +3,7 @@
 **Feature Branch**: `002-feature-002-admin`
 **Created**: 2025-11-28
 **Status**: Clarified
-**Input**: User description: "Feature 002: Admin Welcome Message & Email Verification - Three-part feature: (1) Add 4th admin user ScriptHammer (admin@scripthammer.com) to .env with secure password, (2) Enforce email verification for messaging features using new MessagingGate component that blocks /messages until email verified, (3) Send encrypted welcome message from admin to new users on first login explaining E2E encryption in layman terms"
+**Input**: User description: "Feature 002: Admin Welcome Message & Email Verification - Three-part feature: (1) Add 4th admin user RescueDogs (admin@rescuedogs.com) to .env with secure password, (2) Enforce email verification for messaging features using new MessagingGate component that blocks /messages until email verified, (3) Send encrypted welcome message from admin to new users on first login explaining E2E encryption in layman terms"
 
 ## Clarifications
 
@@ -15,15 +15,15 @@
 
 ### User Story 1 - New User Receives Welcome Message (Priority: P1)
 
-A new user signs up, verifies their email, and logs in for the first time. After their encryption keys are initialized, they automatically receive an encrypted welcome message from "ScriptHammer" in their message inbox explaining how the E2E encryption protects their privacy.
+A new user signs up, verifies their email, and logs in for the first time. After their encryption keys are initialized, they automatically receive an encrypted welcome message from "RescueDogs" in their message inbox explaining how the E2E encryption protects their privacy.
 
 **Why this priority**: This is the core value proposition - educating users about security features increases trust and engagement. Without this, users may not understand why they need a separate messaging password.
 
-**Independent Test**: Can be fully tested by creating a new user, verifying email, logging in, and checking that a welcome message appears from ScriptHammer in their conversations.
+**Independent Test**: Can be fully tested by creating a new user, verifying email, logging in, and checking that a welcome message appears from RescueDogs in their conversations.
 
 **Acceptance Scenarios**:
 
-1. **Given** a new user with verified email and no encryption keys, **When** they log in and initialize keys, **Then** they receive an encrypted welcome message from ScriptHammer
+1. **Given** a new user with verified email and no encryption keys, **When** they log in and initialize keys, **Then** they receive an encrypted welcome message from RescueDogs
 2. **Given** a user who has already received the welcome message, **When** they log in again, **Then** they do NOT receive a duplicate welcome message
 3. **Given** a new user, **When** they view the welcome message, **Then** it explains E2E encryption in simple, non-technical language
 
@@ -47,7 +47,7 @@ A user who has not verified their email tries to access the /messages page. They
 
 ### User Story 3 - Admin User Setup (Priority: P3)
 
-System administrators can configure the ScriptHammer admin user via environment variables. The admin user has encryption keys initialized and can send automated messages.
+System administrators can configure the RescueDogs admin user via environment variables. The admin user has encryption keys initialized and can send automated messages.
 
 **Why this priority**: Foundation requirement - the admin user must exist before welcome messages can be sent, but setup is a one-time configuration task.
 
@@ -89,7 +89,7 @@ Users who sign in via OAuth providers (Google, GitHub) have their email automati
 
 ### Functional Requirements
 
-- **FR-001**: System MUST include a 4th admin user "ScriptHammer" with email admin@scripthammer.com configurable via environment variables
+- **FR-001**: System MUST include a 4th admin user "RescueDogs" with email admin@rescuedogs.com configurable via environment variables
 - **FR-002**: System MUST store admin user ID as NEXT_PUBLIC_ADMIN_USER_ID environment variable
 - **FR-003**: System MUST block access to /messages route for users with unverified email addresses
 - **FR-004**: System MUST display "Email Verification Required" UI with resend functionality when blocking unverified users
@@ -104,7 +104,7 @@ Users who sign in via OAuth providers (Google, GitHub) have their email automati
 
 ### Key Entities
 
-- **Admin User (ScriptHammer)**: System user with fixed UUID (00000000-0000-0000-0000-000000000001), sends automated welcome messages, credentials stored in .env
+- **Admin User (RescueDogs)**: System user with fixed UUID (00000000-0000-0000-0000-000000000001), sends automated welcome messages, credentials stored in .env
 - **MessagingGate**: New component that wraps /messages content, checks email_confirmed_at before allowing access
 - **WelcomeService**: New service that derives admin keys, encrypts and sends welcome message to new users
 - **user_profiles.welcome_message_sent**: Boolean column tracking whether user has received welcome message

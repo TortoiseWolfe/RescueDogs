@@ -163,8 +163,8 @@
 **Purpose**: Validation and cleanup
 
 - [x] T021 [P] Manual test: Full end-to-end flow per quickstart.md test scenarios
-- [x] T022 [P] Run type-check: `docker compose exec scripthammer pnpm run type-check`
-- [x] T023 [P] Run lint: `docker compose exec scripthammer pnpm run lint`
+- [x] T022 [P] Run type-check: `docker compose exec rescuedogs pnpm run type-check`
+- [x] T023 [P] Run lint: `docker compose exec rescuedogs pnpm run lint`
 - [x] T024 Run existing test suite to verify no regressions
 
 ---

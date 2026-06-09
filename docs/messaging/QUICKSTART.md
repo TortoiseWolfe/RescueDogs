@@ -126,7 +126,7 @@
 
 ```bash
 # Connect to Supabase and verify tables exist
-docker compose exec scripthammer pnpm exec supabase db diff
+docker compose exec rescuedogs pnpm exec supabase db diff
 
 # Expected tables:
 # - user_connections (friend requests)
@@ -182,10 +182,10 @@ describe('Encryption Service', () => {
 
 ```bash
 # Start dev server first
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 
 # Run messaging E2E tests in another terminal
-docker compose exec scripthammer pnpm exec playwright test e2e/messaging/
+docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/
 
 # Expected: 5 tests pass
 # ✓ Should send and receive encrypted message between two users
@@ -381,7 +381,7 @@ await connectionService.respondToRequest({
 
 ```bash
 # Run encryption unit tests
-docker compose exec scripthammer pnpm test src/lib/messaging/__tests__/
+docker compose exec rescuedogs pnpm test src/lib/messaging/__tests__/
 
 # Test files:
 # - encryption.test.ts (encrypt/decrypt, key generation)
@@ -438,7 +438,7 @@ describe('encryptionService.encryptMessage', () => {
 
 ```bash
 # Run integration tests (requires Supabase env vars)
-docker compose exec scripthammer pnpm test tests/integration/messaging/
+docker compose exec rescuedogs pnpm test tests/integration/messaging/
 
 # Test files:
 # - message-service.integration.test.ts
@@ -493,7 +493,7 @@ describe('MessageService Integration', () => {
 
 ```bash
 # Run E2E tests (requires running dev server)
-docker compose exec scripthammer pnpm exec playwright test e2e/messaging/
+docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/
 
 # Test files:
 # - encrypted-messaging.spec.ts (5 comprehensive scenarios)
@@ -1621,9 +1621,9 @@ function MessageBubble({ message }) {
 
 ### Community Support
 
-- **GitHub Issues**: https://github.com/TortoiseWolfe/ScriptHammer/issues
+- **GitHub Issues**: https://github.com/TortoiseWolfe/RescueDogs/issues
 - **Supabase Discord**: https://discord.supabase.com
-- **ScriptHammer Discussions**: https://github.com/TortoiseWolfe/ScriptHammer/discussions
+- **RescueDogs Discussions**: https://github.com/TortoiseWolfe/RescueDogs/discussions
 
 ---
 

@@ -11,17 +11,17 @@ Principle III).
 | ---------------------------- | --------------------- | ------------------------------------------------------------------ |
 | `check-prerequisites.sh`     | upstream, verbatim    | `/speckit.clarify`, `/speckit.tasks`, `/speckit.implement`, more   |
 | `common.sh`                  | upstream + 2 patches  | sourced by all the other scripts                                   |
-| `config.sh`                  | ScriptHammer-specific | sourced by `common.sh` (top of file)                               |
+| `config.sh`                  | RescueDogs-specific | sourced by `common.sh` (top of file)                               |
 | `create-new-feature.sh`      | upstream + 2 patches  | `/speckit.specify`                                                 |
 | `setup-plan.sh`              | upstream, verbatim    | `/speckit.plan`                                                    |
 | `setup-tasks.sh`             | upstream, verbatim    | (chained workflow; not direct slash command)                       |
-| `update-agent-context.sh`    | ScriptHammer stub     | `/speckit.plan` Phase 1 step 3                                     |
+| `update-agent-context.sh`    | RescueDogs stub     | `/speckit.plan` Phase 1 step 3                                     |
 
 Upstream: <https://github.com/github/spec-kit/tree/main/scripts/bash>
 
-## ScriptHammer adaptations
+## RescueDogs adaptations
 
-Upstream SpecKit assumes flat `specs/<NNN-name>/` layout. ScriptHammer uses
+Upstream SpecKit assumes flat `specs/<NNN-name>/` layout. RescueDogs uses
 `features/<category>/<NNN-name>/`. Two functions in `common.sh` were patched:
 
 1. `find_feature_dir_by_prefix()` — recurses through
@@ -40,7 +40,7 @@ Upstream SpecKit assumes flat `specs/<NNN-name>/` layout. ScriptHammer uses
 3. `get_highest_from_specs()` scans both flat and nested layouts so the
    next-feature-number computation respects both patterns.
 
-`update-agent-context.sh` is a deliberate no-op: ScriptHammer's `CLAUDE.md` is
+`update-agent-context.sh` is a deliberate no-op: RescueDogs's `CLAUDE.md` is
 hand-curated and not auto-rewritten.
 
 ## Configuration
@@ -68,7 +68,7 @@ SPECIFY_FEATURE=013-oauth-messaging-password \
 # Expected: JSON with BRANCH_NAME 0XX-smoke-test, SPEC_FILE under _uncategorized/
 
 .specify/scripts/bash/update-agent-context.sh claude
-# Expected: stderr "[update-agent-context] No-op for ScriptHammer..."
+# Expected: stderr "[update-agent-context] No-op for RescueDogs..."
 ```
 
 ## Updating from upstream
@@ -84,8 +84,8 @@ done
 chmod +x .specify/scripts/bash/*.sh
 ```
 
-Then re-apply the ScriptHammer adaptations listed above. The patches are small
+Then re-apply the RescueDogs adaptations listed above. The patches are small
 (~50 lines total) and the diffs in git history show what to re-apply.
 
-The `config.sh` and `update-agent-context.sh` files are ScriptHammer-only — never
+The `config.sh` and `update-agent-context.sh` files are RescueDogs-only — never
 overwrite them from upstream.

@@ -39,7 +39,7 @@ The organization is well-structured for the spec-first planning phase but needs 
 #### CTO ✅
 
 **Role Understanding**:
-Strategic oversight for ScriptHammer. Responsible for high-level project direction, technology stack decisions, cross-cutting concerns, and risk assessment. I set priorities and ensure feature dependencies are respected via IMPLEMENTATION_ORDER.md.
+Strategic oversight for RescueDogs. Responsible for high-level project direction, technology stack decisions, cross-cutting concerns, and risk assessment. I set priorities and ensure feature dependencies are respected via IMPLEMENTATION_ORDER.md.
 
 **Context Assessment**:
 `/prep cto` loads constitution.md, IMPLEMENTATION_ORDER.md, and all spec files. This is appropriate context for strategic decisions. The 46 feature specs provide good visibility, though sometimes overwhelming for quick decisions.
@@ -70,7 +70,7 @@ CTO is accurate. Alternatives: "Strategic Lead", "Technical Director"
 #### Architect ✅
 
 **Role Understanding**:
-System design authority for ScriptHammer. Responsible for enforcing the 5-file component pattern, reviewing technical approaches before implementation, managing feature dependencies in IMPLEMENTATION_ORDER.md, and designing data models and API contracts. I ensure architectural consistency across all 46 features and provide technical feasibility assessments to the CTO.
+System design authority for RescueDogs. Responsible for enforcing the 5-file component pattern, reviewing technical approaches before implementation, managing feature dependencies in IMPLEMENTATION_ORDER.md, and designing data models and API contracts. I ensure architectural consistency across all 46 features and provide technical feasibility assessments to the CTO.
 
 **Context Assessment**:
 `/prep architect` loads constitution.md, IMPLEMENTATION_ORDER.md, and component structure patterns. This is adequate for most architectural decisions. However, I often need to manually read individual feature specs to understand cross-cutting concerns. A consolidated "dependency graph" view would accelerate impact analysis.
@@ -103,7 +103,7 @@ Architect is accurate. Could also be "Solutions Architect" or "Technical Archite
 #### Security Lead ✅
 
 **Role Understanding**:
-Security review and compliance enforcement for ScriptHammer. Responsible for OWASP Top 10 compliance, auth flow validation, secrets management review, vulnerability assessment, and security sign-off before features proceed to implementation. I ensure RLS policies are correctly defined, Supabase Edge Functions follow secure patterns, and no secrets leak into client code.
+Security review and compliance enforcement for RescueDogs. Responsible for OWASP Top 10 compliance, auth flow validation, secrets management review, vulnerability assessment, and security sign-off before features proceed to implementation. I ensure RLS policies are correctly defined, Supabase Edge Functions follow secure patterns, and no secrets leak into client code.
 
 **Context Assessment**:
 `/prep security` should load security-focused specs (003-Auth, 005-Security Hardening, 019-Analytics Consent for privacy), constitution.md for Privacy First principle, and IMPLEMENTATION_ORDER.md to understand dependency chains. Current context is adequate for strategic security decisions but would benefit from a security-specific inventory showing all auth/privacy touchpoints across the 46 features.
@@ -179,7 +179,7 @@ No critical gaps, but the **Documentation Specialist** function is currently dis
 #### DevOps ✅
 
 **Role Understanding**:
-Responsible for CI/CD pipelines, Docker configurations, GitHub Actions workflows, and deployment infrastructure. Primary focus is ensuring ScriptHammer can be built, tested, and deployed reliably to GitHub Pages as a static export. Also responsible for build optimization, caching strategies, and infrastructure-as-code.
+Responsible for CI/CD pipelines, Docker configurations, GitHub Actions workflows, and deployment infrastructure. Primary focus is ensuring RescueDogs can be built, tested, and deployed reliably to GitHub Pages as a static export. Also responsible for build optimization, caching strategies, and infrastructure-as-code.
 
 **Context Assessment**:
 `/prep devops` provides adequate context for infrastructure decisions. The constitution's Docker-first principle is clear. However, lacking visibility into what GitHub Actions workflows currently exist (if any) and what the deployment pipeline looks like. Would benefit from loading `.github/workflows/` contents automatically.
@@ -502,7 +502,7 @@ A **Pattern Librarian** role could own the source-of-truth for UI patterns. Curr
 #### Author ✅
 
 **Role Understanding**:
-Documentation and communication lead for ScriptHammer. Responsible for blog posts, release notes, workflow guides, social media content, and documenting lessons learned. I translate technical work from other terminals into accessible documentation for internal reference and external audiences.
+Documentation and communication lead for RescueDogs. Responsible for blog posts, release notes, workflow guides, social media content, and documenting lessons learned. I translate technical work from other terminals into accessible documentation for internal reference and external audiences.
 
 **Context Assessment**:
 `/prep author` loads `docs/CLAUDE.md` which provides documentation standards (tone, structure, file naming) and content type guidelines. This is lightweight but adequate for the current scope. As the project matures and implementation begins, I may need access to feature completion status and release schedules.
@@ -588,7 +588,7 @@ Convert specs, plans, and wireframes into working code. Execute tasks from `task
 `/prep implementer` loads root context only (CLAUDE.md, constitution.md) since no `src/` folder exists yet. This is appropriate for understanding methodology and constraints but provides no existing code patterns to reference. Once implementation begins, will need expanded context loading for component patterns, utility functions, and established conventions.
 
 **Tooling Adequacy**:
-`/speckit.implement` and `/speckit.tasks` are the primary skills. Currently blocked because ScriptHammer is still in spec-first planning phase—no application code exists to extend. Missing tooling:
+`/speckit.implement` and `/speckit.tasks` are the primary skills. Currently blocked because RescueDogs is still in spec-first planning phase—no application code exists to extend. Missing tooling:
 
 - Component generator (`pnpm run generate:component` referenced in constitution doesn't exist)
 - `/scaffold [feature]` skill to bootstrap feature directory structure

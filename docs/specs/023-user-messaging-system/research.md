@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Analyze ScriptHammer's existing patterns for Supabase integration, offline support, real-time subscriptions, and authentication to ensure the messaging system follows established conventions.
+Analyze RescueDogs's existing patterns for Supabase integration, offline support, real-time subscriptions, and authentication to ensure the messaging system follows established conventions.
 
 ## Key Findings Summary
 
@@ -153,7 +153,7 @@ CREATE POLICY "Users update own profile" ON user_profiles
 
 ```typescript
 // Uses native IndexedDB
-const DB_NAME = 'scripthammer_offline';
+const DB_NAME = 'rescuedogs_offline';
 const STORE_NAME = 'queue';
 const DB_VERSION = 1;
 
@@ -294,7 +294,7 @@ return () => {
 **Generator Usage**:
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component -- \
+docker compose exec rescuedogs pnpm run generate:component -- \
   --name MessageBubble \
   --category atomic \
   --hasProps true \
@@ -571,7 +571,7 @@ async function decryptMessage(
 **Installation**:
 
 ```bash
-docker compose exec scripthammer pnpm add dexie@^4.0.10
+docker compose exec rescuedogs pnpm add dexie@^4.0.10
 ```
 
 **Usage Pattern**:
@@ -663,7 +663,7 @@ COMMIT;
 
 **Action for Messaging**:
 
-- Create `/home/turtle_wolfe/repos/ScriptHammer/supabase/migrations/20251008_user_messaging_system.sql`
+- Create `/home/turtle_wolfe/repos/RescueDogs/supabase/migrations/20251008_user_messaging_system.sql`
 - Follow transaction pattern
 - 6 tables: user_connections, conversations, messages, user_encryption_keys, conversation_keys, typing_indicators
 - Apply RLS to all tables

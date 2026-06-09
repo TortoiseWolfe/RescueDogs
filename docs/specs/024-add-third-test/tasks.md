@@ -60,7 +60,7 @@ This document provides actionable implementation tasks for adding a third test u
   - **Pattern**: Follow existing `supabase/seed-test-user.sql` structure
 
 - [ ] **T004** [US2] Run seed script to create third test user in database
-  - **Command**: `docker compose exec scripthammer psql $DATABASE_URL -f supabase/migrations/seed-test-user-b.sql`
+  - **Command**: `docker compose exec rescuedogs psql $DATABASE_URL -f supabase/migrations/seed-test-user-b.sql`
   - **Action**: Execute seed script against Supabase database
   - **Success**: User exists in auth.users with email='test-user-b@example.com', profile exists with username='testuser-b'
   - **Verification**: Query `SELECT email FROM auth.users WHERE email = 'test-user-b@example.com';`
@@ -75,21 +75,21 @@ This document provides actionable implementation tasks for adding a third test u
 ### US3: Local-Only Test Execution Setup
 
 - [ ] **T006** [US3] Verify Playwright is installed in Docker container
-  - **Command**: `docker compose exec scripthammer pnpm exec playwright --version`
+  - **Command**: `docker compose exec rescuedogs pnpm exec playwright --version`
   - **Action**: Check Playwright version
   - **Success**: Returns version number (e.g., "Version 1.55.0")
   - **Ref**: FR-010, Plan §Technical Context
-  - **Troubleshooting**: If missing, run `docker compose exec scripthammer pnpm exec playwright install`
+  - **Troubleshooting**: If missing, run `docker compose exec rescuedogs pnpm exec playwright install`
 
 - [ ] **T007** [US3] [P] Verify dev server is accessible from Docker container
-  - **Command**: `docker compose exec scripthammer curl -I http://localhost:3000`
+  - **Command**: `docker compose exec rescuedogs curl -I http://localhost:3000`
   - **Action**: Test HTTP connectivity from container to dev server
   - **Success**: Returns `HTTP/1.1 200 OK`
   - **Ref**: FR-010, SC-009, Research §Q1
 
 - [ ] **T008** [US3] [P] Verify environment variables are accessible in test environment
   - **Action**: Check `.env` is mounted in Docker container
-  - **Command**: `docker compose exec scripthammer env | grep TEST_USER`
+  - **Command**: `docker compose exec rescuedogs env | grep TEST_USER`
   - **Success**: TEST_USER_PRIMARY_EMAIL, TEST_USER_TERTIARY_EMAIL visible
   - **Ref**: FR-012
 
@@ -135,7 +135,7 @@ This document provides actionable implementation tasks for adding a third test u
     - Log specific errors (table name, operation, SQL error, user IDs involved)
     - Implement retry logic with exponential backoff (3 attempts, 1s/2s/4s delays)
     - If cleanup fails after retries: Skip test with clear error message explaining manual cleanup needed
-    - Provide troubleshooting guidance in error output (e.g., "Run: docker compose exec scripthammer psql $DATABASE_URL ...")
+    - Provide troubleshooting guidance in error output (e.g., "Run: docker compose exec rescuedogs psql $DATABASE_URL ...")
   - **Success**: Test failures from cleanup issues are diagnosable with actionable error messages
   - **Ref**: User feedback "if it fails we need to know why", Checklist CHK038, Quickstart §Troubleshooting
   - **Pattern**: Defensive error handling with diagnostic output
@@ -310,7 +310,7 @@ This document provides actionable implementation tasks for adding a third test u
 ### Test Execution Validation
 
 - [ ] **T026** [US3] Run complete-user-workflow test locally in Docker
-  - **Command**: `docker compose exec scripthammer pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts`
+  - **Command**: `docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts`
   - **Action**: Execute test inside Docker container
   - **Success**: Test passes, completes in <60 seconds
   - **Ref**: FR-010, SC-001, SC-003, Quickstart §Run Specific Test File
@@ -322,7 +322,7 @@ This document provides actionable implementation tasks for adding a third test u
   - **Ref**: FR-013, SC-008, Quickstart §Verify Test Idempotency
 
 - [ ] **T028** [US3] Run full E2E test suite to verify no regressions
-  - **Command**: `docker compose exec scripthammer pnpm exec playwright test`
+  - **Command**: `docker compose exec rescuedogs pnpm exec playwright test`
   - **Action**: Run all E2E tests (40+ existing + new test)
   - **Success**: All tests pass, no failures
   - **Ref**: FR-011, SC-003, SC-010
@@ -363,7 +363,7 @@ This document provides actionable implementation tasks for adding a third test u
 
 - [ ] **T032** Verify all tests pass before allowing push
   - **Action**: Run full test suite as final validation
-  - **Command**: `docker compose exec scripthammer pnpm exec playwright test`
+  - **Command**: `docker compose exec rescuedogs pnpm exec playwright test`
   - **Success**: 100% pass rate (48+ tests including new test)
   - **Gate**: DO NOT PUSH if any tests fail
   - **Ref**: FR-011, SC-003, SC-010
@@ -429,7 +429,7 @@ This document provides actionable implementation tasks for adding a third test u
 
 ```bash
 # Run in parallel
-docker compose exec scripthammer sh -c "
+docker compose exec rescuedogs sh -c "
   echo 'TEST_USER_TERTIARY_EMAIL=test-user-b@example.com' >> .env &
   echo 'TEST_USER_TERTIARY_PASSWORD=TestPassword456!' >> .env &
   # Update .env.example in separate operation
@@ -441,9 +441,9 @@ docker compose exec scripthammer sh -c "
 
 ```bash
 # Run validations in parallel
-docker compose exec scripthammer pnpm exec playwright --version &
-docker compose exec scripthammer curl -I http://localhost:3000 &
-docker compose exec scripthammer env | grep TEST_USER &
+docker compose exec rescuedogs pnpm exec playwright --version &
+docker compose exec rescuedogs curl -I http://localhost:3000 &
+docker compose exec rescuedogs env | grep TEST_USER &
 wait
 ```
 

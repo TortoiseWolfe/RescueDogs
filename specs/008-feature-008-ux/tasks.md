@@ -74,7 +74,7 @@
   - Change `{message.content}` to `{parseMarkdown(message.content)}`
 
 - [ ] T007 [US2] Verify tests pass after implementation
-  - Run: `docker compose exec scripthammer pnpm test MessageBubble`
+  - Run: `docker compose exec rescuedogs pnpm test MessageBubble`
 
 **Checkpoint**: All markdown types should render correctly in message bubbles
 
@@ -85,10 +85,10 @@
 **Purpose**: Full validation and cleanup
 
 - [ ] T008 [P] Run full test suite
-  - Command: `docker compose exec scripthammer pnpm test`
+  - Command: `docker compose exec rescuedogs pnpm test`
 
 - [ ] T009 [P] Run type check
-  - Command: `docker compose exec scripthammer pnpm run type-check`
+  - Command: `docker compose exec rescuedogs pnpm run type-check`
 
 - [ ] T010 Manual verification (USER)
   - Open conversation, verify character count shows "0 / 10000 characters"

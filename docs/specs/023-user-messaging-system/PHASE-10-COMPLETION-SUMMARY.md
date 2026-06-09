@@ -274,7 +274,7 @@ CREATE INDEX idx_user_connections_connected_status ON user_connections(connected
 #### T231: Documentation Updates ✅
 
 **Status**: COMPLETE
-**Location**: `/home/turtle_wolfe/repos/ScriptHammer/CLAUDE.md`
+**Location**: `/home/turtle_wolfe/repos/RescueDogs/CLAUDE.md`
 
 **Changes**:
 
@@ -349,7 +349,7 @@ sed -i 's/var /const /g' src/services/messaging/message-service.ts
 # (Requires understanding of each service's type issues)
 
 # 4. Re-run build
-docker compose exec scripthammer pnpm run build
+docker compose exec rescuedogs pnpm run build
 ```
 
 **Documentation**: See `/docs/testing/PHASE-10-TESTING-GUIDE.md` for full error list
@@ -371,9 +371,9 @@ docker compose exec scripthammer pnpm run build
 **How to Run (when build fixed)**:
 
 ```bash
-docker compose exec scripthammer pnpm run build
-docker compose exec scripthammer pnpm exec serve out -p 3000
-docker compose exec scripthammer pnpm exec lighthouse http://localhost:3000/messages \
+docker compose exec rescuedogs pnpm run build
+docker compose exec rescuedogs pnpm exec serve out -p 3000
+docker compose exec rescuedogs pnpm exec lighthouse http://localhost:3000/messages \
   --only-categories=performance,accessibility,best-practices,seo \
   --output=json \
   --output-path=./lighthouse-report.json
@@ -401,8 +401,8 @@ docker compose exec scripthammer pnpm exec lighthouse http://localhost:3000/mess
 **How to Run (when build fixed)**:
 
 ```bash
-docker compose exec scripthammer pnpm run build
-docker compose exec scripthammer ls -lh .next/static/chunks
+docker compose exec rescuedogs pnpm run build
+docker compose exec rescuedogs ls -lh .next/static/chunks
 ```
 
 ---
@@ -418,10 +418,10 @@ docker compose exec scripthammer ls -lh .next/static/chunks
 
 ```bash
 # Terminal 1
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 
 # Terminal 2
-docker compose exec scripthammer pnpm exec pa11y http://localhost:3000/messages --runner axe
+docker compose exec rescuedogs pnpm exec pa11y http://localhost:3000/messages --runner axe
 ```
 
 **Target**: 0 errors (WCAG AA compliance)
@@ -507,7 +507,7 @@ test('passes color contrast audit', async () => {
 **Implementation**:
 
 ```bash
-docker compose exec scripthammer pnpm add @radix-ui/react-dialog
+docker compose exec rescuedogs pnpm add @radix-ui/react-dialog
 ```
 
 **Use in AccountDeletionModal**:
@@ -755,26 +755,26 @@ import * as Dialog from '@radix-ui/react-dialog';
    # (Manual review required)
 
    # Re-run build
-   docker compose exec scripthammer pnpm run build
+   docker compose exec rescuedogs pnpm run build
    ```
 
 2. **Run Production Build Test** (5 min)
 
    ```bash
-   docker compose exec scripthammer pnpm run build
-   docker compose exec scripthammer ls -la out/
+   docker compose exec rescuedogs pnpm run build
+   docker compose exec rescuedogs ls -la out/
    ```
 
 3. **Run Performance Audits** (15 min)
 
    ```bash
    # Bundle size analysis
-   docker compose exec scripthammer pnpm run build
-   docker compose exec scripthammer ls -lh .next/static/chunks
+   docker compose exec rescuedogs pnpm run build
+   docker compose exec rescuedogs ls -lh .next/static/chunks
 
    # Lighthouse audit
-   docker compose exec scripthammer pnpm exec serve out -p 3000
-   docker compose exec scripthammer pnpm exec lighthouse http://localhost:3000/messages
+   docker compose exec rescuedogs pnpm exec serve out -p 3000
+   docker compose exec rescuedogs pnpm exec lighthouse http://localhost:3000/messages
    ```
 
 4. **Add Message Audit Logging** (2 hours)
@@ -794,8 +794,8 @@ import * as Dialog from '@radix-ui/react-dialog';
 6. **Run Pa11y Accessibility Audit** (30 min)
 
    ```bash
-   docker compose exec scripthammer pnpm run dev
-   docker compose exec scripthammer pnpm exec pa11y http://localhost:3000/messages --runner axe
+   docker compose exec rescuedogs pnpm run dev
+   docker compose exec rescuedogs pnpm exec pa11y http://localhost:3000/messages --runner axe
    ```
 
 7. **Create E2E Test Suite** (8 hours)

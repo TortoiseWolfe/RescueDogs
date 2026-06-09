@@ -31,12 +31,12 @@ fill="#374151"
 <text x="960" y="1060" text-anchor="middle" ...>
 
 <!-- REPLACE WITH (left-aligned) -->
-<text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#374151">NNN:NN | Feature | ScriptHammer</text>
+<text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#374151">NNN:NN | Feature | RescueDogs</text>
 ```
 
 ### SIGNATURE-004: Format Check
 
-Ensure format is exactly: `NNN:NN | Feature Name | ScriptHammer`
+Ensure format is exactly: `NNN:NN | Feature Name | RescueDogs`
 
 ### G-047: Key Concepts Position (VERIFY ON ALL)
 

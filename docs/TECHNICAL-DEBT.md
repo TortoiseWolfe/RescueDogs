@@ -540,7 +540,7 @@ These TODOs should remain as they are part of the tooling infrastructure.
 
 ## Future Considerations: Template-Library Components
 
-Components from the [Template-Library](https://github.com/TortoiseWolfe/Template-Library) project that ScriptHammer doesn't have yet. Documented 2026-02-22 for potential future adoption.
+Components from the [Template-Library](https://github.com/TortoiseWolfe/Template-Library) project that RescueDogs doesn't have yet. Documented 2026-02-22 for potential future adoption.
 
 ### Atomic Components
 
@@ -568,4 +568,4 @@ Components from the [Template-Library](https://github.com/TortoiseWolfe/Template
 | --------------------------------- | --------------------------------------- | ----------------------- |
 | ComponentPreview "Build Your Own" | Toggle sections on/off to compose pages | Fork customization tool |
 
-**Note:** Template-Library is a pure presentational library (no auth, database, or testing). These components would need adaptation to ScriptHammer's 5-file pattern, DaisyUI theming, and Docker-first workflow.
+**Note:** Template-Library is a pure presentational library (no auth, database, or testing). These components would need adaptation to RescueDogs's 5-file pattern, DaisyUI theming, and Docker-first workflow.

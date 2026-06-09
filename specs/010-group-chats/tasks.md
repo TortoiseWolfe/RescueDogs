@@ -75,7 +75,7 @@
 - [ ] T023 [US1] Implement createGroup() in `src/services/messaging/group-service.ts`: validate members, create conversation with is_group=true, add conversation_members entries (depends on T022)
 - [ ] T024 [US1] Implement distributeGroupKey() in `src/services/messaging/group-key-service.ts`: generate key, encrypt for each member, store in group_keys (depends on T023)
 - [ ] T025 [US1] Integrate key distribution into createGroup() flow (depends on T024)
-- [ ] T026 [P] [US1] Create CreateGroupModal component using generator: `docker compose exec scripthammer pnpm run generate:component` - organisms/CreateGroupModal
+- [ ] T026 [P] [US1] Create CreateGroupModal component using generator: `docker compose exec rescuedogs pnpm run generate:component` - organisms/CreateGroupModal
 - [ ] T027 [P] [US1] Create useGroupMembers hook in `src/hooks/useGroupMembers.ts` for member search/selection
 - [ ] T028 [US1] Implement CreateGroupModal UI: member search, selection chips, name input, create button; include auto-name generation from first 3 member display names per FR-012 (depends on T026, T027)
 - [ ] T029 [US1] Add "New Group" button to UnifiedSidebar in `src/components/organisms/UnifiedSidebar/UnifiedSidebar.tsx`

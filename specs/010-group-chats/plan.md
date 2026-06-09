@@ -5,7 +5,7 @@
 
 ## Summary
 
-Add group chat functionality to ScriptHammer's existing E2E encrypted messaging system. Groups support up to 200 members using symmetric AES-GCM-256 encryption with key versioning. New members cannot see pre-join history, any member can add others, only owner can remove members, and 1-to-1 conversations can be upgraded to groups while preserving original participants' history access.
+Add group chat functionality to RescueDogs's existing E2E encrypted messaging system. Groups support up to 200 members using symmetric AES-GCM-256 encryption with key versioning. New members cannot see pre-join history, any member can add others, only owner can remove members, and 1-to-1 conversations can be upgraded to groups while preserving original participants' history access.
 
 ## Technical Context
 

@@ -1,12 +1,12 @@
 /**
  * Contract Test: Admin User Configuration (Feature 002/004)
  *
- * Tests that the admin user (ScriptHammer) is properly configured for
+ * Tests that the admin user (RescueDogs) is properly configured for
  * sending welcome messages to new users.
  *
  * Admin user properties:
  * - Fixed UUID: 00000000-0000-0000-0000-000000000001
- * - Email: admin@scripthammer.com
+ * - Email: admin@rescuedogs.com
  * - Public key: Pre-stored in database (no password needed at runtime)
  *
  * REDESIGNED in Feature 004: Uses ECDH public key instead of password derivation.
@@ -58,9 +58,9 @@ describe('Admin User Configuration Contract', () => {
     });
 
     it('should use default email if not configured', () => {
-      // Default is admin@scripthammer.com if env not set
+      // Default is admin@rescuedogs.com if env not set
       if (!process.env.TEST_USER_ADMIN_EMAIL) {
-        expect(TEST_EMAIL_ADMIN).toBe('admin@scripthammer.com');
+        expect(TEST_EMAIL_ADMIN).toBe('admin@rescuedogs.com');
       }
     });
   });

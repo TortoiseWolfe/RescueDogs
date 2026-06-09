@@ -44,7 +44,7 @@
 
 ### Primary User Story
 
-As a user of ScriptHammer, I need assurance that my personal data (profile, preferences, activity) is completely isolated from other users, so that no one can view, modify, or delete my information without my explicit consent.
+As a user of RescueDogs, I need assurance that my personal data (profile, preferences, activity) is completely isolated from other users, so that no one can view, modify, or delete my information without my explicit consent.
 
 ### Acceptance Scenarios
 

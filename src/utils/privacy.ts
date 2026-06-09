@@ -146,7 +146,7 @@ export function downloadJSON(data: unknown, filename?: string): void {
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
 
-  const defaultFilename = `scripthammer-privacy-export-${new Date()
+  const defaultFilename = `rescuedogs-privacy-export-${new Date()
     .toISOString()
     .replace(/[:.]/g, '-')}.json`;
 

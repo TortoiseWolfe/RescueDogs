@@ -7,7 +7,7 @@
 
 Three-part feature implementing:
 
-1. **Admin User Setup** - 4th admin user "ScriptHammer" with env-configured credentials
+1. **Admin User Setup** - 4th admin user "RescueDogs" with env-configured credentials
 2. **Email Verification Gate** - MessagingGate component blocks /messages for unverified users
 3. **Welcome Message System** - Encrypted welcome message sent on first key initialization
 
@@ -95,7 +95,7 @@ tests/fixtures/test-user.ts          # MODIFY: Add admin constants
 **Environment Variables:**
 
 ```bash
-TEST_USER_ADMIN_EMAIL=admin@scripthammer.com
+TEST_USER_ADMIN_EMAIL=admin@rescuedogs.com
 TEST_USER_ADMIN_PASSWORD=<64-char-secure-password>
 NEXT_PUBLIC_ADMIN_USER_ID=00000000-0000-0000-0000-000000000001
 ```
@@ -105,7 +105,7 @@ NEXT_PUBLIC_ADMIN_USER_ID=00000000-0000-0000-0000-000000000001
 ```sql
 -- Admin profile (in user_profiles section)
 INSERT INTO user_profiles (id, username, display_name, welcome_message_sent)
-VALUES ('00000000-0000-0000-0000-000000000001', 'scripthammer', 'ScriptHammer', TRUE)
+VALUES ('00000000-0000-0000-0000-000000000001', 'rescuedogs', 'RescueDogs', TRUE)
 ON CONFLICT (id) DO NOTHING;
 ```
 
@@ -173,7 +173,7 @@ if (!hasKeys) {
 **Message Content:**
 
 ```
-Welcome to ScriptHammer!
+Welcome to RescueDogs!
 
 Your messages are protected by end-to-end encryption...
 [See contracts/welcome-service.ts for full content]
@@ -254,7 +254,7 @@ _No violations - implementation follows existing patterns_
 - Added `welcome_message_sent` column to `user_profiles`
 - Created index `idx_user_profiles_welcome_pending`
 - Created admin user in `auth.users`
-- Created admin profile with username 'scripthammer'
+- Created admin profile with username 'rescuedogs'
 - Added `admin_create_any_conversation` RLS policy
 
 ### Test Results

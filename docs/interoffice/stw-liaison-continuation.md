@@ -28,7 +28,7 @@
    ./scripts/client-session.sh --client stw --all
    ```
 
-2. **Present RFC-009 to Council** (in scripthammer session)
+2. **Present RFC-009 to Council** (in rescuedogs session)
    - Council reviews running stw session context
    - Vote on external client onboarding process
 

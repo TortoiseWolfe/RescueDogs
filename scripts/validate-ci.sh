@@ -25,7 +25,7 @@ fi
 # Clean up .next directory before starting to avoid permission issues
 if [ "$IN_DOCKER" = false ]; then
     echo -e "${YELLOW}🧹 Cleaning build artifacts...${NC}"
-    docker compose exec -T scripthammer rm -rf .next 2>/dev/null || true
+    docker compose exec -T rescuedogs rm -rf .next 2>/dev/null || true
 fi
 
 # Function to run a check
@@ -46,7 +46,7 @@ run_check() {
         fi
     else
         # Running outside Docker, use docker compose exec
-        if docker compose exec -T scripthammer $command; then
+        if docker compose exec -T rescuedogs $command; then
             echo -e "${GREEN}✅ ${name} passed${NC}"
         else
             echo -e "${RED}❌ ${name} failed${NC}"

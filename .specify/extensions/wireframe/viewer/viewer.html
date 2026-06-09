@@ -1012,7 +1012,7 @@
         const manifest = await r.json();
         wireframes = manifest.wireframes || [];
 
-        // Build categories — one entry per feature (simplified from ScriptHammer's
+        // Build categories — one entry per feature (simplified from RescueDogs's
         // hardcoded 9 categories). Each feature becomes its own category.
         let idx = 0;
         categories = (manifest.features || []).map(f => {
@@ -1352,7 +1352,7 @@
     // Status badges are baked into the manifest (see generate-manifest.py's
     // detect_status) and rendered by buildNavFromManifest, so fetchStatus() is a
     // no-op in this extension. We keep the function defined for API compat
-    // with the old ScriptHammer codebase.
+    // with the old RescueDogs codebase.
 
     // Parse feature number from path (e.g., "000-rls-implementation/..." → 0)
     function getFeatureNum(path) {

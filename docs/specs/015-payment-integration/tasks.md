@@ -51,7 +51,7 @@
 npm install -g supabase
 
 # Initialize project
-cd /home/turtle_wolfe/repos/ScriptHammer
+cd /home/turtle_wolfe/repos/RescueDogs
 supabase init
 
 # Link to cloud project (reads credentials from .env)
@@ -115,10 +115,10 @@ NEXT_PUBLIC_CHIME_SIGN=$yourchimesign
 **Commands**:
 
 ```bash
-docker compose exec scripthammer pnpm add @supabase/supabase-js @stripe/stripe-js dexie resend
+docker compose exec rescuedogs pnpm add @supabase/supabase-js @stripe/stripe-js dexie resend
 
 # Dev dependencies for testing
-docker compose exec scripthammer pnpm add -D @supabase/supabase-js @types/stripe stripe
+docker compose exec rescuedogs pnpm add -D @supabase/supabase-js @types/stripe stripe
 ```
 
 **Files Modified**:
@@ -345,7 +345,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 ```bash
 # After migrations are run (Phase 2), generate types
-docker compose exec scripthammer npx supabase gen types typescript --local > src/lib/supabase/types.ts
+docker compose exec rescuedogs npx supabase gen types typescript --local > src/lib/supabase/types.ts
 ```
 
 **File Created**: `src/lib/supabase/types.ts`
@@ -726,8 +726,8 @@ VALUES (
 **Commands**:
 
 ```bash
-docker compose exec scripthammer supabase db reset
-docker compose exec scripthammer supabase db seed
+docker compose exec rescuedogs supabase db reset
+docker compose exec rescuedogs supabase db seed
 ```
 
 **Validation**: Query shows test data present
@@ -742,13 +742,13 @@ docker compose exec scripthammer supabase db seed
 
 ```bash
 # Reset database (applies all migrations)
-docker compose exec scripthammer supabase db reset
+docker compose exec rescuedogs supabase db reset
 
 # Generate TypeScript types (updates T007 file)
-docker compose exec scripthammer npx supabase gen types typescript --local > src/lib/supabase/types.ts
+docker compose exec rescuedogs npx supabase gen types typescript --local > src/lib/supabase/types.ts
 
 # Verify all tables created
-docker compose exec scripthammer supabase db inspect
+docker compose exec rescuedogs supabase db inspect
 ```
 
 **Validation**:
@@ -1350,16 +1350,16 @@ function getEmailHtml(eventType: string, data: any): string {
 
 ```bash
 # Deploy Stripe webhook
-docker compose exec scripthammer supabase functions deploy stripe-webhook
+docker compose exec rescuedogs supabase functions deploy stripe-webhook
 
 # Deploy PayPal webhook
-docker compose exec scripthammer supabase functions deploy paypal-webhook
+docker compose exec rescuedogs supabase functions deploy paypal-webhook
 
 # Deploy email sender
-docker compose exec scripthammer supabase functions deploy send-payment-email
+docker compose exec rescuedogs supabase functions deploy send-payment-email
 
 # List deployed functions
-docker compose exec scripthammer supabase functions list
+docker compose exec rescuedogs supabase functions list
 ```
 
 **Validation**: Functions appear in Supabase dashboard, can be invoked
@@ -1472,13 +1472,13 @@ describe('Webhook Security', () => {
 
 ```bash
 # Set secrets (one-time setup)
-docker compose exec scripthammer supabase secrets set STRIPE_SECRET_KEY=sk_test_xxx
-docker compose exec scripthammer supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_xxx
-docker compose exec scripthammer supabase secrets set PAYPAL_CLIENT_SECRET=xxx
-docker compose exec scripthammer supabase secrets set RESEND_API_KEY=re_xxx
+docker compose exec rescuedogs supabase secrets set STRIPE_SECRET_KEY=sk_test_xxx
+docker compose exec rescuedogs supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_xxx
+docker compose exec rescuedogs supabase secrets set PAYPAL_CLIENT_SECRET=xxx
+docker compose exec rescuedogs supabase secrets set RESEND_API_KEY=re_xxx
 
 # List secrets (values hidden)
-docker compose exec scripthammer supabase secrets list
+docker compose exec rescuedogs supabase secrets list
 ```
 
 **Validation**: Secrets visible in Supabase dashboard (Project Settings → Edge Functions)
@@ -2046,7 +2046,7 @@ export function initConnectionListener() {
 **Commands**:
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component PaymentButton -- \
+docker compose exec rescuedogs pnpm run generate:component PaymentButton -- \
   --category atomic \
   --hasProps true \
   --withHooks true
@@ -2203,7 +2203,7 @@ describe('PaymentButton Accessibility', () => {
 **Commands**:
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component PaymentConsentModal -- \
+docker compose exec rescuedogs pnpm run generate:component PaymentConsentModal -- \
   --category atomic \
   --hasProps true
 ```
@@ -2323,7 +2323,7 @@ describe('PaymentConsentModal', () => {
 **Commands**:
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component PaymentDashboard -- \
+docker compose exec rescuedogs pnpm run generate:component PaymentDashboard -- \
   --category organisms \
   --hasProps false \
   --withHooks true
@@ -2485,7 +2485,7 @@ describe('PaymentDashboard', () => {
 **Commands**:
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component PaymentHistory -- \
+docker compose exec rescuedogs pnpm run generate:component PaymentHistory -- \
   --category molecular \
   --hasProps true
 ```
@@ -2620,7 +2620,7 @@ describe('PaymentHistory', () => {
 **Commands**:
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component SubscriptionCard -- \
+docker compose exec rescuedogs pnpm run generate:component SubscriptionCard -- \
   --category molecular \
   --hasProps true
 ```
@@ -3242,7 +3242,7 @@ describe('Row Level Security', () => {
 **Commands**:
 
 ```bash
-docker compose exec scripthammer pnpm run test:a11y:dev
+docker compose exec rescuedogs pnpm run test:a11y:dev
 ```
 
 **Fix any issues found**:
@@ -3264,11 +3264,11 @@ docker compose exec scripthammer pnpm run test:a11y:dev
 
 ```bash
 # Start production build
-docker compose exec scripthammer pnpm run build
-docker compose exec scripthammer pnpm run start
+docker compose exec rescuedogs pnpm run build
+docker compose exec rescuedogs pnpm run start
 
 # Run Lighthouse
-docker compose exec scripthammer npx lighthouse http://localhost:3000/dashboard/payments --output=html --output-path=./lighthouse-report.html
+docker compose exec rescuedogs npx lighthouse http://localhost:3000/dashboard/payments --output=html --output-path=./lighthouse-report.html
 ```
 
 **Target Scores**:

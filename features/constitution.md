@@ -1,4 +1,4 @@
-# ScriptHammer Constitution
+# RescueDogs Constitution
 
 ## Core Principles
 

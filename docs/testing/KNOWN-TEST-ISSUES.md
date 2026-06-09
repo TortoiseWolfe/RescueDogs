@@ -88,7 +88,7 @@ To verify production functionality:
 
 ```bash
 # 1. Start the development server
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 
 # 2. Open Chrome and navigate to http://localhost:3000/contact
 
@@ -266,7 +266,7 @@ which had been present since the feature shipped.
 
 **Diagnostic tooling left in place**:
 
-- `window.__scripthammer_syncQueue` in `src/hooks/useOfflineQueue.ts` —
+- `window.__rescuedogs_syncQueue` in `src/hooks/useOfflineQueue.ts` —
   installed only when `playwright_e2e=true` is in localStorage. E2E
   tests call it to trigger sync deterministically, avoiding dependence
   on browser-specific event dispatch semantics.

@@ -1,11 +1,11 @@
 #!/bin/sh
 set -e
 
-# Docker entrypoint for ScriptHammer
+# Docker entrypoint for RescueDogs
 # Runs as node user (set by USER in Dockerfile)
 # No root operations needed at runtime
 
-echo "Initializing ScriptHammer container..."
+echo "Initializing RescueDogs container..."
 
 # Ensure dependencies match package.json (fast when already current)
 echo "Checking dependencies..."

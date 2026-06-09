@@ -88,7 +88,7 @@
 
 1. Check if admin auth user exists by email
 2. Create auth user with fixed UUID if missing
-3. Create profile with username `scripthammer` if missing
+3. Create profile with username `rescuedogs` if missing
 4. Generate ECDH P-256 keypair using Web Crypto API
 5. Store public key in `user_encryption_keys`
 6. Discard private key (not needed for welcome messages)

@@ -2,7 +2,7 @@
 
 **Version**: 1.0.0
 **Last Updated**: 2025-09-30
-**For**: ScriptHammer developers implementing features
+**For**: RescueDogs developers implementing features
 
 ---
 
@@ -167,7 +167,7 @@ vim docs/prp-docs/my-component-prp.md
 /tasks
 
 # Execute (use generator)
-docker compose exec scripthammer pnpm run generate:component MyButton
+docker compose exec rescuedogs pnpm run generate:component MyButton
 # ... implement following tasks.md
 ```
 

@@ -62,7 +62,7 @@ This costs nothing — the existing layout supports the longer copy
 Current default (`SetupBanner.tsx:24`):
 
 ```
-https://github.com/TortoiseWolfe/ScriptHammer#supabase-setup
+https://github.com/TortoiseWolfe/RescueDogs#supabase-setup
 ```
 
 GitHub returns HTTP 200 for any anchor (the page loads regardless), but
@@ -111,7 +111,7 @@ Supabase Project":
 The banner currently renders in the root layout, so it appears on the
 homepage, about pages, and any other route that doesn't actually depend
 on Supabase. A fork user who _intentionally_ doesn't use Supabase (e.g.,
-forking ScriptHammer as a static-marketing-site template and ripping out
+forking RescueDogs as a static-marketing-site template and ripping out
 auth) sees the warning permanently.
 
 This is **arguably out of scope for #24** — the ticket asks for "any

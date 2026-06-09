@@ -2,7 +2,7 @@
 
 **Feature ID**: 018
 **Category**: enhancements
-**Source**: ScriptHammer/docs/specs/006-font-switcher
+**Source**: RescueDogs/docs/specs/006-font-switcher
 **Status**: Complete (2026-04-08) — `src/components/molecular/FontSwitcher/` with full 5-file pattern (main, test, stories, accessibility.test). LocalStorage persistence, tested in production use.
 
 ## Description

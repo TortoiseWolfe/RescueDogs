@@ -57,42 +57,42 @@ _All can run in parallel [P]_
 
 ### ✅ T003: Generate SocialShareButton Component [P]
 
-**Command**: `docker compose exec scripthammer pnpm run generate:component SocialShareButton blog`
+**Command**: `docker compose exec rescuedogs pnpm run generate:component SocialShareButton blog`
 **Creates**: 5 files in `/home/turtle_wolfe/repos/000/src/components/blog/SocialShareButton/`
 
 ### ✅ T004: Generate SocialShareGroup Component [P]
 
-**Command**: `docker compose exec scripthammer pnpm run generate:component SocialShareGroup blog`
+**Command**: `docker compose exec rescuedogs pnpm run generate:component SocialShareGroup blog`
 **Creates**: 5 files in `/home/turtle_wolfe/repos/000/src/components/blog/SocialShareGroup/`
 
 ### ✅ T005: Generate AuthorAvatar Component [P]
 
-**Command**: `docker compose exec scripthammer pnpm run generate:component AuthorAvatar blog`
+**Command**: `docker compose exec rescuedogs pnpm run generate:component AuthorAvatar blog`
 **Creates**: 5 files in `/home/turtle_wolfe/repos/000/src/components/blog/AuthorAvatar/`
 
 ### ✅ T006: Generate AuthorBio Component [P]
 
-**Command**: `docker compose exec scripthammer pnpm run generate:component AuthorBio blog`
+**Command**: `docker compose exec rescuedogs pnpm run generate:component AuthorBio blog`
 **Creates**: 5 files in `/home/turtle_wolfe/repos/000/src/components/blog/AuthorBio/`
 
 ### ✅ T007: Generate SocialLink Component [P]
 
-**Command**: `docker compose exec scripthammer pnpm run generate:component SocialLink blog`
+**Command**: `docker compose exec rescuedogs pnpm run generate:component SocialLink blog`
 **Creates**: 5 files in `/home/turtle_wolfe/repos/000/src/components/blog/SocialLink/`
 
 ### ✅ T008: Generate AuthorSocialLinks Component [P]
 
-**Command**: `docker compose exec scripthammer pnpm run generate:component AuthorSocialLinks blog`
+**Command**: `docker compose exec rescuedogs pnpm run generate:component AuthorSocialLinks blog`
 **Creates**: 5 files in `/home/turtle_wolfe/repos/000/src/components/blog/AuthorSocialLinks/`
 
 ### ✅ T009: Generate AuthorProfile Component [P]
 
-**Command**: `docker compose exec scripthammer pnpm run generate:component AuthorProfile blog`
+**Command**: `docker compose exec rescuedogs pnpm run generate:component AuthorProfile blog`
 **Creates**: 5 files in `/home/turtle_wolfe/repos/000/src/components/blog/AuthorProfile/`
 
 ### ✅ T010: Generate ShareMetadata Component [P]
 
-**Command**: `docker compose exec scripthammer pnpm run generate:component ShareMetadata blog`
+**Command**: `docker compose exec rescuedogs pnpm run generate:component ShareMetadata blog`
 **Creates**: 5 files in `/home/turtle_wolfe/repos/000/src/components/blog/ShareMetadata/`
 
 ---
@@ -472,7 +472,7 @@ _All can run in parallel [P]_
 
 ### T054: Run Full Accessibility Audit [P]
 
-**Command**: `docker compose exec scripthammer pnpm test:a11y`
+**Command**: `docker compose exec rescuedogs pnpm test:a11y`
 **Depends on**: T051, T052, T053
 
 - Verify WCAG AA compliance
@@ -482,7 +482,7 @@ _All can run in parallel [P]_
 
 ### T055: Verify Performance Metrics [P]
 
-**Command**: `docker compose exec scripthammer pnpm run build && pnpm run analyze`
+**Command**: `docker compose exec rescuedogs pnpm run build && pnpm run analyze`
 **Depends on**: T051, T052, T053
 
 - Check bundle size impact
@@ -492,7 +492,7 @@ _All can run in parallel [P]_
 
 ### T056: Execute E2E Test Suite [P]
 
-**Command**: `docker compose exec scripthammer pnpm test:e2e`
+**Command**: `docker compose exec rescuedogs pnpm test:e2e`
 **Depends on**: T051, T052, T053
 
 - Test share flow end-to-end

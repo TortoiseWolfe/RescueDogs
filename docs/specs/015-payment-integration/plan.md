@@ -28,7 +28,7 @@
 
 ## Summary
 
-**Primary Requirement**: Enable ScriptHammer template users to accept payments (one-time and recurring) through Stripe, PayPal, Cash App, and Chime on their static GitHub Pages sites.
+**Primary Requirement**: Enable RescueDogs template users to accept payments (one-time and recurring) through Stripe, PayPal, Cash App, and Chime on their static GitHub Pages sites.
 
 **Technical Approach**:
 
@@ -105,7 +105,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 ### IV. Docker-First Development
 
-- [x] Docker Compose setup included (existing ScriptHammer infrastructure)
+- [x] Docker Compose setup included (existing RescueDogs infrastructure)
 - [x] CI/CD uses containerized environments
 - [x] Environment consistency maintained
 

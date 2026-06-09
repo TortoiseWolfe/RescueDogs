@@ -43,7 +43,7 @@
 
 ### Primary User Story
 
-A developer wants to add Visual Regression Testing (PRP-012) to ScriptHammer. They need a clear, repeatable process that takes them from a product idea (PRP) through to tested, production-ready code using the SpecKit workflow commands.
+A developer wants to add Visual Regression Testing (PRP-012) to RescueDogs. They need a clear, repeatable process that takes them from a product idea (PRP) through to tested, production-ready code using the SpecKit workflow commands.
 
 ### Acceptance Scenarios
 
@@ -54,7 +54,7 @@ A developer wants to add Visual Regression Testing (PRP-012) to ScriptHammer. Th
    - Break it into tasks using `/tasks`
    - Execute the tasks using `/implement`
 
-2. **Given** a new contributor forks ScriptHammer, **When** they want to add a custom feature, **Then** they can read the PRP Methodology documentation and understand:
+2. **Given** a new contributor forks RescueDogs, **When** they want to add a custom feature, **Then** they can read the PRP Methodology documentation and understand:
    - What PRPs are and when to use them
    - How PRPs differ from SpecKit specs
    - The complete workflow from idea to implementation
@@ -79,7 +79,7 @@ A developer wants to add Visual Regression Testing (PRP-012) to ScriptHammer. Th
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide comprehensive documentation explaining what PRPs are and why they're used in ScriptHammer
+- **FR-001**: System MUST provide comprehensive documentation explaining what PRPs are and why they're used in RescueDogs
 - **FR-002**: System MUST document the complete PRP → SpecKit workflow with step-by-step instructions
 - **FR-003**: System MUST show real examples from at least 2-3 completed PRPs demonstrating the workflow
 - **FR-004**: System MUST explain how to write effective PRPs (structure, content, level of detail)

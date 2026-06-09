@@ -5,7 +5,7 @@
 **Sprint**: Post-Sprint 3.5
 **Status**: 📥 Inbox
 **Created**: 2025-09-30
-**Author**: ScriptHammer Development Team
+**Author**: RescueDogs Development Team
 
 ---
 
@@ -20,7 +20,7 @@ A comprehensive methodology that bridges product thinking (PRPs) with implementa
 - **Proven Process**: 12 PRPs successfully completed (002-014) but methodology undocumented
 - **SpecKit Integration**: PRPs written before SpecKit was fully integrated
 - **Repeatability**: PRP-012 (Visual Regression) and future features need clear process
-- **Template Value**: Users forking ScriptHammer need to understand the development workflow
+- **Template Value**: Users forking RescueDogs need to understand the development workflow
 - **Knowledge Transfer**: Capture lessons learned while they're fresh
 
 ### Success Criteria
@@ -117,7 +117,7 @@ docs/prp-docs/
 ### File Structure
 
 ```
-ScriptHammer/
+RescueDogs/
 ├── docs/prp-docs/
 │   ├── prp-methodology-prp.md       # NEW: This PRP
 │   ├── SPECKIT-PRP-GUIDE.md         # NEW: Quick reference
@@ -636,7 +636,7 @@ pnpm test           # Run tests
 
 ```bash
 # Full test suite
-docker compose exec scripthammer pnpm run test:suite
+docker compose exec rescuedogs pnpm run test:suite
 
 # E2E tests if applicable
 pnpm test:e2e

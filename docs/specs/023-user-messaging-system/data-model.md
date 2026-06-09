@@ -661,7 +661,7 @@ conversations
 
 ## Migration File Structure
 
-**Location**: `/home/turtle_wolfe/repos/ScriptHammer/supabase/migrations/20251008_user_messaging_system.sql`
+**Location**: `/home/turtle_wolfe/repos/RescueDogs/supabase/migrations/20251008_user_messaging_system.sql`
 
 ```sql
 -- User Messaging System Migration

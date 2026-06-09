@@ -27,12 +27,12 @@ export function Footer() {
         <p className="text-base-content mt-1 text-xs">
           Built with{' '}
           <a
-            href="https://github.com/TortoiseWolfe/ScriptHammer"
+            href="https://github.com/TortoiseWolfe/RescueDogs"
             target="_blank"
             rel="noopener noreferrer"
             className="link-hover link"
           >
-            ScriptHammer
+            RescueDogs
           </a>{' '}
           template
         </p>

@@ -25,7 +25,7 @@
  *
  * Run from inside the Docker container:
  *   docker exec -e SKIP_WEBSERVER=1 -e BASE_URL=http://localhost:3000 \
- *     scripthammer-scripthammer-1 npx playwright test tests/e2e/messaging/offline-queue-sync.spec.ts --project=chromium-msg-iso
+ *     rescuedogs-rescuedogs-1 npx playwright test tests/e2e/messaging/offline-queue-sync.spec.ts --project=chromium-msg-iso
  */
 
 import { test, expect } from '@playwright/test';

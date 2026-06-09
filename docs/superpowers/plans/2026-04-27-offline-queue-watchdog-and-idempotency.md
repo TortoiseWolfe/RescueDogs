@@ -10,7 +10,7 @@
 
 **Spec:** [`docs/superpowers/specs/2026-04-27-offline-queue-watchdog-and-idempotency-design.md`](../specs/2026-04-27-offline-queue-watchdog-and-idempotency-design.md)
 
-**Tracks:** [#52](https://github.com/TortoiseWolfe/ScriptHammer/issues/52) (Family A2 in `docs/STABILITY-TRACKING.md`)
+**Tracks:** [#52](https://github.com/TortoiseWolfe/RescueDogs/issues/52) (Family A2 in `docs/STABILITY-TRACKING.md`)
 
 ---
 
@@ -54,7 +54,7 @@ Expected: "Already up to date." or fast-forward to current origin tip.
 - [ ] **Step 3: Create branch from inside container**
 
 ```bash
-docker compose exec scripthammer git checkout -b 052/offline-queue-watchdog-idempotency
+docker compose exec rescuedogs git checkout -b 052/offline-queue-watchdog-idempotency
 ```
 
 Expected: "Switched to a new branch '052/offline-queue-watchdog-idempotency'"
@@ -124,8 +124,8 @@ Expected:
 - [ ] **Step 5: Commit**
 
 ```bash
-docker compose exec scripthammer git add supabase/migrations/20251006_complete_monolithic_setup.sql
-docker compose exec scripthammer git commit -m "feat(payments): add idempotency_key partial unique index to payment_intents
+docker compose exec rescuedogs git add supabase/migrations/20251006_complete_monolithic_setup.sql
+docker compose exec rescuedogs git commit -m "feat(payments): add idempotency_key partial unique index to payment_intents
 
 Supports the offline-queue retry safety work tracked in #52: a queued
 INSERT that's retried after a tab crash must not produce a duplicate
@@ -210,7 +210,7 @@ export type ProcessItemResult = { status: 'completed' | 'conflicted' };
 - [ ] **Step 5: Run type-check to confirm no type errors**
 
 ```bash
-docker compose exec scripthammer pnpm run type-check
+docker compose exec rescuedogs pnpm run type-check
 ```
 
 Expected: clean (no output after `> tsc --noEmit`).
@@ -218,8 +218,8 @@ Expected: clean (no output after `> tsc --noEmit`).
 - [ ] **Step 6: Commit**
 
 ```bash
-docker compose exec scripthammer git add src/lib/offline-queue/types.ts
-docker compose exec scripthammer git commit -m "feat(offline-queue): add processingTimeoutMs and conflicted accounting types
+docker compose exec rescuedogs git add src/lib/offline-queue/types.ts
+docker compose exec rescuedogs git commit -m "feat(offline-queue): add processingTimeoutMs and conflicted accounting types
 
 Prepares the type surface for the watchdog-reclaim and conflict-aware
 accounting that follow in subsequent commits. void return from
@@ -273,7 +273,7 @@ it('reclaims items stuck in processing past processingTimeoutMs', async () => {
 - [ ] **Step 2: Run the test, expect failure**
 
 ```bash
-docker compose exec scripthammer pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts -t "reclaims items stuck in processing"
+docker compose exec rescuedogs pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts -t "reclaims items stuck in processing"
 ```
 
 Expected: FAIL — the test runs but stuck `processing` items aren't reclaimed yet, so `result.success` is `0` (the item stays `processing`, never enters the loop).
@@ -331,7 +331,7 @@ try {
 - [ ] **Step 2: Run the test, expect pass**
 
 ```bash
-docker compose exec scripthammer pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts -t "reclaims items stuck in processing"
+docker compose exec rescuedogs pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts -t "reclaims items stuck in processing"
 ```
 
 Expected: PASS.
@@ -339,7 +339,7 @@ Expected: PASS.
 - [ ] **Step 3: Run the full base-queue test file to confirm no regressions**
 
 ```bash
-docker compose exec scripthammer pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts
+docker compose exec rescuedogs pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts
 ```
 
 Expected: all existing tests still pass.
@@ -347,8 +347,8 @@ Expected: all existing tests still pass.
 - [ ] **Step 4: Commit**
 
 ```bash
-docker compose exec scripthammer git add src/lib/offline-queue/__tests__/base-queue.test.ts src/lib/offline-queue/base-queue.ts
-docker compose exec scripthammer git commit -m "feat(offline-queue): watchdog reclaim for stuck processing items
+docker compose exec rescuedogs git add src/lib/offline-queue/__tests__/base-queue.test.ts src/lib/offline-queue/base-queue.ts
+docker compose exec rescuedogs git commit -m "feat(offline-queue): watchdog reclaim for stuck processing items
 
 A tab that crashes after atomically claiming a queue item but before
 writing the completion update leaves the row in 'processing' forever.
@@ -403,7 +403,7 @@ it('leaves fresh processing items alone (within processingTimeoutMs)', async () 
 - [ ] **Step 2: Run the test, expect pass**
 
 ```bash
-docker compose exec scripthammer pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts -t "leaves fresh processing"
+docker compose exec rescuedogs pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts -t "leaves fresh processing"
 ```
 
 Expected: PASS (the watchdog's `>` comparison correctly excludes 30s-old items).
@@ -411,8 +411,8 @@ Expected: PASS (the watchdog's `>` comparison correctly excludes 30s-old items).
 - [ ] **Step 3: Commit**
 
 ```bash
-docker compose exec scripthammer git add src/lib/offline-queue/__tests__/base-queue.test.ts
-docker compose exec scripthammer git commit -m "test(offline-queue): pin watchdog negative case (fresh processing preserved)
+docker compose exec rescuedogs git add src/lib/offline-queue/__tests__/base-queue.test.ts
+docker compose exec rescuedogs git commit -m "test(offline-queue): pin watchdog negative case (fresh processing preserved)
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 ```
@@ -484,7 +484,7 @@ it('counts conflicted as completed but in the conflicted bucket', async () => {
 - [ ] **Step 3: Run the test, expect failure**
 
 ```bash
-docker compose exec scripthammer pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts -t "counts conflicted"
+docker compose exec rescuedogs pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts -t "counts conflicted"
 ```
 
 Expected: FAIL — `result.conflicted` is `undefined` (or the assertion `success === 0` fails because conflicts currently flow into the success counter), and the type-check may also flag missing `conflicted` in `SyncResult` returns.
@@ -669,7 +669,7 @@ import {
 - [ ] **Step 7: Run the conflict test, expect pass**
 
 ```bash
-docker compose exec scripthammer pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts -t "counts conflicted"
+docker compose exec rescuedogs pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts -t "counts conflicted"
 ```
 
 Expected: PASS.
@@ -677,8 +677,8 @@ Expected: PASS.
 - [ ] **Step 8: Run the full file to confirm no regressions**
 
 ```bash
-docker compose exec scripthammer pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts
-docker compose exec scripthammer pnpm run type-check
+docker compose exec rescuedogs pnpm vitest run src/lib/offline-queue/__tests__/base-queue.test.ts
+docker compose exec rescuedogs pnpm run type-check
 ```
 
 Expected: all green; type-check clean.
@@ -686,8 +686,8 @@ Expected: all green; type-check clean.
 - [ ] **Step 9: Commit**
 
 ```bash
-docker compose exec scripthammer git add src/lib/offline-queue/types.ts src/lib/offline-queue/base-queue.ts src/lib/offline-queue/__tests__/base-queue.test.ts
-docker compose exec scripthammer git commit -m "feat(offline-queue): conflict-aware accounting in sync()
+docker compose exec rescuedogs git add src/lib/offline-queue/types.ts src/lib/offline-queue/base-queue.ts src/lib/offline-queue/__tests__/base-queue.test.ts
+docker compose exec rescuedogs git commit -m "feat(offline-queue): conflict-aware accounting in sync()
 
 processItem may now return { status: 'conflicted' } to signal that the
 work was already done server-side (typical case: an idempotency-key
@@ -745,7 +745,7 @@ async queuePaymentIntent(
 - [ ] **Step 3: Run type-check**
 
 ```bash
-docker compose exec scripthammer pnpm run type-check
+docker compose exec rescuedogs pnpm run type-check
 ```
 
 Expected: clean.
@@ -753,8 +753,8 @@ Expected: clean.
 - [ ] **Step 4: Commit**
 
 ```bash
-docker compose exec scripthammer git add src/lib/offline-queue/payment-adapter.ts
-docker compose exec scripthammer git commit -m "feat(payments): generate idempotency_key at offline-queue time
+docker compose exec rescuedogs git add src/lib/offline-queue/payment-adapter.ts
+docker compose exec rescuedogs git commit -m "feat(payments): generate idempotency_key at offline-queue time
 
 Stable key per logical payment intent. Retries of a queued payment
 INSERT now share the same key, so server-side ON CONFLICT DO NOTHING
@@ -882,7 +882,7 @@ protected async processItem(item: PaymentQueueItem): Promise<ProcessItemResult |
 - [ ] **Step 4: Run type-check**
 
 ```bash
-docker compose exec scripthammer pnpm run type-check
+docker compose exec rescuedogs pnpm run type-check
 ```
 
 Expected: clean.
@@ -890,7 +890,7 @@ Expected: clean.
 - [ ] **Step 5: Run all existing payment-related tests to confirm no regressions**
 
 ```bash
-docker compose exec scripthammer pnpm vitest run tests/unit/payment-service.test.ts
+docker compose exec rescuedogs pnpm vitest run tests/unit/payment-service.test.ts
 ```
 
 Expected: all existing tests pass (none of them assert on the INSERT shape; they're at a higher abstraction).
@@ -898,8 +898,8 @@ Expected: all existing tests pass (none of them assert on the INSERT shape; they
 - [ ] **Step 6: Commit**
 
 ```bash
-docker compose exec scripthammer git add src/lib/offline-queue/payment-adapter.ts
-docker compose exec scripthammer git commit -m "feat(payments): upsert payment_intents with ignoreDuplicates for offline retry safety
+docker compose exec rescuedogs git add src/lib/offline-queue/payment-adapter.ts
+docker compose exec rescuedogs git commit -m "feat(payments): upsert payment_intents with ignoreDuplicates for offline retry safety
 
 Replaces the prior insert() with upsert(..., { onConflict:
 'idempotency_key', ignoreDuplicates: true }), which maps to INSERT ...
@@ -1029,7 +1029,7 @@ describe('PaymentQueueAdapter (idempotent INSERT path, #52)', () => {
 - [ ] **Step 2: Run the new test file, expect pass (mocks align with the implementation)**
 
 ```bash
-docker compose exec scripthammer pnpm vitest run src/lib/offline-queue/__tests__/payment-adapter.test.ts
+docker compose exec rescuedogs pnpm vitest run src/lib/offline-queue/__tests__/payment-adapter.test.ts
 ```
 
 Expected: 2 tests pass. If a test fails, the mock shape may not match the actual upsert chain — read the actual error and adjust the chain (e.g., `.select('id')` may need its own `mockReturnValue`).
@@ -1037,8 +1037,8 @@ Expected: 2 tests pass. If a test fails, the mock shape may not match the actual
 - [ ] **Step 3: Commit**
 
 ```bash
-docker compose exec scripthammer git add src/lib/offline-queue/__tests__/payment-adapter.test.ts
-docker compose exec scripthammer git commit -m "test(payments): pin idempotent-INSERT and conflicted-completion contracts
+docker compose exec rescuedogs git add src/lib/offline-queue/__tests__/payment-adapter.test.ts
+docker compose exec rescuedogs git commit -m "test(payments): pin idempotent-INSERT and conflicted-completion contracts
 
 Two regression cases for the #52 retry-safety surface:
 1. queued idempotency_key flows into the upsert payload with the
@@ -1104,8 +1104,8 @@ Expected: JSON containing `idempotency_key | text`.
 - [ ] **Step 1: Run full offline-queue + RLS suites**
 
 ```bash
-docker compose exec scripthammer pnpm vitest run src/lib/offline-queue/
-docker compose exec scripthammer pnpm test:rls
+docker compose exec rescuedogs pnpm vitest run src/lib/offline-queue/
+docker compose exec rescuedogs pnpm test:rls
 ```
 
 Expected:
@@ -1116,8 +1116,8 @@ Expected:
 - [ ] **Step 2: Type-check + lint affected files**
 
 ```bash
-docker compose exec scripthammer pnpm run type-check
-docker compose exec scripthammer pnpm exec eslint src/lib/offline-queue/
+docker compose exec rescuedogs pnpm run type-check
+docker compose exec rescuedogs pnpm exec eslint src/lib/offline-queue/
 ```
 
 Expected: both clean.
@@ -1131,7 +1131,7 @@ git push -u origin 052/offline-queue-watchdog-idempotency
 - [ ] **Step 4: Open PR**
 
 ```bash
-gh pr create --repo TortoiseWolfe/ScriptHammer \
+gh pr create --repo TortoiseWolfe/RescueDogs \
   --base main \
   --head 052/offline-queue-watchdog-idempotency \
   --title "fix(offline-queue): watchdog reclaim + idempotent payment INSERTs (#52)" \

@@ -27,9 +27,9 @@ Add admin user creation with public key generation:
 // Add to TEST_USERS array or create separate admin setup
 const ADMIN_USER = {
   id: '00000000-0000-0000-0000-000000000001',
-  email: 'admin@scripthammer.com',
-  username: 'scripthammer',
-  displayName: 'ScriptHammer',
+  email: 'admin@rescuedogs.com',
+  username: 'rescuedogs',
+  displayName: 'RescueDogs',
 };
 
 async function setupAdminUser() {
@@ -133,10 +133,10 @@ When implementing features that need secrets:
 
 ```bash
 # Run seed script to create admin
-docker compose exec scripthammer pnpm exec tsx scripts/seed-test-users.ts
+docker compose exec rescuedogs pnpm exec tsx scripts/seed-test-users.ts
 
 # Verify admin has public key
-docker compose exec scripthammer pnpm exec tsx -e "
+docker compose exec rescuedogs pnpm exec tsx -e "
   const { createClient } = require('@supabase/supabase-js');
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
   supabase.from('user_encryption_keys')
@@ -146,7 +146,7 @@ docker compose exec scripthammer pnpm exec tsx -e "
 "
 
 # Run tests
-docker compose exec scripthammer pnpm test welcome-service
+docker compose exec rescuedogs pnpm test welcome-service
 
 # Test full flow manually
 # 1. Delete test user if exists

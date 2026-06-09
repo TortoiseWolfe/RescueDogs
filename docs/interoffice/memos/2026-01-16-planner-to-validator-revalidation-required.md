@@ -112,7 +112,7 @@ Validator must check:
 | G-044         | Footer/nav have `rx="4-8"`                       |
 | G-047         | Key Concepts at `x=40, y=940`                    |
 | SIGNATURE-003 | Signature at `x="40"`, no `text-anchor="middle"` |
-| SIGNATURE-004 | Format: `NNN:NN \| Feature Name \| ScriptHammer` |
+| SIGNATURE-004 | Format: `NNN:NN \| Feature Name \| RescueDogs` |
 
 ---
 

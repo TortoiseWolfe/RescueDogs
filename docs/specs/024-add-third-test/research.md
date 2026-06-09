@@ -15,7 +15,7 @@
 
 - Examined existing test setup: `/e2e/messaging/friend-requests.spec.ts`, `/e2e/auth/user-registration.spec.ts`
 - Playwright config: `playwright.config.ts` already configured for Docker execution
-- 40+ existing E2E tests run successfully with: `docker compose exec scripthammer pnpm exec playwright test`
+- 40+ existing E2E tests run successfully with: `docker compose exec rescuedogs pnpm exec playwright test`
 
 **Decision**: Reuse existing Playwright Docker setup (no changes needed)
 
@@ -35,13 +35,13 @@
 
 ```bash
 # Execute tests inside Docker
-docker compose exec scripthammer pnpm exec playwright test
+docker compose exec rescuedogs pnpm exec playwright test
 
 # Run specific test file
-docker compose exec scripthammer pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
+docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
 
 # Run with UI mode for debugging
-docker compose exec scripthammer pnpm exec playwright test --ui
+docker compose exec rescuedogs pnpm exec playwright test --ui
 ```
 
 ---

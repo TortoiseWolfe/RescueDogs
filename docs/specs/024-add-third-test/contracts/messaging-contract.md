@@ -723,7 +723,7 @@ const sharedSecret = await crypto.subtle.deriveKey(
 Run contract tests with:
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test e2e/messaging/
+docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/
 ```
 
 Expected results:

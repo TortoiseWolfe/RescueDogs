@@ -2,7 +2,7 @@
 
 **Feature ID**: 038
 **Category**: payments
-**Source**: ScriptHammer README (SPEC-054)
+**Source**: RescueDogs README (SPEC-054)
 **Status**: Components Built, Route Missing (2026-04-08). Built: `PaymentHistory` (component with tests + stories + a11y), `PaymentTrendChart` (molecular), `AdminPaymentPanel` (organism, used at `/admin/payments`), `admin-payment-service.ts`. Missing: no `page.tsx` at `/payment/dashboard` — needs a route file that composes the existing components. Also missing: real-time subscription wiring for the dashboard's live-update behavior (webhook status pill, tx counter, batch updates, connection loss/reconnect indicators, charts tied to live data). 20 E2E stubs in `tests/e2e/payment/06-realtime-dashboard.spec.ts` define the target UX. Depends on 024 API keys being activated.
 
 ## Description

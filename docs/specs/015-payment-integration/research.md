@@ -188,7 +188,7 @@ paypal
 - Small bundle size: ~20KB gzipped
 - Automatic schema migrations
 - Promise-based (async/await support)
-- Battle-tested (used in ScriptHammer PRP-011 already)
+- Battle-tested (used in RescueDogs PRP-011 already)
 
 **Queue Schema**:
 
@@ -260,7 +260,7 @@ supabase.on('connection:online', async () => {
 
 - [Dexie.js Documentation](https://dexie.org/)
 - [PWA Background Sync](https://web.dev/periodic-background-sync/)
-- ScriptHammer PRP-011 (existing implementation)
+- RescueDogs PRP-011 (existing implementation)
 
 ---
 
@@ -401,7 +401,7 @@ We use Stripe and PayPal to process payments securely.
 
 - [GDPR Consent Requirements](https://gdpr.eu/consent/)
 - [Cookie Consent Best Practices](https://www.cookiebot.com/en/gdpr-consent/)
-- ScriptHammer PRP-007 (existing cookie consent system)
+- RescueDogs PRP-007 (existing cookie consent system)
 
 ---
 

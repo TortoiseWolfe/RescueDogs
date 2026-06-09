@@ -37,7 +37,7 @@ export const DarkTheme: Story = {
   args: {},
   decorators: [
     (StoryFn) => (
-      <div data-theme="scripthammer-dark" style={{ padding: '2rem' }}>
+      <div data-theme="rescuedogs-dark" style={{ padding: '2rem' }}>
         <StoryFn />
       </div>
     ),
@@ -47,7 +47,7 @@ export const DarkTheme: Story = {
     docs: {
       description: {
         story:
-          'Verifies the inline silhouette SVG and panel chrome recolor correctly under the `scripthammer-dark` DaisyUI theme. The silhouette uses `hsl(var(--bc) / 0.6)` so it tracks base-content color across all 32 themes.',
+          'Verifies the inline silhouette SVG and panel chrome recolor correctly under the `rescuedogs-dark` DaisyUI theme. The silhouette uses `hsl(var(--bc) / 0.6)` so it tracks base-content color across all 32 themes.',
       },
     },
   },

@@ -308,5 +308,5 @@ Feature 002 demonstrates exemplary privacy-by-design principles. The spec explic
 ---
 
 **Security Lead**
-ScriptHammer Council
+RescueDogs Council
 2026-01-15

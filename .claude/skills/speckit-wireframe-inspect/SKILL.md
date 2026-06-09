@@ -7,7 +7,7 @@ metadata:
   source: wireframe:commands/inspect.md
 ---
 
-> **ScriptHammer note:** wireframes live at `features/<category>/<NNN-name>/wireframes/`
+> **RescueDogs note:** wireframes live at `features/<category>/<NNN-name>/wireframes/`
 > (not the flat `specs/<feature>/` layout). Shipped inspector at
 > `.specify/extensions/wireframe/scripts/inspect-wireframes.py` handles two-level
 > paths via its auto-root detection; run with `--all` or pass a specific SVG.

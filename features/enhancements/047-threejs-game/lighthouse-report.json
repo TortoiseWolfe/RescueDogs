@@ -1,9 +1,9 @@
 {
   "lighthouseVersion": "12.8.2",
-  "requestedUrl": "http://localhost:3000/ScriptHammer/game/3d/",
-  "mainDocumentUrl": "http://localhost:3000/ScriptHammer/game/3d/",
-  "finalDisplayedUrl": "http://localhost:3000/ScriptHammer/game/3d/",
-  "finalUrl": "http://localhost:3000/ScriptHammer/game/3d/",
+  "requestedUrl": "http://localhost:3000/RescueDogs/game/3d/",
+  "mainDocumentUrl": "http://localhost:3000/RescueDogs/game/3d/",
+  "finalDisplayedUrl": "http://localhost:3000/RescueDogs/game/3d/",
+  "finalUrl": "http://localhost:3000/RescueDogs/game/3d/",
   "fetchTime": "2026-05-18T02:46:03.100Z",
   "gatherMode": "navigation",
   "runWarnings": [],
@@ -226,7 +226,7 @@
         ],
         "items": [
           {
-            "url": "http://localhost:3000/ScriptHammer/game/3d/",
+            "url": "http://localhost:3000/RescueDogs/game/3d/",
             "responseTime": 72.107
           }
         ],
@@ -336,7 +336,7 @@
         "chains": {
           "07210F1B04EB2927D6778F9411707D6E": {
             "request": {
-              "url": "http://localhost:3000/ScriptHammer/game/3d/",
+              "url": "http://localhost:3000/RescueDogs/game/3d/",
               "startTime": 301925.918448,
               "endTime": 301926.028944,
               "responseReceivedTime": 301925.99102599995,
@@ -345,7 +345,7 @@
             "children": {
               "949.7": {
                 "request": {
-                  "url": "http://localhost:3000/ScriptHammer/_next/static/css/app/layout.css?v=1779072363202",
+                  "url": "http://localhost:3000/RescueDogs/_next/static/css/app/layout.css?v=1779072363202",
                   "startTime": 301926.002303,
                   "endTime": 301926.022122,
                   "responseReceivedTime": 301926.00887600007,
@@ -499,13 +499,13 @@
             "scriptParseCompile": 0
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
             "total": 2216.0599999999795,
             "scripting": 1233.1119999999796,
             "scriptParseCompile": 968.1080000000001
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
             "total": 1357.319999999997,
             "scripting": 1241.091999999997,
             "scriptParseCompile": 12.344
@@ -517,7 +517,7 @@
             "scriptParseCompile": 0
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/game/3d/",
+            "url": "http://localhost:3000/RescueDogs/game/3d/",
             "total": 559.8959999999996,
             "scripting": 23.03999999999996,
             "scriptParseCompile": 6.751999999999992
@@ -541,7 +541,7 @@
             "scriptParseCompile": 0
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/layout.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/app/layout.js",
             "total": 56.872,
             "scripting": 1.6960000000000002,
             "scriptParseCompile": 54.388
@@ -696,7 +696,7 @@
         ],
         "items": [
           {
-            "url": "http://localhost:3000/ScriptHammer/game/3d/",
+            "url": "http://localhost:3000/RescueDogs/game/3d/",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 0,
@@ -713,7 +713,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/media/22a5144ee8d83bca-s.p.woff2",
+            "url": "http://localhost:3000/RescueDogs/_next/static/media/22a5144ee8d83bca-s.p.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 78.38400000333786,
@@ -731,7 +731,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/media/f5271587012faf78-s.p.woff2",
+            "url": "http://localhost:3000/RescueDogs/_next/static/media/f5271587012faf78-s.p.woff2",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 78.75400000810623,
@@ -749,7 +749,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/printing-mallet.svg",
+            "url": "http://localhost:3000/RescueDogs/printing-mallet.svg",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 78.89999997615814,
@@ -767,7 +767,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/scripthammer-logo.svg",
+            "url": "http://localhost:3000/RescueDogs/rescuedogs-logo.svg",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 79.00500005483627,
@@ -785,7 +785,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/script-tags.svg",
+            "url": "http://localhost:3000/RescueDogs/script-tags.svg",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 79.07500004768372,
@@ -803,7 +803,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/css/app/layout.css?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/css/app/layout.css?v=1779072363202",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 84.30699998140335,
@@ -820,7 +820,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/webpack.js?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/webpack.js?v=1779072363202",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 84.44800001382828,
@@ -838,7 +838,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 84.51300001144409,
@@ -855,7 +855,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/main-app.js?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/main-app.js?v=1779072363202",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 84.57700002193451,
@@ -872,7 +872,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/app-pages-internals.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/app-pages-internals.js",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 84.61900001764297,
@@ -889,7 +889,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/common.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/common.js",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 84.65500003099442,
@@ -906,7 +906,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/layout.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/app/layout.js",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 84.68900001049042,
@@ -923,7 +923,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/page.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/app/page.js",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 84.72799998521805,
@@ -940,7 +940,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/game/3d/page.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/app/game/3d/page.js",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 84.76300001144409,
@@ -957,7 +957,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/global-error.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/app/global-error.js",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 84.79900002479553,
@@ -1007,7 +1007,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 1287.6840000152588,
@@ -1057,7 +1057,7 @@
             "experimentalFromMainFrame": true
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/webpack/0377da3bee10d267.webpack.hot-update.json",
+            "url": "http://localhost:3000/RescueDogs/_next/static/webpack/0377da3bee10d267.webpack.hot-update.json",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 2236.775000035763,
@@ -1074,7 +1074,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/webpack/webpack.0377da3bee10d267.hot-update.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/webpack/webpack.0377da3bee10d267.hot-update.js",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 2255.912000000477,
@@ -1091,7 +1091,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/webpack/bc6e946f8b3b478b.webpack.hot-update.json",
+            "url": "http://localhost:3000/RescueDogs/_next/static/webpack/bc6e946f8b3b478b.webpack.hot-update.json",
             "sessionTargetType": "page",
             "protocol": "http/1.1",
             "rendererStartTime": 2979.1520000100136,
@@ -1108,7 +1108,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/webpack/webpack.bc6e946f8b3b478b.hot-update.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/webpack/webpack.bc6e946f8b3b478b.hot-update.js",
             "sessionTargetType": "page",
             "protocol": "",
             "rendererStartTime": 2996.2599999904633,
@@ -1124,7 +1124,7 @@
             "entity": "localhost"
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/webpack/common.bc6e946f8b3b478b.hot-update.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/webpack/common.bc6e946f8b3b478b.hot-update.js",
             "sessionTargetType": "page",
             "protocol": "",
             "rendererStartTime": 2996.6050000190735,
@@ -1146,71 +1146,71 @@
           "initiators": [
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/game/3d/",
+              "url": "http://localhost:3000/RescueDogs/game/3d/",
               "lineNumber": 0,
               "columnNumber": 288
             },
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/game/3d/",
+              "url": "http://localhost:3000/RescueDogs/game/3d/",
               "lineNumber": 0,
               "columnNumber": 409
             },
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/game/3d/",
+              "url": "http://localhost:3000/RescueDogs/game/3d/",
               "lineNumber": 0,
               "columnNumber": 492
             },
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/game/3d/",
+              "url": "http://localhost:3000/RescueDogs/game/3d/",
               "lineNumber": 0,
               "columnNumber": 586
             },
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/game/3d/",
+              "url": "http://localhost:3000/RescueDogs/game/3d/",
               "lineNumber": 0,
               "columnNumber": 675
             },
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/game/3d/",
+              "url": "http://localhost:3000/RescueDogs/game/3d/",
               "lineNumber": 0,
               "columnNumber": 751
             },
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/game/3d/",
+              "url": "http://localhost:3000/RescueDogs/game/3d/",
               "lineNumber": 0,
               "columnNumber": 831
             },
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/game/3d/",
+              "url": "http://localhost:3000/RescueDogs/game/3d/",
               "lineNumber": 0,
               "columnNumber": 909
             },
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/game/3d/",
+              "url": "http://localhost:3000/RescueDogs/game/3d/",
               "lineNumber": 0,
               "columnNumber": 995
             },
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/game/3d/",
+              "url": "http://localhost:3000/RescueDogs/game/3d/",
               "lineNumber": 0,
               "columnNumber": 1081
             },
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/_next/static/css/app/layout.css?v=1779072363202"
+              "url": "http://localhost:3000/RescueDogs/_next/static/css/app/layout.css?v=1779072363202"
             },
             {
               "type": "parser",
-              "url": "http://localhost:3000/ScriptHammer/_next/static/css/app/layout.css?v=1779072363202"
+              "url": "http://localhost:3000/RescueDogs/_next/static/css/app/layout.css?v=1779072363202"
             }
           ]
         }
@@ -2035,12 +2035,12 @@
         ],
         "items": [
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
             "duration": 2213,
             "startTime": 28220.73525
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
             "duration": 1358,
             "startTime": 30433.73525
           },
@@ -2080,12 +2080,12 @@
             "startTime": 1047.91175
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/layout.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/app/layout.js",
             "duration": 57,
             "startTime": 5420.735250000001
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/game/3d/",
+            "url": "http://localhost:3000/RescueDogs/game/3d/",
             "duration": 54,
             "startTime": 786.91175
           }
@@ -2095,13 +2095,13 @@
         "debugData": {
           "type": "debugdata",
           "urls": [
-            "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
-            "http://localhost:3000/ScriptHammer/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
+            "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
+            "http://localhost:3000/RescueDogs/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
             "webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@react-three+fiber@9.6.1_@types+react@19.1.13_react-dom@19.1.0_react@19.1.0__react@19.1.0_three@0.184.0/node_modules/@react-three/fiber/dist/events-b389eeca.esm.js",
             "webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.9_@babel+core@7.28.4_@opentelemetry+api@1.9.0_@playwright+test@1.55.0_react-d_abafcb220e570ad869e3b50475f69ae5/node_modules/next/dist/compiled/scheduler/cjs/scheduler.development.js",
             "webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/cjs/scheduler.development.js",
-            "http://localhost:3000/ScriptHammer/_next/static/chunks/app/layout.js",
-            "http://localhost:3000/ScriptHammer/game/3d/"
+            "http://localhost:3000/RescueDogs/_next/static/chunks/app/layout.js",
+            "http://localhost:3000/RescueDogs/game/3d/"
           ],
           "tasks": [
             {
@@ -2258,7 +2258,7 @@
         "type": "treemap-data",
         "nodes": [
           {
-            "name": "http://localhost:3000/ScriptHammer/game/3d/",
+            "name": "http://localhost:3000/RescueDogs/game/3d/",
             "resourceBytes": 72315,
             "encodedBytes": 15211,
             "unusedBytes": 1384,
@@ -2516,43 +2516,43 @@
             ]
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/main-app.js?v=1779072363202",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/main-app.js?v=1779072363202",
             "resourceBytes": 1758,
             "encodedBytes": 774,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/app-pages-internals.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/app-pages-internals.js",
             "resourceBytes": 31851,
             "encodedBytes": 3391,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/common.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/common.js",
             "resourceBytes": 50270,
             "encodedBytes": 11764,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/page.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/app/page.js",
             "resourceBytes": 11257,
             "encodedBytes": 2587,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/game/3d/page.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/app/game/3d/page.js",
             "resourceBytes": 31967,
             "encodedBytes": 7336,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/global-error.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/app/global-error.js",
             "resourceBytes": 11449,
             "encodedBytes": 3915,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/webpack.js?v=1779072363202",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/webpack.js?v=1779072363202",
             "resourceBytes": 140845,
             "encodedBytes": 28168,
             "children": [
@@ -2567,25 +2567,25 @@
             ]
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/layout.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/app/layout.js",
             "resourceBytes": 1109786,
             "encodedBytes": 263111,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
             "resourceBytes": 21457319,
             "encodedBytes": 4939998,
             "unusedBytes": 1942781
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
             "resourceBytes": 183725,
             "encodedBytes": 42373,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/webpack/webpack.0377da3bee10d267.hot-update.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/webpack/webpack.0377da3bee10d267.hot-update.js",
             "resourceBytes": 1157,
             "encodedBytes": 785,
             "children": [
@@ -2600,7 +2600,7 @@
             ]
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/webpack/webpack.bc6e946f8b3b478b.hot-update.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/webpack/webpack.bc6e946f8b3b478b.hot-update.js",
             "resourceBytes": 1157,
             "encodedBytes": 0,
             "children": [
@@ -2615,25 +2615,25 @@
             ]
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/webpack/common.bc6e946f8b3b478b.hot-update.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/webpack/common.bc6e946f8b3b478b.hot-update.js",
             "resourceBytes": 237714,
             "encodedBytes": 0,
             "unusedBytes": 234193
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/main-app.js?v=1779072366738",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/main-app.js?v=1779072366738",
             "resourceBytes": 1758,
             "encodedBytes": 1758,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/app-pages-internals.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/app-pages-internals.js",
             "resourceBytes": 31851,
             "encodedBytes": 3391,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/webpack.js?v=1779072366738",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/webpack.js?v=1779072366738",
             "resourceBytes": 140845,
             "encodedBytes": 140845,
             "children": [
@@ -2648,43 +2648,43 @@
             ]
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/page.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/app/page.js",
             "resourceBytes": 11257,
             "encodedBytes": 2587,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/game/3d/page.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/app/game/3d/page.js",
             "resourceBytes": 31967,
             "encodedBytes": 7336,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/common.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/common.js",
             "resourceBytes": 287385,
             "encodedBytes": 11764,
             "unusedBytes": 88
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/global-error.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/app/global-error.js",
             "resourceBytes": 11449,
             "encodedBytes": 3915,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/layout.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/app/layout.js",
             "resourceBytes": 873798,
             "encodedBytes": 263111,
             "unusedBytes": 0
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
             "resourceBytes": 21457319,
             "encodedBytes": 21457319,
             "unusedBytes": 1942781
           },
           {
-            "name": "http://localhost:3000/ScriptHammer/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
+            "name": "http://localhost:3000/RescueDogs/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
             "resourceBytes": 183725,
             "encodedBytes": 42373,
             "unusedBytes": 0
@@ -2752,35 +2752,35 @@
         ],
         "items": [
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
             "totalBytes": 4940370
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/app/layout.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/app/layout.js",
             "totalBytes": 263482
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/css/app/layout.css?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/css/app/layout.css?v=1779072363202",
             "totalBytes": 43700
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/_app-pages-browser_src_components_game_Scene_index_tsx.js",
             "totalBytes": 42743
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/media/f5271587012faf78-s.p.woff2",
+            "url": "http://localhost:3000/RescueDogs/_next/static/media/f5271587012faf78-s.p.woff2",
             "totalBytes": 30272
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/media/22a5144ee8d83bca-s.p.woff2",
+            "url": "http://localhost:3000/RescueDogs/_next/static/media/22a5144ee8d83bca-s.p.woff2",
             "totalBytes": 29588
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/webpack.js?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/webpack.js?v=1779072363202",
             "totalBytes": 28538
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/game/3d/",
+            "url": "http://localhost:3000/RescueDogs/game/3d/",
             "totalBytes": 18846
           },
           {
@@ -2788,7 +2788,7 @@
             "totalBytes": 17640
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/common.js",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/common.js",
             "totalBytes": 12133
           }
         ],
@@ -2861,7 +2861,7 @@
         ],
         "items": [
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/css/app/layout.css?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/css/app/layout.css?v=1779072363202",
             "totalBytes": 43700,
             "wastedMs": 307
           }
@@ -2970,7 +2970,7 @@
         ],
         "items": [
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/webpack.js?v=1779072366738",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/webpack.js?v=1779072366738",
             "totalBytes": 46479,
             "wastedBytes": 37054,
             "wastedPercent": 79.72238986119493
@@ -3063,13 +3063,13 @@
         ],
         "items": [
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
             "totalBytes": 7080915,
             "wastedBytes": 641118,
             "wastedPercent": 9.054164688514907
           },
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
             "totalBytes": 4939953,
             "wastedBytes": 447272,
             "wastedPercent": 9.054164688514907
@@ -3312,7 +3312,7 @@
         ],
         "items": [
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
             "wastedBytes": 17489,
             "subItems": {
               "type": "subitems",
@@ -3321,7 +3321,7 @@
                   "signal": "@babel/plugin-transform-classes",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
                     "urlProvider": "network",
                     "line": 2245,
                     "column": 116470
@@ -3331,7 +3331,7 @@
                   "signal": "@babel/plugin-transform-spread",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
                     "urlProvider": "network",
                     "line": 2245,
                     "column": 561198
@@ -3341,7 +3341,7 @@
                   "signal": "Array.prototype.at",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 1029
@@ -3351,7 +3351,7 @@
                   "signal": "Array.prototype.flat",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 415
@@ -3361,7 +3361,7 @@
                   "signal": "Array.prototype.flatMap",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 528
@@ -3371,7 +3371,7 @@
                   "signal": "Object.fromEntries",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 906
@@ -3381,7 +3381,7 @@
                   "signal": "Object.hasOwn",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 1164
@@ -3391,7 +3391,7 @@
                   "signal": "Promise.allSettled",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
                     "urlProvider": "network",
                     "line": 874,
                     "column": 41369
@@ -3401,7 +3401,7 @@
                   "signal": "Promise.any",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
                     "urlProvider": "network",
                     "line": 874,
                     "column": 41475
@@ -3411,7 +3411,7 @@
                   "signal": "String.prototype.trimEnd",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 151
@@ -3421,7 +3421,7 @@
                   "signal": "String.prototype.trimStart",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072366738",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072366738",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 64
@@ -3523,7 +3523,7 @@
                 "width": 412,
                 "height": 823
               },
-              "snippet": "<body class=\"__variable_3d8a48 __variable_25a3aa flex min-h-screen flex-col antialiased\" data-theme=\"scripthammer-light\" style=\"line-height: 1.5; font-family: ui-sans-serif, system-ui, -apple-system, Bl…;\">",
+              "snippet": "<body class=\"__variable_3d8a48 __variable_25a3aa flex min-h-screen flex-col antialiased\" data-theme=\"rescuedogs-light\" style=\"line-height: 1.5; font-family: ui-sans-serif, system-ui, -apple-system, Bl…;\">",
               "nodeLabel": "body.__variable_3d8a48"
             },
             "statistic": "Maximum Child Elements",
@@ -3638,7 +3638,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "frameUrl": "http://localhost:3000/ScriptHammer/game/3d/"
+                  "frameUrl": "http://localhost:3000/RescueDogs/game/3d/"
                 }
               ]
             },
@@ -3651,7 +3651,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "frameUrl": "http://localhost:3000/ScriptHammer/game/3d/"
+                  "frameUrl": "http://localhost:3000/RescueDogs/game/3d/"
                 }
               ]
             },
@@ -3664,7 +3664,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "frameUrl": "http://localhost:3000/ScriptHammer/game/3d/"
+                  "frameUrl": "http://localhost:3000/RescueDogs/game/3d/"
                 }
               ]
             },
@@ -4138,7 +4138,7 @@
         ],
         "items": [
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
             "wastedBytes": 12202,
             "subItems": {
               "type": "subitems",
@@ -4147,7 +4147,7 @@
                   "signal": "@babel/plugin-transform-classes",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
                     "urlProvider": "network",
                     "line": 2245,
                     "column": 116470
@@ -4157,7 +4157,7 @@
                   "signal": "@babel/plugin-transform-spread",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
                     "urlProvider": "network",
                     "line": 2245,
                     "column": 561198
@@ -4167,7 +4167,7 @@
                   "signal": "Array.prototype.at",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 1029
@@ -4177,7 +4177,7 @@
                   "signal": "Array.prototype.flat",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 415
@@ -4187,7 +4187,7 @@
                   "signal": "Array.prototype.flatMap",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 528
@@ -4197,7 +4197,7 @@
                   "signal": "Object.fromEntries",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 906
@@ -4207,7 +4207,7 @@
                   "signal": "Object.hasOwn",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 1164
@@ -4217,7 +4217,7 @@
                   "signal": "Promise.allSettled",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
                     "urlProvider": "network",
                     "line": 874,
                     "column": 41369
@@ -4227,7 +4227,7 @@
                   "signal": "Promise.any",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
                     "urlProvider": "network",
                     "line": 874,
                     "column": 41475
@@ -4237,7 +4237,7 @@
                   "signal": "String.prototype.trimEnd",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 151
@@ -4247,7 +4247,7 @@
                   "signal": "String.prototype.trimStart",
                   "location": {
                     "type": "source-location",
-                    "url": "http://localhost:3000/ScriptHammer/_next/static/chunks/vendor.js?v=1779072363202",
+                    "url": "http://localhost:3000/RescueDogs/_next/static/chunks/vendor.js?v=1779072363202",
                     "urlProvider": "network",
                     "line": 982,
                     "column": 64
@@ -4310,13 +4310,13 @@
               "type": "network-tree",
               "chains": {
                 "07210F1B04EB2927D6778F9411707D6E": {
-                  "url": "http://localhost:3000/ScriptHammer/game/3d/",
+                  "url": "http://localhost:3000/RescueDogs/game/3d/",
                   "navStartToEndTime": 131,
                   "transferSize": 18846,
                   "isLongest": true,
                   "children": {
                     "949.7": {
-                      "url": "http://localhost:3000/ScriptHammer/_next/static/css/app/layout.css?v=1779072363202",
+                      "url": "http://localhost:3000/RescueDogs/_next/static/css/app/layout.css?v=1779072363202",
                       "navStartToEndTime": 118,
                       "transferSize": 43700,
                       "children": {}
@@ -4384,7 +4384,7 @@
         ],
         "items": [
           {
-            "url": "http://localhost:3000/ScriptHammer/_next/static/css/app/layout.css?v=1779072363202",
+            "url": "http://localhost:3000/RescueDogs/_next/static/css/app/layout.css?v=1779072363202",
             "totalBytes": 43700,
             "wastedMs": 307
           }

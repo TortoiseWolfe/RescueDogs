@@ -1,11 +1,11 @@
-# ScriptHammer — Multi-Instance Development Stack
+# RescueDogs — Multi-Instance Development Stack
 #
 # Run two instances side-by-side (A/B testing):
 #   Instance A:   docker compose up
-#   Instance B:   docker compose -p scripthammer-b up
+#   Instance B:   docker compose -p rescuedogs-b up
 #
 # Host ports auto-assign (see the `:-0` defaults below). Find yours with:
-#   docker compose [-p <name>] port scripthammer 3000
+#   docker compose [-p <name>] port rescuedogs 3000
 #
 # Optional Supabase stack:
 #   docker compose --profile supabase up
@@ -14,7 +14,7 @@
 # name below. Change COMPOSE_PROJECT_NAME in .env to isolate instances that
 # share a checkout directory.
 
-name: ${COMPOSE_PROJECT_NAME:-scripthammer}
+name: ${COMPOSE_PROJECT_NAME:-rescuedogs}
 
 x-supabase-env: &supabase-env
   # Demo keys from Supabase self-hosting docs — LOCAL DEV ONLY, never deploy.
@@ -28,7 +28,7 @@ services:
   # ──────────────────────────────────────────────────────────────────────
   # Next.js app
   # ──────────────────────────────────────────────────────────────────────
-  scripthammer:
+  rescuedogs:
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -41,7 +41,7 @@ services:
     # mandatory per collision.
     #
     # Discover where you landed:
-    #   docker compose port scripthammer 3000   → 127.0.0.1:49171 (or wherever)
+    #   docker compose port rescuedogs 3000   → 127.0.0.1:49171 (or wherever)
     ports:
       - '127.0.0.1:${SH_PORT:-0}:3000'
       - '127.0.0.1:${SH_STORYBOOK_PORT:-0}:6006'
@@ -331,7 +331,7 @@ services:
     environment:
       <<: *supabase-env
       STUDIO_PG_META_URL: http://supabase-meta:8080
-      DEFAULT_ORGANIZATION_NAME: ScriptHammer
+      DEFAULT_ORGANIZATION_NAME: RescueDogs
       DEFAULT_PROJECT_NAME: Local
       SUPABASE_URL: http://supabase-kong:8000
       SUPABASE_PUBLIC_URL: http://localhost:${SH_SUPABASE_API_PORT:-54321}
@@ -399,10 +399,10 @@ services:
 
 volumes:
   node_modules:
-    name: '${COMPOSE_PROJECT_NAME:-scripthammer}_node_modules'
+    name: '${COMPOSE_PROJECT_NAME:-rescuedogs}_node_modules'
   next_cache:
-    name: '${COMPOSE_PROJECT_NAME:-scripthammer}_next_cache'
+    name: '${COMPOSE_PROJECT_NAME:-rescuedogs}_next_cache'
   supabase_db:
-    name: '${COMPOSE_PROJECT_NAME:-scripthammer}_supabase_db'
+    name: '${COMPOSE_PROJECT_NAME:-rescuedogs}_supabase_db'
   supabase_storage:
-    name: '${COMPOSE_PROJECT_NAME:-scripthammer}_supabase_storage'
+    name: '${COMPOSE_PROJECT_NAME:-rescuedogs}_supabase_storage'

@@ -14,7 +14,7 @@
 Coverage:
 
 - OWASP Top 10 (2021) full checklist
-- ScriptHammer-specific checks (Supabase, Static Export, Privacy)
+- RescueDogs-specific checks (Supabase, Static Export, Privacy)
 - Quick mode (--quick) for fast scans
 - Structured output format with severity levels
 

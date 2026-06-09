@@ -242,7 +242,7 @@ src/components/atomic/AvatarDisplay/
 **Generator Command**:
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component -- \
+docker compose exec rescuedogs pnpm run generate:component -- \
   --name AvatarUpload \
   --category atomic \
   --hasProps true \
@@ -355,7 +355,7 @@ docker compose exec scripthammer pnpm run generate:component -- \
 **Testing** (from CLAUDE.md:94):
 
 ```bash
-docker compose exec scripthammer pnpm run test:a11y:dev
+docker compose exec rescuedogs pnpm run test:a11y:dev
 ```
 
 ---

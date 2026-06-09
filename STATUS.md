@@ -1,4 +1,4 @@
-# ScriptHammer Status
+# RescueDogs Status
 
 **Snapshot**: 2026-05-17 · **Version**: v0.0.1 · **Stability**: Beta — Phase 0 (template hygiene) closed; E2E flake round 10 closed via concurrency mutex (#89); **Phase 0.5 (#48 Three.js Game) shipping in PR #95** (feature 047 at `/game/3d` — full SpecKit cascade complete, 21/21 E2E shards green); Family B (payment routes) is the next-leverage front
 
@@ -120,10 +120,10 @@ The `feat/repo-overhaul-merge` of 2026-03-04 introduced patterns that have cause
 
 | Hotspot                           | Status   | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | --------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ProtectedRoute auth race**      | Resolved | 3 prior reverts: 6b4c13a, 2c97e67, 259b38d. AdminGate now extracted to its own file with a 10-test regression suite pinning the `wasAdmin` debounce, the `cancelled` flag, and dep-array integrity. Closed by [#51](https://github.com/TortoiseWolfe/ScriptHammer/issues/51) (PR #56).                                                                                                                                                                                                                     |
+| **ProtectedRoute auth race**      | Resolved | 3 prior reverts: 6b4c13a, 2c97e67, 259b38d. AdminGate now extracted to its own file with a 10-test regression suite pinning the `wasAdmin` debounce, the `cancelled` flag, and dep-array integrity. Closed by [#51](https://github.com/TortoiseWolfe/RescueDogs/issues/51) (PR #56).                                                                                                                                                                                                                     |
 | **ConversationView regression**   | Resolved | `createClient()` calls in `useConversationRealtime.ts:46` and `useTypingIndicator.ts:32` are now wrapped in `useMemo(() => createClient(), [])`. Comment in code names the prior revert (adae629).                                                                                                                                                                                                                                                                                                         |
 | **GDPR consent Firefox**          | Resolved | `PaymentConsentModal.tsx:46-59` defers `acceptButtonRef.focus()` via `requestAnimationFrame()` after `dialog.showModal()`. Comment names the prior revert (3e67772).                                                                                                                                                                                                                                                                                                                                       |
-| **Offline-queue IndexedDB drift** | Resolved | Watchdog reclaim (60s default) + `payment_intents.idempotency_key` partial unique index + upsert-with-ignoreDuplicates. At-least-once delivery + idempotent receiver = exactly-once observable outcome. Closed by [#52](https://github.com/TortoiseWolfe/ScriptHammer/issues/52) (PR #59).                                                                                                                                                                                                                 |
+| **Offline-queue IndexedDB drift** | Resolved | Watchdog reclaim (60s default) + `payment_intents.idempotency_key` partial unique index + upsert-with-ignoreDuplicates. At-least-once delivery + idempotent receiver = exactly-once observable outcome. Closed by [#52](https://github.com/TortoiseWolfe/RescueDogs/issues/52) (PR #59).                                                                                                                                                                                                                 |
 | **E2E flake mitigation**          | Resolved | 10 rounds. Rounds 1-9 attacked symptoms (stale closures, unstable hook refs, hydration timing, retry budgets, stagger delays, Supabase priming). Round 10 (#89, commit 996211e) found the underlying cause: two concurrent E2E CI runs racing against one Supabase project — fixed via repo-wide `concurrency:` mutex in `.github/workflows/e2e.yml` plus an explicit `dispatchEvent('scroll')` after each programmatic `el.scrollTop = N` to work around WebKit's quirk of not auto-firing scroll events. |
 
 The full code-review findings (35 high-confidence items) live in [`scripts/audit/code-review-findings.json`](scripts/audit/code-review-findings.json). The pattern is consistent: stale closures after async auth, unstabilized context providers, hooks creating new Supabase clients every render.
@@ -136,7 +136,7 @@ The full code-review findings (35 high-confidence items) live in [`scripts/audit
 2. Populate 6 keys in `.env` + Supabase Vault
 3. Wire 3 missing routes (`/payment-dashboard`, `/payment-subscriptions`, `/payment-history`); `/payment-result` already shipped — see 040 entry for its remaining UX gaps
 4. Build offline-queue UI affordances (status indicator, sync pill, retry button)
-5. As each route lands, remove the corresponding skips from `tests/e2e/payment/` per [#53](https://github.com/TortoiseWolfe/ScriptHammer/issues/53)
+5. As each route lands, remove the corresponding skips from `tests/e2e/payment/` per [#53](https://github.com/TortoiseWolfe/RescueDogs/issues/53)
 
 GitHub issues #3, #4, #5, #43 track the route work; #53 is the test-skip index.
 
@@ -161,10 +161,10 @@ GitHub issues #3, #4, #5, #43 track the route work; #53 is the test-skip index.
 
 ```bash
 # Refresh truth table
-docker compose exec scripthammer node scripts/audit/refresh-truth-table.mjs  # (script TBD)
+docker compose exec rescuedogs node scripts/audit/refresh-truth-table.mjs  # (script TBD)
 
 # Verify published artifacts agree with reality
-docker compose exec scripthammer node scripts/audit/verify.mjs
+docker compose exec rescuedogs node scripts/audit/verify.mjs
 
 # List open audit-tracked work
 gh issue list --label gap-audit

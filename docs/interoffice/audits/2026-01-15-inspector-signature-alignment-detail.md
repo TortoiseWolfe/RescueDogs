@@ -96,13 +96,13 @@
 **Current (wrong):**
 
 ```xml
-<text x="960" y="1060" text-anchor="middle" ...>NNN:NN | Feature | ScriptHammer</text>
+<text x="960" y="1060" text-anchor="middle" ...>NNN:NN | Feature | RescueDogs</text>
 ```
 
 **Expected (correct):**
 
 ```xml
-<text x="40" y="1060" ...>NNN:NN | Feature | ScriptHammer</text>
+<text x="40" y="1060" ...>NNN:NN | Feature | RescueDogs</text>
 ```
 
 **Changes:**

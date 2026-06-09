@@ -13,9 +13,9 @@ import { detectedConfig } from '@/config/project-detected';
 // 13 hardcoded repo URLs → one detectedConfig.projectUrl base.
 
 export const metadata: Metadata = {
-  title: 'Documentation - ScriptHammer',
+  title: 'Documentation - RescueDogs',
   description:
-    'Documentation index for ScriptHammer — fork, configure, build, ship.',
+    'Documentation index for RescueDogs — fork, configure, build, ship.',
 };
 
 const gh = (path: string) => `${detectedConfig.projectUrl}/blob/main/${path}`;

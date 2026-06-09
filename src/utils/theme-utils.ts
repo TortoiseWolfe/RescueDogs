@@ -5,7 +5,7 @@ import { Color as ThreeColor } from 'three';
  * Used by map tiles, Disqus, Calendly, Cal.com, and Leaflet CSS.
  */
 export const DARK_THEMES = [
-  'scripthammer-dark',
+  'rescuedogs-dark',
   'dark',
   'synthwave',
   'halloween',

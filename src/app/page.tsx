@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LayeredScriptHammerLogo } from '@/components/atomic/SpinningLogo';
+import { LayeredRescueDogsLogo } from '@/components/atomic/SpinningLogo';
 import { AnimatedLogo } from '@/components/atomic/AnimatedLogo';
 import TemplateStats, {
   type TemplateStat,
@@ -52,7 +52,7 @@ const DEMOS: readonly TemplateDemo[] = [
   { label: 'Contact', href: '/contact' },
 ];
 
-const STORYBOOK_URL = 'https://tortoisewolfe.github.io/ScriptHammer/storybook/';
+const STORYBOOK_URL = 'https://tortoisewolfe.github.io/RescueDogs/storybook/';
 
 // Promoted hero card — stands alone above the grouped grid.
 const PRODUCTION_READY = {
@@ -115,7 +115,7 @@ export default function Home() {
           {/* Logo — responsive sizing, spins slowly, pauses on hover */}
           <div className="flex-shrink-0">
             <div className="h-48 w-48 sm:h-52 sm:w-52 md:h-56 md:w-56 lg:h-[350px] lg:w-[350px]">
-              <LayeredScriptHammerLogo speed="slow" pauseOnHover />
+              <LayeredRescueDogsLogo speed="slow" pauseOnHover />
             </div>
           </div>
 
@@ -175,7 +175,7 @@ export default function Home() {
                 target="_blank"
                 rel="noopener noreferrer"
                 // Solid text-base-content for AAA contrast (7:1) on
-                // scripthammer-light's #ebe5dd panel. /70 was 4.98:1 — fine
+                // rescuedogs-light's #ebe5dd panel. /70 was 4.98:1 — fine
                 // for AA but failed AAA per #21. The muted-secondary feel
                 // is preserved via text-sm + the smaller font, not opacity.
                 className="link link-hover text-base-content inline-flex min-h-11 items-center gap-2 text-sm"

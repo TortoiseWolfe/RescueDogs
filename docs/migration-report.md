@@ -70,7 +70,7 @@ Generated: 2025-09-25T16:37:38.669Z
 - [Prettier: The Code Formatting War Ender](/blog/prettier-code-formatting.md) - TortoiseWolfe (Wed Nov 12 2025 00:00:00 GMT+0000 (Coordinated Universal Time))
 - [Privacy Components: GDPR Compliance Without the Lawyers](/blog/privacy-components-gdpr.md) - TortoiseWolfe (Tue Nov 18 2025 00:00:00 GMT+0000 (Coordinated Universal Time))
 - [PWA Install: The App Store Escape Route](/blog/pwa-install-component.md) - TortoiseWolfe (Sat Oct 25 2025 00:00:00 GMT+0000 (Coordinated Universal Time))
-- [PWAs in 2025: Why My ScriptHammer Template Finally Cracked the Code](/blog/pwas-2025-scripthammer-template.md) - TortoiseWolfe (Fri Oct 10 2025 00:00:00 GMT+0000 (Coordinated Universal Time))
+- [PWAs in 2025: Why My RescueDogs Template Finally Cracked the Code](/blog/pwas-2025-rescuedogs-template.md) - TortoiseWolfe (Fri Oct 10 2025 00:00:00 GMT+0000 (Coordinated Universal Time))
 - [CSP Headers: Your XSS Force Field](/blog/security-csp-headers.md) - TortoiseWolfe (Sat Nov 15 2025 00:00:00 GMT+0000 (Coordinated Universal Time))
 - [How Spec Kit Workflow Built 33 Features in 9 Days: A Developer Transformation](/blog/spec-kit-workflow.md) - TortoiseWolfe (Wed Oct 01 2025 00:00:00 GMT+0000 (Coordinated Universal Time))
 - [Status Dashboard: The Panic Prevention System](/blog/status-dashboard-monitoring.md) - TortoiseWolfe (Tue Oct 21 2025 00:00:00 GMT+0000 (Coordinated Universal Time))

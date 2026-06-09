@@ -206,9 +206,9 @@ test.describe('/game/3d — US-2: Theme-Aware 3D Scene', () => {
 
     // Force-switch the theme via DOM attribute. We use `cupcake` (a very
     // light pastel theme) because the page's default theme is
-    // `scripthammer-dark` and the two have wildly different OKLCH primary
+    // `rescuedogs-dark` and the two have wildly different OKLCH primary
     // tokens — guaranteeing a visible delta. (Earlier the test used `dark`,
-    // which happens to share an OKLCH primary with `scripthammer-dark` in
+    // which happens to share an OKLCH primary with `rescuedogs-dark` in
     // some configurations; this caused intermittent E2E failures across
     // all 3 browsers.)
     await page.evaluate(() => {

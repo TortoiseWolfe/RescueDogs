@@ -1,5 +1,5 @@
 /**
- * Vitest globalSetup hook that scrubs stale *@scripthammer.test users +
+ * Vitest globalSetup hook that scrubs stale *@rescuedogs.test users +
  * their FK-blocking dependent rows before pnpm test:rls runs (#50).
  *
  * Wired in vitest.rls.config.ts. Skips silently when

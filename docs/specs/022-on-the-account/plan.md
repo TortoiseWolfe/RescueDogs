@@ -42,7 +42,7 @@ Implement user avatar upload with client-side crop interface on Account Settings
 
 _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
-**Constitution File**: `.specify/memory/constitution.md` (ScriptHammer Constitution v1.0.1 - 6 core principles)
+**Constitution File**: `.specify/memory/constitution.md` (RescueDogs Constitution v1.0.1 - 6 core principles)
 
 **Analysis**: No constitutional violations detected
 
@@ -749,7 +749,7 @@ async function compressImage(blob: Blob): Promise<Blob> {
 **Testing**:
 
 ```bash
-docker compose exec scripthammer pnpm run test:a11y:dev
+docker compose exec rescuedogs pnpm run test:a11y:dev
 ```
 
 ---
@@ -953,26 +953,26 @@ Expected artifacts:
 
 ```bash
 # Run migration
-docker compose exec scripthammer npx supabase db push
+docker compose exec rescuedogs npx supabase db push
 
 # Verify
-docker compose exec scripthammer npx supabase db execute \
+docker compose exec rescuedogs npx supabase db execute \
   "SELECT * FROM storage.buckets WHERE id = 'avatars';"
 ```
 
 ### Step 2: Install Dependencies
 
 ```bash
-docker compose exec scripthammer pnpm add react-easy-crop
+docker compose exec rescuedogs pnpm add react-easy-crop
 ```
 
 ### Step 3: Generate Components
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component -- \
+docker compose exec rescuedogs pnpm run generate:component -- \
   --name AvatarUpload --category atomic --hasProps true --withHooks true
 
-docker compose exec scripthammer pnpm run generate:component -- \
+docker compose exec rescuedogs pnpm run generate:component -- \
   --name AvatarDisplay --category atomic --hasProps true --withHooks false
 ```
 
@@ -988,14 +988,14 @@ Add AvatarUpload component to Account Settings page
 
 ```bash
 # Unit tests
-docker compose exec scripthammer pnpm test src/lib/avatar
-docker compose exec scripthammer pnpm test src/components/atomic/AvatarUpload
+docker compose exec rescuedogs pnpm test src/lib/avatar
+docker compose exec rescuedogs pnpm test src/components/atomic/AvatarUpload
 
 # E2E tests
-docker compose exec scripthammer pnpm run test:e2e
+docker compose exec rescuedogs pnpm run test:e2e
 
 # Accessibility tests
-docker compose exec scripthammer pnpm run test:a11y:dev
+docker compose exec rescuedogs pnpm run test:a11y:dev
 ```
 
 ---

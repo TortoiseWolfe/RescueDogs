@@ -59,7 +59,7 @@ export function hasTertiaryUser(): boolean {
  * ECDH(user_private, admin_public) = ECDH(admin_private, user_public)
  */
 export const TEST_EMAIL_ADMIN =
-  process.env.TEST_USER_ADMIN_EMAIL || 'admin@scripthammer.com';
+  process.env.TEST_USER_ADMIN_EMAIL || 'admin@rescuedogs.com';
 export const ADMIN_USER_ID =
   process.env.NEXT_PUBLIC_ADMIN_USER_ID ||
   '00000000-0000-0000-0000-000000000001';

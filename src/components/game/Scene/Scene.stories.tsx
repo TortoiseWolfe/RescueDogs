@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Root R3F Canvas for the /game/3d route. Renders the procedural ScriptHammer brand sculpt (CogRing + ScriptTags + PrintingMallet). Theme-reactive via DaisyUI CSS custom properties. Respects prefers-reduced-motion. Auto-falls-back to FallbackPanel when WebGL is unavailable.',
+          'Root R3F Canvas for the /game/3d route. Renders the procedural RescueDogs brand sculpt (CogRing + ScriptTags + PrintingMallet). Theme-reactive via DaisyUI CSS custom properties. Respects prefers-reduced-motion. Auto-falls-back to FallbackPanel when WebGL is unavailable.',
       },
     },
   },

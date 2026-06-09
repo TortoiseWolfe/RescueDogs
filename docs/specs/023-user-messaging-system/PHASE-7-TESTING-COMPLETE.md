@@ -154,7 +154,7 @@ These are **testing limitations only** - the actual service code works perfectly
 
 ```bash
 # Unit Tests
-docker compose exec scripthammer pnpm test \
+docker compose exec rescuedogs pnpm test \
   src/services/messaging/__tests__/offline-queue-service.test.ts \
   src/lib/messaging/__tests__/cache.test.ts \
   src/hooks/__tests__/useOfflineQueue.test.ts
@@ -164,7 +164,7 @@ docker compose exec scripthammer pnpm test \
 
 ```bash
 # E2E Tests (list only - require running app)
-docker compose exec scripthammer pnpm exec playwright test \
+docker compose exec rescuedogs pnpm exec playwright test \
   e2e/messaging/offline-queue.spec.ts --list
 
 # Results: 50 tests across 10 browsers/devices

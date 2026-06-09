@@ -1,9 +1,9 @@
 /**
- * Pure cleanup function for stale `*@scripthammer.test` users (#50).
+ * Pure cleanup function for stale `*@rescuedogs.test` users (#50).
  *
  * Walks the FK chain (payment_intents → subscriptions → user_profiles
  * → auth deleteUser) for every test-suite user that matches the
- * scripthammer.test domain. Best-effort: errors are logged via the
+ * rescuedogs.test domain. Best-effort: errors are logged via the
  * provided logger and the cleanup continues. Returns a summary count.
  *
  * Used by tests/rls/__setup__/cleanup-stale.ts as a Vitest globalSetup.
@@ -13,7 +13,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-const SCRIPTHAMMER_TEST_DOMAIN = '@scripthammer.test';
+const SCRIPTHAMMER_TEST_DOMAIN = '@rescuedogs.test';
 
 export interface CleanupSummary {
   /** Auth users hard-deleted via auth.admin.deleteUser. */
@@ -45,7 +45,7 @@ export async function cleanupStaleScripthammerUsers(
     errorsLogged: 0,
   };
 
-  // 1. List all auth users; filter to the scripthammer.test domain.
+  // 1. List all auth users; filter to the rescuedogs.test domain.
   const { data: listData, error: listError } =
     await client.auth.admin.listUsers({ perPage: 1000 });
   if (listError) {

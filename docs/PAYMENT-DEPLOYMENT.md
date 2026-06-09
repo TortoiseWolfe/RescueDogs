@@ -11,14 +11,14 @@ This guide helps template forkers deploy the payment integration system to their
 | Service layer (`src/lib/payments/payment-service.ts`)                                     | ✅ shipped                                                                                                                                                                    |
 | Components (`PaymentButton`, `PaymentStatusDisplay`, `SubscriptionManager`, etc.)         | ✅ shipped (full 5-file pattern)                                                                                                                                              |
 | `/payment-demo` and `/payment-result` routes                                              | ✅ shipped                                                                                                                                                                    |
-| **Outbound Edge Functions** (browser → provider checkout creation)                        | ⏳ **Partially shipped** — Phase 0a (Stripe one-off) ✅ + Phase 0b (Stripe subscription) ✅; rest tracked in [#100](https://github.com/TortoiseWolfe/ScriptHammer/issues/100) |
+| **Outbound Edge Functions** (browser → provider checkout creation)                        | ⏳ **Partially shipped** — Phase 0a (Stripe one-off) ✅ + Phase 0b (Stripe subscription) ✅; rest tracked in [#100](https://github.com/TortoiseWolfe/RescueDogs/issues/100) |
 | **Inbound Edge Functions** (provider webhooks → DB)                                       | ✅ shipped (`stripe-webhook`, `paypal-webhook`, `send-payment-email`)                                                                                                         |
 
-**Operator note:** Phases 0a + 0b ship **all Stripe paths** (one-off + subscription). Clicking "Pay" on `/payment-demo` with the **Stripe tab** works once sandbox keys are configured. The **PayPal tab** and subscription **cancel/resume** still fail with 404 until the remaining phases ship (tracked in [#100](https://github.com/TortoiseWolfe/ScriptHammer/issues/100), sub-issues [#103](https://github.com/TortoiseWolfe/ScriptHammer/issues/103)–[#106](https://github.com/TortoiseWolfe/ScriptHammer/issues/106)).
+**Operator note:** Phases 0a + 0b ship **all Stripe paths** (one-off + subscription). Clicking "Pay" on `/payment-demo` with the **Stripe tab** works once sandbox keys are configured. The **PayPal tab** and subscription **cancel/resume** still fail with 404 until the remaining phases ship (tracked in [#100](https://github.com/TortoiseWolfe/RescueDogs/issues/100), sub-issues [#103](https://github.com/TortoiseWolfe/RescueDogs/issues/103)–[#106](https://github.com/TortoiseWolfe/RescueDogs/issues/106)).
 
 ## Prerequisites
 
-- A forked ScriptHammer repo, configured per `docs/FORKING.md`
+- A forked RescueDogs repo, configured per `docs/FORKING.md`
 - A Supabase project (free tier works for development)
 - A Stripe account (for Stripe payments — sandbox to start)
 - A PayPal Business account (for PayPal payments — sandbox to start)
@@ -132,7 +132,7 @@ supabase functions deploy verify-stripe-session
 supabase functions deploy create-stripe-subscription
 ```
 
-Remaining (tracked in [#100](https://github.com/TortoiseWolfe/ScriptHammer/issues/100)):
+Remaining (tracked in [#100](https://github.com/TortoiseWolfe/RescueDogs/issues/100)):
 
 ```bash
 # Phase 0c (#103) — PayPal one-off
@@ -273,7 +273,7 @@ After sandbox smoke-test passes:
 ## Testing
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test tests/e2e/payment/
+docker compose exec rescuedogs pnpm exec playwright test tests/e2e/payment/
 ```
 
 Most tests are currently `test.skip()`'d because they require either Phase 0 to ship OR sandbox keys to be configured. The skip reasons are inline in each spec file.
@@ -285,4 +285,4 @@ Most tests are currently `test.skip()`'d because they require either Phase 0 to 
 - **Browser SDK shims**: `src/lib/payments/stripe.ts`, `src/lib/payments/paypal.ts`
 - **DB-side lifecycle**: `src/lib/payments/payment-service.ts`
 - **Tests**: `tests/e2e/payment/*.spec.ts`
-- **Open issues tracking missing work**: [#3](https://github.com/TortoiseWolfe/ScriptHammer/issues/3), [#4](https://github.com/TortoiseWolfe/ScriptHammer/issues/4), [#5](https://github.com/TortoiseWolfe/ScriptHammer/issues/5), [#43](https://github.com/TortoiseWolfe/ScriptHammer/issues/43)
+- **Open issues tracking missing work**: [#3](https://github.com/TortoiseWolfe/RescueDogs/issues/3), [#4](https://github.com/TortoiseWolfe/RescueDogs/issues/4), [#5](https://github.com/TortoiseWolfe/RescueDogs/issues/5), [#43](https://github.com/TortoiseWolfe/RescueDogs/issues/43)

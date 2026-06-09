@@ -406,7 +406,7 @@ export const calendarConfig: CalendarConfig = {
     'calendly',
   url: process.env.NEXT_PUBLIC_CALENDAR_URL || '',
   utm: {
-    source: 'scripthammer',
+    source: 'rescuedogs',
     medium: 'embed',
     campaign: 'website',
   },

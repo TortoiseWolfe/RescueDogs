@@ -71,27 +71,27 @@ By participating in this project, you agree to abide by our code of conduct:
 docker compose up
 
 # Run commands in container
-docker compose exec scripthammer pnpm dev       # Dev server
-docker compose exec scripthammer pnpm test      # Run tests
-docker compose exec scripthammer pnpm lint      # Run linting
-docker compose exec scripthammer pnpm format    # Format code
-docker compose exec scripthammer pnpm storybook  # Storybook
-docker compose exec scripthammer pnpm type-check # TypeScript
+docker compose exec rescuedogs pnpm dev       # Dev server
+docker compose exec rescuedogs pnpm test      # Run tests
+docker compose exec rescuedogs pnpm lint      # Run linting
+docker compose exec rescuedogs pnpm format    # Format code
+docker compose exec rescuedogs pnpm storybook  # Storybook
+docker compose exec rescuedogs pnpm type-check # TypeScript
 ```
 
 ### Available Scripts (Run Inside Docker)
 
 | Script                                                | Description                      |
 | ----------------------------------------------------- | -------------------------------- |
-| `docker compose exec scripthammer pnpm dev`           | Start Next.js development server |
-| `docker compose exec scripthammer pnpm build`         | Build for production             |
-| `docker compose exec scripthammer pnpm test`          | Run Vitest tests                 |
-| `docker compose exec scripthammer pnpm test:coverage` | Generate coverage report         |
-| `docker compose exec scripthammer pnpm lint`          | Run ESLint                       |
-| `docker compose exec scripthammer pnpm format`        | Format code with Prettier        |
-| `docker compose exec scripthammer pnpm format:check`  | Check formatting without changes |
-| `docker compose exec scripthammer pnpm type-check`    | Run TypeScript type checking     |
-| `docker compose exec scripthammer pnpm storybook`     | Start Storybook development      |
+| `docker compose exec rescuedogs pnpm dev`           | Start Next.js development server |
+| `docker compose exec rescuedogs pnpm build`         | Build for production             |
+| `docker compose exec rescuedogs pnpm test`          | Run Vitest tests                 |
+| `docker compose exec rescuedogs pnpm test:coverage` | Generate coverage report         |
+| `docker compose exec rescuedogs pnpm lint`          | Run ESLint                       |
+| `docker compose exec rescuedogs pnpm format`        | Format code with Prettier        |
+| `docker compose exec rescuedogs pnpm format:check`  | Check formatting without changes |
+| `docker compose exec rescuedogs pnpm type-check`    | Run TypeScript type checking     |
+| `docker compose exec rescuedogs pnpm storybook`     | Start Storybook development      |
 
 ## Coding Standards
 
@@ -172,13 +172,13 @@ docs: update installation instructions
 
 ```bash
 # Run all tests (inside Docker)
-docker compose exec scripthammer pnpm test
+docker compose exec rescuedogs pnpm test
 
 # Run tests in watch mode
-docker compose exec scripthammer pnpm test:watch
+docker compose exec rescuedogs pnpm test:watch
 
 # Generate coverage report
-docker compose exec scripthammer pnpm test:coverage
+docker compose exec rescuedogs pnpm test:coverage
 ```
 
 ### Coverage Requirements
@@ -306,7 +306,7 @@ CRUDkit/
 ## Getting Help
 
 - Check the [documentation](./docs/)
-- Review [existing issues](https://github.com/TortoiseWolfe/ScriptHammer/issues)
+- Review [existing issues](https://github.com/TortoiseWolfe/RescueDogs/issues)
 - Ask in discussions
 - Read the [README](./README.md)
 

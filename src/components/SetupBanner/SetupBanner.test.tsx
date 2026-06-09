@@ -61,7 +61,7 @@ describe('SetupBanner', () => {
       const link = screen.getByText('View setup guide');
       expect(link).toHaveAttribute(
         'href',
-        'https://github.com/TortoiseWolfe/ScriptHammer/blob/main/docs/FORKING.md#supabase-setup'
+        'https://github.com/TortoiseWolfe/RescueDogs/blob/main/docs/FORKING.md#supabase-setup'
       );
     });
 

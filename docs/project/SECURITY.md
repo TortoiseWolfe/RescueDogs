@@ -11,7 +11,7 @@ We release patches for security vulnerabilities. Which versions are eligible for
 
 ## Reporting a Vulnerability
 
-We take the security of ScriptHammer seriously. If you believe you have found a security vulnerability in ScriptHammer, please report it to us as described below.
+We take the security of RescueDogs seriously. If you believe you have found a security vulnerability in RescueDogs, please report it to us as described below.
 
 ### Please do NOT:
 
@@ -20,7 +20,7 @@ We take the security of ScriptHammer seriously. If you believe you have found a 
 
 ### Please DO:
 
-- Email us at security@scripthammer.com
+- Email us at security@rescuedogs.com
 - Include the following information in your report:
   - Type of issue (e.g., buffer overflow, SQL injection, cross-site scripting, etc.)
   - Full paths of source file(s) related to the manifestation of the issue
@@ -39,7 +39,7 @@ We take the security of ScriptHammer seriously. If you believe you have found a 
 
 ## Security Best Practices
 
-When using ScriptHammer in production, we recommend:
+When using RescueDogs in production, we recommend:
 
 ### 1. Environment Variables
 
@@ -115,7 +115,7 @@ The application implements a strict CSP in `src/app/layout.tsx` (via meta tag fo
 
 ## Security Features
 
-ScriptHammer includes several built-in security features:
+RescueDogs includes several built-in security features:
 
 ### Form Validation
 
@@ -172,12 +172,12 @@ We use the following tools to maintain security:
 
 For any security-related questions or concerns, please contact:
 
-- Security Email: security@scripthammer.com
+- Security Email: security@rescuedogs.com
 - Project Maintainers: See CONTRIBUTING.md
 
 ## Acknowledgments
 
-We appreciate the security research community's efforts in helping keep ScriptHammer and our users safe. Responsible disclosure of vulnerabilities helps us ensure the security and privacy of our users.
+We appreciate the security research community's efforts in helping keep RescueDogs and our users safe. Responsible disclosure of vulnerabilities helps us ensure the security and privacy of our users.
 
 ---
 

@@ -289,7 +289,7 @@ describe('Privacy Utilities', () => {
       downloadJSON({ test: 'data' });
 
       expect(mockElement.download).toBe(
-        'scripthammer-privacy-export-2024-01-15T10-00-00-000Z.json'
+        'rescuedogs-privacy-export-2024-01-15T10-00-00-000Z.json'
       );
     });
 

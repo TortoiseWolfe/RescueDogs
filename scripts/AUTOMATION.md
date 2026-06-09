@@ -7,7 +7,7 @@ Lessons learned from automating multi-terminal workflows with tmux and Claude Co
 **NEVER change the git remote URL.** It MUST remain SSH:
 
 ```
-origin  git@github.com:TortoiseWolfe/ScriptHammer.git
+origin  git@github.com:TortoiseWolfe/RescueDogs.git
 ```
 
 **NEVER run `git push`** - Only the Operator has SSH access.
@@ -15,7 +15,7 @@ origin  git@github.com:TortoiseWolfe/ScriptHammer.git
 If a terminal accidentally changes to HTTPS, fix immediately:
 
 ```bash
-git remote set-url origin git@github.com:TortoiseWolfe/ScriptHammer.git
+git remote set-url origin git@github.com:TortoiseWolfe/RescueDogs.git
 ```
 
 ## Known Edge Cases
@@ -169,10 +169,10 @@ fi
 
 ```bash
 # Check what a terminal is doing
-tmux capture-pane -t scripthammer:18 -p | tail -20
+tmux capture-pane -t rescuedogs:18 -p | tail -20
 
 # Check if stuck on permission prompt
-tmux capture-pane -t scripthammer:$i -p | grep -q "Do you want to proceed"
+tmux capture-pane -t rescuedogs:$i -p | grep -q "Do you want to proceed"
 ```
 
 ### Retry Failed Windows

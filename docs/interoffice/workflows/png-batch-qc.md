@@ -49,18 +49,18 @@ Or manually read: `.claude/roles/qc-operator.md`
 ```bash
 for win in WireframeQA Validator Inspector Auditor; do
   echo "=== $win ===";
-  tmux capture-pane -t scripthammer:$win -p 2>/dev/null | grep "% free" | tail -1
+  tmux capture-pane -t rescuedogs:$win -p 2>/dev/null | grep "% free" | tail -1
 done
 ```
 
 Clear/prime any terminal below 30%:
 
 ```bash
-tmux send-keys -t scripthammer:[terminal] '/clear' Enter
-tmux send-keys -t scripthammer:[terminal] Enter  # Select from autocomplete
+tmux send-keys -t rescuedogs:[terminal] '/clear' Enter
+tmux send-keys -t rescuedogs:[terminal] Enter  # Select from autocomplete
 sleep 3
-tmux send-keys -t scripthammer:[terminal] '/prime [role]' Enter
-tmux send-keys -t scripthammer:[terminal] Enter
+tmux send-keys -t rescuedogs:[terminal] '/prime [role]' Enter
+tmux send-keys -t rescuedogs:[terminal] Enter
 ```
 
 ### 3. Identify Current Batch
@@ -74,8 +74,8 @@ ls docs/design/wireframes/png/ | grep overviews
 Each QC terminal reviews ALL PNGs in the batch (not split):
 
 ```bash
-tmux send-keys -t scripthammer:WireframeQA 'Review PNG batch: docs/design/wireframes/png/overviews_XXX/ - View each annotated PNG and log visual issues to .issues.md files.' Enter
-tmux send-keys -t scripthammer:WireframeQA Enter
+tmux send-keys -t rescuedogs:WireframeQA 'Review PNG batch: docs/design/wireframes/png/overviews_XXX/ - View each annotated PNG and log visual issues to .issues.md files.' Enter
+tmux send-keys -t rescuedogs:WireframeQA Enter
 ```
 
 Repeat for: Validator, Inspector, Auditor
@@ -87,7 +87,7 @@ Check every 5 minutes:
 ```bash
 for win in WireframeQA Validator Inspector Auditor; do
   echo "=== $win ===";
-  tmux capture-pane -t scripthammer:$win -p 2>/dev/null | tail -8
+  tmux capture-pane -t rescuedogs:$win -p 2>/dev/null | tail -8
 done
 ```
 
@@ -107,7 +107,7 @@ When a terminal drops below 30%:
 **Fix:** Send extra Enter key
 
 ```bash
-tmux send-keys -t scripthammer:[terminal] Enter
+tmux send-keys -t rescuedogs:[terminal] Enter
 ```
 
 ### Autocomplete menu blocking /clear
@@ -116,8 +116,8 @@ tmux send-keys -t scripthammer:[terminal] Enter
 **Fix:** Press Enter to select from menu
 
 ```bash
-tmux send-keys -t scripthammer:[terminal] '/clear' Enter
-tmux send-keys -t scripthammer:[terminal] Enter  # Extra Enter for menu
+tmux send-keys -t rescuedogs:[terminal] '/clear' Enter
+tmux send-keys -t rescuedogs:[terminal] Enter  # Extra Enter for menu
 ```
 
 ### Terminal stuck at low %
@@ -126,11 +126,11 @@ tmux send-keys -t scripthammer:[terminal] Enter  # Extra Enter for menu
 **Fix:** Sometimes need multiple attempts
 
 ```bash
-tmux send-keys -t scripthammer:[terminal] '/clear' Enter
+tmux send-keys -t rescuedogs:[terminal] '/clear' Enter
 sleep 2
-tmux send-keys -t scripthammer:[terminal] Enter
+tmux send-keys -t rescuedogs:[terminal] Enter
 # Check result
-tmux capture-pane -t scripthammer:[terminal] -p | grep "% free"
+tmux capture-pane -t rescuedogs:[terminal] -p | grep "% free"
 ```
 
 ### Terminal not responding
@@ -139,7 +139,7 @@ tmux capture-pane -t scripthammer:[terminal] -p | grep "% free"
 **Fix:** Check if window exists
 
 ```bash
-tmux list-windows -t scripthammer | grep [terminal]
+tmux list-windows -t rescuedogs | grep [terminal]
 ```
 
 ## Best Practices

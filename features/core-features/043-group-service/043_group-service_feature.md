@@ -2,7 +2,7 @@
 
 **Feature ID**: 043
 **Category**: core-features
-**Source**: ScriptHammer README (SPEC-049)
+**Source**: RescueDogs README (SPEC-049)
 **Status**: Ready for SpecKit
 **Depends on**: 009-user-messaging-system
 

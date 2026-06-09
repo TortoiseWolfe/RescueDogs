@@ -1,6 +1,6 @@
 services:
   # Main application service
-  scripthammer:
+  rescuedogs:
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -17,7 +17,7 @@ services:
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000/ScriptHammer']
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/RescueDogs']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -31,14 +31,14 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.e2e
     depends_on:
-      scripthammer:
+      rescuedogs:
         condition: service_healthy
     volumes:
       - ../tests/e2e:/app/tests/e2e
       - ../test-results:/app/test-results
       - ../playwright-report:/app/playwright-report
     environment:
-      - BASE_URL=http://scripthammer:3000/ScriptHammer
+      - BASE_URL=http://rescuedogs:3000/RescueDogs
       - CI=false
       - PWDEBUG=${PWDEBUG:-0}
     networks:
@@ -51,7 +51,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.e2e
     depends_on:
-      scripthammer:
+      rescuedogs:
         condition: service_healthy
     ports:
       - '9323:9323' # Playwright UI port
@@ -60,7 +60,7 @@ services:
       - ../test-results:/app/test-results
       - ../playwright-report:/app/playwright-report
     environment:
-      - BASE_URL=http://scripthammer:3000/ScriptHammer
+      - BASE_URL=http://rescuedogs:3000/RescueDogs
       - DISPLAY=:99
     networks:
       - e2e-network

@@ -5,7 +5,7 @@
 
 ## Executive Summary
 
-Research into the ScriptHammer codebase reveals a well-architected project auto-detection system already in place. The main gaps are:
+Research into the RescueDogs codebase reveals a well-architected project auto-detection system already in place. The main gaps are:
 
 1. Service worker cache names are hardcoded
 2. manifest.json is static (not generated)
@@ -29,7 +29,7 @@ Research into the ScriptHammer codebase reveals a well-architected project auto-
 
 | Component      | File                        | Issue                                 |
 | -------------- | --------------------------- | ------------------------------------- |
-| Service Worker | `public/sw.js:4`            | Hardcoded `scripthammer-v1.0.0` cache |
+| Service Worker | `public/sw.js:4`            | Hardcoded `rescuedogs-v1.0.0` cache |
 | Manifest       | `public/manifest.json`      | Static file, not generated            |
 | robots.txt     | `public/robots.txt`         | Hardcoded sitemap URL                 |
 | Footer         | `src/components/Footer.tsx` | No template attribution link          |
@@ -42,7 +42,7 @@ Research into the ScriptHammer codebase reveals a well-architected project auto-
 
 ```javascript
 // Line 4 - HARDCODED
-const CACHE_VERSION = 'scripthammer-v1.0.0';
+const CACHE_VERSION = 'rescuedogs-v1.0.0';
 ```
 
 **Fix Required**: Use dynamic cache name from project config or inject at build time.
@@ -81,7 +81,7 @@ RUN git config --global --add safe.directory /app
 
 `docker-compose.yml`:
 
-- Service name `scripthammer` is hardcoded
+- Service name `rescuedogs` is hardcoded
 - GIT_AUTHOR_NAME/EMAIL not passed through
 
 ### 5. GitHub Actions (`deploy.yml`)
@@ -107,7 +107,7 @@ Create comprehensive shell script that:
 1. Accepts: `NEW_NAME`, `NEW_OWNER`, `NEW_DESCRIPTION`
 2. Auto-sanitizes input (spaces→hyphens, remove special chars)
 3. Replaces all case variations in file contents
-4. Renames files containing "ScriptHammer"
+4. Renames files containing "RescueDogs"
 5. Updates docker-compose service name
 6. Deletes public/CNAME
 7. Updates git remote origin

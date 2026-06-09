@@ -15,8 +15,8 @@
 
 @plugin "daisyui" {
   themes:
-    scripthammer-dark --default,
-    scripthammer-light,
+    rescuedogs-dark --default,
+    rescuedogs-light,
     light,
     dark,
     cupcake,
@@ -51,9 +51,9 @@
     sunset;
 }
 
-/* ScriptHammer Dark Theme — VS Code dark meets metallic craftsmanship */
+/* RescueDogs Dark Theme — VS Code dark meets metallic craftsmanship */
 @plugin "daisyui/theme" {
-  name: 'scripthammer-dark';
+  name: 'rescuedogs-dark';
   default: true;
   color-scheme: dark;
 
@@ -93,9 +93,9 @@
   --noise: 1;
 }
 
-/* ScriptHammer Light Theme — warm parchment with adjusted brand colors */
+/* RescueDogs Light Theme — warm parchment with adjusted brand colors */
 @plugin "daisyui/theme" {
-  name: 'scripthammer-light';
+  name: 'rescuedogs-light';
   default: false;
   prefersdark: false;
   color-scheme: light;
@@ -136,37 +136,37 @@
   --noise: 1;
 }
 
-/* ScriptHammer visual polish — scoped to custom themes only.
+/* RescueDogs visual polish — scoped to custom themes only.
  * Stock DaisyUI themes keep their original look untouched. */
-[data-theme='scripthammer-dark'] .card,
-[data-theme='scripthammer-light'] .card {
+[data-theme='rescuedogs-dark'] .card,
+[data-theme='rescuedogs-light'] .card {
   box-shadow:
     0 4px 6px -1px rgb(0 0 0 / 0.25),
     0 10px 15px -3px rgb(0 0 0 / 0.2),
     0 20px 25px -5px rgb(0 0 0 / 0.15);
 }
 
-[data-theme='scripthammer-dark'] .btn,
-[data-theme='scripthammer-light'] .btn {
+[data-theme='rescuedogs-dark'] .btn,
+[data-theme='rescuedogs-light'] .btn {
   box-shadow:
     0 2px 4px 0 rgb(0 0 0 / 0.2),
     0 1px 2px -1px rgb(0 0 0 / 0.15);
 }
 
-[data-theme='scripthammer-dark'] .btn:hover,
-[data-theme='scripthammer-light'] .btn:hover {
+[data-theme='rescuedogs-dark'] .btn:hover,
+[data-theme='rescuedogs-light'] .btn:hover {
   box-shadow:
     0 4px 8px -1px rgb(0 0 0 / 0.3),
     0 2px 4px -2px rgb(0 0 0 / 0.2);
 }
 
 /* DaisyUI's .stat-title and .stat-desc ship with base-content at 60% alpha,
- * which falls short of WCAG AA (3.86:1 on scripthammer-light, needs 4.5:1).
+ * which falls short of WCAG AA (3.86:1 on rescuedogs-light, needs 4.5:1).
  * Raising alpha to 80% gives ~7.1:1 on light and ~9.3:1 on dark — AAA on both. */
-[data-theme='scripthammer-dark'] .stat-title,
-[data-theme='scripthammer-dark'] .stat-desc,
-[data-theme='scripthammer-light'] .stat-title,
-[data-theme='scripthammer-light'] .stat-desc {
+[data-theme='rescuedogs-dark'] .stat-title,
+[data-theme='rescuedogs-dark'] .stat-desc,
+[data-theme='rescuedogs-light'] .stat-title,
+[data-theme='rescuedogs-light'] .stat-desc {
   color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
 }
 
@@ -367,7 +367,7 @@ p:not([class*='text-']) {
 }
 
 /* Dark background for map container before tiles load */
-[data-theme='scripthammer-dark'] .leaflet-container,
+[data-theme='rescuedogs-dark'] .leaflet-container,
 [data-theme='dark'] .leaflet-container,
 [data-theme='dracula'] .leaflet-container,
 [data-theme='synthwave'] .leaflet-container,
@@ -384,7 +384,7 @@ p:not([class*='text-']) {
 }
 
 /* Invert OSM tiles for dark mode — preserves color/detail unlike CartoDB dark_all */
-[data-theme='scripthammer-dark'] .leaflet-tile-pane,
+[data-theme='rescuedogs-dark'] .leaflet-tile-pane,
 [data-theme='dark'] .leaflet-tile-pane,
 [data-theme='dracula'] .leaflet-tile-pane,
 [data-theme='synthwave'] .leaflet-tile-pane,
@@ -440,7 +440,7 @@ p:not([class*='text-']) {
 }
 
 /* Fix Leaflet controls for dark mode */
-[data-theme='scripthammer-dark'] .leaflet-control,
+[data-theme='rescuedogs-dark'] .leaflet-control,
 [data-theme='dark'] .leaflet-control,
 [data-theme='dracula'] .leaflet-control,
 [data-theme='synthwave'] .leaflet-control,
@@ -461,7 +461,7 @@ p:not([class*='text-']) {
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-[data-theme='scripthammer-dark'] .leaflet-control a,
+[data-theme='rescuedogs-dark'] .leaflet-control a,
 [data-theme='dark'] .leaflet-control a,
 [data-theme='dracula'] .leaflet-control a,
 [data-theme='synthwave'] .leaflet-control a,

@@ -27,7 +27,7 @@ Fix 5 critical UX bugs blocking messaging functionality:
 
 ## Constitution Check
 
-_GATE: ScriptHammer Constitution v1.0.1 - 6 Core Principles_
+_GATE: RescueDogs Constitution v1.0.1 - 6 Core Principles_
 
 | Principle                  | Status  | Notes                                                   |
 | -------------------------- | ------- | ------------------------------------------------------- |

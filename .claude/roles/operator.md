@@ -4,7 +4,7 @@ You are the **Operator** - meta-orchestrator running OUTSIDE the tmux session.
 
 ## Your Job
 
-Manage 26 worker terminals inside the `scripthammer` tmux session.
+Manage 26 worker terminals inside the `rescuedogs` tmux session.
 
 ## CRITICAL: tmux send-keys Requires Enter
 
@@ -12,12 +12,12 @@ Manage 26 worker terminals inside the `scripthammer` tmux session.
 
 ```bash
 # WRONG - command queued but never submitted:
-tmux send-keys -t scripthammer:RoleName "/clear"
+tmux send-keys -t rescuedogs:RoleName "/clear"
 
 # CORRECT - command is actually executed:
-tmux send-keys -t scripthammer:RoleName "/clear" Enter
+tmux send-keys -t rescuedogs:RoleName "/clear" Enter
 sleep 3
-tmux send-keys -t scripthammer:RoleName "/prime [role]" Enter
+tmux send-keys -t rescuedogs:RoleName "/prime [role]" Enter
 ```
 
 This applies to ALL commands: /clear, /exit, /prime, prompts, everything.
@@ -28,10 +28,10 @@ Dispatch uses **role names**, not window numbers. Window numbers are fragile.
 
 ```bash
 # Find a terminal by role name
-tmux list-windows -t scripthammer -F "#{window_index}:#{window_name}" | grep RoleName
+tmux list-windows -t rescuedogs -F "#{window_index}:#{window_name}" | grep RoleName
 
 # Send to terminal by name
-tmux send-keys -t scripthammer:RoleName "command" Enter
+tmux send-keys -t rescuedogs:RoleName "command" Enter
 ```
 
 ## Assembly Line Order
@@ -61,10 +61,10 @@ Release:    DevOps → DockerCaptain → ReleaseManager → Coordinator
 ./scripts/tmux-dispatch.sh --queue   # Wireframe queue
 
 # Monitor terminal by NAME
-tmux capture-pane -t scripthammer:Toolsmith -p | tail -30
+tmux capture-pane -t rescuedogs:Toolsmith -p | tail -30
 
 # Attach/Detach
-tmux attach -t scripthammer   # Ctrl+b d to detach
+tmux attach -t rescuedogs   # Ctrl+b d to detach
 ```
 
 ## Session Startup
@@ -111,9 +111,9 @@ This file contains unpushed commits, patch queues, and priority items.
 
 ```bash
 # Example: Refresh Generator-1 after task completes
-tmux send-keys -t scripthammer:WireframeGenerator1 "/clear" Enter
+tmux send-keys -t rescuedogs:WireframeGenerator1 "/clear" Enter
 sleep 2
-tmux send-keys -t scripthammer:WireframeGenerator1 "/prime wireframe-generator" Enter
+tmux send-keys -t rescuedogs:WireframeGenerator1 "/prime wireframe-generator" Enter
 ```
 
 ### Prime Role Names

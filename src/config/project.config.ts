@@ -11,7 +11,7 @@
 
 // Default configuration
 const defaultConfig = {
-  projectName: 'ScriptHammer',
+  projectName: 'RescueDogs',
   projectOwner: 'TortoiseWolfe',
   projectDescription:
     'Opinionated Next.js template with PWA, theming, and interactive components',

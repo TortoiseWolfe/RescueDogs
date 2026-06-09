@@ -52,7 +52,7 @@ test.describe('PWA Installation', () => {
     const manifestLink = page.locator('link[rel="manifest"]');
     await expect(manifestLink).toHaveCount(1);
 
-    // Get the actual href (could be /ScriptHammer/manifest.json or /manifest.json)
+    // Get the actual href (could be /RescueDogs/manifest.json or /manifest.json)
     const href = await manifestLink.getAttribute('href');
     expect(href).toContain('manifest.json');
 

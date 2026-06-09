@@ -2,7 +2,7 @@
 
 **Feature ID**: 030
 **Category**: polish
-**Source**: ScriptHammer/docs/specs/013-calendar-integration
+**Source**: RescueDogs/docs/specs/013-calendar-integration
 **Status**: Implemented — Awaiting Provider Config (2026-04-08) — `src/components/atomic/CalendarEmbed/` (5-file pattern), `src/components/calendar/CalendarConsent.tsx`, `src/components/calendar/providers/` directory for provider integrations, `src/config/calendar.config.ts`. Route `/schedule` with layout and page wire the components together. Consent-gated. Activates when `NEXT_PUBLIC_CALENDAR_PROVIDER` and `NEXT_PUBLIC_CALENDAR_URL` are set (per-fork configuration).
 
 ## Description

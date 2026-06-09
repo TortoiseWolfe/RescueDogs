@@ -26,7 +26,7 @@
 
 3. **Start Development Server**:
    ```bash
-   docker compose exec scripthammer pnpm run dev
+   docker compose exec rescuedogs pnpm run dev
    ```
 
 ## Test Scenario: Complete Auth Flow
@@ -257,7 +257,7 @@ localStorage.clear()
 
 After quickstart validation:
 
-1. Run full E2E test suite: `docker compose exec scripthammer pnpm test:e2e`
-2. Run accessibility tests: `docker compose exec scripthammer pnpm test:a11y`
+1. Run full E2E test suite: `docker compose exec rescuedogs pnpm test:e2e`
+2. Run accessibility tests: `docker compose exec rescuedogs pnpm test:a11y`
 3. Load test with k6: `k6 run tests/load/auth-load.js`
 4. Security audit: `npm audit && snyk test`

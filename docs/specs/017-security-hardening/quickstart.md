@@ -53,7 +53,7 @@ CREATE INDEX idx_oauth_states_expires ON oauth_states(expires_at) WHERE used = F
 EOF
 
 # Apply migration
-docker compose exec scripthammer pnpm supabase:migrate
+docker compose exec rescuedogs pnpm supabase:migrate
 ```
 
 #### Step 1.2: Add RLS Policies to Payment Tables
@@ -497,16 +497,16 @@ export function validateMetadata(metadata: Record<string, unknown>): void {
 
 ```bash
 # Test 1: Payment user isolation
-docker compose exec scripthammer pnpm test src/lib/payments/secure-payment-service.test.ts
+docker compose exec rescuedogs pnpm test src/lib/payments/secure-payment-service.test.ts
 
 # Test 2: OAuth CSRF protection
-docker compose exec scripthammer pnpm test src/lib/auth/oauth-state.test.ts
+docker compose exec rescuedogs pnpm test src/lib/auth/oauth-state.test.ts
 
 # Test 3: Rate limiting
-docker compose exec scripthammer pnpm test src/lib/auth/rate-limit-check.test.ts
+docker compose exec rescuedogs pnpm test src/lib/auth/rate-limit-check.test.ts
 
 # E2E Security Tests
-docker compose exec scripthammer pnpm exec playwright test e2e/security/
+docker compose exec rescuedogs pnpm exec playwright test e2e/security/
 ```
 
 ### Manual Verification

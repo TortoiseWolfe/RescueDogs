@@ -61,7 +61,7 @@
 
 ### Primary User Story
 
-As a user of ScriptHammer's payment system, I need to create an account and authenticate securely so that I can make payments and view my payment history without anyone else being able to access my financial information.
+As a user of RescueDogs's payment system, I need to create an account and authenticate securely so that I can make payments and view my payment history without anyone else being able to access my financial information.
 
 ### Acceptance Scenarios
 
@@ -86,7 +86,7 @@ As a user of ScriptHammer's payment system, I need to create an account and auth
 #### Scenario 4: Third-Party Authentication
 
 1. **Given** I prefer not to create another password, **When** I click "Sign in with GitHub", **Then** I am redirected to GitHub to authorize
-2. **Given** I authorize the application on GitHub, **When** I return to ScriptHammer, **Then** I am automatically signed in
+2. **Given** I authorize the application on GitHub, **When** I return to RescueDogs, **Then** I am automatically signed in
 
 #### Scenario 5: Protected Content Access
 

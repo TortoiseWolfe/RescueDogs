@@ -17,13 +17,13 @@ This guide walks through setting up and testing the blog system with markdown co
 docker compose up -d
 
 # Install dependencies
-docker compose exec scripthammer pnpm install
+docker compose exec rescuedogs pnpm install
 
 # Generate blog data from markdown
-docker compose exec scripthammer pnpm run generate:blog
+docker compose exec rescuedogs pnpm run generate:blog
 
 # Start development server
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 ```
 
 ### 2. Initial Configuration
@@ -87,7 +87,7 @@ Create author registry at `/src/data/authors.json`:
 
 ```bash
 # 1. Start dev server
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 
 # 2. Create new post
 echo '---
@@ -102,7 +102,7 @@ author:
 Initial content.' > public/blog/test-hot-reload.md
 
 # 3. Regenerate blog data
-docker compose exec scripthammer pnpm run generate:blog
+docker compose exec rescuedogs pnpm run generate:blog
 
 # 4. Navigate to http://localhost:3000/blog/test-hot-reload
 # Should see the new post
@@ -120,7 +120,7 @@ author:
 Updated content with changes!' > public/blog/test-hot-reload.md
 
 # 6. Regenerate and refresh
-docker compose exec scripthammer pnpm run generate:blog
+docker compose exec rescuedogs pnpm run generate:blog
 
 # Should see updated content immediately
 ```
@@ -311,7 +311,7 @@ Navigate to the post and verify:
 
 ```bash
 # 1. Run Lighthouse audit
-docker compose exec scripthammer pnpm run lighthouse
+docker compose exec rescuedogs pnpm run lighthouse
 
 # 2. Check metrics:
 # - Performance: 90+
@@ -321,7 +321,7 @@ docker compose exec scripthammer pnpm run lighthouse
 # - CLS: <0.1
 
 # 3. Test hot reload speed
-time docker compose exec scripthammer pnpm run generate:blog
+time docker compose exec rescuedogs pnpm run generate:blog
 # Should complete in <500ms
 
 # 4. Test page load with 50+ posts

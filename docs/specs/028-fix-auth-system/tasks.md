@@ -161,15 +161,15 @@
 **Purpose**: Ensure all stories work together and pass validation
 
 - [ ] T016 [P] Run existing auth tests to ensure no regressions
-  - `docker compose exec scripthammer pnpm test src/contexts/AuthContext`
-  - `docker compose exec scripthammer pnpm test src/components/auth`
+  - `docker compose exec rescuedogs pnpm test src/contexts/AuthContext`
+  - `docker compose exec rescuedogs pnpm test src/components/auth`
 
 - [ ] T017 [P] Run E2E auth tests
-  - `docker compose exec scripthammer pnpm exec playwright test tests/e2e/auth/`
+  - `docker compose exec rescuedogs pnpm exec playwright test tests/e2e/auth/`
 
 - [ ] T018 [P] Run type-check and lint
-  - `docker compose exec scripthammer pnpm run type-check`
-  - `docker compose exec scripthammer pnpm run lint`
+  - `docker compose exec rescuedogs pnpm run type-check`
+  - `docker compose exec rescuedogs pnpm run lint`
 
 - [ ] T019 Manual verification on local environment
   - Test sign-in flow end-to-end

@@ -43,7 +43,7 @@ Reference: research.md §Topic 5
 ### T003 - Verify existing test suite passes [P] [X]
 
 ```
-Command: docker compose exec scripthammer pnpm test
+Command: docker compose exec rescuedogs pnpm test
 Action: RUN full test suite to establish baseline
 Expected: All tests pass (SC-007 baseline)
 Result: 207 passed, 2 skipped, 2136 tests passed
@@ -52,7 +52,7 @@ Result: 207 passed, 2 skipped, 2136 tests passed
 ### T004 - Verify TypeScript compilation passes [X]
 
 ```
-Command: docker compose exec scripthammer pnpm run type-check
+Command: docker compose exec rescuedogs pnpm run type-check
 Action: RUN TypeScript compiler to establish baseline
 Expected: No errors (SC-008 baseline)
 Result: No errors
@@ -182,7 +182,7 @@ Result: Clear documentation of 6 public and 6 private variables
 ### T015 - Verify security changes [Story US1] [X]
 
 ```
-Command: docker compose exec scripthammer pnpm run type-check
+Command: docker compose exec rescuedogs pnpm run type-check
 Action: RUN TypeScript compilation to verify changes don't break
 Expected: No TypeScript errors
 Result: TypeScript compilation passes
@@ -506,7 +506,7 @@ Reference: checklist CHK059, spec.md §Edge Cases
 ### T041 - Run full test suite [P]
 
 ```
-Command: docker compose exec scripthammer pnpm test
+Command: docker compose exec rescuedogs pnpm test
 Action: RUN all tests
 Expected: All tests pass (SC-007)
 ```
@@ -514,7 +514,7 @@ Expected: All tests pass (SC-007)
 ### T042 - Run TypeScript type check [P]
 
 ```
-Command: docker compose exec scripthammer pnpm run type-check
+Command: docker compose exec rescuedogs pnpm run type-check
 Action: RUN TypeScript compiler
 Expected: No errors (SC-008)
 ```
@@ -522,7 +522,7 @@ Expected: No errors (SC-008)
 ### T043 - Run linter [P]
 
 ```
-Command: docker compose exec scripthammer pnpm run lint
+Command: docker compose exec rescuedogs pnpm run lint
 Action: RUN ESLint
 Expected: No errors
 ```
@@ -530,7 +530,7 @@ Expected: No errors
 ### T044 - Verify logger test coverage
 
 ```
-Command: docker compose exec scripthammer pnpm test --coverage src/lib/logger/
+Command: docker compose exec rescuedogs pnpm test --coverage src/lib/logger/
 Action: RUN tests with coverage report
 Expected: 100% coverage (SC-006)
 ```
@@ -538,7 +538,7 @@ Expected: 100% coverage (SC-006)
 ### T045 - Build production bundle
 
 ```
-Command: docker compose exec scripthammer pnpm run build
+Command: docker compose exec rescuedogs pnpm run build
 Action: RUN production build
 Expected: Build succeeds with no errors
 ```
