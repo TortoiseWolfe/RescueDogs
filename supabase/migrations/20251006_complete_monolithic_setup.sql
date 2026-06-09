@@ -532,9 +532,21 @@ CREATE TRIGGER on_auth_user_created
 -- Cloud this INSERT works as-is because storage has already migrated there.
 -- Forward-fill the three columns here so the INSERT succeeds; storage's own
 -- ADD COLUMN IF NOT EXISTS will no-op when it catches up later.
-ALTER TABLE storage.buckets ADD COLUMN IF NOT EXISTS public             boolean DEFAULT false;
-ALTER TABLE storage.buckets ADD COLUMN IF NOT EXISTS file_size_limit    bigint;
-ALTER TABLE storage.buckets ADD COLUMN IF NOT EXISTS allowed_mime_types text[];
+--
+-- Cloud-portability guard: on hosted Supabase these columns ALREADY exist and
+-- storage tables are owned by supabase_storage_admin — running the bare ALTERs
+-- as the `postgres` role (SQL Editor, MCP) throws 42501 "must be owner of
+-- table buckets" and aborts the whole transaction. Swallow the privilege error:
+-- it only occurs in exactly the environment where the columns already exist.
+DO $$
+BEGIN
+  ALTER TABLE storage.buckets ADD COLUMN IF NOT EXISTS public             boolean DEFAULT false;
+  ALTER TABLE storage.buckets ADD COLUMN IF NOT EXISTS file_size_limit    bigint;
+  ALTER TABLE storage.buckets ADD COLUMN IF NOT EXISTS allowed_mime_types text[];
+EXCEPTION
+  WHEN insufficient_privilege THEN
+    NULL; -- hosted Supabase: columns pre-exist, nothing to forward-fill
+END $$;
 
 INSERT INTO storage.buckets (
   id,
@@ -728,13 +740,32 @@ CREATE POLICY "Service role can insert audit logs" ON auth_audit_logs
 -- initdb. Forward-fill a stub with the canonical implementation; GoTrue's
 -- CREATE OR REPLACE overwrites it at service boot. Ownership must be
 -- supabase_auth_admin or that REPLACE dies on 42501 (must be owner).
-CREATE OR REPLACE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE AS $$
-  SELECT coalesce(
-    nullif(current_setting('request.jwt.claim', true), ''),
-    nullif(current_setting('request.jwt.claims', true), '')
-  )::jsonb
-$$;
-ALTER FUNCTION auth.jwt() OWNER TO supabase_auth_admin;
+--
+-- Cloud-portability guard: on hosted Supabase GoTrue's canonical auth.jwt()
+-- ALREADY exists and is owned by supabase_auth_admin — a bare CREATE OR
+-- REPLACE as the `postgres` role (SQL Editor, MCP) throws 42501 "must be
+-- owner" and aborts the whole transaction. Only forward-fill when the
+-- function is genuinely missing (local initdb), and swallow the privilege
+-- error otherwise: it only occurs where the canonical function already exists.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'auth' AND p.proname = 'jwt'
+  ) THEN
+    CREATE OR REPLACE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE AS $fn$
+      SELECT coalesce(
+        nullif(current_setting('request.jwt.claim', true), ''),
+        nullif(current_setting('request.jwt.claims', true), '')
+      )::jsonb
+    $fn$;
+    ALTER FUNCTION auth.jwt() OWNER TO supabase_auth_admin;
+  END IF;
+EXCEPTION
+  WHEN insufficient_privilege THEN
+    NULL; -- hosted Supabase: GoTrue's auth.jwt() already in place
+END $$;
 
 DROP POLICY IF EXISTS "Admin can view all profiles" ON user_profiles;
 CREATE POLICY "Admin can view all profiles" ON user_profiles
