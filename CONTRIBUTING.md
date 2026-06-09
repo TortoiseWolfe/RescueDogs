@@ -6,6 +6,7 @@ Thank you for your interest in contributing to RescueDogs. This guide will help 
 
 - [Code of Conduct](#code-of-conduct)
 - [Prerequisites](#prerequisites)
+- [SSH Keys](#ssh-keys)
 - [Development Environment](#development-environment)
 - [Project Structure](#project-structure)
 - [Making Changes](#making-changes)
@@ -32,26 +33,80 @@ Be respectful, inclusive, and constructive. We welcome contributors of all exper
 
 ---
 
+## SSH Keys
+
+This repo uses SSH for git. One-time setup if you've never used an SSH key
+with GitHub:
+
+```bash
+# Check whether you already have a key
+ls ~/.ssh/id_ed25519.pub
+
+# If not, generate one (Enter to accept defaults; passphrase optional)
+ssh-keygen -t ed25519 -C "you@example.com"
+
+# Start the agent and load your key
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+
+# Print the PUBLIC key and copy the whole line
+cat ~/.ssh/id_ed25519.pub
+```
+
+Add the key to GitHub: **github.com → Settings → SSH and GPG keys → New SSH
+key**, paste the public key, save. Then verify:
+
+```bash
+ssh -T git@github.com
+# Expected: "Hi <username>! You've successfully authenticated..."
+```
+
+Full reference: [GitHub's SSH docs](https://docs.github.com/en/authentication/connecting-to-github-with-ssh).
+
+---
+
 ## Development Environment
 
 ### Initial Setup
 
-```bash
-# 1. Fork the repository on GitHub
+Collaborators clone the repo directly (accept your GitHub collaborator
+invitation first, or pushes will be rejected):
 
-# 2. Clone your fork
-git clone https://github.com/YOUR_USERNAME/RescueDogs.git
+```bash
+# 1. Clone via SSH
+git clone git@github.com:TortoiseWolfe/RescueDogs.git
 cd RescueDogs
 
-# 3. Add upstream remote
-git remote add upstream https://github.com/ORIGINAL_OWNER/RescueDogs.git
+# 2. Create your .env (gitignored — never committed)
+cp .env.example .env
+```
 
-# 4. Start the development environment
+Edit `.env` and set:
+
+| Variable                                                     | Value                                                                |
+| ------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `UID` / `GID`                                                | output of `id -u` and `id -g`                                        |
+| `COMPOSE_PROJECT_NAME`                                       | `rescuedogs`                                                         |
+| `SH_PORT`                                                    | `3000` (uncomment — pins the dev server to localhost:3000)           |
+| `GIT_AUTHOR_NAME` / `GIT_AUTHOR_EMAIL`                       | your name/email (commits run from the container)                     |
+| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ask a maintainer (public-by-design values, but we don't commit them) |
+
+**Never** put the Supabase `service_role` key anywhere committed or
+client-side — it's only used by seed scripts and E2E runs, locally in `.env`.
+
+```bash
+# 3. Start the development environment (first build takes 5–10 minutes)
 docker compose up -d
 
-# 5. Verify containers are running
+# 4. Verify containers are running
 docker compose ps
+# App: http://localhost:3000   Storybook: http://localhost:6006
 ```
+
+Demo sign-ins and a guided tour of the app live in the README's
+[Live Demo — Try the Loop](./README.md#-live-demo--try-the-loop) section —
+the same `adopter@demo.test` / `staff@demo.test` accounts work against your
+local dev server.
 
 ### Running Commands
 
@@ -59,15 +114,28 @@ All commands run inside the Docker container:
 
 ```bash
 # Enter the container shell
-docker compose exec app sh
+docker compose exec rescuedogs sh
 
 # Or run commands directly
-docker compose exec app pnpm run dev
-docker compose exec app pnpm run test
-docker compose exec app pnpm run lint
+docker compose exec rescuedogs pnpm run dev
+docker compose exec rescuedogs pnpm run test
+docker compose exec rescuedogs pnpm run lint
 ```
 
 **Never run `npm install` or `pnpm install` on your host machine.** This violates the Docker-first principle and may cause inconsistencies.
+
+### Committing From the Container
+
+The pre-commit hooks (lint-staged/prettier) live in the container's
+`node_modules`, so committing from the host fails with `lint-staged: not
+found`. Stage from anywhere, but **commit inside the container** (it picks up
+your `GIT_AUTHOR_NAME`/`GIT_AUTHOR_EMAIL` from `.env`):
+
+```bash
+git add -A
+docker compose exec rescuedogs git commit -m "feat: ..."
+git push   # push from the host — that's where your SSH key lives
+```
 
 ### Wireframe Viewer
 
@@ -190,7 +258,7 @@ src/components/Button/
 Use the component generator to ensure compliance:
 
 ```bash
-docker compose exec app pnpm run generate:component Button
+docker compose exec rescuedogs pnpm run generate:component Button
 ```
 
 ### Component Structure
@@ -248,19 +316,19 @@ Write tests BEFORE implementation (RED-GREEN-REFACTOR):
 
 ```bash
 # All tests
-docker compose exec app pnpm run test
+docker compose exec rescuedogs pnpm run test
 
 # Unit tests only
-docker compose exec app pnpm run test:unit
+docker compose exec rescuedogs pnpm run test:unit
 
 # E2E tests
-docker compose exec app pnpm run test:e2e
+docker compose exec rescuedogs pnpm run test:e2e
 
 # Accessibility tests
-docker compose exec app pnpm run test:a11y
+docker compose exec rescuedogs pnpm run test:a11y
 
 # Watch mode for development
-docker compose exec app pnpm run test:watch
+docker compose exec rescuedogs pnpm run test:watch
 ```
 
 ### Test File Examples
@@ -470,9 +538,10 @@ export const User = ({ name, email }) => <div>{name}</div>;
 
 ## Getting Help
 
-- **Questions**: Open a [Discussion](https://github.com/OWNER/RescueDogs/discussions)
-- **Bugs**: Open an [Issue](https://github.com/OWNER/RescueDogs/issues)
-- **Security**: Email security@example.com (do not open public issues)
+- **Questions**: Open a [Discussion](https://github.com/TortoiseWolfe/RescueDogs/discussions)
+- **Bugs**: Open an [Issue](https://github.com/TortoiseWolfe/RescueDogs/issues)
+- **Security**: Contact the maintainer (@TortoiseWolfe) directly — do not open public issues
+- **Project conventions**: [`CLAUDE.md`](./CLAUDE.md) (Docker-first rules, migration policy, upstream-sync notes) and the constitution at [`.specify/memory/constitution.md`](./.specify/memory/constitution.md)
 
 ---
 

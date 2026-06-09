@@ -60,6 +60,9 @@ bounces non-staff accounts back to the home page (that's the gate working).
 
 The Shelter nav link only appears for staff accounts; adopters never see it.
 
+> **Joining the team?** Start with [CONTRIBUTING.md](./CONTRIBUTING.md) — SSH
+> key setup, cloning, `.env`, and the Docker-first workflow, step by step.
+
 ## ✨ Key Features
 
 - 🎨 **32 DaisyUI Themes** - Light/dark variants with persistent selection
