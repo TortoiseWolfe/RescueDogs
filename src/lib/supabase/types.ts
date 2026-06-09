@@ -12,62 +12,165 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: '14.5';
   };
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
   public: {
     Tables: {
-      audit_logs: {
+      adopter_profiles: {
         Row: {
+          address_line: string | null;
+          city: string | null;
           created_at: string;
-          details: Json | null;
-          event_type: string;
+          experience: string | null;
+          full_name: string;
+          has_yard: boolean;
+          household_adults: number;
+          household_children: number;
+          housing_type: string;
           id: string;
-          ip_address: unknown;
-          user_agent: string | null;
-          user_id: string | null;
+          landlord_approval: boolean | null;
+          landlord_contact: string | null;
+          other_pets: string | null;
+          phone: string | null;
+          state: string | null;
+          updated_at: string;
+          vet_name: string | null;
+          vet_phone: string | null;
+          yard_fenced: boolean | null;
+          zip: string | null;
         };
         Insert: {
+          address_line?: string | null;
+          city?: string | null;
           created_at?: string;
-          details?: Json | null;
-          event_type: string;
-          id?: string;
-          ip_address?: unknown;
-          user_agent?: string | null;
-          user_id?: string | null;
+          experience?: string | null;
+          full_name: string;
+          has_yard?: boolean;
+          household_adults?: number;
+          household_children?: number;
+          housing_type: string;
+          id: string;
+          landlord_approval?: boolean | null;
+          landlord_contact?: string | null;
+          other_pets?: string | null;
+          phone?: string | null;
+          state?: string | null;
+          updated_at?: string;
+          vet_name?: string | null;
+          vet_phone?: string | null;
+          yard_fenced?: boolean | null;
+          zip?: string | null;
         };
         Update: {
+          address_line?: string | null;
+          city?: string | null;
           created_at?: string;
-          details?: Json | null;
-          event_type?: string;
+          experience?: string | null;
+          full_name?: string;
+          has_yard?: boolean;
+          household_adults?: number;
+          household_children?: number;
+          housing_type?: string;
           id?: string;
-          ip_address?: unknown;
-          user_agent?: string | null;
-          user_id?: string | null;
+          landlord_approval?: boolean | null;
+          landlord_contact?: string | null;
+          other_pets?: string | null;
+          phone?: string | null;
+          state?: string | null;
+          updated_at?: string;
+          vet_name?: string | null;
+          vet_phone?: string | null;
+          yard_fenced?: boolean | null;
+          zip?: string | null;
         };
         Relationships: [];
+      };
+      application_status_history: {
+        Row: {
+          application_id: string;
+          changed_by: string | null;
+          created_at: string;
+          from_status: string | null;
+          id: string;
+          note: string | null;
+          to_status: string;
+        };
+        Insert: {
+          application_id: string;
+          changed_by?: string | null;
+          created_at?: string;
+          from_status?: string | null;
+          id?: string;
+          note?: string | null;
+          to_status: string;
+        };
+        Update: {
+          application_id?: string;
+          changed_by?: string | null;
+          created_at?: string;
+          from_status?: string | null;
+          id?: string;
+          note?: string | null;
+          to_status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'application_status_history_application_id_fkey';
+            columns: ['application_id'];
+            isOneToOne: false;
+            referencedRelation: 'applications';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      applications: {
+        Row: {
+          adopter_id: string;
+          created_at: string;
+          id: string;
+          pet_id: string;
+          profile_snapshot: Json;
+          shelter_id: string;
+          status: string;
+          status_changed_at: string;
+          why_this_pet: string | null;
+        };
+        Insert: {
+          adopter_id: string;
+          created_at?: string;
+          id?: string;
+          pet_id: string;
+          profile_snapshot: Json;
+          shelter_id: string;
+          status?: string;
+          status_changed_at?: string;
+          why_this_pet?: string | null;
+        };
+        Update: {
+          adopter_id?: string;
+          created_at?: string;
+          id?: string;
+          pet_id?: string;
+          profile_snapshot?: Json;
+          shelter_id?: string;
+          status?: string;
+          status_changed_at?: string;
+          why_this_pet?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'applications_pet_id_fkey';
+            columns: ['pet_id'];
+            isOneToOne: false;
+            referencedRelation: 'pets';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'applications_shelter_id_fkey';
+            columns: ['shelter_id'];
+            isOneToOne: false;
+            referencedRelation: 'shelters';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       auth_audit_logs: {
         Row: {
@@ -593,32 +696,55 @@ export type Database = {
           },
         ];
       };
-      profiles: {
+      pets: {
         Row: {
-          avatar_url: string | null;
-          bio: string | null;
+          age_years: number | null;
+          breed: string | null;
           created_at: string;
-          display_name: string | null;
           id: string;
-          updated_at: string;
+          name: string;
+          photo_url: string | null;
+          sex: string | null;
+          shelter_id: string;
+          size: string | null;
+          species: string;
+          status: string;
         };
         Insert: {
-          avatar_url?: string | null;
-          bio?: string | null;
+          age_years?: number | null;
+          breed?: string | null;
           created_at?: string;
-          display_name?: string | null;
-          id: string;
-          updated_at?: string;
+          id?: string;
+          name: string;
+          photo_url?: string | null;
+          sex?: string | null;
+          shelter_id: string;
+          size?: string | null;
+          species?: string;
+          status?: string;
         };
         Update: {
-          avatar_url?: string | null;
-          bio?: string | null;
+          age_years?: number | null;
+          breed?: string | null;
           created_at?: string;
-          display_name?: string | null;
           id?: string;
-          updated_at?: string;
+          name?: string;
+          photo_url?: string | null;
+          sex?: string | null;
+          shelter_id?: string;
+          size?: string | null;
+          species?: string;
+          status?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'pets_shelter_id_fkey';
+            columns: ['shelter_id'];
+            isOneToOne: false;
+            referencedRelation: 'shelters';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       rate_limit_attempts: {
         Row: {
@@ -656,6 +782,62 @@ export type Database = {
           updated_at?: string;
           user_agent?: string | null;
           window_start?: string;
+        };
+        Relationships: [];
+      };
+      shelter_members: {
+        Row: {
+          created_at: string;
+          role: string;
+          shelter_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          role?: string;
+          shelter_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          role?: string;
+          shelter_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'shelter_members_shelter_id_fkey';
+            columns: ['shelter_id'];
+            isOneToOne: false;
+            referencedRelation: 'shelters';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      shelters: {
+        Row: {
+          city: string | null;
+          contact_email: string | null;
+          created_at: string;
+          id: string;
+          name: string;
+          state: string | null;
+        };
+        Insert: {
+          city?: string | null;
+          contact_email?: string | null;
+          created_at?: string;
+          id?: string;
+          name: string;
+          state?: string | null;
+        };
+        Update: {
+          city?: string | null;
+          contact_email?: string | null;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          state?: string | null;
         };
         Relationships: [];
       };
@@ -996,6 +1178,30 @@ export type Database = {
         Returns: Json;
       };
       admin_user_stats: { Args: never; Returns: Json };
+      advance_application_status: {
+        Args: {
+          p_application_id: string;
+          p_note?: string;
+          p_to_status: string;
+        };
+        Returns: {
+          adopter_id: string;
+          created_at: string;
+          id: string;
+          pet_id: string;
+          profile_snapshot: Json;
+          shelter_id: string;
+          status: string;
+          status_changed_at: string;
+          why_this_pet: string | null;
+        };
+        SetofOptions: {
+          from: '*';
+          to: 'applications';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       check_rate_limit: {
         Args: {
           p_attempt_type: string;
@@ -1013,6 +1219,10 @@ export type Database = {
         Args: { check_user_id?: string; conv_id: string };
         Returns: boolean;
       };
+      is_shelter_staff: {
+        Args: { check_user_id?: string; p_shelter: string };
+        Returns: boolean;
+      };
       record_failed_attempt: {
         Args: {
           p_attempt_type: string;
@@ -1020,6 +1230,26 @@ export type Database = {
           p_ip_address?: unknown;
         };
         Returns: undefined;
+      };
+      withdraw_application: {
+        Args: { p_application_id: string };
+        Returns: {
+          adopter_id: string;
+          created_at: string;
+          id: string;
+          pet_id: string;
+          profile_snapshot: Json;
+          shelter_id: string;
+          status: string;
+          status_changed_at: string;
+          why_this_pet: string | null;
+        };
+        SetofOptions: {
+          from: '*';
+          to: 'applications';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
     };
     Enums: {
@@ -1152,9 +1382,6 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
