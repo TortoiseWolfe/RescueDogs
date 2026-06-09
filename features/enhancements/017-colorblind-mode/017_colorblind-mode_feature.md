@@ -2,7 +2,7 @@
 
 **Feature ID**: 017
 **Category**: enhancements
-**Source**: ScriptHammer/docs/specs/005-colorblind-mode
+**Source**: RescueDogs/docs/specs/005-colorblind-mode
 **Status**: Ready for SpecKit
 
 ## Description

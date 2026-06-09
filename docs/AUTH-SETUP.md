@@ -2,7 +2,7 @@
 
 Complete guide for configuring Supabase authentication with email/password and OAuth providers.
 
-> **Forking ScriptHammer for the first time?** Start at [`docs/FORK-CHECKLIST.md`](FORK-CHECKLIST.md) — it's the master walkthrough covering every external service this template integrates with (auth, payments, email, analytics). This document is the deep-dive for the auth portion.
+> **Forking RescueDogs for the first time?** Start at [`docs/FORK-CHECKLIST.md`](FORK-CHECKLIST.md) — it's the master walkthrough covering every external service this template integrates with (auth, payments, email, analytics). This document is the deep-dive for the auth portion.
 
 ## Prerequisites
 
@@ -103,7 +103,7 @@ Complete guide for configuring Supabase authentication with email/password and O
 
 | Field                          | Value                                                        |
 | ------------------------------ | ------------------------------------------------------------ |
-| **Application name**           | `ScriptHammer` (or your preferred name)                      |
+| **Application name**           | `RescueDogs` (or your preferred name)                      |
 | **Homepage URL**               | `http://localhost:3000` (development) or your production URL |
 | **Application description**    | (Optional) "Next.js template with authentication"            |
 | **Authorization callback URL** | `https://<YOUR-PROJECT-REF>.supabase.co/auth/v1/callback`    |
@@ -163,7 +163,7 @@ Complete guide for configuring Supabase authentication with email/password and O
 **Step 3:** Configure OAuth consent screen (if needed)
 
 - **User Type:** External (for public apps)
-- **App name:** ScriptHammer
+- **App name:** RescueDogs
 - **User support email:** Your email
 - **Developer contact information:** Your email
 - Click **"Save and Continue"**
@@ -173,7 +173,7 @@ Complete guide for configuring Supabase authentication with email/password and O
 **Step 4:** Create OAuth Client ID
 
 - **Application type:** Web application
-- **Name:** ScriptHammer
+- **Name:** RescueDogs
 - **Authorized redirect URIs:** Click **"+ ADD URI"**
   - Add: `https://<YOUR-PROJECT-REF>.supabase.co/auth/v1/callback`
 - Click **"CREATE"**
@@ -215,13 +215,13 @@ Complete guide for configuring Supabase authentication with email/password and O
 **Step 2:** Set Site URL
 
 - **Development:** `http://localhost:3000`
-- **Production:** Your deployed URL (e.g., `https://scripthammer.github.io/ScriptHammer`)
+- **Production:** Your deployed URL (e.g., `https://rescuedogs.github.io/RescueDogs`)
 
 **Step 3:** Add Redirect URLs
 
 - Click **"Add redirect URL"** for each environment:
   - `http://localhost:3000/**` (development)
-  - `https://scripthammer.github.io/ScriptHammer/**` (production)
+  - `https://rescuedogs.github.io/RescueDogs/**` (production)
 
 ### 5.2 Email Auth Settings
 
@@ -250,7 +250,7 @@ Complete guide for configuring Supabase authentication with email/password and O
 **Step 1:** Start development server
 
 ```bash
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 ```
 
 **Step 2:** Navigate to sign-up page
@@ -301,7 +301,7 @@ docker compose exec scripthammer pnpm run dev
 
 ## Verification via Management API
 
-The fastest way to confirm OAuth is actually wired up correctly — without trial-and-error in the dashboard — is to query the Supabase Management API directly. This is the exact check that would have caught [issue #85](https://github.com/TortoiseWolfe/ScriptHammer/issues/85): OAuth Client IDs left as the literal strings `placeholder_google_client_id` / `placeholder_github_client_id` for weeks, surfacing only as `Error 401: invalid_client` when a user clicked "Continue with Google."
+The fastest way to confirm OAuth is actually wired up correctly — without trial-and-error in the dashboard — is to query the Supabase Management API directly. This is the exact check that would have caught [issue #85](https://github.com/TortoiseWolfe/RescueDogs/issues/85): OAuth Client IDs left as the literal strings `placeholder_google_client_id` / `placeholder_github_client_id` for weeks, surfacing only as `Error 401: invalid_client` when a user clicked "Continue with Google."
 
 **Prerequisites:**
 
@@ -377,7 +377,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 
 ```bash
 # Exit dev server (Ctrl+C)
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 ```
 
 ## Troubleshooting

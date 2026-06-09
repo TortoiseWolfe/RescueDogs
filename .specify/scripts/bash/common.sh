@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Common functions and variables for all scripts.
 #
-# ScriptHammer adaptation: this is vendored from upstream github/spec-kit.
+# RescueDogs adaptation: this is vendored from upstream github/spec-kit.
 # Two functions diverge from upstream to support our `features/<category>/<NNN-name>/`
 # layout instead of upstream's flat `specs/<NNN-name>/`:
 #   - find_feature_dir_by_prefix() — recurses through SPEC_KIT_FEATURES_ROOT/*
@@ -9,7 +9,7 @@
 # Both consult $SPEC_KIT_FEATURES_ROOT (sourced from config.sh, defaults to "features").
 # All other code is upstream-verbatim to keep future syncs cheap.
 
-# Source ScriptHammer-specific config (SPEC_KIT_FEATURES_ROOT, etc.)
+# Source RescueDogs-specific config (SPEC_KIT_FEATURES_ROOT, etc.)
 _COMMON_SH_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./config.sh
 [ -f "$_COMMON_SH_DIR/config.sh" ] && source "$_COMMON_SH_DIR/config.sh"
@@ -75,7 +75,7 @@ get_current_branch() {
     fi
 
     # For non-git repos, try to find the latest feature directory.
-    # ScriptHammer adaptation: recurse through features/<category>/* instead of flat specs/*.
+    # RescueDogs adaptation: recurse through features/<category>/* instead of flat specs/*.
     local features_root="$repo_root/${SPEC_KIT_FEATURES_ROOT:-specs}"
 
     if [[ -d "$features_root" ]]; then
@@ -226,7 +226,7 @@ feature_json_matches_feature_dir() {
 # Find feature directory by numeric prefix instead of exact branch match.
 # This allows multiple branches to work on the same spec (e.g., 004-fix-bug, 004-add-feature).
 #
-# ScriptHammer adaptation: searches recursively under features/<category>/<prefix>-*/
+# RescueDogs adaptation: searches recursively under features/<category>/<prefix>-*/
 # instead of upstream's flat specs/<prefix>-*/. Returns the matching dir's absolute
 # path (preserving the <category> segment) so downstream paths like FEATURE_DIR/spec.md
 # resolve correctly.

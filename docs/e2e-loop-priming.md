@@ -12,7 +12,7 @@
 ---
 
 ```
-Fix ScriptHammer E2E tests. The goal is every shard passing with 0 hard-failures and 0 flakies.
+Fix RescueDogs E2E tests. The goal is every shard passing with 0 hard-failures and 0 flakies.
 "Flaky" means the test failed once then passed on retry; it counts as failing.
 
 ================================================================================
@@ -149,7 +149,7 @@ METHODOLOGY (follow strictly, NO guessing)
    mkdir -p /tmp/run-logs
    for id in $(gh run view <RUN_ID> --json jobs -q '.jobs[] | select(.name|startswith("E2E")) | .databaseId'); do
      curl -sS -L -H "Authorization: token $(gh auth token)" \
-       "https://api.github.com/repos/TortoiseWolfe/ScriptHammer/actions/jobs/$id/logs" \
+       "https://api.github.com/repos/TortoiseWolfe/RescueDogs/actions/jobs/$id/logs" \
        -o /tmp/run-logs/job-$id.log
    done
 
@@ -169,8 +169,8 @@ METHODOLOGY (follow strictly, NO guessing)
    the page state at failure, identify root cause. Then patch.
 
 6. VERIFY BEFORE COMMITTING:
-   docker compose exec scripthammer pnpm run type-check
-   docker compose exec scripthammer pnpm run lint
+   docker compose exec rescuedogs pnpm run type-check
+   docker compose exec rescuedogs pnpm run lint
    Commit via Docker. Push from host.
 
 ================================================================================

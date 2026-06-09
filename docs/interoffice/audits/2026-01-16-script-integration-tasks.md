@@ -218,8 +218,8 @@
 
 ```bash
 # Send to Toolsmith terminal
-tmux send-keys -t scripthammer:Toolsmith "Read docs/interoffice/audits/2026-01-16-script-integration-tasks.md and start with Task 1 (svg-autofix integration)"
-tmux send-keys -t scripthammer:Toolsmith Enter
+tmux send-keys -t rescuedogs:Toolsmith "Read docs/interoffice/audits/2026-01-16-script-integration-tasks.md and start with Task 1 (svg-autofix integration)"
+tmux send-keys -t rescuedogs:Toolsmith Enter
 ```
 
 ---

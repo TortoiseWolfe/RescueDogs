@@ -50,7 +50,7 @@ Examples:
    - Account: `x=660, y=3, w=80`
 
 4. **Signature uses `999:NN` namespace.** Format:
-   `999:<idx> | <route-title> (as-is /<route>) | ScriptHammer`
+   `999:<idx> | <route-title> (as-is /<route>) | RescueDogs`
    Where `<idx>` is the zero-padded route index from `scripts/route-feature-map.json`.
    `999` is outside the 000–046 feature range so it reads as the as-is namespace.
 
@@ -87,7 +87,7 @@ to call out **at least 4** visible elements (ANN-002 enforces `>=4` callouts):
 Every as-is SVG must pass the shared validator:
 
 ```bash
-docker compose exec scripthammer \
+docker compose exec rescuedogs \
   python3 .specify/extensions/wireframe/scripts/validate.py \
   features/<cat>/<feat>/wireframes/as-is-<slug>.svg
 ```

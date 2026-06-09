@@ -1,7 +1,7 @@
-# Wireframe Extension Configuration — ScriptHammer
+# Wireframe Extension Configuration — RescueDogs
 # Only values that diverge from config-template.yml are set here.
 #
-# ─── ScriptHammer integration pattern (honored by Claude on every generate) ─
+# ─── RescueDogs integration pattern (honored by Claude on every generate) ─
 # A shipped-with-the-extension validator enforces chrome-consistency rules
 # on every SVG. Two apply specifically to header/footer layout:
 #
@@ -30,7 +30,7 @@
 # ────────────────────────────────────────────────────────────────────────────
 
 # Output paths
-# ScriptHammer uses `features/<category>/<NNN-name>/` (not the upstream `specs/`
+# RescueDogs uses `features/<category>/<NNN-name>/` (not the upstream `specs/`
 # default). Wireframes live in a `wireframes/` subdir inside each feature
 # directory, co-located with spec.md, plan.md, tasks.md.
 output:

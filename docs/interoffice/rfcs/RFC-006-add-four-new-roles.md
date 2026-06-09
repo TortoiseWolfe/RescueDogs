@@ -20,7 +20,7 @@
 
 ## Summary
 
-Expand the ScriptHammer multi-terminal workflow from 22 to 26 terminals by adding four new specialized roles:
+Expand the RescueDogs multi-terminal workflow from 22 to 26 terminals by adding four new specialized roles:
 
 1. **UX Designer** (Council) - 7th voting member for user experience governance
 2. **UI Designer** (Contributor) - Visual design execution

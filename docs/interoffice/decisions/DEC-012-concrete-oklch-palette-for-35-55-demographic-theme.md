@@ -20,7 +20,7 @@
 
 ## Decision
 
-RFC-010 approved the DaisyUI stock themes `business` (dark) and `forest` (intended light) as the ScriptHammer landing-page defaults. Implementation research surfaced that \*\*DaisyUI's stock `forest` is
+RFC-010 approved the DaisyUI stock themes `business` (dark) and `forest` (intended light) as the RescueDogs landing-page defaults. Implementation research surfaced that \*\*DaisyUI's stock `forest` is
 
 ## Rationale
 

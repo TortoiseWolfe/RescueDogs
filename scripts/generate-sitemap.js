@@ -5,7 +5,7 @@ const path = require('path');
 
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
 const BLOG_DATA_PATH = path.join(process.cwd(), 'src/lib/blog/blog-data.json');
-const SITE_URL = 'https://tortoisewolfe.github.io/ScriptHammer';
+const SITE_URL = 'https://tortoisewolfe.github.io/RescueDogs';
 
 // Static pages in the application (public, indexable pages only)
 const staticPages = [
@@ -137,7 +137,7 @@ ${tagPages
 function generateRobotsTxt() {
   const disallowRules = disallowedPaths.map((p) => `Disallow: ${p}`).join('\n');
 
-  const robotsTxt = `# ScriptHammer Robots.txt
+  const robotsTxt = `# RescueDogs Robots.txt
 User-agent: *
 Allow: /
 

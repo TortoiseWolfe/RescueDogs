@@ -107,7 +107,7 @@ For tests that DO render a component containing `<Canvas>`, the test must either
 
 ## Decision 5: Bundle-split verification methodology
 
-**Decision**: After implementation, run `docker compose exec scripthammer pnpm run build` and inspect the Next.js build report:
+**Decision**: After implementation, run `docker compose exec rescuedogs pnpm run build` and inspect the Next.js build report:
 
 ```
 Route (app)                              Size  First Load JS

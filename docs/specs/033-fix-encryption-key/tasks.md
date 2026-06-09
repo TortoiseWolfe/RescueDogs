@@ -16,7 +16,7 @@
 **Purpose**: Verify existing infrastructure and prepare for changes
 
 - [x] T001 Verify branch `033-fix-encryption-key` exists and is checked out
-- [x] T002 [P] Verify TypeScript compilation passes before changes: `docker compose exec scripthammer pnpm run type-check`
+- [x] T002 [P] Verify TypeScript compilation passes before changes: `docker compose exec rescuedogs pnpm run type-check`
 - [x] T003 [P] Review current key-service.ts implementation at `src/services/messaging/key-service.ts`
 
 ---
@@ -96,7 +96,7 @@
   - Update JSDoc comments
 
 - [x] T012 [US2] Verify TypeScript compilation with new signature
-  - Run: `docker compose exec scripthammer pnpm run type-check`
+  - Run: `docker compose exec rescuedogs pnpm run type-check`
   - Any callers of old signature will fail compilation (intentional)
 
 **Checkpoint**: User Story 2 complete - rotateKeys() cannot create NULL-salt keys
@@ -136,8 +136,8 @@
 
 **Purpose**: Final verification and documentation
 
-- [x] T016 [P] Run full type-check: `docker compose exec scripthammer pnpm run type-check`
-- [ ] T017 [P] Run unit tests: `docker compose exec scripthammer pnpm test`
+- [x] T016 [P] Run full type-check: `docker compose exec rescuedogs pnpm run type-check`
+- [ ] T017 [P] Run unit tests: `docker compose exec rescuedogs pnpm test`
 - [x] T018 [P] Update plan.md progress tracking to mark all phases complete
 - [ ] T019 Manual E2E verification per quickstart.md test scenarios:
   1. Sign in as test@example.com / TestPassword123!

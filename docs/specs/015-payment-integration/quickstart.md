@@ -29,7 +29,7 @@ This quickstart guide provides step-by-step integration test scenarios for valid
    docker compose up
 
    # Seed test data
-   docker compose exec scripthammer pnpm run db:seed
+   docker compose exec rescuedogs pnpm run db:seed
    ```
 
 2. **Customer initiates payment**:
@@ -328,7 +328,7 @@ document.querySelectorAll('script[src*="stripe.com"]').length; // > 0
 
    ```bash
    # Generate 10 test payments
-   docker compose exec scripthammer pnpm run db:seed:payments --count=10
+   docker compose exec rescuedogs pnpm run db:seed:payments --count=10
    ```
 
 3. **View payment list**:
@@ -393,7 +393,7 @@ LIMIT 50;
 
 ```bash
 # Simulate 500 concurrent checkout requests
-docker compose exec scripthammer pnpm run test:load -- \
+docker compose exec rescuedogs pnpm run test:load -- \
   --scenario=checkout \
   --users=500 \
   --duration=60s
@@ -408,7 +408,7 @@ docker compose exec scripthammer pnpm run test:load -- \
 
 ```bash
 # Simulate 1000 payments in 1 hour (above target of 10k/month = ~333/day)
-docker compose exec scripthammer pnpm run test:stress -- \
+docker compose exec rescuedogs pnpm run test:stress -- \
   --scenario=payment_flow \
   --rate=1000/hour
 
@@ -462,7 +462,7 @@ const { data, error } = await supabase
 
 ```bash
 # Reset test database
-docker compose exec scripthammer pnpm run db:reset
+docker compose exec rescuedogs pnpm run db:reset
 
 # Clear IndexedDB
 # In browser DevTools: Application → IndexedDB → PaymentQueue → Delete

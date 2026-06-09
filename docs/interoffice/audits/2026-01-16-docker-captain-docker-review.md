@@ -2,7 +2,7 @@
 
 **Date**: 2026-01-16
 **Reviewer**: Docker Captain
-**Scope**: All Docker-related files in ScriptHammer
+**Scope**: All Docker-related files in RescueDogs
 
 ---
 

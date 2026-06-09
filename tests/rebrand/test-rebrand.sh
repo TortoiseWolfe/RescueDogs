@@ -2,7 +2,7 @@
 # Test harness for scripts/rebrand.sh
 #
 # SAFETY: All tests run in isolated temporary directories.
-#         The actual ScriptHammer repo is NEVER modified.
+#         The actual RescueDogs repo is NEVER modified.
 #
 # Usage: ./tests/rebrand/test-rebrand.sh [test_name]
 # Run all tests: ./tests/rebrand/test-rebrand.sh
@@ -16,7 +16,7 @@ REBRAND_SCRIPT="$REPO_ROOT/scripts/rebrand.sh"
 
 # SAFETY CHECK: Never run rebrand on the actual repo
 SAFETY_FILE="$REPO_ROOT/.git/config"
-if [ -f "$SAFETY_FILE" ] && grep -q "ScriptHammer" "$SAFETY_FILE" 2>/dev/null; then
+if [ -f "$SAFETY_FILE" ] && grep -q "RescueDogs" "$SAFETY_FILE" 2>/dev/null; then
     ACTUAL_REPO=true
 else
     ACTUAL_REPO=false
@@ -52,22 +52,22 @@ run_test() {
     echo -e "\n${YELLOW}Running${NC}: $test_name"
 }
 
-# Create temporary test directory with mock ScriptHammer structure
+# Create temporary test directory with mock RescueDogs structure
 setup_temp_dir() {
     TEMP_DIR=$(mktemp -d)
     trap "rm -rf $TEMP_DIR" EXIT
 
-    # Create mock ScriptHammer repo structure in temp dir
+    # Create mock RescueDogs repo structure in temp dir
     cd "$TEMP_DIR"
     git init -q
-    git remote add origin "https://github.com/TortoiseWolfe/ScriptHammer.git"
+    git remote add origin "https://github.com/TortoiseWolfe/RescueDogs.git"
 
-    # Create essential files with ScriptHammer references
+    # Create essential files with RescueDogs references
     mkdir -p src/components
-    echo '{"name": "scripthammer", "description": "ScriptHammer template"}' > package.json
-    echo "# ScriptHammer" > README.md
-    echo "scripthammer.com" > CNAME
-    echo "export const projectName = 'ScriptHammer';" > src/components/Logo.tsx
+    echo '{"name": "rescuedogs", "description": "RescueDogs template"}' > package.json
+    echo "# RescueDogs" > README.md
+    echo "rescuedogs.com" > CNAME
+    echo "export const projectName = 'RescueDogs';" > src/components/Logo.tsx
 
     # Copy the rebrand script to temp dir
     cp "$REBRAND_SCRIPT" "$TEMP_DIR/scripts/" 2>/dev/null || {
@@ -212,17 +212,17 @@ test_dry_run_no_changes() {
 test_rerebrand_detection() {
     run_test "test_rerebrand_detection"
 
-    # Create a DIFFERENT temp dir for this test (without ScriptHammer refs)
+    # Create a DIFFERENT temp dir for this test (without RescueDogs refs)
     local REREBRAND_TEMP
     REREBRAND_TEMP=$(mktemp -d)
     trap "rm -rf $REREBRAND_TEMP" RETURN
 
-    # Create a repo WITHOUT "ScriptHammer" references (simulating already rebranded)
+    # Create a repo WITHOUT "RescueDogs" references (simulating already rebranded)
     cd "$REREBRAND_TEMP"
     git init -q
     git remote add origin "https://github.com/testuser/other-project.git"
 
-    # Create files WITHOUT ScriptHammer (already rebranded scenario)
+    # Create files WITHOUT RescueDogs (already rebranded scenario)
     mkdir -p scripts src/components
     echo '{"name": "otherproject", "description": "Other project"}' > package.json
     echo "# OtherProject" > README.md
@@ -235,7 +235,7 @@ test_rerebrand_detection() {
     local output
     output=$("$REREBRAND_TEMP/scripts/rebrand.sh" "MyApp" "testuser" "Test desc" --dry-run 2>&1 || true)
 
-    if echo "$output" | grep -qi "already.*rebranded\|no.*scripthammer.*found\|WARNING"; then
+    if echo "$output" | grep -qi "already.*rebranded\|no.*rescuedogs.*found\|WARNING"; then
         log_pass "Re-rebrand scenario detected and warned"
     else
         log_fail "Re-rebrand detection" "warning about already rebranded" "${output:0:200}"

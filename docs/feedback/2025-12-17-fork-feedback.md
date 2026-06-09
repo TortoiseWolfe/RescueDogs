@@ -1,6 +1,6 @@
 # Fork Feedback Changelog
 
-Changes made to ScriptHammer based on feedback from forked projects.
+Changes made to RescueDogs based on feedback from forked projects.
 
 If pulling upstream changes doesn't work cleanly, you can manually apply these fixes.
 
@@ -38,7 +38,7 @@ git config --global --add safe.directory /app
 
 **Solution**: Rebrand script deletes `public/CNAME` by default
 
-**Manual fix**: Delete `public/CNAME` if it contains `scripthammer.com`
+**Manual fix**: Delete `public/CNAME` if it contains `rescuedogs.com`
 
 ### Service Worker Cache Names
 
@@ -46,7 +46,7 @@ git config --global --add safe.directory /app
 
 **Solution**: Made cache names dynamic using project name in `src/lib/service-worker/`
 
-**Manual fix**: Search for `scripthammer-` in service worker files and replace with your project name.
+**Manual fix**: Search for `rescuedogs-` in service worker files and replace with your project name.
 
 ### Admin Email Fallback
 
@@ -114,7 +114,7 @@ git config --global --add safe.directory /app
 If you fork this template and encounter issues:
 
 1. Document the issue and your solution
-2. Submit a PR to ScriptHammer or open an issue
+2. Submit a PR to RescueDogs or open an issue
 3. Help future users avoid the same problems!
 
-[ScriptHammer Issues](https://github.com/TortoiseWolfe/ScriptHammer/issues)
+[RescueDogs Issues](https://github.com/TortoiseWolfe/RescueDogs/issues)

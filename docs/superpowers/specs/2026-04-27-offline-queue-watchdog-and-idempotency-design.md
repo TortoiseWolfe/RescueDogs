@@ -1,6 +1,6 @@
 # Offline Queue: Watchdog Reclaim + Idempotency
 
-**Date**: 2026-04-27 · **Tracks**: [#52](https://github.com/TortoiseWolfe/ScriptHammer/issues/52) (Family A2 in [`docs/STABILITY-TRACKING.md`](../../STABILITY-TRACKING.md))
+**Date**: 2026-04-27 · **Tracks**: [#52](https://github.com/TortoiseWolfe/RescueDogs/issues/52) (Family A2 in [`docs/STABILITY-TRACKING.md`](../../STABILITY-TRACKING.md))
 
 ## Context
 

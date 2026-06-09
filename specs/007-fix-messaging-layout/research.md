@@ -51,7 +51,7 @@ CSS Grid `grid-rows-[auto_1fr_auto]` explicitly allocates space:
 
 ### Test Case
 
-1. `docker compose exec scripthammer pnpm run db:reset` - creates 30 test messages
+1. `docker compose exec rescuedogs pnpm run db:reset` - creates 30 test messages
 2. Login as test@example.com
 3. Open conversation with admin
 4. Verify: scroll bar appears, can scroll to all messages, input visible

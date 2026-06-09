@@ -10,7 +10,7 @@
  *   - SUPABASE_PROJECT_REF and SUPABASE_ACCESS_TOKEN in .env
  *
  * Usage:
- *   docker compose exec scripthammer pnpm exec tsx scripts/generate-contract-fixtures.ts
+ *   docker compose exec rescuedogs pnpm exec tsx scripts/generate-contract-fixtures.ts
  */
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';

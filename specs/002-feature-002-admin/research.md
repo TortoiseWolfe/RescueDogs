@@ -165,7 +165,7 @@ if (!hasKeys) {
 ### Environment Variables
 
 ```bash
-TEST_USER_ADMIN_EMAIL=admin@scripthammer.com
+TEST_USER_ADMIN_EMAIL=admin@rescuedogs.com
 TEST_USER_ADMIN_PASSWORD=<secure-password>
 NEXT_PUBLIC_ADMIN_USER_ID=00000000-0000-0000-0000-000000000001
 ```
@@ -174,7 +174,7 @@ NEXT_PUBLIC_ADMIN_USER_ID=00000000-0000-0000-0000-000000000001
 
 ```sql
 INSERT INTO user_profiles (id, username, display_name)
-VALUES ('00000000-0000-0000-0000-000000000001', 'scripthammer', 'ScriptHammer')
+VALUES ('00000000-0000-0000-0000-000000000001', 'rescuedogs', 'RescueDogs')
 ON CONFLICT (id) DO NOTHING;
 ```
 

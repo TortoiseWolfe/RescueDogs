@@ -2,7 +2,7 @@
 
 **Feature ID**: 021
 **Category**: enhancements
-**Source**: ScriptHammer/docs/specs/014-geolocation-map
+**Source**: RescueDogs/docs/specs/014-geolocation-map
 **Status**: Ready for SpecKit
 
 ## Description

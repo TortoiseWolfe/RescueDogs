@@ -9,7 +9,7 @@ metadata:
   source: wireframe:commands/review.md
 ---
 
-> **ScriptHammer note:** wireframes live at `features/<category>/<NNN-name>/wireframes/`
+> **RescueDogs note:** wireframes live at `features/<category>/<NNN-name>/wireframes/`
 > (not the flat `specs/<feature>/` layout referenced below). Machine validation runs
 > `.specify/extensions/wireframe/scripts/validate.py` — an inherited 40+ rule
 > validator. On sign-off, write wireframe paths into

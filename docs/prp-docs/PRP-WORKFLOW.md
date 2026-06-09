@@ -172,7 +172,7 @@ cp docs/prp-docs/prp-methodology-prp.md docs/specs/001-prp-methodology/spec.md
 
 **Version**: 2.0.0 (Updated 2025-09-30 with full SpecKit workflow)
 
-ScriptHammer now uses the complete SpecKit workflow to convert PRPs into implemented features. This section documents the integration between PRP methodology and SpecKit commands.
+RescueDogs now uses the complete SpecKit workflow to convert PRPs into implemented features. This section documents the integration between PRP methodology and SpecKit commands.
 
 ### Before SpecKit (Original Workflow)
 
@@ -431,7 +431,7 @@ vim docs/prp-docs/visual-regression-testing-prp.md
 # Creates: Chromatic config, updated stories, CI workflow
 
 # 9. Validate
-docker compose exec scripthammer pnpm run test:suite
+docker compose exec rescuedogs pnpm run test:suite
 # All tests pass
 
 # 10. Commit and PR

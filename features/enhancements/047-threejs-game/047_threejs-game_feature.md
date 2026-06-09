@@ -6,7 +6,7 @@
 
 ## Description
 
-An interactive Three.js scene at `/game/3d` that demonstrates ScriptHammer's capacity for WebGL/3D content as a PWA. Built with `@react-three/fiber` (R3F) and `@react-three/drei` for an ergonomic React-flavored Three.js authoring experience. The scene is theme-aware (reads DaisyUI CSS custom properties so all 32 themes stay coherent across HTML chrome and 3D content), respects `prefers-reduced-motion`, and is fully static-export-compatible (no server APIs).
+An interactive Three.js scene at `/game/3d` that demonstrates RescueDogs's capacity for WebGL/3D content as a PWA. Built with `@react-three/fiber` (R3F) and `@react-three/drei` for an ergonomic React-flavored Three.js authoring experience. The scene is theme-aware (reads DaisyUI CSS custom properties so all 32 themes stay coherent across HTML chrome and 3D content), respects `prefers-reduced-motion`, and is fully static-export-compatible (no server APIs).
 
 The existing dice game (Captain, Ship & Crew) at `src/app/game/page.tsx` stays untouched at `/game` — feature `037-game-a11y-tests` already depends on it. This feature lives at a sibling sub-route. The two coexist as independent route segments via Next.js App Router's folder-based routing (`src/app/game/3d/page.tsx` → `/game/3d`).
 
@@ -175,8 +175,8 @@ if (!prefersReducedMotion) {
 ### Dependencies
 
 ```bash
-docker compose exec scripthammer pnpm add three @react-three/fiber @react-three/drei
-docker compose exec scripthammer pnpm add -D @types/three
+docker compose exec rescuedogs pnpm add three @react-three/fiber @react-three/drei
+docker compose exec rescuedogs pnpm add -D @types/three
 ```
 
 ### Out of Scope

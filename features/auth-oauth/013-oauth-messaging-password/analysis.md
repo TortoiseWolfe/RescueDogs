@@ -98,7 +98,7 @@ Plan.md "Source code" tree files vs tasks.md file paths:
 | I. Component Structure (5-file pattern)         | ✅         | ReAuthModal already 5-file; tasks T004/T005/T016 update existing test/a11y/stories files in place. No new component dirs.                                                   |
 | II. Test-First Development                      | ✅         | Tasks T003, T004, T005 (RED) precede T006 (GREEN). T009, T010 (RED) precede T011 (GREEN). T013, T014 (regression) ship as part of US-3 by design.                           |
 | III. PRP Methodology + Mandatory Wireframe Gate | ✅         | Cascade order: spec.md (clarifications encoded) → wireframes (PASSED) → plan.md → tasks.md → analysis.md → next: implement. T018 schedules post-implement screenshots step. |
-| IV. Docker-First Development                    | ✅         | Every task that runs commands prefixes with `docker compose exec scripthammer ...`. T008, T012, T015, T017, T018, T019 are all containerized.                               |
+| IV. Docker-First Development                    | ✅         | Every task that runs commands prefixes with `docker compose exec rescuedogs ...`. T008, T012, T015, T017, T018, T019 are all containerized.                               |
 | V. Progressive Enhancement                      | ✅         | Modal already client-only; mobile-first preserved (44px touch targets, mobile breakpoint flagged in plan watch-out). No JS-required-for-core-flow regressions.              |
 | VI. Privacy & Compliance First                  | ✅         | FR-018 forbids password persistence in any client-side store. FR-019 keeps recovery flow out-of-scope. No new analytics events.                                             |
 

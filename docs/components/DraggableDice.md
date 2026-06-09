@@ -147,7 +147,7 @@ The component includes comprehensive tests covering:
 Run tests with:
 
 ```bash
-docker compose exec scripthammer pnpm test src/components/atomic/DraggableDice/
+docker compose exec rescuedogs pnpm test src/components/atomic/DraggableDice/
 ```
 
 ## Related Components

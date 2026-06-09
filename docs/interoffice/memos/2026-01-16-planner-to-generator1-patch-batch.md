@@ -30,10 +30,10 @@ _Applies to annotation panel text elements only._
 
 ```xml
 <!-- FIND (centered signature) -->
-<text x="960" y="1060" text-anchor="middle" ...>NNN:NN | Feature | ScriptHammer</text>
+<text x="960" y="1060" text-anchor="middle" ...>NNN:NN | Feature | RescueDogs</text>
 
 <!-- REPLACE WITH (left-aligned) -->
-<text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#374151">NNN:NN | Feature | ScriptHammer</text>
+<text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#374151">NNN:NN | Feature | RescueDogs</text>
 ```
 
 _Remove `text-anchor="middle"`, change `x="960"` to `x="40"`._

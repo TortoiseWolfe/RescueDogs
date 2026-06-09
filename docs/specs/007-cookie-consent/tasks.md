@@ -495,18 +495,18 @@ interface CookieConsentProps {
 
 ```bash
 # Run all consent tests
-docker compose exec scripthammer pnpm test src/utils/consent
-docker compose exec scripthammer pnpm test src/contexts/Consent
-docker compose exec scripthammer pnpm test src/components/privacy
+docker compose exec rescuedogs pnpm test src/utils/consent
+docker compose exec rescuedogs pnpm test src/contexts/Consent
+docker compose exec rescuedogs pnpm test src/components/privacy
 
 # Run integration tests
-docker compose exec scripthammer pnpm test src/tests/consent
+docker compose exec rescuedogs pnpm test src/tests/consent
 
 # Check test coverage
-docker compose exec scripthammer pnpm test:coverage
+docker compose exec rescuedogs pnpm test:coverage
 
 # Run accessibility audit
-docker compose exec scripthammer pnpm test:a11y
+docker compose exec rescuedogs pnpm test:a11y
 ```
 
 ---

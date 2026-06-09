@@ -2,13 +2,13 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Clean up the component hierarchy, upgrade Storybook to v10, build a custom ScriptHammer DaisyUI theme (dark default + light variant), add theme template tooling for forks, then redesign components with the new brand identity.
+**Goal:** Clean up the component hierarchy, upgrade Storybook to v10, build a custom RescueDogs DaisyUI theme (dark default + light variant), add theme template tooling for forks, then redesign components with the new brand identity.
 
 **Architecture:** Custom DaisyUI theme defined in `globals.css` via `@plugin "daisyui"` block (Tailwind v4 CSS-first config). Storybook upgraded to v10 for full addon support. Components reskinned bottom-up: atoms first, then molecules/organisms, then pages.
 
 **Tech Stack:** Next.js 15.5, React 19, Tailwind v4, DaisyUI beta, Storybook 10, pnpm, Docker Compose
 
-**Important:** ScriptHammer runs inside Docker. All pnpm/storybook commands run via `docker compose exec scripthammer <command>` unless noted otherwise.
+**Important:** RescueDogs runs inside Docker. All pnpm/storybook commands run via `docker compose exec rescuedogs <command>` unless noted otherwise.
 
 ---
 
@@ -22,7 +22,7 @@
 
 **Step 1: List all atomic component directories**
 
-Run: `docker compose exec scripthammer ls src/components/atomic/`
+Run: `docker compose exec rescuedogs ls src/components/atomic/`
 Expected: ~33 directories. Compare against SpokeToWork's validated list.
 
 **Step 2: Identify misplaced components**
@@ -38,9 +38,9 @@ Known moves (validated in SpokeToWork):
 - `CodeBlock` → `molecular/` (composes syntax highlighting + copy button + language selector)
 - `MessageInput` → `molecular/` (composes textarea + send button + attachment)
 
-**Step 3: Audit ScriptHammer-specific extras**
+**Step 3: Audit RescueDogs-specific extras**
 
-ScriptHammer has 33 atomic dirs vs SpokeToWork's 29. Check the 4+ extras for misplacement. Components that compose multiple primitives belong in molecular/. Full interactive interfaces belong in organisms/.
+RescueDogs has 33 atomic dirs vs SpokeToWork's 29. Check the 4+ extras for misplacement. Components that compose multiple primitives belong in molecular/. Full interactive interfaces belong in organisms/.
 
 ---
 
@@ -53,7 +53,7 @@ ScriptHammer has 33 atomic dirs vs SpokeToWork's 29. Check the 4+ extras for mis
 
 **Step 1: Move the directory**
 
-Run: `docker compose exec scripthammer mkdir -p src/lib/analytics && mv src/components/atomic/GoogleAnalytics src/lib/analytics/`
+Run: `docker compose exec rescuedogs mkdir -p src/lib/analytics && mv src/components/atomic/GoogleAnalytics src/lib/analytics/`
 
 **Step 2: Update import in layout.tsx**
 
@@ -61,7 +61,7 @@ Change the import from `@/components/atomic/GoogleAnalytics` to `@/lib/analytics
 
 **Step 3: Verify build**
 
-Run: `docker compose exec scripthammer pnpm run type-check`
+Run: `docker compose exec rescuedogs pnpm run type-check`
 Expected: No errors
 
 ---
@@ -75,7 +75,7 @@ Expected: No errors
 
 **Step 1: Move the directory**
 
-Run: `docker compose exec scripthammer mv src/components/atomic/DiceTray src/components/organisms/`
+Run: `docker compose exec rescuedogs mv src/components/atomic/DiceTray src/components/organisms/`
 
 **Step 2: Fix relative imports inside DiceTray**
 
@@ -91,7 +91,7 @@ Search for imports of DiceTray and update paths.
 
 **Step 5: Verify build**
 
-Run: `docker compose exec scripthammer pnpm run type-check`
+Run: `docker compose exec rescuedogs pnpm run type-check`
 
 ---
 
@@ -110,7 +110,7 @@ Run: `docker compose exec scripthammer pnpm run type-check`
 **Step 1: Move all 6 directories**
 
 ```bash
-docker compose exec scripthammer bash -c "
+docker compose exec rescuedogs bash -c "
   mv src/components/atomic/AvatarUpload src/components/molecular/
   mv src/components/atomic/FontSwitcher src/components/molecular/
   mv src/components/atomic/ColorblindToggle src/components/molecular/
@@ -142,13 +142,13 @@ Expected files to update:
 
 **Step 5: Verify build**
 
-Run: `docker compose exec scripthammer pnpm run type-check && pnpm run build`
+Run: `docker compose exec rescuedogs pnpm run type-check && pnpm run build`
 Expected: Clean build with no errors
 
 **Step 6: Commit**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add -A
 git commit -m "refactor: move misplaced components to correct hierarchy levels
 
@@ -173,17 +173,17 @@ Convert relative imports to @/ absolute paths."
 
 **Step 1: Verify Node version inside Docker**
 
-Run: `docker compose exec scripthammer node --version`
+Run: `docker compose exec rescuedogs node --version`
 Expected: v22.x (meets Storybook 10 requirement of 20.19+)
 
 **Step 2: Verify current Storybook version**
 
-Run: `docker compose exec scripthammer npx storybook --version`
+Run: `docker compose exec rescuedogs npx storybook --version`
 Expected: 9.1.x
 
 **Step 3: Check which stories currently render**
 
-Run: `docker compose exec scripthammer npx storybook build --test 2>&1 | tail -30`
+Run: `docker compose exec rescuedogs npx storybook build --test 2>&1 | tail -30`
 Expected: Build output showing which stories compile. Note any failures.
 
 ---
@@ -198,23 +198,23 @@ Expected: Build output showing which stories compile. Note any failures.
 
 **Step 1: Run the Storybook upgrade**
 
-Run: `docker compose exec scripthammer npx storybook@latest upgrade`
+Run: `docker compose exec rescuedogs npx storybook@latest upgrade`
 Expected: Interactive prompts for automigrations. Accept all recommended changes.
 
 **Step 2: Verify the upgrade**
 
-Run: `docker compose exec scripthammer npx storybook --version`
+Run: `docker compose exec rescuedogs npx storybook --version`
 Expected: 10.x
 
 **Step 3: Install any new dependencies**
 
-Run: `docker compose exec scripthammer pnpm install`
+Run: `docker compose exec rescuedogs pnpm install`
 Expected: Clean install with no peer dependency errors
 
 **Step 4: Commit the upgrade**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add package.json pnpm-lock.yaml .storybook/
 git commit -m "chore: upgrade Storybook from 9.1.5 to 10.x"
 ```
@@ -230,7 +230,7 @@ git commit -m "chore: upgrade Storybook from 9.1.5 to 10.x"
 
 **Step 1: Check if addon-essentials was added by the upgrade**
 
-Run: `docker compose exec scripthammer grep -r "addon-essentials" .storybook/main.ts`
+Run: `docker compose exec rescuedogs grep -r "addon-essentials" .storybook/main.ts`
 Expected: Either found (upgrade added it) or not found (need to add manually)
 
 **Step 2: If not present, add addon-essentials**
@@ -250,17 +250,17 @@ Remove `@storybook/addon-onboarding`, `@storybook/addon-docs`, and `@chromatic-c
 
 **Step 3: Install addon-essentials if needed**
 
-Run: `docker compose exec scripthammer pnpm add -D @storybook/addon-essentials`
+Run: `docker compose exec rescuedogs pnpm add -D @storybook/addon-essentials`
 
 **Step 4: Verify Storybook starts**
 
-Run: `docker compose exec scripthammer npx storybook build --test 2>&1 | tail -30`
+Run: `docker compose exec rescuedogs npx storybook build --test 2>&1 | tail -30`
 Expected: Clean build with no addon errors
 
 **Step 5: Commit**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add .storybook/ package.json pnpm-lock.yaml
 git commit -m "chore: re-add addon-essentials (Controls, Actions, Viewport)"
 ```
@@ -275,22 +275,22 @@ git commit -m "chore: re-add addon-essentials (Controls, Actions, Viewport)"
 
 **Step 1: Check current version**
 
-Run: `docker compose exec scripthammer pnpm list @storybook/test`
+Run: `docker compose exec rescuedogs pnpm list @storybook/test`
 Expected: 9.0.0-alpha.2
 
 **Step 2: Upgrade to stable**
 
-Run: `docker compose exec scripthammer pnpm add -D @storybook/test@latest`
+Run: `docker compose exec rescuedogs pnpm add -D @storybook/test@latest`
 
 **Step 3: Verify stories that use `fn()` still compile**
 
-Run: `docker compose exec scripthammer npx storybook build --test 2>&1 | tail -30`
+Run: `docker compose exec rescuedogs npx storybook build --test 2>&1 | tail -30`
 Expected: Clean build
 
 **Step 4: Commit**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add package.json pnpm-lock.yaml
 git commit -m "chore: upgrade @storybook/test from alpha to stable"
 ```
@@ -306,7 +306,7 @@ git commit -m "chore: upgrade @storybook/test from alpha to stable"
 
 **Step 1: Run a full Storybook build**
 
-Run: `docker compose exec scripthammer npx storybook build --test 2>&1`
+Run: `docker compose exec rescuedogs npx storybook build --test 2>&1`
 Expected: All stories compile. Note any failures.
 
 **Step 2: Fix any broken stories**
@@ -324,7 +324,7 @@ Replace the "Temporarily Removed Packages" section with current status. Remove w
 **Step 4: Commit**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add src/ docs/STORYBOOK_NOTES.md
 git commit -m "fix: resolve story compilation errors after Storybook v10 upgrade
 
@@ -333,7 +333,7 @@ Update STORYBOOK_NOTES.md to reflect v10 state."
 
 ---
 
-## Phase 2: ScriptHammer Brand Theme ✅ COMPLETE
+## Phase 2: RescueDogs Brand Theme ✅ COMPLETE
 
 ### Task 10: Research DaisyUI custom theme syntax for Tailwind v4
 
@@ -344,7 +344,7 @@ Update STORYBOOK_NOTES.md to reflect v10 state."
 
 **Step 1: Check DaisyUI version**
 
-Run: `docker compose exec scripthammer pnpm list daisyui`
+Run: `docker compose exec rescuedogs pnpm list daisyui`
 Expected: beta version
 
 **Step 2: Research custom theme syntax**
@@ -357,7 +357,7 @@ Note the exact syntax needed for Task 11.
 
 ---
 
-### Task 11: Define scripthammer-dark theme
+### Task 11: Define rescuedogs-dark theme
 
 **Files:**
 
@@ -368,7 +368,7 @@ Note the exact syntax needed for Task 11.
 After the `@plugin "daisyui"` block, add the custom dark theme:
 
 ```css
-[data-theme='scripthammer-dark'] {
+[data-theme='rescuedogs-dark'] {
   --color-base-100: #1a1a2e; /* Near-black charcoal - primary surface */
   --color-base-200: #16162a; /* Darker charcoal - secondary surface */
   --color-base-300: #25254a; /* Lighter charcoal - borders/dividers */
@@ -399,26 +399,26 @@ Note: Exact DaisyUI v5 CSS custom property names may differ. Verify against docs
 
 ```css
 @plugin "daisyui" {
-  themes: scripthammer-dark, scripthammer-light, light, dark;
+  themes: rescuedogs-dark, rescuedogs-light, light, dark;
 }
 ```
 
 **Step 3: Verify the theme renders**
 
-Run: `docker compose exec scripthammer pnpm run build`
+Run: `docker compose exec rescuedogs pnpm run build`
 Expected: Clean build with no CSS errors
 
 **Step 4: Commit**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add src/app/globals.css
-git commit -m "feat: add scripthammer-dark custom DaisyUI theme"
+git commit -m "feat: add rescuedogs-dark custom DaisyUI theme"
 ```
 
 ---
 
-### Task 12: Define scripthammer-light theme
+### Task 12: Define rescuedogs-light theme
 
 **Files:**
 
@@ -427,7 +427,7 @@ git commit -m "feat: add scripthammer-dark custom DaisyUI theme"
 **Step 1: Add light variant**
 
 ```css
-[data-theme='scripthammer-light'] {
+[data-theme='rescuedogs-light'] {
   --color-base-100: #f5f0eb; /* Warm parchment - primary surface */
   --color-base-200: #ebe5dd; /* Slightly darker parchment */
   --color-base-300: #ddd5cb; /* Borders */
@@ -458,15 +458,15 @@ Check that primary, secondary, and accent colors meet 4.5:1 contrast ratio again
 
 **Step 3: Verify build**
 
-Run: `docker compose exec scripthammer pnpm run build`
+Run: `docker compose exec rescuedogs pnpm run build`
 Expected: Clean build
 
 **Step 4: Commit**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add src/app/globals.css
-git commit -m "feat: add scripthammer-light custom DaisyUI theme"
+git commit -m "feat: add rescuedogs-light custom DaisyUI theme"
 ```
 
 ---
@@ -475,12 +475,12 @@ git commit -m "feat: add scripthammer-light custom DaisyUI theme"
 
 **Files:**
 
-- Modify: `src/components/ThemeScript.tsx` (change default from 'light' to 'scripthammer-dark')
+- Modify: `src/components/ThemeScript.tsx` (change default from 'light' to 'rescuedogs-dark')
 - Modify: `.storybook/preview.tsx` (add custom themes to switcher, set default)
 
 **Step 1: Update ThemeScript default**
 
-In `src/components/ThemeScript.tsx`, change the fallback theme from `'light'` to `'scripthammer-dark'`.
+In `src/components/ThemeScript.tsx`, change the fallback theme from `'light'` to `'rescuedogs-dark'`.
 
 **Step 2: Update Storybook theme switcher**
 
@@ -488,26 +488,26 @@ In `.storybook/preview.tsx`, add custom themes to the `withThemeByDataAttribute`
 
 ```typescript
 themes: {
-  'scripthammer-dark': 'scripthammer-dark',
-  'scripthammer-light': 'scripthammer-light',
+  'rescuedogs-dark': 'rescuedogs-dark',
+  'rescuedogs-light': 'rescuedogs-light',
   light: 'light',
   dark: 'dark',
   // ... keep other themes
 },
-defaultTheme: 'scripthammer-dark',
+defaultTheme: 'rescuedogs-dark',
 ```
 
 **Step 3: Verify Storybook renders with new default**
 
-Run: `docker compose exec scripthammer npx storybook build --test 2>&1 | tail -10`
+Run: `docker compose exec rescuedogs npx storybook build --test 2>&1 | tail -10`
 Expected: Clean build
 
 **Step 4: Commit**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add src/components/ThemeScript.tsx .storybook/preview.tsx
-git commit -m "feat: set scripthammer-dark as default theme"
+git commit -m "feat: set rescuedogs-dark as default theme"
 ```
 
 ---
@@ -518,20 +518,20 @@ git commit -m "feat: set scripthammer-dark as default theme"
 
 - Modify: `src/app/globals.css` (update dark theme CSS selectors for map controls)
 
-**Step 1: Add scripthammer-dark to map control selectors**
+**Step 1: Add rescuedogs-dark to map control selectors**
 
-The existing CSS has selectors like `[data-theme='dark'] .maplibregl-ctrl-group`. Add `[data-theme='scripthammer-dark']` to each group of dark theme selectors for both MapLibre and Leaflet controls.
+The existing CSS has selectors like `[data-theme='dark'] .maplibregl-ctrl-group`. Add `[data-theme='rescuedogs-dark']` to each group of dark theme selectors for both MapLibre and Leaflet controls.
 
 **Step 2: Verify build**
 
-Run: `docker compose exec scripthammer pnpm run build`
+Run: `docker compose exec rescuedogs pnpm run build`
 
 **Step 3: Commit**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add src/app/globals.css
-git commit -m "fix: add scripthammer-dark to map control dark theme selectors"
+git commit -m "fix: add rescuedogs-dark to map control dark theme selectors"
 ```
 
 ---
@@ -557,7 +557,7 @@ Document how to define a custom DaisyUI theme with the `@plugin` CSS-first synta
 **Step 2: Commit**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add docs/CUSTOM-THEME.md
 git commit -m "docs: add custom theme creation guide for forks"
 ```
@@ -587,7 +587,7 @@ Expected: Shows theme scaffold would be generated
 **Step 4: Commit**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add scripts/rebrand.sh docs/FORKING.md
 git commit -m "feat: add theme scaffolding to rebrand script for forks"
 ```
@@ -605,11 +605,11 @@ git commit -m "feat: add theme scaffolding to rebrand script for forks"
 
 **Step 1: Start Storybook**
 
-Run: `docker compose exec scripthammer npx storybook dev -p 6006 --no-open`
+Run: `docker compose exec rescuedogs npx storybook dev -p 6006 --no-open`
 
 **Step 2: Review Button in both themes**
 
-Open `http://localhost:6006` and switch between scripthammer-dark and scripthammer-light themes. Document what needs to change:
+Open `http://localhost:6006` and switch between rescuedogs-dark and rescuedogs-light themes. Document what needs to change:
 
 - Do variant colors look right with the new palette?
 - Are hover/active/focus states visible and accessible?
@@ -640,9 +640,9 @@ Verify WCAG AA contrast for all variant+theme combinations.
 **Step 4: Commit**
 
 ```bash
-cd ~/repos/ScriptHammer
+cd ~/repos/RescueDogs
 git add src/components/atomic/Button/
-git commit -m "style: update Button component for ScriptHammer theme"
+git commit -m "style: update Button component for RescueDogs theme"
 ```
 
 ---
@@ -664,9 +664,9 @@ Follow the same audit-then-update pattern for:
 
 - **Task 20:** Input/form field components
 - **Task 21:** Badge/Tag components
-- **Task 22:** AnimatedLogo / SpinningLogo (ScriptHammer's mallet)
+- **Task 22:** AnimatedLogo / SpinningLogo (RescueDogs's mallet)
 
-### Tasks 23-24: ScriptHammer-specific components
+### Tasks 23-24: RescueDogs-specific components
 
 - **Task 23:** Dice / DiceTray (gaming elements)
 - **Task 24:** CaptainShipCrew, SetupBanner
@@ -711,4 +711,4 @@ Each page reviewed in browser, adjusted for layout/spacing/composition, committe
 - Phase 0 is validated by SpokeToWork's completed hierarchy cleanup. Apply the same moves with confidence.
 - The Storybook upgrade (Phase 1) is a prerequisite for Phases 2+. Don't start Phase 2 until Storybook is verified working.
 - DaisyUI custom theme CSS property names may need adjustment based on the exact beta version installed. Task 10 handles this research.
-- Phase 3 (theme template system) is unique to ScriptHammer as a template project.
+- Phase 3 (theme template system) is unique to RescueDogs as a template project.

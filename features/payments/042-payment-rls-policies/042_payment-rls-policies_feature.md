@@ -2,7 +2,7 @@
 
 **Feature ID**: 042
 **Category**: payments
-**Source**: ScriptHammer README (SPEC-058)
+**Source**: RescueDogs README (SPEC-058)
 **Status**: Policies Written, Unverified by E2E (2026-04-08). Built: 20+ RLS policies in the monolithic migration covering `payment_intents`, `payment_results`, `subscriptions`, `webhook_events`, `payment_provider_config` — policies for "users view/create own", "payment results immutable/non-deletable", "service role writes", "admin views all". Missing: E2E verification that policies actually enforce what's intended. 25 E2E stubs in `tests/e2e/payment/08-security-rls.spec.ts` are written but skipped because several require `SUPABASE_SERVICE_ROLE_KEY` in the E2E context (which is now available per CLAUDE.md) AND the assertion logic needs to be reviewed against the actual policy wording. Also missing: rate-limit UI for payment endpoints (separate from DB policies). Work is "un-skip tests, run them, fix any policies that fail" rather than "write new policies from scratch".
 
 ## Description

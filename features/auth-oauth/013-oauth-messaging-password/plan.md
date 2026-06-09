@@ -54,7 +54,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 | I. Component Structure Compliance                | ✅         | Extends `src/components/auth/ReAuthModal/` 5-file pattern in place. No new directories. Storybook stories grow from 1 → 5.                                                                                                                                 |
 | II. Test-First Development                       | ✅         | RED tests authored first per `tasks.md` ordering: setup-mode renders confirm field, mismatch validation, submit branches, provider badge conditional. New E2E spec at `tests/e2e/messaging/oauth-setup-modal.spec.ts` precedes the EncryptionKeyGate edit. |
 | III. PRP Methodology w/ Mandatory Wireframe Gate | ✅         | Wireframes 01 + 02 PASSED 2026-05-06 (validate.py v5.4, 0 errors). `## UI Mockup` section in spec.md links both. This file is the cascade's `/speckit.plan` step.                                                                                          |
-| IV. Docker-First Development                     | ✅         | All commands run via `docker compose exec scripthammer ...`. Tests run inside the container. No host pnpm.                                                                                                                                                 |
+| IV. Docker-First Development                     | ✅         | All commands run via `docker compose exec rescuedogs ...`. Tests run inside the container. No host pnpm.                                                                                                                                                 |
 | V. Progressive Enhancement                       | ✅         | Modal uses progressive disclosure (setup mode shows confirm field only when needed). 44px touch targets preserved. Mobile breakpoint validated against wireframe 01. No JS-required-for-core-flow changes; modal is already client-only.                   |
 | VI. Privacy & Compliance First                   | ✅         | Messaging password NEVER persisted (FR-018). Recovery flow explicitly out of scope (FR-019). No new analytics/tracking events. Provider badge surfaces existing `getOAuthProvider(user)` data.                                                             |
 
@@ -133,7 +133,7 @@ All technical questions resolved during exploration (see prior conversation):
 - Modal triggers: `EncryptionKeyGate.tsx:92` calls `setNeedsReAuth(true)` when keys exist in DB but not in IndexedDB cache. The new condition: also trigger when `isOAuthUser(user) && !hasKeysForUser(user.id)`, with mode === 'setup' instead of 'unlock'.
 - Service surface: `KeyManagementService.initializeKeys(password)` (line 74) handles setup; `KeyManagementService.deriveKeys(password)` (line 172) handles unlock. Both already exist.
 - Welcome message: `app/messages/setup/page.tsx:133–149` invokes `welcomeService.sendWelcomeMessage(user.id, keyPair.privateKey, keyPair.publicKeyJwk)`. Extract to a helper for reuse.
-- Credential Management API: `navigator.credentials.store(new PasswordCredential(...))` works in both page and modal contexts. Verify in browser during implementation per watch-out 2 in `~/.claude/plans/continue-the-scripthammer-ticklish-deer.md`.
+- Credential Management API: `navigator.credentials.store(new PasswordCredential(...))` works in both page and modal contexts. Verify in browser during implementation per watch-out 2 in `~/.claude/plans/continue-the-rescuedogs-ticklish-deer.md`.
 - Provider badge: simple text token "via Google" / "via GitHub" — no new icon system. Conditional on `isOAuthUser(user)`, source from `getOAuthProvider(user)`.
 
 No `research.md` artifact needed.
@@ -178,18 +178,18 @@ No `contracts/` directory needed.
 
 ```bash
 # 1. Verify wireframes still pass after spec amendments
-docker compose exec scripthammer python3 .specify/extensions/wireframe/scripts/validate.py \
+docker compose exec rescuedogs python3 .specify/extensions/wireframe/scripts/validate.py \
   features/auth-oauth/013-oauth-messaging-password/wireframes/01-oauth-password-setup.svg
-docker compose exec scripthammer python3 .specify/extensions/wireframe/scripts/validate.py \
+docker compose exec rescuedogs python3 .specify/extensions/wireframe/scripts/validate.py \
   features/auth-oauth/013-oauth-messaging-password/wireframes/02-oauth-password-unlock.svg
 # Expected: PASS for both
 
 # 2. Run full unit + a11y suite (must stay green)
-docker compose exec scripthammer pnpm test
-docker compose exec scripthammer pnpm test:a11y
+docker compose exec rescuedogs pnpm test
+docker compose exec rescuedogs pnpm test:a11y
 
 # 3. After implementation, verify the new E2E spec
-docker compose exec scripthammer pnpm exec playwright test tests/e2e/messaging/oauth-setup-modal.spec.ts
+docker compose exec rescuedogs pnpm exec playwright test tests/e2e/messaging/oauth-setup-modal.spec.ts
 
 # 4. Smoke-test in browser via local Supabase profile (per memory rule)
 docker compose --profile supabase up
@@ -203,7 +203,7 @@ docker compose --profile supabase up
 
 ```bash
 .specify/scripts/bash/update-agent-context.sh claude
-# Expected: stderr "[update-agent-context] No-op for ScriptHammer..."
+# Expected: stderr "[update-agent-context] No-op for RescueDogs..."
 # (CLAUDE.md is hand-curated; this is intentional)
 ```
 

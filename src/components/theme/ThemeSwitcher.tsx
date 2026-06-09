@@ -7,8 +7,8 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 
 // DaisyUI themes (custom themes listed first)
 const THEMES = [
-  'scripthammer-dark',
-  'scripthammer-light',
+  'rescuedogs-dark',
+  'rescuedogs-light',
   'light',
   'dark',
   'cupcake',
@@ -44,7 +44,7 @@ const THEMES = [
 ];
 
 export function ThemeSwitcher() {
-  const [currentTheme, setCurrentTheme] = useState('scripthammer-dark');
+  const [currentTheme, setCurrentTheme] = useState('rescuedogs-dark');
   const { trackThemeChange } = useAnalytics();
 
   useEffect(() => {
@@ -52,14 +52,14 @@ export function ThemeSwitcher() {
     const canPersist = canUseCookies(CookieCategory.FUNCTIONAL);
 
     // Try to load saved theme
-    let savedTheme = 'scripthammer-dark';
+    let savedTheme = 'rescuedogs-dark';
 
     if (canPersist) {
       // Use localStorage if functional cookies allowed
-      savedTheme = localStorage.getItem('theme') || 'scripthammer-dark';
+      savedTheme = localStorage.getItem('theme') || 'rescuedogs-dark';
     } else {
       // Use sessionStorage as fallback
-      savedTheme = sessionStorage.getItem('theme') || 'scripthammer-dark';
+      savedTheme = sessionStorage.getItem('theme') || 'rescuedogs-dark';
     }
 
     setCurrentTheme(savedTheme);

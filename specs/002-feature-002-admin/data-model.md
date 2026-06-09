@@ -25,8 +25,8 @@ WHERE welcome_message_sent = FALSE;
 INSERT INTO user_profiles (id, username, display_name, welcome_message_sent)
 VALUES (
   '00000000-0000-0000-0000-000000000001',
-  'scripthammer',
-  'ScriptHammer',
+  'rescuedogs',
+  'RescueDogs',
   TRUE  -- Admin doesn't need welcome message
 )
 ON CONFLICT (id) DO NOTHING;
@@ -123,7 +123,7 @@ WITH CHECK (
 
 | Variable                    | Type   | Purpose                           | Example                                |
 | --------------------------- | ------ | --------------------------------- | -------------------------------------- |
-| `TEST_USER_ADMIN_EMAIL`     | Secret | Admin login email                 | `admin@scripthammer.com`               |
+| `TEST_USER_ADMIN_EMAIL`     | Secret | Admin login email                 | `admin@rescuedogs.com`               |
 | `TEST_USER_ADMIN_PASSWORD`  | Secret | Admin password for key derivation | `<secure-64-char>`                     |
 | `NEXT_PUBLIC_ADMIN_USER_ID` | Public | Admin UUID for client reference   | `00000000-0000-0000-0000-000000000001` |
 

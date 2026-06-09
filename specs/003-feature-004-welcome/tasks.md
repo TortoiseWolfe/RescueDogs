@@ -37,9 +37,9 @@
   ```typescript
   const ADMIN_USER = {
     id: '00000000-0000-0000-0000-000000000001',
-    email: 'admin@scripthammer.com',
-    username: 'scripthammer',
-    displayName: 'ScriptHammer',
+    email: 'admin@rescuedogs.com',
+    username: 'rescuedogs',
+    displayName: 'RescueDogs',
   };
   ```
 
@@ -55,7 +55,7 @@
 - [x] T007 [FOUNDATION] Run seed script and verify admin public key exists:
 
   ```bash
-  docker compose exec scripthammer pnpm exec tsx scripts/seed-test-users.ts
+  docker compose exec rescuedogs pnpm exec tsx scripts/seed-test-users.ts
   ```
 
 - [x] T008 [FOUNDATION] Verify admin public key in database via SQL query
@@ -124,9 +124,9 @@
   );
   ```
 
-- [x] T019 [US1] Run tests: `docker compose exec scripthammer pnpm test welcome-service`
+- [x] T019 [US1] Run tests: `docker compose exec rescuedogs pnpm test welcome-service`
 
-- [x] T020 [US1] Manual verification: Sign up new user, check conversations for welcome message from scripthammer
+- [x] T020 [US1] Manual verification: Sign up new user, check conversations for welcome message from rescuedogs
 
 **Checkpoint**: User Story 1 complete - new users receive welcome messages
 
@@ -222,11 +222,11 @@
 
 - [x] T032 [P] [POLISH] Remove obsolete `TEST_USER_ADMIN_PASSWORD` references from `.env.example` if present
 
-- [x] T033 [POLISH] Run full test suite: `docker compose exec scripthammer pnpm test`
+- [x] T033 [POLISH] Run full test suite: `docker compose exec rescuedogs pnpm test`
 
-- [x] T034 [POLISH] Run type check: `docker compose exec scripthammer pnpm type-check`
+- [x] T034 [POLISH] Run type check: `docker compose exec rescuedogs pnpm type-check`
 
-- [x] T035 [POLISH] Run linter: `docker compose exec scripthammer pnpm lint`
+- [x] T035 [POLISH] Run linter: `docker compose exec rescuedogs pnpm lint`
 
 - [x] T036 [POLISH] Run quickstart.md verification steps
 

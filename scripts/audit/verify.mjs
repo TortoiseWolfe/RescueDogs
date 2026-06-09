@@ -10,7 +10,7 @@
  *   - GitHub Issues (referenced numbers in STATUS.md and PRP-STATUS.md)
  *
  * Run inside Docker:
- *   docker compose exec scripthammer node scripts/audit/verify.mjs
+ *   docker compose exec rescuedogs node scripts/audit/verify.mjs
  *
  * Exit code: 0 if everything agrees, 1 if drift detected.
  */

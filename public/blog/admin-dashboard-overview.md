@@ -1,5 +1,5 @@
 ---
-title: 'Building a Centralized Admin Dashboard for ScriptHammer'
+title: 'Building a Centralized Admin Dashboard for RescueDogs'
 author: TortoiseWolfe
 date: 2026-02-23
 slug: admin-dashboard-overview
@@ -18,16 +18,16 @@ excerpt: A centralized admin dashboard that surfaces payment, auth, user, and me
 featuredImage: /blog-images/admin-dashboard-overview/overview.png
 featuredImageAlt: Admin Dashboard Overview showing stat cards for payments, auth, users, and messaging across a tabbed interface
 ogImage: /blog-images/admin-dashboard-overview/overview.png
-ogTitle: Building a Centralized Admin Dashboard for ScriptHammer
+ogTitle: Building a Centralized Admin Dashboard for RescueDogs
 ogDescription: How we built a four-domain admin dashboard with three layers of security on a statically exported Next.js 15 site backed by Supabase RPC functions and Row-Level Security.
 twitterCard: summary_large_image
 ---
 
-# 🔧 Building a Centralized Admin Dashboard for ScriptHammer
+# 🔧 Building a Centralized Admin Dashboard for RescueDogs
 
 Running a web application means data lives everywhere. Payment records sit in one table, authentication audit logs in another, user profiles in a third, and encrypted messages in a fourth. When something goes wrong — a spike in failed logins, a payment provider returning errors, a sudden drop in user activity — you need answers fast, not a scavenger hunt across database tables.
 
-This post walks through how we built the ScriptHammer admin dashboard: a single, tabbed interface that surfaces metrics from four data domains while enforcing three layers of security. We built it on a statically exported [Next.js](https://nextjs.org/) 15 site deployed to [GitHub Pages](https://pages.github.com/), which means no server-side Application Programming Interface (API) routes — every data call goes through [Supabase](https://supabase.com/) Remote Procedure Call (RPC) functions and Row-Level Security (RLS) policies.
+This post walks through how we built the RescueDogs admin dashboard: a single, tabbed interface that surfaces metrics from four data domains while enforcing three layers of security. We built it on a statically exported [Next.js](https://nextjs.org/) 15 site deployed to [GitHub Pages](https://pages.github.com/), which means no server-side Application Programming Interface (API) routes — every data call goes through [Supabase](https://supabase.com/) Remote Procedure Call (RPC) functions and Row-Level Security (RLS) policies.
 
 ## 🗄️ Why an Admin Dashboard
 
@@ -49,7 +49,7 @@ This separation makes testing straightforward. The component accepts typed props
 
 ### The Static Export Constraint
 
-ScriptHammer deploys to GitHub Pages as a static export. That constraint shapes every architectural decision:
+RescueDogs deploys to GitHub Pages as a static export. That constraint shapes every architectural decision:
 
 - **No `src/app/api/` routes** — API routes require a Node.js server, which static hosting does not provide
 - **No server-side secrets** — only environment variables prefixed with `NEXT_PUBLIC_` reach the browser
@@ -285,7 +285,7 @@ This creates a double gate: the RLS policy prevents the `SELECT` inside the func
 
 ### End-to-End Encryption Respected
 
-The messaging domain deserves special attention. ScriptHammer uses End-to-End (E2E) encryption for messages — the `encrypted_content` and `iv` (initialization vector) columns on the `messages` table contain ciphertext that only the sender and recipient can decrypt.
+The messaging domain deserves special attention. RescueDogs uses End-to-End (E2E) encryption for messages — the `encrypted_content` and `iv` (initialization vector) columns on the `messages` table contain ciphertext that only the sender and recipient can decrypt.
 
 The admin messaging service never queries these columns. It calls `admin_messaging_stats()`, which runs aggregate `count(*)` queries on conversations and connections. The admin sees _how many_ messages exist and _how many_ conversations are active, but never the content. Even if an admin ran a raw `SELECT *` on the `messages` table, they would see ciphertext they cannot decrypt — the private keys live only in each user's browser via [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API).
 
@@ -310,4 +310,4 @@ The three-tier architecture (page, service, component) makes adding these featur
 
 ---
 
-**Want to explore the full implementation?** Check out the [ScriptHammer GitHub repository](https://github.com/TortoiseWolfe/ScriptHammer). The admin service classes live in `src/services/admin/`, the page routes in `src/app/admin/`, and the RLS policies in `supabase/migrations/20251006_complete_monolithic_setup.sql`.
+**Want to explore the full implementation?** Check out the [RescueDogs GitHub repository](https://github.com/TortoiseWolfe/RescueDogs). The admin service classes live in `src/services/admin/`, the page routes in `src/app/admin/`, and the RLS policies in `supabase/migrations/20251006_complete_monolithic_setup.sql`.

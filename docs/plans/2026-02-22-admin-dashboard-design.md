@@ -2,11 +2,11 @@
 
 **Date:** 2026-02-22
 **Status:** Approved
-**Approach:** Port SpokeToWork three-tier pattern, extend with four ScriptHammer data domains
+**Approach:** Port SpokeToWork three-tier pattern, extend with four RescueDogs data domains
 
 ## Summary
 
-Build an admin dashboard that surfaces payment, auth audit, user, and messaging data across all users. The core challenge is data access: ScriptHammer deploys to GitHub Pages as a static export with no server-side API routes. All queries go through the Supabase client with RLS.
+Build an admin dashboard that surfaces payment, auth audit, user, and messaging data across all users. The core challenge is data access: RescueDogs deploys to GitHub Pages as a static export with no server-side API routes. All queries go through the Supabase client with RLS.
 
 ## Decisions
 
@@ -183,6 +183,6 @@ Ported from SpokeToWork's admin moderation dashboard:
 - `/home/TurtleWolfe/repos/SpokeToWork/src/lib/companies/admin-moderation-service.ts`
 - `/home/TurtleWolfe/repos/SpokeToWork/src/components/organisms/AdminModerationQueue/`
 
-Extended with ScriptHammer-specific data domains from the eval prompt:
+Extended with RescueDogs-specific data domains from the eval prompt:
 
-- `/home/TurtleWolfe/repos/good_prompt_bad_prompt/prompts/scripthammer-admin-dashboard.md`
+- `/home/TurtleWolfe/repos/good_prompt_bad_prompt/prompts/rescuedogs-admin-dashboard.md`

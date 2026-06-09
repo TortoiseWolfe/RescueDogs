@@ -27,18 +27,18 @@ cat > supabase/migrations/20251008_avatar_upload.sql << 'EOF'
 EOF
 
 # Apply migration
-docker compose exec scripthammer npx supabase db push
+docker compose exec rescuedogs npx supabase db push
 ```
 
 **Verify Migration**:
 
 ```bash
 # Check if avatar_url column exists
-docker compose exec scripthammer npx supabase db execute \
+docker compose exec rescuedogs npx supabase db execute \
   "SELECT column_name FROM information_schema.columns WHERE table_name = 'user_profiles' AND column_name = 'avatar_url';"
 
 # Check if avatars bucket exists
-docker compose exec scripthammer npx supabase db execute \
+docker compose exec rescuedogs npx supabase db execute \
   "SELECT id, name, public FROM storage.buckets WHERE id = 'avatars';"
 ```
 
@@ -61,13 +61,13 @@ avatars | avatars | t
 ### Add react-easy-crop Library
 
 ```bash
-docker compose exec scripthammer pnpm add react-easy-crop
+docker compose exec rescuedogs pnpm add react-easy-crop
 ```
 
 **Verify Installation**:
 
 ```bash
-docker compose exec scripthammer pnpm list react-easy-crop
+docker compose exec rescuedogs pnpm list react-easy-crop
 ```
 
 **Expected Output**:
@@ -83,7 +83,7 @@ react-easy-crop 5.0.0
 ### Generate AvatarUpload Component
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component -- \
+docker compose exec rescuedogs pnpm run generate:component -- \
   --name AvatarUpload \
   --category atomic \
   --hasProps true \
@@ -104,7 +104,7 @@ docker compose exec scripthammer pnpm run generate:component -- \
 ### Generate AvatarDisplay Component
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component -- \
+docker compose exec rescuedogs pnpm run generate:component -- \
   --name AvatarDisplay \
   --category atomic \
   --hasProps true \
@@ -279,13 +279,13 @@ mkdir -p e2e/fixtures/avatars
 
 ```bash
 # Type check
-docker compose exec scripthammer pnpm run type-check
+docker compose exec rescuedogs pnpm run type-check
 
 # Unit tests
-docker compose exec scripthammer pnpm test src/lib/avatar
+docker compose exec rescuedogs pnpm test src/lib/avatar
 
 # Lint
-docker compose exec scripthammer pnpm run lint
+docker compose exec rescuedogs pnpm run lint
 ```
 
 ---
@@ -297,7 +297,7 @@ docker compose exec scripthammer pnpm run lint
 1. **Start dev server**:
 
    ```bash
-   docker compose exec scripthammer pnpm run dev
+   docker compose exec rescuedogs pnpm run dev
    ```
 
 2. **Navigate to Account Settings**:
@@ -317,7 +317,7 @@ docker compose exec scripthammer pnpm run lint
 
 ```bash
 # Check if avatar_url was updated
-docker compose exec scripthammer npx supabase db execute \
+docker compose exec rescuedogs npx supabase db execute \
   "SELECT id, username, avatar_url FROM user_profiles WHERE avatar_url IS NOT NULL LIMIT 5;"
 ```
 
@@ -333,7 +333,7 @@ id                                   | username  | avatar_url
 
 ```bash
 # List uploaded avatars
-docker compose exec scripthammer npx supabase storage ls avatars
+docker compose exec rescuedogs npx supabase storage ls avatars
 ```
 
 **Expected Output**:
@@ -371,10 +371,10 @@ ON CONFLICT (id) DO NOTHING;
 
 ```bash
 # Re-run migration to create policies
-docker compose exec scripthammer npx supabase db push
+docker compose exec rescuedogs npx supabase db push
 
 # Verify policies exist
-docker compose exec scripthammer npx supabase db execute \
+docker compose exec rescuedogs npx supabase db execute \
   "SELECT policyname FROM pg_policies WHERE tablename = 'objects';"
 ```
 
@@ -403,7 +403,7 @@ if (!error) {
 
 ```bash
 # Regenerate with correct types
-docker compose exec scripthammer pnpm run generate:component -- \
+docker compose exec rescuedogs pnpm run generate:component -- \
   --name AvatarUpload \
   --category atomic \
   --hasProps true \
@@ -420,26 +420,26 @@ docker compose exec scripthammer pnpm run generate:component -- \
 
 ```bash
 # Start dev server
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 
 # Run tests in watch mode
-docker compose exec scripthammer pnpm test -- --watch
+docker compose exec rescuedogs pnpm test -- --watch
 
 # Type checking
-docker compose exec scripthammer pnpm run type-check
+docker compose exec rescuedogs pnpm run type-check
 
 # Lint
-docker compose exec scripthammer pnpm run lint
+docker compose exec rescuedogs pnpm run lint
 ```
 
 ### Before Committing
 
 ```bash
 # Run full test suite
-docker compose exec scripthammer pnpm run test:suite
+docker compose exec rescuedogs pnpm run test:suite
 
 # Run accessibility tests
-docker compose exec scripthammer pnpm run test:a11y:dev
+docker compose exec rescuedogs pnpm run test:a11y:dev
 ```
 
 ---

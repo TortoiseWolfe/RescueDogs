@@ -14,7 +14,7 @@ Amendment Summary:
   (game scenes are mocked in-Editor, not via SVG).
 
   This amendment bakes that decision into the constitution as the
-  source-of-truth so the rest of the GrimGlow IP family (RN ScriptHammer,
+  source-of-truth so the rest of the GrimGlow IP family (RN RescueDogs,
   KDG-stack, Headless Drupal templates) inherits the hardened gate when
   each track's v1.0.0 ratifies.
 
@@ -39,7 +39,7 @@ Family Propagation (informational):
     (TortoiseWolfe/GrimGlow_planning commit 2466343)
   - Unity GrimGlow constitution — EXEMPT (Unity track stays at v1.0.1
     on this dimension; in-Editor mocking is the wireframe equivalent)
-  - RN ScriptHammer / KDG-stack / Headless Drupal — inherit the v1.0.2
+  - RN RescueDogs / KDG-stack / Headless Drupal — inherit the v1.0.2
     cascade when each track's v1.0.0 ratifies
 
 Version Decision: MINOR bump to v1.0.2
@@ -51,7 +51,7 @@ Version Decision: MINOR bump to v1.0.2
     cite updated v1.0.1 → v1.0.2
 -->
 
-# ScriptHammer Constitution
+# RescueDogs Constitution
 
 ## Core Principles
 
@@ -260,7 +260,7 @@ matters even where it had been treated as optional. The
 `.specify/extensions/wireframe/` toolchain (6 skills, validator, viewer)
 already exists and is in use; the constitution was lagging the practice.
 This amendment closes that gap and propagates the hardened gate to the
-rest of the GrimGlow IP family (RN ScriptHammer, KDG-stack, Headless
+rest of the GrimGlow IP family (RN RescueDogs, KDG-stack, Headless
 Drupal) when each track's v1.0.0 ratifies.
 
 **Impact:** No code changes required. Existing PRPs already follow this
@@ -272,7 +272,7 @@ This amendment is the source-of-truth alignment.
 - GrimGlow Phase 1 constitution v1.0.1 — already shipped
   (TortoiseWolfe/GrimGlow_planning commit 2466343)
 - Unity GrimGlow constitution — exempt; stays at v1.0.1 on this dimension
-- RN ScriptHammer / KDG-stack / Headless Drupal — inherit when each
+- RN RescueDogs / KDG-stack / Headless Drupal — inherit when each
   track's v1.0.0 ratifies
 
 ### v1.0.1 — 2025-09-25

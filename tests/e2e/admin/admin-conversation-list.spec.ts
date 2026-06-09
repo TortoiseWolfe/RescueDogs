@@ -13,7 +13,7 @@
  * this insert the stale assertion would be dead weight.
  *
  * Run from inside the Docker container:
- *   docker compose exec -T -e SKIP_WEBSERVER=1 -e CI= scripthammer \
+ *   docker compose exec -T -e SKIP_WEBSERVER=1 -e CI= rescuedogs \
  *     pnpm exec playwright test tests/e2e/admin/admin-conversation-list.spec.ts --project=chromium
  */
 

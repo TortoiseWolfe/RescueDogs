@@ -57,7 +57,7 @@ Create a `/dispatch` skill for Planner/Coordinator that:
 The skill will:
 
 1. Map terminal names to tmux window IDs (from `scripts/tmux-session.sh` or a config)
-2. Use `tmux send-keys -t scripthammer:N 'command' Enter` to push commands
+2. Use `tmux send-keys -t rescuedogs:N 'command' Enter` to push commands
 3. Optionally wait and capture response via `tmux capture-pane`
 4. Log dispatch to `.terminal-status.json` completedToday
 
@@ -67,11 +67,11 @@ Add to `.claude/config/terminal-map.json`:
 
 ```json
 {
-  "generator-1": "scripthammer:7",
-  "generator-2": "scripthammer:8",
-  "generator-3": "scripthammer:9",
-  "planner": "scripthammer:6",
-  "validator": "scripthammer:13"
+  "generator-1": "rescuedogs:7",
+  "generator-2": "rescuedogs:8",
+  "generator-3": "rescuedogs:9",
+  "planner": "rescuedogs:6",
+  "validator": "rescuedogs:13"
 }
 ```
 
@@ -87,7 +87,7 @@ When Planner adds items to queue:
 Before dispatching, check if terminal is idle:
 
 ```bash
-tmux capture-pane -t scripthammer:7 -p | tail -1 | grep -q "bypass permissions"
+tmux capture-pane -t rescuedogs:7 -p | tail -1 | grep -q "bypass permissions"
 ```
 
 Only dispatch to idle terminals; skip those already processing.

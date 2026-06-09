@@ -7,7 +7,7 @@ metadata:
   source: wireframe:commands/prep.md
 ---
 
-> **ScriptHammer note:** feature paths are `features/<category>/<NNN-name>/`,
+> **RescueDogs note:** feature paths are `features/<category>/<NNN-name>/`,
 > not `specs/<feature>/`. Validator is at
 > `.specify/extensions/wireframe/scripts/validate.py` (shipped by this project).
 

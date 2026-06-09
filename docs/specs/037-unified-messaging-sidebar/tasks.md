@@ -18,7 +18,7 @@
 **Purpose**: Type definitions and project structure preparation
 
 - [x] T001 [P] Add `SidebarTab` type to `src/types/messaging.ts`
-- [x] T002 [P] Create UnifiedSidebar component directory structure using `docker compose exec scripthammer pnpm run generate:component`
+- [x] T002 [P] Create UnifiedSidebar component directory structure using `docker compose exec rescuedogs pnpm run generate:component`
 
 **Checkpoint**: Type definitions ready, component scaffolding in place
 
@@ -211,9 +211,9 @@
 
 **Purpose**: Final validation and cleanup
 
-- [x] T019 Run full test suite: `docker compose exec scripthammer pnpm test`
-- [x] T020 Run type check: `docker compose exec scripthammer pnpm run type-check`
-- [x] T021 Run linter: `docker compose exec scripthammer pnpm run lint`
+- [x] T019 Run full test suite: `docker compose exec rescuedogs pnpm test`
+- [x] T020 Run type check: `docker compose exec rescuedogs pnpm run type-check`
+- [x] T021 Run linter: `docker compose exec rescuedogs pnpm run lint`
 - [x] T022 Verify all quickstart.md checklist items pass
 - [ ] T023 Manual testing on mobile and desktop viewports
 - [ ] T024 Verify tab switching performance < 200ms (SC-003)
@@ -291,7 +291,7 @@ Task: "Create redirect in src/app/messages/connections/page.tsx"
 - [Story] label maps task to specific user story for traceability
 - Each user story should be independently testable
 - Commit after each task or logical group
-- Use `docker compose exec scripthammer` prefix for all commands
+- Use `docker compose exec rescuedogs` prefix for all commands
 - Follow 5-file component pattern for UnifiedSidebar
 
 ## Requirement Coverage Summary

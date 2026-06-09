@@ -7,7 +7,7 @@ metadata:
   source: wireframe:commands/view.md
 ---
 
-> **ScriptHammer note:** the viewer is integrated into the Next.js app at
+> **RescueDogs note:** the viewer is integrated into the Next.js app at
 > `/wireframes` (src/app/wireframes/page.tsx iframes
 > `public/wireframes/viewer.html`). Wireframes auto-sync on `pnpm run dev` and
 > `pnpm run build` via `scripts/sync-wireframes.sh`. To preview a local edit

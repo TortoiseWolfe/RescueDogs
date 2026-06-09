@@ -91,8 +91,8 @@ if [ -z "$FEATURE_DESCRIPTION" ]; then
 fi
 
 # Function to get highest number from specs directory.
-# ScriptHammer adaptation: scans both flat specs_dir/* (upstream layout) and
-# nested specs_dir/<category>/* (ScriptHammer layout) so the next-feature-number
+# RescueDogs adaptation: scans both flat specs_dir/* (upstream layout) and
+# nested specs_dir/<category>/* (RescueDogs layout) so the next-feature-number
 # computation respects both patterns.
 get_highest_from_specs() {
     local specs_dir="$1"
@@ -210,7 +210,7 @@ fi
 
 cd "$REPO_ROOT"
 
-# ScriptHammer adaptation: features live under features/<category>/, not specs/
+# RescueDogs adaptation: features live under features/<category>/, not specs/
 # (see .specify/scripts/bash/config.sh). New dirs land under <default_category>/
 # until a human moves them into the right category.
 SPECS_DIR="$REPO_ROOT/${SPEC_KIT_FEATURES_ROOT:-specs}"

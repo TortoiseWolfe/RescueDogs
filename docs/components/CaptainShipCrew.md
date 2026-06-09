@@ -152,7 +152,7 @@ The component includes extensive test coverage:
 Run tests with:
 
 ```bash
-docker compose exec scripthammer pnpm test src/components/atomic/CaptainShipCrew/
+docker compose exec rescuedogs pnpm test src/components/atomic/CaptainShipCrew/
 ```
 
 ## Performance

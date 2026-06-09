@@ -104,7 +104,7 @@ The validator appears to be reporting issues from a previous version of this SVG
 | Aspect           | Status | Notes                                                                         |
 | ---------------- | ------ | ----------------------------------------------------------------------------- |
 | Title            | ✓ PASS | Centered at top: "MOBILE-FIRST DESIGN - RESPONSIVE NAVIGATION"                |
-| Signature        | ✓ PASS | Left-aligned, correct format: "004:01 \| Mobile-First Design \| ScriptHammer" |
+| Signature        | ✓ PASS | Left-aligned, correct format: "004:01 \| Mobile-First Design \| RescueDogs" |
 | Desktop mockup   | ✓ PASS | Mobile-First Design Guide with CSS code sample and responsive image           |
 | Mobile mockup    | ✓ PASS | Condensed view with navigation tips and CSS snippet                           |
 | Desktop nav      | ✓ PASS | "Features" tab highlighted purple with callout                                |

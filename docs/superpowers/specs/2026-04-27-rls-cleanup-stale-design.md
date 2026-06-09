@@ -1,20 +1,20 @@
 # RLS Test Suite: Cleanup-Stale Hook
 
-**Date**: 2026-04-27 · **Tracks**: [#50](https://github.com/TortoiseWolfe/ScriptHammer/issues/50) (Family D1 in [`docs/STABILITY-TRACKING.md`](../../STABILITY-TRACKING.md))
+**Date**: 2026-04-27 · **Tracks**: [#50](https://github.com/TortoiseWolfe/RescueDogs/issues/50) (Family D1 in [`docs/STABILITY-TRACKING.md`](../../STABILITY-TRACKING.md))
 
 ## Context
 
-`pnpm test:rls` against cloud Supabase fails on `beforeAll` if a prior run died mid-test and left orphan rows that block deletion of the canonical `*@scripthammer.test` users. The fixture's `afterAll` cleanup is correct for _successful_ runs; what's missing is recovery from killed runs.
+`pnpm test:rls` against cloud Supabase fails on `beforeAll` if a prior run died mid-test and left orphan rows that block deletion of the canonical `*@rescuedogs.test` users. The fixture's `afterAll` cleanup is correct for _successful_ runs; what's missing is recovery from killed runs.
 
-This was observed concretely during #44 verification on 2026-04-26: cloud had two stale `*@scripthammer.test` users from a 2026-04-16 run with one orphaned `payment_intents` row referencing `userA`. The user delete failed with `payment_intents_template_user_id_fkey` (FK constraint), wedging every test file that called `createTestUser('test-user-a@scripthammer.test', …)` in its `beforeAll`. The fixture's existing recovery path (`tests/fixtures/test-users.ts:171-201`) tries delete-then-recreate, but the `deleteUser` call hits the same FK and gives up.
+This was observed concretely during #44 verification on 2026-04-26: cloud had two stale `*@rescuedogs.test` users from a 2026-04-16 run with one orphaned `payment_intents` row referencing `userA`. The user delete failed with `payment_intents_template_user_id_fkey` (FK constraint), wedging every test file that called `createTestUser('test-user-a@rescuedogs.test', …)` in its `beforeAll`. The fixture's existing recovery path (`tests/fixtures/test-users.ts:171-201`) tries delete-then-recreate, but the `deleteUser` call hits the same FK and gives up.
 
 Today's behaviour: the next operator who runs `pnpm test:rls` against a stale-cloud-state has to manually grep for orphan FKs, delete dependent rows in the right order, then delete the user. (I did this yesterday — it works, but it's wrong to require it.)
 
-The intended outcome: a Vitest `globalSetup` hook scrubs `*@scripthammer.test` orphan FKs before any RLS test file collects. Killed runs become recoverable on the next invocation; the operator never has to know the chain.
+The intended outcome: a Vitest `globalSetup` hook scrubs `*@rescuedogs.test` orphan FKs before any RLS test file collects. Killed runs become recoverable on the next invocation; the operator never has to know the chain.
 
 ## Scope clarification (vs. yesterday's framing)
 
-In a comment on #50 yesterday I proposed expanding scope to cover the E2E messaging shards too, on the hypothesis that they shared test users with the RLS suite. **That hypothesis was wrong.** The E2E suite uses env-configured users (`TEST_USER_PRIMARY_EMAIL`, typically `test@example.com`); the RLS suite uses hardcoded `*@scripthammer.test` users. Two different user pools, two different lifecycles, two different surfaces. The chromium-msg failure pattern tracked in #57 is something else (likely Supabase Realtime, Stripe rate-limit, or storageState corruption — TBD).
+In a comment on #50 yesterday I proposed expanding scope to cover the E2E messaging shards too, on the hypothesis that they shared test users with the RLS suite. **That hypothesis was wrong.** The E2E suite uses env-configured users (`TEST_USER_PRIMARY_EMAIL`, typically `test@example.com`); the RLS suite uses hardcoded `*@rescuedogs.test` users. Two different user pools, two different lifecycles, two different surfaces. The chromium-msg failure pattern tracked in #57 is something else (likely Supabase Realtime, Stripe rate-limit, or storageState corruption — TBD).
 
 This spec narrows back to the original #50 scope: **RLS fixture cleanup-stale hook only**. #57 stays open as its own investigation.
 
@@ -22,7 +22,7 @@ This spec narrows back to the original #50 scope: **RLS fixture cleanup-stale ho
 
 One file, one pure function, one config wire-up. Each unit has one responsibility:
 
-1. **Pure cleanup function** — `tests/rls/__setup__/cleanup-stale-impl.ts`. Takes a Supabase service client, deletes the FK chain for every `*@scripthammer.test` auth user, then deletes the users. Returns a count summary. No I/O beyond Supabase calls. Unit-testable in isolation.
+1. **Pure cleanup function** — `tests/rls/__setup__/cleanup-stale-impl.ts`. Takes a Supabase service client, deletes the FK chain for every `*@rescuedogs.test` auth user, then deletes the users. Returns a count summary. No I/O beyond Supabase calls. Unit-testable in isolation.
 
 2. **globalSetup wrapper** — `tests/rls/__setup__/cleanup-stale.ts`. Constructs a service client from env, calls the impl, logs the summary. Skips silently when `SUPABASE_SERVICE_ROLE_KEY` is absent (matches `hasRlsTestEnvironment()` semantics — no env, no cleanup, just like the tests themselves skip).
 
@@ -63,7 +63,7 @@ If any individual DELETE fails (network blip, transient Supabase error), log it 
 1. **Cleanup deletes in correct FK order**: mock service client, call `cleanupStaleScripthammerUsers(client)` against a 2-user fixture (no real auth), assert the call sequence is `payment_intents → subscriptions → user_profiles → auth.admin.deleteUser` per user.
 2. **Cleanup ignores non-matching emails**: include a `prod@example.com` user in `listUsers` mock, assert it's never touched.
 3. **Cleanup is best-effort**: simulate a `payment_intents` DELETE error, assert the function continues to subscriptions/user_profiles/deleteUser and returns the partial-cleanup summary.
-4. **Cleanup is a no-op when no `*@scripthammer.test` users exist**: empty user list, assert no DELETE calls fired.
+4. **Cleanup is a no-op when no `*@rescuedogs.test` users exist**: empty user list, assert no DELETE calls fired.
 
 `vitest.rls.config.ts`'s globalSetup invocation is verified empirically — running `pnpm test:rls` against a cloud instance with deliberately-injected orphan rows should clean them and let the suite proceed. (We won't unit-test the wiring itself; the cost-to-benefit is wrong.)
 
@@ -73,7 +73,7 @@ End-to-end pass criteria:
 
 1. `pnpm vitest run tests/unit/rls-cleanup.test.ts` — 4/4 green.
 2. `pnpm test:rls` against cloud — still 55/55 (no behavior regression on a clean cloud state).
-3. Manual stress test: insert an orphan `payment_intents` referencing `test-user-a@scripthammer.test` via SQL, run `pnpm test:rls`. The globalSetup logs `[rls cleanup-stale] removed 1 user(s); 0 error(s) logged`, the suite passes. (Manual because it requires deliberate state perturbation; not worth automating.)
+3. Manual stress test: insert an orphan `payment_intents` referencing `test-user-a@rescuedogs.test` via SQL, run `pnpm test:rls`. The globalSetup logs `[rls cleanup-stale] removed 1 user(s); 0 error(s) logged`, the suite passes. (Manual because it requires deliberate state perturbation; not worth automating.)
 
 ### Note on summary count semantics
 

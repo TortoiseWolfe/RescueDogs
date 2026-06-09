@@ -6,7 +6,7 @@ const matter = require('gray-matter');
 
 const BLOG_DIR = path.join(process.cwd(), 'blog');
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
-const SITE_URL = 'https://tortoisewolfe.github.io/ScriptHammer';
+const SITE_URL = 'https://tortoisewolfe.github.io/RescueDogs';
 
 function escapeXml(unsafe) {
   return unsafe
@@ -38,7 +38,7 @@ function generateRSSFeed() {
             title: data.title,
             description: data.excerpt,
             url: `/blog/${data.slug || file.replace('.md', '')}`,
-            author: data.author || 'ScriptHammer Team',
+            author: data.author || 'RescueDogs Team',
             pubDate: new Date(data.publishDate || new Date()).toUTCString(),
             categories: data.categories || [],
             content: content.substring(0, 500) + '...', // First 500 chars
@@ -54,7 +54,7 @@ function generateRSSFeed() {
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>ScriptHammer Blog</title>
+    <title>RescueDogs Blog</title>
     <description>Opinionated Next.js PWA Template with 32 themes and comprehensive tooling</description>
     <link>${SITE_URL}/blog</link>
     <language>en-US</language>
@@ -88,7 +88,7 @@ ${post.categories.map((cat) => `      <category>${escapeXml(cat)}</category>`).j
   // Also generate a simple JSON feed for modern readers
   const jsonFeed = {
     version: 'https://jsonfeed.org/version/1.1',
-    title: 'ScriptHammer Blog',
+    title: 'RescueDogs Blog',
     home_page_url: `${SITE_URL}/blog`,
     feed_url: `${SITE_URL}/feed.json`,
     description: 'Opinionated Next.js PWA Template',

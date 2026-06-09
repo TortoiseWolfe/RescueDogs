@@ -91,7 +91,7 @@ As a user who prefers not to manage another password, I need to sign in using Gi
 **Acceptance Scenarios**:
 
 1. **Given** I prefer OAuth, **When** I click "Sign in with GitHub", **Then** I am redirected to GitHub to authorize
-2. **Given** I authorize on GitHub, **When** I return to ScriptHammer, **Then** I am automatically signed in
+2. **Given** I authorize on GitHub, **When** I return to RescueDogs, **Then** I am automatically signed in
 3. **Given** I prefer Google, **When** I click "Sign in with Google" and authorize, **Then** I am signed in via Google
 
 ---

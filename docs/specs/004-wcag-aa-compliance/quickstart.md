@@ -15,7 +15,7 @@ Quick setup guide for WCAG AA compliance using Storybook addon-a11y and Pa11y CI
 
 ```bash
 # Install Storybook a11y addon and jest-axe
-docker compose exec scripthammer pnpm add -D @storybook/addon-a11y jest-axe @types/jest-axe
+docker compose exec rescuedogs pnpm add -D @storybook/addon-a11y jest-axe @types/jest-axe
 ```
 
 ### 2. Configure Storybook
@@ -77,10 +77,10 @@ Create `.pa11yci`:
 
 ```bash
 # Start your development server
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 
 # In another terminal, run accessibility test
-docker compose exec scripthammer pnpm run test:a11y
+docker compose exec rescuedogs pnpm run test:a11y
 ```
 
 ## Development Workflow
@@ -137,7 +137,7 @@ chokidar.watch('src/**/*.{tsx,ts,css}').on('change', () => {
 Run the watcher:
 
 ```bash
-docker compose exec scripthammer pnpm run test:a11y:watch
+docker compose exec rescuedogs pnpm run test:a11y:watch
 ```
 
 #### Option 2: Development Runtime Integration
@@ -224,19 +224,19 @@ describe('Button Accessibility', () => {
 
 ```bash
 # Run single accessibility check
-docker compose exec scripthammer pnpm run test:a11y
+docker compose exec rescuedogs pnpm run test:a11y
 
 # Watch for changes and re-run tests
-docker compose exec scripthammer pnpm run test:a11y:watch
+docker compose exec rescuedogs pnpm run test:a11y:watch
 
 # Run component accessibility tests
-docker compose exec scripthammer pnpm run test:a11y:components
+docker compose exec rescuedogs pnpm run test:a11y:components
 
 # Generate HTML report
-docker compose exec scripthammer pa11y-ci --reporter html
+docker compose exec rescuedogs pa11y-ci --reporter html
 
 # Test specific URL
-docker compose exec scripthammer pa11y http://localhost:3000/CRUDkit/themes --standard WCAG2AA
+docker compose exec rescuedogs pa11y http://localhost:3000/CRUDkit/themes --standard WCAG2AA
 ```
 
 ### CI/CD Commands
@@ -344,7 +344,7 @@ Add to `.vscode/snippets/accessibility.code-snippets`:
 
 ```bash
 # Make sure your dev server is running
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 
 # Or update URLs in config to match your server
 ```

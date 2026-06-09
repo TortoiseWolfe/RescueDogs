@@ -8,7 +8,7 @@
 
 If you've built anything substantial with Claude Code or similar AI assistants, you've hit the wall: context windows are finite. Every message, every file read, every tool output consumes tokens. Run out, and the model starts forgetting earlier context or you're forced into a new session.
 
-We hit this wall hard while wireframing 46 features for ScriptHammer. Each SVG wireframe needed validation against 40+ design rules:
+We hit this wall hard while wireframing 46 features for RescueDogs. Each SVG wireframe needed validation against 40+ design rules:
 
 - Canvas dimensions (1920×1080)
 - Color codes (#e8d4b8 for panels, #22c55e for toggle ON, etc.)

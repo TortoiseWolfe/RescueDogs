@@ -103,7 +103,7 @@ No code changes needed in components - this is handled by AuthContext.
 
 ```bash
 # Run auth E2E tests
-docker compose exec scripthammer pnpm exec playwright test tests/e2e/auth/
+docker compose exec rescuedogs pnpm exec playwright test tests/e2e/auth/
 ```
 
 ## Migration Notes

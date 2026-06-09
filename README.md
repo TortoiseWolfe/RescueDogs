@@ -1,16 +1,16 @@
-# ScriptHammer - Modern Next.js Template with PWA
+# RescueDogs - Modern Next.js Template with PWA
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/TortoiseWolfe/ScriptHammer)
-[![Use Template](https://img.shields.io/badge/Use%20this%20template-2ea44f?style=for-the-badge)](https://github.com/TortoiseWolfe/ScriptHammer/generate)
-[![Stars](https://img.shields.io/github/stars/TortoiseWolfe/ScriptHammer?style=social)](https://github.com/TortoiseWolfe/ScriptHammer)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/TortoiseWolfe/RescueDogs)
+[![Use Template](https://img.shields.io/badge/Use%20this%20template-2ea44f?style=for-the-badge)](https://github.com/TortoiseWolfe/RescueDogs/generate)
+[![Stars](https://img.shields.io/github/stars/TortoiseWolfe/RescueDogs?style=social)](https://github.com/TortoiseWolfe/RescueDogs)
 
 A comprehensive Next.js starter kit featuring 32 themes, PWA capabilities, component gallery, and extensive testing infrastructure.
 
 ## 🚀 Live Demos
 
-- **Main App**: [https://www.scripthammer.com/](https://www.scripthammer.com/)
-- **Storybook**: [https://www.scripthammer.com/storybook/](https://www.scripthammer.com/storybook/)
-- **Status Dashboard**: [https://www.scripthammer.com/status](https://www.scripthammer.com/status)
+- **Main App**: [https://www.rescuedogs.com/](https://www.rescuedogs.com/)
+- **Storybook**: [https://www.rescuedogs.com/storybook/](https://www.rescuedogs.com/storybook/)
+- **Status Dashboard**: [https://www.rescuedogs.com/status](https://www.rescuedogs.com/status)
 
 ## ✨ Key Features
 
@@ -32,7 +32,7 @@ A comprehensive Next.js starter kit featuring 32 themes, PWA capabilities, compo
 
 ## 🚀 Quick Start
 
-> 💡 **New to ScriptHammer?** Start at [`docs/FORK-CHECKLIST.md`](./docs/FORK-CHECKLIST.md) for the complete service-setup matrix — which env vars to set, which services are required vs. optional, where to sign up for each, and the suggested setup order. The Quick Start below is just the bare minimum to boot the dev server.
+> 💡 **New to RescueDogs?** Start at [`docs/FORK-CHECKLIST.md`](./docs/FORK-CHECKLIST.md) for the complete service-setup matrix — which env vars to set, which services are required vs. optional, where to sign up for each, and the suggested setup order. The Quick Start below is just the bare minimum to boot the dev server.
 
 ### Prerequisites
 
@@ -69,9 +69,9 @@ docker compose up     # Start everything (first build takes 5-10 minutes)
 
 ```bash
 # Run commands inside container
-docker compose exec scripthammer pnpm run dev         # Dev server
-docker compose exec scripthammer pnpm test            # Run tests
-docker compose exec scripthammer pnpm run storybook   # Storybook
+docker compose exec rescuedogs pnpm run dev         # Dev server
+docker compose exec rescuedogs pnpm test            # Run tests
+docker compose exec rescuedogs pnpm run storybook   # Storybook
 
 # Clean restart if needed
 docker compose down
@@ -107,7 +107,7 @@ Once configured, `/payment-demo` should work end-to-end against sandbox APIs. Th
 
 ## 🔐 Authentication Setup
 
-ScriptHammer ships with full email/password + OAuth (GitHub, Google) authentication via Supabase. Out of the box, the app won't authenticate users until you create a Supabase project and configure your auth providers.
+RescueDogs ships with full email/password + OAuth (GitHub, Google) authentication via Supabase. Out of the box, the app won't authenticate users until you create a Supabase project and configure your auth providers.
 
 **For a brand-new forker**: start at [`docs/FORK-CHECKLIST.md`](./docs/FORK-CHECKLIST.md) — it's the master walkthrough covering every service this template integrates with.
 
@@ -204,7 +204,7 @@ Git pushes use **SSH authentication** - keeping you in control of what gets comm
 1. Go to **[GitHub Token Settings](https://github.com/settings/personal-access-tokens/new)** (fine-grained tokens)
 
 2. Configure the token:
-   - **Token name**: `ScriptHammer` or `Claude Code`
+   - **Token name**: `RescueDogs` or `Claude Code`
    - **Expiration**: 90 days recommended
    - **Repository access**: Select "Only select repositories" → choose your repository
 
@@ -244,13 +244,13 @@ ssh -T git@github.com
 
 ## 🍴 Forking This Template
 
-The quickest way to create your own project from ScriptHammer:
+The quickest way to create your own project from RescueDogs:
 
 ### 5-Minute Setup
 
 ```bash
 # 1. Fork and clone
-gh repo fork TortoiseWolfe/ScriptHammer --clone
+gh repo fork TortoiseWolfe/RescueDogs --clone
 cd YourProjectName
 
 # 2. Run the rebrand script (updates 200+ files automatically)
@@ -292,7 +292,7 @@ For detailed setup instructions, see [docs/FORKING.md](./docs/FORKING.md).
 
 ```bash
 # Add upstream and pull changes
-git remote add upstream https://github.com/TortoiseWolfe/ScriptHammer.git
+git remote add upstream https://github.com/TortoiseWolfe/RescueDogs.git
 git fetch upstream
 git merge upstream/main
 ```
@@ -451,15 +451,15 @@ See [docs/prp-docs/PRP-STATUS.md](./docs/prp-docs/PRP-STATUS.md) for detailed pr
 
 ## 🤝 Contributing
 
-1. Fork the repository (for contributing back to ScriptHammer)
+1. Fork the repository (for contributing back to RescueDogs)
 2. Create your feature branch (`git checkout -b feature/amazing`)
-3. Run tests in Docker (`docker compose exec scripthammer pnpm test`)
+3. Run tests in Docker (`docker compose exec rescuedogs pnpm test`)
 4. Commit changes (`git commit -m 'Add feature'`)
 5. Push and open a PR
 
 ## Design System Redesign
 
-Custom ScriptHammer theme (dark default + light variant) built on the existing DaisyUI/Tailwind stack. Storybook upgrade to v10, hierarchy cleanup, then bottom-up component reskin. Includes theme template tooling for forks.
+Custom RescueDogs theme (dark default + light variant) built on the existing DaisyUI/Tailwind stack. Storybook upgrade to v10, hierarchy cleanup, then bottom-up component reskin. Includes theme template tooling for forks.
 
 **Design doc**: [docs/plans/2026-02-13-design-system-redesign.md](./docs/plans/2026-02-13-design-system-redesign.md)
 **Implementation plan**: [docs/plans/2026-02-13-design-system-implementation.md](./docs/plans/2026-02-13-design-system-implementation.md)
@@ -486,16 +486,16 @@ Read these files to pick up the design system redesign:
 1. CLAUDE.md - Project rules, Docker setup, component standards
 2. docs/plans/2026-02-13-design-system-redesign.md - Approved design (Phase 4 section)
 3. docs/plans/2026-02-13-design-system-implementation.md - Task-by-task plan
-4. src/app/globals.css - Custom theme definitions (scripthammer-dark, scripthammer-light)
+4. src/app/globals.css - Custom theme definitions (rescuedogs-dark, rescuedogs-light)
 
 Use superpowers:executing-plans to work through the implementation plan.
 Phases 0-6 complete. Next: final polish or new feature work.
 
 Key context:
-- Everything runs inside Docker: docker compose exec scripthammer <command>
+- Everything runs inside Docker: docker compose exec rescuedogs <command>
 - pnpm, not npm
 - DaisyUI beta with Tailwind v4 CSS-first config (@plugin syntax)
-- ScriptHammer is a template, design must be bold but also easy to rebrand
+- RescueDogs is a template, design must be bold but also easy to rebrand
 - Brand colors: silver/steel (primary), warm amber (secondary), electric accent, charcoal base
 - Dark theme default, light variant available
 - Both themes pass WCAG AAA (7:1) contrast

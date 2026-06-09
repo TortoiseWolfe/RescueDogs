@@ -14,7 +14,7 @@ This fix addresses a critical UX bug where users cannot see the message input or
 
 ## Quick Test
 
-1. Start the dev server: `docker compose exec scripthammer pnpm run dev`
+1. Start the dev server: `docker compose exec rescuedogs pnpm run dev`
 2. Navigate to `/messages` with a conversation selected
 3. Verify:
    - Message input is visible at bottom on mobile (375px)

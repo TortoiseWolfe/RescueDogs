@@ -33,7 +33,7 @@
 
 ## Summary
 
-**Primary Requirement**: Implement comprehensive mobile-first responsive design across entire ScriptHammer site to fix current desktop-cramped-on-mobile experience.
+**Primary Requirement**: Implement comprehensive mobile-first responsive design across entire RescueDogs site to fix current desktop-cramped-on-mobile experience.
 
 **Technical Approach**:
 
@@ -332,7 +332,7 @@ playwright.config.ts     # Mobile device configurations
 - Document orientation detection patterns
 - Add mobile testing requirements
 
-**Location**: `/home/turtle_wolfe/repos/ScriptHammer/CLAUDE.md`
+**Location**: `/home/turtle_wolfe/repos/RescueDogs/CLAUDE.md`
 
 **Changes Needed**:
 

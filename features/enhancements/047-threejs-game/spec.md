@@ -3,7 +3,7 @@
 **Feature Branch**: `047-threejs-game`
 **Created**: 2026-05-14
 **Status**: Draft
-**Input**: User description: "An interactive Three.js scene at /game/3d that demonstrates ScriptHammer's capacity for WebGL/3D content as a PWA. Built with @react-three/fiber and @react-three/drei. Theme-aware via DaisyUI CSS custom properties (32 themes), respects prefers-reduced-motion, static-export-compatible (no SSR for canvas), procedural geometry only for v1. Coexists with the existing dice game at /game (must not regress feature 037-game-a11y-tests). 5 user scenarios, 7 functional + 5 non-functional requirements."
+**Input**: User description: "An interactive Three.js scene at /game/3d that demonstrates RescueDogs's capacity for WebGL/3D content as a PWA. Built with @react-three/fiber and @react-three/drei. Theme-aware via DaisyUI CSS custom properties (32 themes), respects prefers-reduced-motion, static-export-compatible (no SSR for canvas), procedural geometry only for v1. Coexists with the existing dice game at /game (must not regress feature 037-game-a11y-tests). 5 user scenarios, 7 functional + 5 non-functional requirements."
 
 ---
 
@@ -11,9 +11,9 @@
 
 ### Session 2026-05-15
 
-- Q: What is the canonical v1 scene content? → A: A 3D composition of the **three canonical ScriptHammer brand assets**, all mirrored from their SVG sources:
-  1. **Spinning silver cog ring** (procedural ring + 20 trapezoidal gear teeth + rivets, mirroring `public/scripthammer-logo.svg`) — the steampunk-machinery motif. Rotates slowly per the auto-orbit behavior.
-  2. **Glowing golden code brackets `< >`** (procedural extruded paths in a brass/bronze metallic material — note Three.js renders the metal highlight via `metalness` + lighting, not a stroke gradient as the source SVG uses; the visual is equivalent at scene scale — mirroring `public/script-tags.svg`) — the "Script" half of ScriptHammer. Centered, slight emissive glow.
+- Q: What is the canonical v1 scene content? → A: A 3D composition of the **three canonical RescueDogs brand assets**, all mirrored from their SVG sources:
+  1. **Spinning silver cog ring** (procedural ring + 20 trapezoidal gear teeth + rivets, mirroring `public/rescuedogs-logo.svg`) — the steampunk-machinery motif. Rotates slowly per the auto-orbit behavior.
+  2. **Glowing golden code brackets `< >`** (procedural extruded paths in a brass/bronze metallic material — note Three.js renders the metal highlight via `metalness` + lighting, not a stroke gradient as the source SVG uses; the visual is equivalent at scene scale — mirroring `public/script-tags.svg`) — the "Script" half of RescueDogs. Centered, slight emissive glow.
   3. **Printing-mallet** (procedural primitives mirroring `public/printing-mallet.svg` — squat boxy beech head + thin handle + visible wedge) — the "Hammer" half. Rests near the brackets.
 
   DaisyUI theme tokens drive: cog rim color, bracket emissive glow color, mallet base material color, scene background. Procedural geometry only (no `.glb`/`.gltf` imports). _Revised 2026-05-15: dropped earlier "hammer + anvil + accent orbs" framing — anvils are blacksmith tools, not Gutenberg-press tools, and the orbs were filler. The three actual brand SVGs replace them._
@@ -72,7 +72,7 @@ A user navigates to `/game/3d` and sees an interactive Three.js scene render aft
 **Acceptance Scenarios**:
 
 1. **Given** a user navigates to `/game/3d`, **When** the page hydrates, **Then** a loading spinner displays until the canvas mounts
-2. **Given** the canvas has mounted, **When** the scene initializes, **Then** a `<canvas>` element renders the v1 scene content (procedural composition of the three brand assets — silver cog ring mirroring `public/scripthammer-logo.svg`, golden `< >` brackets mirroring `public/script-tags.svg`, printing-mallet mirroring `public/printing-mallet.svg` — no `.glb`/`.gltf` imports)
+2. **Given** the canvas has mounted, **When** the scene initializes, **Then** a `<canvas>` element renders the v1 scene content (procedural composition of the three brand assets — silver cog ring mirroring `public/rescuedogs-logo.svg`, golden `< >` brackets mirroring `public/script-tags.svg`, printing-mallet mirroring `public/printing-mallet.svg` — no `.glb`/`.gltf` imports)
 3. **Given** the scene is rendering, **When** the user drags or scrolls, **Then** the camera responds via orbit controls
 4. **Given** a fresh visit, **When** the production static export is served, **Then** the page works end-to-end with no server runtime (no `/api/` routes)
 
@@ -82,7 +82,7 @@ A user navigates to `/game/3d` and sees an interactive Three.js scene render aft
 
 The 3D scene's colors, lighting, and materials reflect the currently active DaisyUI theme, and update in real time when the user switches themes via the existing ThemeSwitcher.
 
-**Why this priority**: The differentiator for this feature is that 3D content lives inside the same theme system as the rest of the app — not a hardcoded palette that breaks coherence with the 32-theme HTML chrome. Without theme reactivity, the 3D scene becomes a visual island; with it, the scene proves that ScriptHammer's theme system extends past the DOM.
+**Why this priority**: The differentiator for this feature is that 3D content lives inside the same theme system as the rest of the app — not a hardcoded palette that breaks coherence with the 32-theme HTML chrome. Without theme reactivity, the 3D scene becomes a visual island; with it, the scene proves that RescueDogs's theme system extends past the DOM.
 
 **Independent Test**: Load `/game/3d`, change the DaisyUI theme via the existing ThemeSwitcher, and observe scene colors update immediately without a page reload.
 
@@ -166,8 +166,8 @@ The 3D scene resizes responsively, supports touch input for camera orbiting, and
   - **Bounded zoom** — explicit `minDistance` and `maxDistance` set on `OrbitControls` so the user cannot zoom into the geometry or zoom out into empty space.
   - **Auto-orbit when idle** — the camera slowly rotates around the scene by default. User input (drag/scroll/touch) suspends auto-orbit immediately; auto-orbit resumes after 3 seconds of no input. Auto-orbit MUST be disabled when `prefers-reduced-motion: reduce` is set (per FR-004).
 - **FR-006**: Route MUST be reachable via standard navigation (no auth required, no special headers, no payment gating).
-- **FR-007**: Scene MUST use procedural geometry only for v1 — no `.glb`/`.gltf`/`.hdr` model or texture imports. The v1 scene content is a 3D composition of the three canonical ScriptHammer brand assets, each mirrored as procedural geometry from its SVG source:
-  - **Silver cog ring** with 20 trapezoidal gear teeth and rivets (mirror of `public/scripthammer-logo.svg`); rotates slowly per the auto-orbit behavior.
+- **FR-007**: Scene MUST use procedural geometry only for v1 — no `.glb`/`.gltf`/`.hdr` model or texture imports. The v1 scene content is a 3D composition of the three canonical RescueDogs brand assets, each mirrored as procedural geometry from its SVG source:
+  - **Silver cog ring** with 20 trapezoidal gear teeth and rivets (mirror of `public/rescuedogs-logo.svg`); rotates slowly per the auto-orbit behavior.
   - **Golden `< >` code brackets** rendered as extruded bracket paths with a brass/bronze gradient material (mirror of `public/script-tags.svg`); slight emissive glow.
   - **Printing-mallet** (squat boxy beech head, thin handle, locking wedge) procedurally constructed from primitives (mirror of `public/printing-mallet.svg`).
 
@@ -186,7 +186,7 @@ The 3D scene resizes responsively, supports touch input for camera orbiting, and
 
 ### Key Entities
 
-- **Scene**: The top-level R3F `<Canvas>` wrapper. Owns theme-aware color extraction, camera, lights, and the procedural geometry hierarchy. Contains the v1 brand composition: silver cog ring (mirroring `public/scripthammer-logo.svg`) + golden `< >` brackets (mirroring `public/script-tags.svg`) + printing-mallet (mirroring `public/printing-mallet.svg`). Re-renders on theme change.
+- **Scene**: The top-level R3F `<Canvas>` wrapper. Owns theme-aware color extraction, camera, lights, and the procedural geometry hierarchy. Contains the v1 brand composition: silver cog ring (mirroring `public/rescuedogs-logo.svg`) + golden `< >` brackets (mirroring `public/script-tags.svg`) + printing-mallet (mirroring `public/printing-mallet.svg`). Re-renders on theme change.
 - **Theme Tokens**: The DaisyUI CSS custom properties (`--p`, `--s`, `--b1`, etc.) read from `document.documentElement` at runtime. Converted to Three.js-compatible color values for materials and lights.
 - **Reduced-Motion Preference**: The OS-level `prefers-reduced-motion` media query result, watched via `matchMedia`'s `change` event for runtime toggling.
 

@@ -204,21 +204,21 @@ Task T056: "Create account page"
 ```bash
 # Setup
 docker compose up
-docker compose exec scripthammer pnpm install
+docker compose exec rescuedogs pnpm install
 
 # Component generation (MANDATORY for all components)
-docker compose exec scripthammer pnpm run generate:component -- --name ComponentName --category atomic --hasProps true
+docker compose exec rescuedogs pnpm run generate:component -- --name ComponentName --category atomic --hasProps true
 
 # Testing (TDD workflow)
-docker compose exec scripthammer pnpm test                    # Run all tests
-docker compose exec scripthammer pnpm test:coverage           # Coverage report
-docker compose exec scripthammer pnpm exec playwright test    # E2E tests
-docker compose exec scripthammer pnpm run test:a11y:dev       # Accessibility tests
+docker compose exec rescuedogs pnpm test                    # Run all tests
+docker compose exec rescuedogs pnpm test:coverage           # Coverage report
+docker compose exec rescuedogs pnpm exec playwright test    # E2E tests
+docker compose exec rescuedogs pnpm run test:a11y:dev       # Accessibility tests
 
 # Code quality
-docker compose exec scripthammer pnpm run type-check          # TypeScript validation
-docker compose exec scripthammer pnpm run lint                # ESLint
-docker compose exec scripthammer pnpm run test:suite          # Full test suite
+docker compose exec rescuedogs pnpm run type-check          # TypeScript validation
+docker compose exec rescuedogs pnpm run lint                # ESLint
+docker compose exec rescuedogs pnpm run test:suite          # Full test suite
 
 # Database migrations
 psql $DATABASE_URL < supabase/migrations/000_create_auth_tables.sql

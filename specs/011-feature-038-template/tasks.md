@@ -51,12 +51,12 @@
 - [x] T005 [US1] Create `scripts/rebrand.sh` skeleton with argument parsing and --help output
 - [x] T006 [US1] Implement argument validation (3 required args, optional --force, --dry-run flags)
 - [x] T007 [US1] Implement name sanitization function (spaces→hyphens, remove special chars)
-- [x] T008 [US1] Implement previous-rebrand detection (grep for "ScriptHammer" count)
+- [x] T008 [US1] Implement previous-rebrand detection (grep for "RescueDogs" count)
 - [x] T008a [US1] Implement uncommitted changes warning (git status check, warn but proceed)
 - [x] T009 [US1] Implement user confirmation prompt for re-rebrand scenario
 - [x] T010 [US1] Implement content replacement using sed across all file types (_.ts, _.tsx, _.js, _.json, _.md, _.yml, \*.sh)
 - [x] T011 [US1] Implement directory exclusion (node_modules/, .next/, out/, .git/)
-- [x] T012 [US1] Implement file renaming for files containing "ScriptHammer" in name
+- [x] T012 [US1] Implement file renaming for files containing "RescueDogs" in name
 - [x] T013 [US1] Implement docker-compose.yml service name update
 - [x] T014 [US1] Implement public/CNAME deletion
 - [x] T015 [US1] Implement package.json field updates (name, description, repository)
@@ -113,7 +113,7 @@
 
 **Goal**: Git commits work from Docker container without errors
 
-**Independent Test**: Run `docker compose exec scripthammer git commit -m "test"` after change
+**Independent Test**: Run `docker compose exec rescuedogs git commit -m "test"` after change
 
 ### Implementation for User Story 4
 

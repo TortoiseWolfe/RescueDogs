@@ -63,7 +63,7 @@ graph TD
 
    ```bash
    # Use component generator for 4-file structure
-   docker compose exec scripthammer pnpm run generate:component
+   docker compose exec rescuedogs pnpm run generate:component
    # Select: forms
    # Name: ContactForm
    # Path: forms/ContactForm

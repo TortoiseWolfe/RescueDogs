@@ -210,7 +210,7 @@ jobs:
 
       - name: Create Status Summary
         run: |
-          echo "## ScriptHammer Status Report" > status-report.md
+          echo "## RescueDogs Status Report" > status-report.md
           echo "Generated: $(date)" >> status-report.md
           echo "" >> status-report.md
           echo "### Test Results" >> status-report.md

@@ -4,7 +4,7 @@
 **Category**: core-features
 **Priority**: P2
 **Status**: Draft
-**Source**: Migrated from ScriptHammer docs/specs/021
+**Source**: Migrated from RescueDogs docs/specs/021
 
 ---
 

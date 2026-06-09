@@ -242,12 +242,12 @@ This document provides comprehensive testing guidance for Phase 10 of the User M
 
 ```bash
 # Terminal 1: Start dev server
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 
 # Terminal 2: Run Pa11y
-docker compose exec scripthammer pnpm exec pa11y http://localhost:3000/messages --runner axe
-docker compose exec scripthammer pnpm exec pa11y http://localhost:3000/messages/connections --runner axe
-docker compose exec scripthammer pnpm exec pa11y http://localhost:3000/conversations --runner axe
+docker compose exec rescuedogs pnpm exec pa11y http://localhost:3000/messages --runner axe
+docker compose exec rescuedogs pnpm exec pa11y http://localhost:3000/messages/connections --runner axe
+docker compose exec rescuedogs pnpm exec pa11y http://localhost:3000/conversations --runner axe
 ```
 
 **Expected Results**:
@@ -320,13 +320,13 @@ test('passes color contrast audit', async () => {
 
 ```bash
 # Terminal 1: Build production
-docker compose exec scripthammer pnpm run build
+docker compose exec rescuedogs pnpm run build
 
 # Terminal 2: Serve production build
-docker compose exec scripthammer pnpm exec serve out -p 3000
+docker compose exec rescuedogs pnpm exec serve out -p 3000
 
 # Terminal 3: Run Lighthouse
-docker compose exec scripthammer pnpm exec lighthouse http://localhost:3000/messages \
+docker compose exec rescuedogs pnpm exec lighthouse http://localhost:3000/messages \
   --only-categories=performance,accessibility,best-practices,seo \
   --output=json \
   --output-path=./lighthouse-report.json
@@ -349,11 +349,11 @@ docker compose exec scripthammer pnpm exec lighthouse http://localhost:3000/mess
 
 ```bash
 # Build production
-docker compose exec scripthammer pnpm run build
+docker compose exec rescuedogs pnpm run build
 
 # Analyze bundle
-docker compose exec scripthammer pnpm exec next build --experimental-build-mode=compile
-docker compose exec scripthammer ls -lh .next/static/chunks
+docker compose exec rescuedogs pnpm exec next build --experimental-build-mode=compile
+docker compose exec rescuedogs ls -lh .next/static/chunks
 ```
 
 **Target Metrics**:
@@ -593,7 +593,7 @@ for (let i = 0; i < 10; i++) {
 **Next Steps**:
 
 1. Fix critical errors above
-2. Re-run build: `docker compose exec scripthammer pnpm run build`
+2. Re-run build: `docker compose exec rescuedogs pnpm run build`
 3. Verify static export: `ls -la out/`
 
 ---

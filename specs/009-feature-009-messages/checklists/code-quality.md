@@ -57,7 +57,7 @@
 - [x] CHK029 - Is SC-003 (memory leak) testable with specific DevTools procedure? [Measurability, Spec §SC-003] ✓ Plan: "navigate away from messages during toast, check console"; Task T028:EC-003
 - [x] CHK030 - Is SC-004 (no console.warn) measurable with specific grep command? [Measurability, Spec §SC-004] ✓ Plan: `grep -r "console.warn" src/app/messages/`
 - [x] CHK031 - Is SC-005 (connection badge) testable with specific user action? [Measurability, Spec §SC-005] ✓ Plan: "create pending request, verify badge updates"; Spec AS1.1
-- [x] CHK032 - Is SC-006 (a11y audit) measurable with specific pnpm command? [Measurability, Spec §SC-006] ✓ Plan: `docker compose exec scripthammer pnpm run test:a11y`
+- [x] CHK032 - Is SC-006 (a11y audit) measurable with specific pnpm command? [Measurability, Spec §SC-006] ✓ Plan: `docker compose exec rescuedogs pnpm run test:a11y`
 - [x] CHK033 - Is SC-007 (error boundary) testable with specific procedure? [Measurability, Spec §SC-007] ✓ Plan: "Manually throw error in ChatWindow, verify boundary catches"
 - [x] CHK034 - Is SC-008 (all 18 resolved) quantifiable? [Measurability, Spec §SC-008] ✓ Yes - 18 discrete FRs (FR-001 to FR-018) mapped to tasks
 
@@ -145,7 +145,7 @@
 ## Constitution Compliance
 
 - [x] CHK069 - Does refactoring-only scope comply with Constitution II (Test-First) given existing test coverage? [Constitution §II] ✓ Plan §Constitution Check: "Existing tests cover functionality; may add edge case tests"
-- [x] CHK070 - Does Docker-first verification comply with Constitution IV? [Constitution §IV] ✓ All verification commands use `docker compose exec scripthammer`
+- [x] CHK070 - Does Docker-first verification comply with Constitution IV? [Constitution §IV] ✓ All verification commands use `docker compose exec rescuedogs`
 - [x] CHK071 - Does accessibility improvement comply with Constitution V (Progressive Enhancement)? [Constitution §V] ✓ Plan §Constitution Check: "No new features, maintaining existing progressive behavior"
 - [x] CHK072 - Is TypeScript strict mode compliance aligned with Constitution Technical Standards? [Constitution §Technical Standards] ✓ Plan: "TypeScript 5.x" + Constitution requires strict mode
 

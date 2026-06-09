@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document analyzes the existing authentication and payment systems in ScriptHammer to identify security vulnerabilities and plan remediation strategies. The research covers PRP-015 (Payment Integration) and PRP-016 (User Authentication) implementations.
+This document analyzes the existing authentication and payment systems in RescueDogs to identify security vulnerabilities and plan remediation strategies. The research covers PRP-015 (Payment Integration) and PRP-016 (User Authentication) implementations.
 
 ## Current System Analysis
 
@@ -216,7 +216,7 @@ From REQ-A11Y-001:
 
 ### Static Export Limitation
 
-ScriptHammer uses Next.js static export (`output: 'export'` in `next.config.ts`), which means:
+RescueDogs uses Next.js static export (`output: 'export'` in `next.config.ts`), which means:
 
 - ❌ No API routes (server-side code)
 - ✅ Can use Supabase Edge Functions

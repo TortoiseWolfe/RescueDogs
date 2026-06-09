@@ -123,7 +123,7 @@ The authentication and security feature specs demonstrate strong security archit
 
 **Note**: No URL fetching features identified in current specs. Monitor for future features.
 
-## ScriptHammer-Specific Findings
+## RescueDogs-Specific Findings
 
 ### Supabase Security
 

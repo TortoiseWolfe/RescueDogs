@@ -19,7 +19,7 @@ Passing SVGs (e.g., `006-template-fork-experience/01-service-setup-guidance.svg`
 ### Desktop Footer
 
 - Uses include: `<use href="includes/footer-desktop.svg#site-footer" x="0" y="640"/>`
-- Contains: ScriptHammer brand, nav links, copyright
+- Contains: RescueDogs brand, nav links, copyright
 - Background: `path` element with rounded BOTTOM corners only
 
 ### Mobile Header

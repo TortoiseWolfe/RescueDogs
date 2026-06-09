@@ -19,8 +19,8 @@
 
 **Purpose**: Establish baseline state before any changes
 
-- [x] T001 Run `docker compose exec scripthammer pnpm run type-check` and record current state
-- [x] T002 [P] Run `docker compose exec scripthammer pnpm run lint` and record current warnings
+- [x] T001 Run `docker compose exec rescuedogs pnpm run type-check` and record current state
+- [x] T002 [P] Run `docker compose exec rescuedogs pnpm run lint` and record current warnings
 - [x] T003 [P] Run `grep -r "err: any" src/app/messages/` to document current violations
 
 **Checkpoint**: Baseline recorded, ready to implement fixes
@@ -111,7 +111,7 @@
 
 **Checkpoint**: P3 Medium priority issues resolved - verify with:
 
-- `docker compose exec scripthammer pnpm run test:a11y` passes
+- `docker compose exec rescuedogs pnpm run test:a11y` passes
 - Manual test: edit message in long thread, verify no full re-render
 - Code review: all className concatenation uses cn() utility
 
@@ -161,10 +161,10 @@
 
 - [x] T027 Run full verification suite:
   ```bash
-  docker compose exec scripthammer pnpm run type-check
-  docker compose exec scripthammer pnpm run lint
-  docker compose exec scripthammer pnpm test
-  docker compose exec scripthammer pnpm run build
+  docker compose exec rescuedogs pnpm run type-check
+  docker compose exec rescuedogs pnpm run lint
+  docker compose exec rescuedogs pnpm test
+  docker compose exec rescuedogs pnpm run build
   ```
 - [x] T028 Manual verification checklist:
   - [x] SC-001: `grep -r "err: any" src/app/messages/` returns empty

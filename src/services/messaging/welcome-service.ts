@@ -2,7 +2,7 @@
  * Welcome Service for Admin Welcome Messages
  * Feature: 003-feature-004-welcome
  *
- * Sends encrypted welcome messages from the admin user (ScriptHammer)
+ * Sends encrypted welcome messages from the admin user (RescueDogs)
  * to new users on their first key initialization.
  *
  * REDESIGNED: Uses admin's pre-stored public key instead of password derivation.
@@ -38,7 +38,7 @@ export const ADMIN_USER_ID = '00000000-0000-0000-0000-000000000001';
  * - Password-derived keys
  * - Cross-device access
  */
-export const WELCOME_MESSAGE_CONTENT = `Welcome to ScriptHammer!
+export const WELCOME_MESSAGE_CONTENT = `Welcome to RescueDogs!
 
 Your messages are protected by end-to-end encryption. Here's what that means:
 
@@ -51,7 +51,7 @@ Your messages are protected by end-to-end encryption. Here's what that means:
 **Why this matters** - Even if someone accessed our servers, your conversations would look like scrambled nonsense without your password.
 
 Feel free to explore!
-- The ScriptHammer Team`;
+- The RescueDogs Team`;
 
 /**
  * Result of sending a welcome message

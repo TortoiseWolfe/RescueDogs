@@ -28,7 +28,7 @@ docker compose --profile supabase rm -f
 #    intact network.
 echo ""
 echo "🔄 Restarting the app container (rebuilds the bundle with the cloud URL)..."
-docker compose up -d scripthammer
+docker compose up -d rescuedogs
 
 echo ""
 echo "=================================="

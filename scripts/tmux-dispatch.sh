@@ -1,18 +1,18 @@
 #!/bin/bash
-# Task dispatcher for scripthammer terminals
+# Task dispatcher for rescuedogs terminals
 # Usage: ./tmux-dispatch.sh [--vote|--tasks|--queue|--all]
 #
 # Dispatches work to running tmux terminals without manual intervention.
 # See AUTOMATION.md for patterns and edge case documentation.
 
-SESSION="scripthammer"
+SESSION="rescuedogs"
 # NOTE: the wireframe queue at docs/design/wireframes/.terminal-status.json
 # was retired during the wireframe subsystem consolidation. The --queue mode
 # below now reports "status file not found" and exits cleanly. --vote and
 # --tasks modes still work against their own state files.
 STATUS_FILE="docs/design/wireframes/.terminal-status.json"
 AUDIT_FILE="docs/interoffice/audits/2026-01-14-organizational-review.md"
-PROJECT_DIR="$HOME/repos/000_Mega_Plates/ScriptHammer"
+PROJECT_DIR="$HOME/repos/000_Mega_Plates/RescueDogs"
 PRECOMPUTE_SCRIPT="$PROJECT_DIR/scripts/dispatch-precompute.py"
 PRECOMPUTE_CACHE="/tmp/dispatch-precompute-$(date +%Y-%m-%d).json"
 USE_PRECOMPUTE=true
@@ -409,7 +409,7 @@ case "${1:-}" in
   *)
     echo "Usage: $0 [--vote|--tasks|--queue|--precomputed|--all|--status] [--no-precompute]"
     echo ""
-    echo "Dispatches work to running scripthammer tmux terminals."
+    echo "Dispatches work to running rescuedogs tmux terminals."
     echo ""
     echo "Commands:"
     echo "  --vote        Dispatch RFC votes to council (7 terminals)"

@@ -48,11 +48,11 @@ fi
 
 SESSION="$CLIENT"
 
-# Color palette - match ScriptHammer but slightly different for distinction
+# Color palette - match RescueDogs but slightly different for distinction
 COLOR_DESIGN="colour183"     # Pale Lavender #d7afff
 COLOR_WIREFRAME="colour159"  # Pale Cyan #afffff
 COLOR_SUPPORT="colour254"    # Pale Gray #e4e4e4
-COLOR_BASE="colour239"       # Darker gray (distinguishes from scripthammer)
+COLOR_BASE="colour239"       # Darker gray (distinguishes from rescuedogs)
 
 # Role definitions - just the /prime command
 declare -A PRIMERS=(
@@ -97,10 +97,10 @@ esac
 # Get client-specific working directory
 case "$CLIENT" in
   stw)
-    # SpokeToWork repos are siblings to ScriptHammer
+    # SpokeToWork repos are siblings to RescueDogs
     CLIENT_DIR="$(dirname "$PROJECT_DIR")/SpokeToWork-MVP"
     if [ ! -d "$CLIENT_DIR" ]; then
-      echo "Warning: $CLIENT_DIR not found, using ScriptHammer dir"
+      echo "Warning: $CLIENT_DIR not found, using RescueDogs dir"
       CLIENT_DIR="$PROJECT_DIR"
     fi
     ;;
@@ -116,7 +116,7 @@ tmux kill-session -t $SESSION 2>/dev/null
 FIRST="${ROLES[0]}"
 tmux new-session -d -s $SESSION -n "$FIRST" -c "$CLIENT_DIR"
 
-# Status bar styling (slightly different from scripthammer for visual distinction)
+# Status bar styling (slightly different from rescuedogs for visual distinction)
 tmux set-option -t $SESSION status-style "bg=$COLOR_BASE,fg=white"
 tmux set-option -t $SESSION status-left "#[bg=colour166,fg=white,bold] $SESSION #[default]"
 tmux set-option -t $SESSION status-left-length 15

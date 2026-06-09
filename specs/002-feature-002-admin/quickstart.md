@@ -17,7 +17,7 @@ Add to `.env`:
 
 ```bash
 # Admin user for system welcome messages
-TEST_USER_ADMIN_EMAIL=admin@scripthammer.com
+TEST_USER_ADMIN_EMAIL=admin@rescuedogs.com
 TEST_USER_ADMIN_PASSWORD=<generate-with: openssl rand -base64 48>
 NEXT_PUBLIC_ADMIN_USER_ID=00000000-0000-0000-0000-000000000001
 ```
@@ -33,14 +33,14 @@ ADD COLUMN IF NOT EXISTS welcome_message_sent BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Admin profile
 INSERT INTO user_profiles (id, username, display_name, welcome_message_sent)
-VALUES ('00000000-0000-0000-0000-000000000001', 'scripthammer', 'ScriptHammer', TRUE)
+VALUES ('00000000-0000-0000-0000-000000000001', 'rescuedogs', 'RescueDogs', TRUE)
 ON CONFLICT (id) DO NOTHING;
 ```
 
 ### 3. Generate MessagingGate Component
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 # Name: MessagingGate
 # Directory: src/components/auth
 ```
@@ -48,7 +48,7 @@ docker compose exec scripthammer pnpm run generate:component
 ### 4. Run Tests
 
 ```bash
-docker compose exec scripthammer pnpm test
+docker compose exec rescuedogs pnpm test
 ```
 
 ## Development Workflow
@@ -66,7 +66,7 @@ docker compose exec scripthammer pnpm test
 1. Sign in as new user with verified email
 2. Initialize encryption keys
 3. Check conversations list
-4. Verify ScriptHammer welcome message appears
+4. Verify RescueDogs welcome message appears
 
 ### Testing OAuth Flow
 

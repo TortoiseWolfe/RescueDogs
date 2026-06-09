@@ -32,7 +32,7 @@ Implement a privacy-conscious Google Analytics 4 (GA4) integration that respects
 **Note**: The GoogleAnalytics component will be generated using the component generator to ensure proper 5-file structure:
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 # Select: atomic
 # Name: GoogleAnalytics
 # Path: analytics/GoogleAnalytics

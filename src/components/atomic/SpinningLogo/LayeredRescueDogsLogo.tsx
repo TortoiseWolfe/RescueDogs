@@ -5,15 +5,15 @@ import Image from 'next/image';
 import { SpinningLogo } from './SpinningLogo';
 import { detectedConfig } from '@/config/project-detected';
 
-export interface LayeredScriptHammerLogoProps {
+export interface LayeredRescueDogsLogoProps {
   className?: string;
   size?: number;
   speed?: 'slow' | 'normal' | 'fast' | number;
   pauseOnHover?: boolean;
 }
 
-export const LayeredScriptHammerLogo: React.FC<
-  LayeredScriptHammerLogoProps
+export const LayeredRescueDogsLogo: React.FC<
+  LayeredRescueDogsLogoProps
 > = ({ className = '', speed = 'slow', pauseOnHover = true }) => {
   return (
     <div
@@ -52,11 +52,11 @@ export const LayeredScriptHammerLogo: React.FC<
         />
       </div>
 
-      {/* Layer 2: Rotating silver gear + "ScriptHammer.com" text (MIDDLE) */}
+      {/* Layer 2: Rotating silver gear + "RescueDogs.com" text (MIDDLE) */}
       <SpinningLogo speed={speed} pauseOnHover={pauseOnHover}>
         <Image
-          src={`${detectedConfig.basePath}/scripthammer-logo.svg`}
-          alt="ScriptHammer.com gear logo"
+          src={`${detectedConfig.basePath}/rescuedogs-logo.svg`}
+          alt="RescueDogs.com gear logo"
           width={400}
           height={400}
           className="absolute inset-0 h-full w-full"
@@ -100,4 +100,4 @@ export const LayeredScriptHammerLogo: React.FC<
   );
 };
 
-LayeredScriptHammerLogo.displayName = 'LayeredScriptHammerLogo';
+LayeredRescueDogsLogo.displayName = 'LayeredRescueDogsLogo';

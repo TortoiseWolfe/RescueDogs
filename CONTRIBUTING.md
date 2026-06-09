@@ -1,6 +1,6 @@
-# Contributing to ScriptHammer
+# Contributing to RescueDogs
 
-Thank you for your interest in contributing to ScriptHammer. This guide will help you get started.
+Thank you for your interest in contributing to RescueDogs. This guide will help you get started.
 
 ## Table of Contents
 
@@ -40,11 +40,11 @@ Be respectful, inclusive, and constructive. We welcome contributors of all exper
 # 1. Fork the repository on GitHub
 
 # 2. Clone your fork
-git clone https://github.com/YOUR_USERNAME/ScriptHammer.git
-cd ScriptHammer
+git clone https://github.com/YOUR_USERNAME/RescueDogs.git
+cd RescueDogs
 
 # 3. Add upstream remote
-git remote add upstream https://github.com/ORIGINAL_OWNER/ScriptHammer.git
+git remote add upstream https://github.com/ORIGINAL_OWNER/RescueDogs.git
 
 # 4. Start the development environment
 docker compose up -d
@@ -84,7 +84,7 @@ docker compose up
 Validate wireframes with the shipped 40+ rule validator:
 
 ```bash
-docker compose exec scripthammer \
+docker compose exec rescuedogs \
   python3 .specify/extensions/wireframe/scripts/validate.py --all --summary
 ```
 
@@ -93,7 +93,7 @@ docker compose exec scripthammer \
 ## Project Structure
 
 ```
-ScriptHammer/
+RescueDogs/
 ├── features/                    # Feature specifications (PRPs)
 │   ├── foundation/              # Core features (000-006)
 │   ├── core-features/           # Main features (007-012)
@@ -137,7 +137,7 @@ git checkout -b feature/your-feature-name
 
 ### Workflow for Features
 
-ScriptHammer uses the SpecKit workflow for feature development:
+RescueDogs uses the SpecKit workflow for feature development:
 
 ```bash
 # 1. Specification phase
@@ -470,8 +470,8 @@ export const User = ({ name, email }) => <div>{name}</div>;
 
 ## Getting Help
 
-- **Questions**: Open a [Discussion](https://github.com/OWNER/ScriptHammer/discussions)
-- **Bugs**: Open an [Issue](https://github.com/OWNER/ScriptHammer/issues)
+- **Questions**: Open a [Discussion](https://github.com/OWNER/RescueDogs/discussions)
+- **Bugs**: Open an [Issue](https://github.com/OWNER/RescueDogs/issues)
 - **Security**: Email security@example.com (do not open public issues)
 
 ---
@@ -482,4 +482,4 @@ By contributing, you agree that your contributions will be licensed under the sa
 
 ---
 
-Thank you for contributing to ScriptHammer!
+Thank you for contributing to RescueDogs!

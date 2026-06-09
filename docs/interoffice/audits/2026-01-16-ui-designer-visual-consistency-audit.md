@@ -79,7 +79,7 @@ y=710  └───────────────────────�
                               ↓ 20px gap
 y=730  Key Concepts: term1 | term2 | term3 | term4 | term5
                               ↓ remaining space
-y=1060 NNN:NN | Feature Name | ScriptHammer
+y=1060 NNN:NN | Feature Name | RescueDogs
 ```
 
 ### Fix Template
@@ -130,10 +130,10 @@ y=1060 NNN:NN | Feature Name | ScriptHammer
 
 ```xml
 <!-- BEFORE (wrong) -->
-<text x="960" y="1060" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#374151">NNN:NN | Feature | ScriptHammer</text>
+<text x="960" y="1060" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#374151">NNN:NN | Feature | RescueDogs</text>
 
 <!-- AFTER (correct) -->
-<text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#374151">NNN:NN | Feature | ScriptHammer</text>
+<text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#374151">NNN:NN | Feature | RescueDogs</text>
 ```
 
 ### Affected Files (18 total)

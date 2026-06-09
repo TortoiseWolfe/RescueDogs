@@ -15,7 +15,7 @@
 - [ ] CHK002 - Are optional flags (--force, --dry-run) defined with their behaviors? [Gap, Contract]
 - [ ] CHK003 - Is the complete list of file extensions to process explicitly enumerated? [Completeness, Contract §File Patterns]
 - [ ] CHK004 - Is the complete list of directories to exclude explicitly enumerated? [Completeness, Contract §File Patterns]
-- [ ] CHK005 - Are all case variations to replace documented (ScriptHammer, scripthammer, SCRIPTHAMMER)? [Completeness, Spec §FR-002]
+- [ ] CHK005 - Are all case variations to replace documented (RescueDogs, rescuedogs, SCRIPTHAMMER)? [Completeness, Spec §FR-002]
 - [ ] CHK006 - Is the docker-compose service name update requirement specified? [Completeness, Spec §FR-004]
 - [ ] CHK007 - Is the CNAME deletion behavior documented including custom domain exception? [Completeness, Spec §FR-005]
 - [ ] CHK008 - Are all package.json fields to update explicitly listed (name, description, repository)? [Completeness, Spec §FR-006]
@@ -74,7 +74,7 @@
 - [ ] CHK043 - Is behavior defined for project name collision with existing files? [Edge Case, Gap]
 - [ ] CHK044 - Is behavior defined for read-only files in the repository? [Edge Case, Gap]
 - [ ] CHK045 - Is behavior defined for symlinks in the repository? [Edge Case, Gap]
-- [ ] CHK046 - Is behavior defined for binary files that might contain "ScriptHammer"? [Edge Case, Gap]
+- [ ] CHK046 - Is behavior defined for binary files that might contain "RescueDogs"? [Edge Case, Gap]
 - [ ] CHK047 - Is behavior defined for files with mixed line endings (CRLF/LF)? [Edge Case, Gap]
 - [ ] CHK048 - Is behavior defined for Unicode in project names? [Edge Case, Gap]
 

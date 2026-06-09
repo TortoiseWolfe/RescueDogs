@@ -48,7 +48,7 @@ echo "✓ Kong is responding."
 # 4. Restart the app so the dev server rebuilds with the local NEXT_PUBLIC_SUPABASE_URL.
 echo ""
 echo "🔄 Restarting the app container (rebuilds the bundle with the local URL)..."
-docker compose up -d scripthammer
+docker compose up -d rescuedogs
 
 # 5. Seed test users + connections (idempotent).
 echo ""
@@ -59,6 +59,6 @@ echo ""
 echo "=================================="
 echo "  ✨ LOCAL Supabase ready"
 echo "=================================="
-echo "  App:    docker compose port scripthammer 3000"
+echo "  App:    docker compose port rescuedogs 3000"
 echo "  Studio: http://localhost:54323"
 echo "  Back to cloud:  pnpm run dev:cloud"

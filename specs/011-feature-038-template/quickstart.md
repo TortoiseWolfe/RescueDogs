@@ -6,7 +6,7 @@
 
 ```bash
 # 1. Fork & Clone
-gh repo fork TortoiseWolfe/ScriptHammer --clone
+gh repo fork TortoiseWolfe/RescueDogs --clone
 cd YourNewProject
 
 # 2. Run Rebrand Script
@@ -45,7 +45,7 @@ git push
 - [ ] `pnpm test` passes (no Supabase errors)
 - [ ] `pnpm run build` succeeds
 - [ ] Docker container starts without errors
-- [ ] No "ScriptHammer" references in `package.json`
+- [ ] No "RescueDogs" references in `package.json`
 - [ ] Git remote points to your repository
 - [ ] GitHub Pages deployment succeeds
 
@@ -61,8 +61,8 @@ git push
 # Then run for real
 ./scripts/rebrand.sh TestProject testuser "Test description"
 
-# Verify no ScriptHammer references remain
-grep -r "ScriptHammer" --include="*.ts" --include="*.tsx" --include="*.json" .
+# Verify no RescueDogs references remain
+grep -r "RescueDogs" --include="*.ts" --include="*.tsx" --include="*.json" .
 # Should return empty
 ```
 
@@ -73,7 +73,7 @@ grep -r "ScriptHammer" --include="*.ts" --include="*.tsx" --include="*.json" .
 mv .env .env.backup
 
 # Run tests
-docker compose exec scripthammer pnpm test
+docker compose exec rescuedogs pnpm test
 
 # Should pass with mocked Supabase client
 # Restore env

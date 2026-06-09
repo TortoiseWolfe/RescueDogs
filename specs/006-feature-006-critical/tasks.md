@@ -161,10 +161,10 @@
 
 **Purpose**: Final validation and cleanup
 
-- [ ] T040 [P] Run full E2E test suite: `docker compose exec scripthammer pnpm exec playwright test tests/e2e/messaging/`
-- [x] T041 [P] Run unit tests: `docker compose exec scripthammer pnpm test`
-- [x] T042 [P] Run type-check: `docker compose exec scripthammer pnpm run type-check`
-- [x] T043 [P] Run linting: `docker compose exec scripthammer pnpm run lint`
+- [ ] T040 [P] Run full E2E test suite: `docker compose exec rescuedogs pnpm exec playwright test tests/e2e/messaging/`
+- [x] T041 [P] Run unit tests: `docker compose exec rescuedogs pnpm test`
+- [x] T042 [P] Run type-check: `docker compose exec rescuedogs pnpm run type-check`
+- [x] T043 [P] Run linting: `docker compose exec rescuedogs pnpm run lint`
 - [ ] T044 [P] Run Lighthouse performance audit on /messages page (target: 90+ score per Constitution V)
 - [ ] T045 Manual browser test with Chrome password manager on /messages/setup
 - [ ] T046 Manual browser test with Firefox password manager on /messages/setup

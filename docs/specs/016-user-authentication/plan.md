@@ -91,7 +91,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 - [x] CI/CD uses containerized environments
 - [x] Environment consistency maintained
 
-**Docker Usage**: All development via `docker compose exec scripthammer`, env vars in .env for Supabase keys
+**Docker Usage**: All development via `docker compose exec rescuedogs`, env vars in .env for Supabase keys
 
 ### V. Progressive Enhancement
 

@@ -1,4 +1,4 @@
-# ScriptHammer Feature Analysis Report
+# RescueDogs Feature Analysis Report
 
 **Generated**: 2025-12-30
 **Total Features**: 46 (45 original + 000-RLS)

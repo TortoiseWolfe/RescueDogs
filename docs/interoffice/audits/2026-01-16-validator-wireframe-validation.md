@@ -15,7 +15,7 @@ Validation run on 45 SVG files found **60 issues**. Only **10 files passed** (22
 | Code          | Count | Description                                                                 |
 | ------------- | ----- | --------------------------------------------------------------------------- |
 | G-037         | 42    | Annotation text uses light color `#6b7280` instead of `#374151`             |
-| SIGNATURE-004 | 16    | Wrong signature format (should be `NNN:NN \| Feature Name \| ScriptHammer`) |
+| SIGNATURE-004 | 16    | Wrong signature format (should be `NNN:NN \| Feature Name \| RescueDogs`) |
 | PARSE         | 2     | Invalid XML - not well-formed                                               |
 
 ## Critical Issues (PARSE Errors)
@@ -49,7 +49,7 @@ These SVGs cannot be rendered:
 ## Recommendations
 
 1. **G-037 Fix**: Change annotation text `fill="#6b7280"` to `fill="#374151"` (42 files)
-2. **SIGNATURE-004 Fix**: Update signatures to format `NNN:NN | Feature Name | ScriptHammer` (16 files)
+2. **SIGNATURE-004 Fix**: Update signatures to format `NNN:NN | Feature Name | RescueDogs` (16 files)
 3. **PARSE Fix**: Debug XML syntax in 014-admin-welcome-email-gate SVGs (2 files)
 
 ## Action Items

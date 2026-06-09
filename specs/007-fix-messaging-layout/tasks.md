@@ -18,7 +18,7 @@
 
 **Purpose**: Database reset to create test data
 
-- [ ] T001 Reset database with 30 test messages: `docker compose exec scripthammer pnpm run db:reset`
+- [ ] T001 Reset database with 30 test messages: `docker compose exec rescuedogs pnpm run db:reset`
 
 **Checkpoint**: 30 test messages exist for scroll testing
 

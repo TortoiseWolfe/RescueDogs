@@ -5,7 +5,7 @@ import blogData from '@/lib/blog/blog-data.json';
 import { getProjectConfig } from '@/config/project.config';
 
 export const metadata: Metadata = {
-  title: 'Blog Tags | ScriptHammer',
+  title: 'Blog Tags | RescueDogs',
   description: 'Browse all blog post tags and topics',
   openGraph: {
     title: 'Blog Tags',

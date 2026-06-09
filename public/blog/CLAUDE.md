@@ -1,4 +1,4 @@
-# ScriptHammer Blog Writing Style Guide
+# RescueDogs Blog Writing Style Guide
 
 This guide ensures consistency across all blog posts and technical documentation.
 
@@ -57,7 +57,7 @@ Always explain these on first use:
 
 ### Project-Specific Acronyms
 
-ScriptHammer-specific terms that need explanation:
+RescueDogs-specific terms that need explanation:
 
 - **PRP** - Product Requirements Prompt
 - **FR** - Functional Requirement (e.g., FR-001)
@@ -66,7 +66,7 @@ ScriptHammer-specific terms that need explanation:
 
 ## Examples from Existing Posts
 
-### Good Example: scripthammer-intro.md
+### Good Example: rescuedogs-intro.md
 
 ```markdown
 - **[Tailwind CSS](https://tailwindcss.com/) (Cascading Style Sheets) v4**

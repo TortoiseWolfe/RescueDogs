@@ -2,7 +2,7 @@
 
 **Feature ID**: 037
 **Category**: testing
-**Source**: ScriptHammer README (SPEC-064)
+**Source**: RescueDogs README (SPEC-064)
 **Status**: Ready for SpecKit
 
 ## Description

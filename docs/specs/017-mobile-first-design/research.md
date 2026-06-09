@@ -5,7 +5,7 @@
 
 ## Overview
 
-This document consolidates research findings for implementing comprehensive mobile-first responsive design across ScriptHammer. Research covers CSS architecture, touch standards, image optimization, and orientation detection.
+This document consolidates research findings for implementing comprehensive mobile-first responsive design across RescueDogs. Research covers CSS architecture, touch standards, image optimization, and orientation detection.
 
 ---
 
@@ -151,7 +151,7 @@ Target 44×44px minimum (WCAG AAA + Apple HIG + Android Material Design)
 - Bottom of screen: 12mm minimum
 - 44×44px hits the ergonomic sweet spot
 
-**ScriptHammer Context**:
+**RescueDogs Context**:
 
 - Existing Playwright tests only check 20px (too small!)
 - PRP-017 spec requires 44×44px (FR-003, FR-017)
@@ -255,7 +255,7 @@ Manual Optimization with Sharp + HTML `<picture>` Element
 
 ### Rationale
 
-**Current ScriptHammer Setup**:
+**Current RescueDogs Setup**:
 
 - Next.js 15.5.2 with `output: 'export'` (static site)
 - Images set to `unoptimized: true` (no optimization)

@@ -37,7 +37,7 @@
 
 ### Primary User Story
 
-As a mobile user visiting ScriptHammer on my phone, I want the site to provide a clean, native-feeling mobile experience where all content is readable, all controls are tappable, and nothing requires horizontal scrolling or zooming, so that I can easily navigate and consume content on my device.
+As a mobile user visiting RescueDogs on my phone, I want the site to provide a clean, native-feeling mobile experience where all content is readable, all controls are tappable, and nothing requires horizontal scrolling or zooming, so that I can easily navigate and consume content on my device.
 
 ### Acceptance Scenarios
 

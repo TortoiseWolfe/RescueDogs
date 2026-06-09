@@ -89,7 +89,7 @@ export interface IWelcomeService {
  * Welcome message content constant
  * Explains E2E encryption to new users
  */
-export const WELCOME_MESSAGE_CONTENT = `Welcome to ScriptHammer!
+export const WELCOME_MESSAGE_CONTENT = `Welcome to RescueDogs!
 
 Your messages are protected by end-to-end encryption. Here's what that means:
 
@@ -102,7 +102,7 @@ Your messages are protected by end-to-end encryption. Here's what that means:
 **Why this matters** - Even if someone accessed our servers, your conversations would look like scrambled nonsense without your password.
 
 Feel free to explore!
-- The ScriptHammer Team`;
+- The RescueDogs Team`;
 
 /**
  * Admin user constant

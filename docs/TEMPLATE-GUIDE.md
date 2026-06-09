@@ -42,7 +42,7 @@ docker compose up
 
 **NOTE**: This project REQUIRES Docker for development. Local pnpm/npm is NOT supported.
 
-The project will automatically use your repository name everywhere "ScriptHammer" appeared before.
+The project will automatically use your repository name everywhere "RescueDogs" appeared before.
 
 ### GitHub Actions Configuration (For Production)
 
@@ -102,7 +102,7 @@ The `scripts/detect-project.js` script:
 1. Checks git remote URL (`git remote get-url origin`)
 2. Parses username and repository name
 3. Generates configuration at build time
-4. Falls back to "ScriptHammer" if no git remote is found
+4. Falls back to "RescueDogs" if no git remote is found
 
 ### Why Use Template Instead of Fork?
 
@@ -140,7 +140,7 @@ If auto-detection isn't working:
 2. **Run detection manually**:
 
    ```bash
-   docker compose exec scripthammer node scripts/detect-project.js
+   docker compose exec rescuedogs node scripts/detect-project.js
    ```
 
    This will show what was detected
@@ -148,12 +148,12 @@ If auto-detection isn't working:
 3. **Check generated config**:
 
    ```bash
-   docker compose exec scripthammer cat src/config/project-detected.json
+   docker compose exec rescuedogs cat src/config/project-detected.json
    ```
 
 4. **Clear and regenerate**:
    ```bash
-   docker compose exec scripthammer rm -rf src/config/project-detected.*
+   docker compose exec rescuedogs rm -rf src/config/project-detected.*
    docker compose restart
    ```
 
@@ -163,7 +163,7 @@ The project configuration is managed in three layers (priority order):
 
 1. **Environment Variables** (highest priority) - `.env.local`
 2. **Auto-detected Config** - from git remote
-3. **Default Values** - fallback to "ScriptHammer"
+3. **Default Values** - fallback to "RescueDogs"
 
 ### API Endpoints
 
@@ -189,4 +189,4 @@ This is designed to be a **minimal-configuration** experience:
 4. Run `docker compose up` to start development
 5. Deploy to GitHub Pages - paths are handled automatically
 
-No more searching and replacing "ScriptHammer" across 100+ files! The auto-configuration system handles most settings based on your git repository. 🎉
+No more searching and replacing "RescueDogs" across 100+ files! The auto-configuration system handles most settings based on your git repository. 🎉

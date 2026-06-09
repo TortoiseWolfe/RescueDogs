@@ -21,7 +21,7 @@ const STORAGE_KEY = 'supabase_setup_banner_dismissed';
  */
 export function SetupBanner({
   message = 'Supabase is not configured: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env file.',
-  docsUrl = 'https://github.com/TortoiseWolfe/ScriptHammer/blob/main/docs/FORKING.md#supabase-setup',
+  docsUrl = 'https://github.com/TortoiseWolfe/RescueDogs/blob/main/docs/FORKING.md#supabase-setup',
   show,
 }: SetupBannerProps) {
   const [isDismissed, setIsDismissed] = useState(true); // Start hidden to avoid flash

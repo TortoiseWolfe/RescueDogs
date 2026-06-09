@@ -1,6 +1,6 @@
 # QC-Operator Role
 
-You are the QC-Operator for ScriptHammer - responsible for dispatching annotated PNG batches to QC terminals for visual review.
+You are the QC-Operator for RescueDogs - responsible for dispatching annotated PNG batches to QC terminals for visual review.
 
 ## Purpose
 
@@ -45,19 +45,19 @@ Dispatch work to these 4 QC terminals:
 ```bash
 for win in WireframeQA Validator Inspector Auditor; do
   echo "=== $win ===";
-  tmux capture-pane -t scripthammer:$win -p 2>/dev/null | grep "% free" | tail -1
+  tmux capture-pane -t rescuedogs:$win -p 2>/dev/null | grep "% free" | tail -1
 done
 ```
 
 **Clear/prime any terminal below 30%:**
 
 ```bash
-tmux send-keys -t scripthammer:[terminal] '/clear' Enter
+tmux send-keys -t rescuedogs:[terminal] '/clear' Enter
 # Wait for autocomplete menu, then:
-tmux send-keys -t scripthammer:[terminal] Enter
+tmux send-keys -t rescuedogs:[terminal] Enter
 # Wait 3 seconds, then:
-tmux send-keys -t scripthammer:[terminal] '/prime [role]' Enter
-tmux send-keys -t scripthammer:[terminal] Enter
+tmux send-keys -t rescuedogs:[terminal] '/prime [role]' Enter
+tmux send-keys -t rescuedogs:[terminal] Enter
 ```
 
 ### 2. List Batch Contents
@@ -69,8 +69,8 @@ ls docs/design/wireframes/png/overviews_XXX/
 ### 3. Dispatch to All Terminals
 
 ```bash
-tmux send-keys -t scripthammer:WireframeQA 'Review PNG batch: docs/design/wireframes/png/overviews_XXX/ - View each annotated PNG and log visual issues to respective .issues.md files.' Enter
-tmux send-keys -t scripthammer:WireframeQA Enter
+tmux send-keys -t rescuedogs:WireframeQA 'Review PNG batch: docs/design/wireframes/png/overviews_XXX/ - View each annotated PNG and log visual issues to respective .issues.md files.' Enter
+tmux send-keys -t rescuedogs:WireframeQA Enter
 ```
 
 Repeat for Validator, Inspector, Auditor.
@@ -81,7 +81,7 @@ Repeat for Validator, Inspector, Auditor.
 # Check every 5 minutes
 for win in WireframeQA Validator Inspector Auditor; do
   echo "=== $win ===";
-  tmux capture-pane -t scripthammer:$win -p 2>/dev/null | tail -8
+  tmux capture-pane -t rescuedogs:$win -p 2>/dev/null | tail -8
 done
 ```
 
@@ -91,10 +91,10 @@ done
 
 ```bash
 # WRONG - command sits in buffer
-tmux send-keys -t scripthammer:WireframeQA '/clear'
+tmux send-keys -t rescuedogs:WireframeQA '/clear'
 
 # RIGHT - command executes
-tmux send-keys -t scripthammer:WireframeQA '/clear' Enter
+tmux send-keys -t rescuedogs:WireframeQA '/clear' Enter
 ```
 
 ## Autocomplete Gotcha
@@ -102,14 +102,14 @@ tmux send-keys -t scripthammer:WireframeQA '/clear' Enter
 When typing `/clear`, Claude Code shows an autocomplete menu. You need an EXTRA Enter to select and execute:
 
 ```bash
-tmux send-keys -t scripthammer:[terminal] '/clear' Enter  # Shows menu
-tmux send-keys -t scripthammer:[terminal] Enter           # Selects /clear
+tmux send-keys -t rescuedogs:[terminal] '/clear' Enter  # Shows menu
+tmux send-keys -t rescuedogs:[terminal] Enter           # Selects /clear
 ```
 
 Check the result:
 
 ```bash
-tmux capture-pane -t scripthammer:[terminal] -p | grep "% free"
+tmux capture-pane -t rescuedogs:[terminal] -p | grep "% free"
 ```
 
 If it shows 100%, the clear worked. Then send `/prime [role]` Enter Enter.
@@ -141,11 +141,11 @@ Terminal output is ephemeral. Always have terminals write findings to:
 
 ```bash
 # Health check
-for win in WireframeQA Validator Inspector Auditor; do echo "=== $win ==="; tmux capture-pane -t scripthammer:$win -p | grep "% free"; done
+for win in WireframeQA Validator Inspector Auditor; do echo "=== $win ==="; tmux capture-pane -t rescuedogs:$win -p | grep "% free"; done
 
 # Clear and prime
-tmux send-keys -t scripthammer:WireframeQA '/clear' Enter && sleep 2 && tmux send-keys -t scripthammer:WireframeQA Enter && sleep 3 && tmux send-keys -t scripthammer:WireframeQA '/prime wireframeqa' Enter && sleep 2 && tmux send-keys -t scripthammer:WireframeQA Enter
+tmux send-keys -t rescuedogs:WireframeQA '/clear' Enter && sleep 2 && tmux send-keys -t rescuedogs:WireframeQA Enter && sleep 3 && tmux send-keys -t rescuedogs:WireframeQA '/prime wireframeqa' Enter && sleep 2 && tmux send-keys -t rescuedogs:WireframeQA Enter
 
 # Dispatch
-tmux send-keys -t scripthammer:WireframeQA 'Review PNG batch: [path] - Log issues.' Enter && tmux send-keys -t scripthammer:WireframeQA Enter
+tmux send-keys -t rescuedogs:WireframeQA 'Review PNG batch: [path] - Log issues.' Enter && tmux send-keys -t rescuedogs:WireframeQA Enter
 ```

@@ -61,7 +61,7 @@
 
 - [x] T005 [US1] Run unit tests to verify T001-T004 pass:
   ```bash
-  docker compose exec scripthammer pnpm test src/lib/auth/oauth-utils.test.ts
+  docker compose exec rescuedogs pnpm test src/lib/auth/oauth-utils.test.ts
   ```
 
 **Checkpoint**: Extraction functions ready - User Story 1 integration can proceed
@@ -95,7 +95,7 @@
 
 - [x] T008 [US1] Run unit tests to verify T006-T007 pass:
   ```bash
-  docker compose exec scripthammer pnpm test src/lib/auth/oauth-utils.test.ts
+  docker compose exec rescuedogs pnpm test src/lib/auth/oauth-utils.test.ts
   ```
 
 ### Auth Callback Integration
@@ -206,7 +206,7 @@
 - [x] T017 Run full test suite:
 
   ```bash
-  docker compose exec scripthammer pnpm test
+  docker compose exec rescuedogs pnpm test
   ```
 
   ✅ 243 tests passed
@@ -214,7 +214,7 @@
 - [x] T018 Run type check:
 
   ```bash
-  docker compose exec scripthammer pnpm run type-check
+  docker compose exec rescuedogs pnpm run type-check
   ```
 
   ✅ No type errors
@@ -222,7 +222,7 @@
 - [x] T019 Run linter:
 
   ```bash
-  docker compose exec scripthammer pnpm run lint
+  docker compose exec rescuedogs pnpm run lint
   ```
 
   ✅ Passed (1 unrelated warning in ReAuthModal)

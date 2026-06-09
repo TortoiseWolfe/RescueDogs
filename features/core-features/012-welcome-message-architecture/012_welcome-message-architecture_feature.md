@@ -4,7 +4,7 @@
 **Category**: core-features
 **Priority**: P2
 **Status**: Draft
-**Source**: Migrated from ScriptHammer specs/003-feature-004-welcome
+**Source**: Migrated from RescueDogs specs/003-feature-004-welcome
 
 ---
 

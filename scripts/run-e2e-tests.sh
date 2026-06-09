@@ -78,7 +78,7 @@ if [ "$DOCKER" = true ]; then
   echo -e "${YELLOW}Running tests in Docker...${NC}"
 
   # Start services
-  docker compose -f docker/docker-compose.e2e.yml up -d scripthammer
+  docker compose -f docker/docker-compose.e2e.yml up -d rescuedogs
 
   # Wait for health check
   echo "Waiting for application to be ready..."
@@ -98,7 +98,7 @@ else
   echo -e "${YELLOW}Running tests locally...${NC}"
 
   # Check if app is running
-  if ! curl -s http://localhost:3000/scripthammer > /dev/null; then
+  if ! curl -s http://localhost:3000/rescuedogs > /dev/null; then
     echo -e "${YELLOW}Starting development server...${NC}"
     pnpm run dev &
     DEV_PID=$!

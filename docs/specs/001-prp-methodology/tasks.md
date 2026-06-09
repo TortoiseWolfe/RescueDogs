@@ -196,7 +196,7 @@
 ```markdown
 ## PRP/SpecKit Workflow
 
-ScriptHammer uses Product Requirements Prompts (PRPs) integrated with SpecKit workflow commands for feature development.
+RescueDogs uses Product Requirements Prompts (PRPs) integrated with SpecKit workflow commands for feature development.
 
 **Quick Start**: See [SPECKIT-PRP-GUIDE.md](docs/prp-docs/SPECKIT-PRP-GUIDE.md)
 

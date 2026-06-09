@@ -6,7 +6,7 @@
 
 ## Day 1-3: The Specification Sprint
 
-We started ScriptHammer with ambitious goals: 46 features, full specs, wireframes, then implementation. The SpecKit workflow felt efficient:
+We started RescueDogs with ambitious goals: 46 features, full specs, wireframes, then implementation. The SpecKit workflow felt efficient:
 
 ```
 /speckit.specify → /speckit.clarify → /speckit.plan → /speckit.tasks

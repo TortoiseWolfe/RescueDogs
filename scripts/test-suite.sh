@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Test Suite Runner for ScriptHammer
+# Test Suite Runner for RescueDogs
 # Runs all tests with clear feedback and actionable results
 
 # Colors for output
@@ -66,7 +66,7 @@ START_TIME=$(date +%s)
 # Main header
 echo ""
 echo -e "${BLUE}${BOLD}╔══════════════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}${BOLD}║                  ScriptHammer Comprehensive Test Suite               ║${NC}"
+echo -e "${BLUE}${BOLD}║                  RescueDogs Comprehensive Test Suite               ║${NC}"
 echo -e "${BLUE}${BOLD}╚══════════════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${CYAN}Running all tests to ensure code quality and functionality...${NC}"
@@ -75,7 +75,7 @@ echo -e "${CYAN}Running all tests to ensure code quality and functionality...${N
 if in_docker; then
     CMD_PREFIX=""
 else
-    CMD_PREFIX="docker compose exec scripthammer"
+    CMD_PREFIX="docker compose exec rescuedogs"
 fi
 
 # 1. TypeScript Type Checking
@@ -172,7 +172,7 @@ print_header "8. Accessibility Tests"
 # Production build corrupts .next permissions - restart container to fix
 if ! in_docker; then
     echo "Restarting container to restore dev server after build..."
-    docker compose restart scripthammer > /dev/null 2>&1
+    docker compose restart rescuedogs > /dev/null 2>&1
 
     # Wait for dev server to be ready
     echo "Waiting for dev server to recover..."

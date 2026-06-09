@@ -3,7 +3,7 @@
 **Date**: 2025-10-07
 **Status**: ✅ ALL KNOWN ISSUES RESOLVED
 
-This document tracks the resolution of all previously known issues in the ScriptHammer project.
+This document tracks the resolution of all previously known issues in the RescueDogs project.
 
 ---
 

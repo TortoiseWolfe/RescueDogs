@@ -81,5 +81,5 @@ All original tests preserved:
 Run the tests to verify no configuration errors:
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test e2e/tests/blog-mobile-ux
+docker compose exec rescuedogs pnpm exec playwright test e2e/tests/blog-mobile-ux
 ```

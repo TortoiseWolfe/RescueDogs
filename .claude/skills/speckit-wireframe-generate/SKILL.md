@@ -7,7 +7,7 @@ metadata:
   source: wireframe:commands/generate.md
 ---
 
-> **ScriptHammer note:** this project uses two-level feature paths —
+> **RescueDogs note:** this project uses two-level feature paths —
 > `features/<category>/<NNN-name>/wireframes/` — not the flat `specs/<feature>/`
 > layout referenced below. `<FEATURE_DIR>` resolves to the actual feature path
 > (run `find features -maxdepth 3 -type d -name '<NNN>*'`).

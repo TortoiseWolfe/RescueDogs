@@ -22,10 +22,10 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [x] T001 Upgrade Dexie.js from 3.2.7 to 4.0.10: `docker compose exec scripthammer pnpm add dexie@^4.0.10` (Note: Breaking changes - API differences between v3 and v4)
+- [x] T001 Upgrade Dexie.js from 3.2.7 to 4.0.10: `docker compose exec rescuedogs pnpm add dexie@^4.0.10` (Note: Breaking changes - API differences between v3 and v4)
 - [x] T002 [P] Create TypeScript types in `src/types/messaging.ts` (copy from `contracts/types.ts`)
 - [x] T003 [P] Create IndexedDB database schema in `src/lib/messaging/database.ts` (3 Dexie stores: messaging_queued_messages, messaging_cached_messages, messaging_private_keys) - namespaced to avoid conflicts
-- [x] T003b [P] Verify Docker container is running and Supabase service is healthy: `docker compose ps` (verify scripthammer container is "Up")
+- [x] T003b [P] Verify Docker container is running and Supabase service is healthy: `docker compose ps` (verify rescuedogs container is "Up")
 
 ---
 
@@ -74,11 +74,11 @@
 - [x] T019 [US1] Implement searchUsers method in ConnectionService (SELECT from auth.users WHERE email/username EXACT MATCH)
 - [x] T020 [US1] Implement getConnections method in ConnectionService (SELECT user_connections with filtering by status)
 - [x] T021 [US1] Implement removeConnection method in ConnectionService (DELETE from user_connections WHERE status='accepted')
-- [x] T022 [P] [US1] Generate UserSearch component: `docker compose exec scripthammer pnpm run generate:component -- --name UserSearch --category molecular --hasProps true --withHooks false`
+- [x] T022 [P] [US1] Generate UserSearch component: `docker compose exec rescuedogs pnpm run generate:component -- --name UserSearch --category molecular --hasProps true --withHooks false`
 - [x] T023 [US1] Implement UserSearch component in `src/components/molecular/UserSearch/UserSearch.tsx` (input field, search button 44px, results list)
 - [x] T024 [US1] Add search input validation in UserSearch (email format check, min length 3 chars)
 - [x] T025 [US1] Display search results with "Send Request" button (44px touch target, disabled if already connected)
-- [x] T026 [P] [US1] Generate ConnectionManager component: `docker compose exec scripthammer pnpm run generate:component -- --name ConnectionManager --category organisms --hasProps true --withHooks true`
+- [x] T026 [P] [US1] Generate ConnectionManager component: `docker compose exec rescuedogs pnpm run generate:component -- --name ConnectionManager --category organisms --hasProps true --withHooks true`
 - [x] T027 [US1] Implement ConnectionManager component in `src/components/organisms/ConnectionManager/ConnectionManager.tsx` (tabs for Pending Sent/Pending Received/Accepted/Blocked)
 - [x] T028 [US1] Add Accept/Decline/Block buttons in ConnectionManager (44px touch targets, confirm modals for block action)
 - [x] T029 [US1] Implement useConnections hook in `src/hooks/useConnections.ts` (fetch connections, sendRequest, acceptRequest, declineRequest, blockUser methods)
@@ -136,18 +136,18 @@
 - [x] T063 [US2] Implement markAsRead method in MessageService (UPDATE messages SET read_at=now() WHERE id IN (?))
 - [x] T064 [US2] Add "Setting up encryption..." loading state UI during first message send (1-2 second delay for key generation)
 - [x] T065 [US2] Handle edge case: recipient has no keys yet (show "User hasn't set up encryption yet. They'll receive your message when they reply.")
-- [x] T066 [P] [US2] Generate MessageBubble component: `docker compose exec scripthammer pnpm run generate:component -- --name MessageBubble --category atomic --hasProps true --withHooks false`
+- [x] T066 [P] [US2] Generate MessageBubble component: `docker compose exec rescuedogs pnpm run generate:component -- --name MessageBubble --category atomic --hasProps true --withHooks false`
 - [x] T067 [US2] Implement MessageBubble component in `src/components/atomic/MessageBubble/MessageBubble.tsx` (sender/recipient variants, timestamp, decrypted content display)
 - [x] T068 [US2] Add delivery status indicators to MessageBubble (sent: single checkmark, delivered: double checkmark, read: double blue checkmark)
-- [x] T069 [P] [US2] Generate MessageInput component: `docker compose exec scripthammer pnpm run generate:component -- --name MessageInput --category atomic --hasProps true --withHooks false`
+- [x] T069 [P] [US2] Generate MessageInput component: `docker compose exec rescuedogs pnpm run generate:component -- --name MessageInput --category atomic --hasProps true --withHooks false`
 - [x] T070 [US2] Implement MessageInput component in `src/components/atomic/MessageInput/MessageInput.tsx` (auto-expanding textarea, send button 44px, character count)
 - [x] T071 [US2] Add message validation in MessageInput (max 10,000 chars, non-empty after trim)
 - [x] T072 [US2] Add Enter key to send message (Cmd+Enter for newline on Mac, Ctrl+Enter on Windows/Linux)
-- [x] T073 [P] [US2] Generate MessageThread component: `docker compose exec scripthammer pnpm run generate:component -- --name MessageThread --category molecular --hasProps true --withHooks true`
+- [x] T073 [P] [US2] Generate MessageThread component: `docker compose exec rescuedogs pnpm run generate:component -- --name MessageThread --category molecular --hasProps true --withHooks true`
 - [x] T074 [US2] Implement MessageThread component in `src/components/molecular/MessageThread/MessageThread.tsx` (render MessageBubble array, scroll to bottom on new message)
 - [x] T075 [US2] Add pagination support in MessageThread (load 50 messages at a time, infinite scroll upwards)
 - [x] T076 [US2] Add "Scroll to bottom" button when viewing old messages (44px floating button)
-- [x] T077 [P] [US2] Generate ChatWindow component: `docker compose exec scripthammer pnpm run generate:component -- --name ChatWindow --category organisms --hasProps true --withHooks true`
+- [x] T077 [P] [US2] Generate ChatWindow component: `docker compose exec rescuedogs pnpm run generate:component -- --name ChatWindow --category organisms --hasProps true --withHooks true`
 - [x] T078 [US2] Implement ChatWindow component in `src/components/organisms/ChatWindow/ChatWindow.tsx` (compose ChatHeader + MessageThread + MessageInput)
 - [x] T079 [US2] Add blocked user banner to ChatWindow (display "[User] blocked you" at top, disable MessageInput)
 - [x] T080 [US2] Create conversation page in `src/app/messages/[id]/page.tsx` using ChatWindow component
@@ -196,9 +196,9 @@
 - [x] T105 [US3] Implement unsubscribeFromConversation method in RealtimeService (cleanup Supabase subscriptions)
 - [x] T106 [US3] Add debounce logic for typing indicators (only send update after 1 second of typing activity)
 - [x] T107 [US3] Add auto-expire logic for typing indicators (remove indicator if no update for 5 seconds)
-- [x] T108 [P] [US3] Generate TypingIndicator component: `docker compose exec scripthammer pnpm run generate:component -- --name TypingIndicator --category atomic --hasProps true --withHooks false`
+- [x] T108 [P] [US3] Generate TypingIndicator component: `docker compose exec rescuedogs pnpm run generate:component -- --name TypingIndicator --category atomic --hasProps true --withHooks false`
 - [x] T109 [US3] Implement TypingIndicator component in `src/components/atomic/TypingIndicator/TypingIndicator.tsx` (animated dots, "[User] is typing..." text, ARIA live region)
-- [x] T110 [P] [US3] Generate ReadReceipt component: `docker compose exec scripthammer pnpm run generate:component -- --name ReadReceipt --category atomic --hasProps true --withHooks false`
+- [x] T110 [P] [US3] Generate ReadReceipt component: `docker compose exec rescuedogs pnpm run generate:component -- --name ReadReceipt --category atomic --hasProps true --withHooks false`
 - [x] T111 [US3] Implement ReadReceipt component in `src/components/atomic/ReadReceipt/ReadReceipt.tsx` (sent/delivered/read states, checkmark icons, ARIA labels)
 - [x] T112 [US3] Implement useConversationRealtime hook in `src/hooks/useConversationRealtime.ts` (subscribe to messages on mount, decrypt in real-time, handle pagination)
 - [x] T113 [US3] Implement useTypingIndicator hook in `src/hooks/useTypingIndicator.ts` (track other user's typing status, debounce own status updates)
@@ -318,7 +318,7 @@
 ### Implementation for User Story 6
 
 - [x] T174 [US6] Research virtual scrolling library (react-window vs @tanstack/react-virtual vs custom implementation) - verify React 19.1.0 compatibility ✅ COMPLETE (selected @tanstack/react-virtual@^3.10.8)
-- [x] T175 [US6] Install virtual scrolling library: `docker compose exec scripthammer pnpm add @tanstack/react-virtual` (React 19 compatible alternative to react-window) ✅ COMPLETE (installed v3.13.12)
+- [x] T175 [US6] Install virtual scrolling library: `docker compose exec rescuedogs pnpm add @tanstack/react-virtual` (React 19 compatible alternative to react-window) ✅ COMPLETE (installed v3.13.12)
 - [x] T176 [US6] Refactor MessageThread to use @tanstack/react-virtual with useVirtualizer hook (render only visible messages) ✅ COMPLETE (100-message threshold, conditional rendering)
 - [x] T177 [US6] Configure estimateSize for MessageBubble (80px estimated height per message for performance) ✅ COMPLETE (dynamic estimation: 80px short, 120px long)
 - [x] T178 [US6] Implement infinite scroll pagination (detect scroll to top, load previous 50 messages) ✅ COMPLETE (scrollTop < 100px triggers onLoadMore)
@@ -384,9 +384,9 @@
 
 **Missing UI Components** (T195-T202): ✅ COMPLETE
 
-- [x] T195 [P] Generate ConversationList component: `docker compose exec scripthammer pnpm run generate:component -- --name ConversationList --category organisms --hasProps true --withHooks true`
+- [x] T195 [P] Generate ConversationList component: `docker compose exec rescuedogs pnpm run generate:component -- --name ConversationList --category organisms --hasProps true --withHooks true`
 - [x] T196 Implement ConversationList component in `src/components/organisms/ConversationList/ConversationList.tsx` (sort by last_message_at, show unread badges, search/filter/sort)
-- [x] T197 [P] Generate ConversationListItem component: `docker compose exec scripthammer pnpm run generate:component -- --name ConversationListItem --category molecular --hasProps true --withHooks false`
+- [x] T197 [P] Generate ConversationListItem component: `docker compose exec rescuedogs pnpm run generate:component -- --name ConversationListItem --category molecular --hasProps true --withHooks false`
 - [x] T198 Implement ConversationListItem component in `src/components/molecular/ConversationListItem/ConversationListItem.tsx` (avatar, name, last message preview, timestamp, unread count badge, 44px touch target)
 
 **Search & Filter** (T203-T206): ✅ COMPLETE (integrated into ConversationList)

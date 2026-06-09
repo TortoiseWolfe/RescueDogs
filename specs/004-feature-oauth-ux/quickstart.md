@@ -26,7 +26,7 @@ export function populateOAuthProfile(user: User): Promise<boolean>;
 **Test with**:
 
 ```bash
-docker compose exec scripthammer pnpm test src/lib/auth/oauth-utils.test.ts
+docker compose exec rescuedogs pnpm test src/lib/auth/oauth-utils.test.ts
 ```
 
 ### 2. Auth Callback Update (15 min)
@@ -104,10 +104,10 @@ Then run in Supabase SQL Editor (just the UPDATE statement for existing data).
 
 ```bash
 # Unit tests
-docker compose exec scripthammer pnpm test oauth-utils
+docker compose exec rescuedogs pnpm test oauth-utils
 
 # E2E test (if available)
-docker compose exec scripthammer pnpm exec playwright test welcome-message
+docker compose exec rescuedogs pnpm exec playwright test welcome-message
 ```
 
 ## Rollback

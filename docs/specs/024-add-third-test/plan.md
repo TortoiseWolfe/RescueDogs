@@ -15,7 +15,7 @@ Add a third test user (test-user-b@example.com) with credentials in .env and cre
 **Primary Dependencies**: Playwright 1.55.0, @supabase/supabase-js 2.58.0, Vitest 3.2.4
 **Storage**: Supabase (PostgreSQL) - existing auth.users, user_profiles, connections, messages, conversations tables
 **Testing**: Playwright for E2E (Docker-based), Vitest for unit tests
-**Target Platform**: Docker containers (scripthammer service), GitHub Pages static export
+**Target Platform**: Docker containers (rescuedogs service), GitHub Pages static export
 **Project Type**: Single (Next.js App Router with static export)
 **Performance Goals**: E2E test workflow completes in <60 seconds, user search <2s, connection acceptance <3s
 **Constraints**: Tests run inside Docker (no host-based Playwright), test data cleanup required for idempotency, must verify zero-knowledge encryption (database contains only ciphertext)

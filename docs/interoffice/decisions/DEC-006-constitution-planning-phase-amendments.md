@@ -19,7 +19,7 @@
 
 ## Decision
 
-Amend the constitution (v1.0.0 → v1.1.0) to reflect ScriptHammer's planning-phase status:
+Amend the constitution (v1.0.0 → v1.1.0) to reflect RescueDogs's planning-phase status:
 
 1. **Part A**: Change present-tense enforcement language to future-tense
    - Section I: "IS enforced" → "WILL BE enforced once implementation begins"

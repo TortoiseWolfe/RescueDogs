@@ -198,7 +198,7 @@ export default function Scene({
         <directionalLight position={[5, 8, 5]} intensity={1.5} />
 
         {/* Brand-asset sculpt — composition mirrors src/components/atomic/
-            SpinningLogo/LayeredScriptHammerLogo.tsx (mallet BACK, cog MIDDLE,
+            SpinningLogo/LayeredRescueDogsLogo.tsx (mallet BACK, cog MIDDLE,
             brackets FRONT). FR-007. */}
         <group position={[-0.3, -0.2, -0.4]}>
           <PrintingMallet />

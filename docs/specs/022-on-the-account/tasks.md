@@ -27,7 +27,7 @@
 **Purpose**: Database, dependencies, and project structure for avatar feature
 
 - [x] T001 Run database migration to create avatars bucket and add avatar_url column: `supabase/migrations/20251008_avatar_upload.sql`
-- [x] T002 Install react-easy-crop dependency: `docker compose exec scripthammer pnpm add react-easy-crop`
+- [x] T002 Install react-easy-crop dependency: `docker compose exec rescuedogs pnpm add react-easy-crop`
 - [x] T003 [P] Verify Supabase Storage bucket created and RLS policies applied
 - [x] T004 [P] Create test fixtures directory: `e2e/fixtures/avatars/` with test images (valid-small.jpg, valid-medium.png, invalid-toolarge.jpg, invalid-corrupted.jpg)
 
@@ -70,8 +70,8 @@
 
 ### Component Generation for User Story 1
 
-- [x] T016 [P] [US1] Generate AvatarUpload component: `docker compose exec scripthammer pnpm run generate:component -- --name AvatarUpload --category atomic --hasProps true --withHooks true`
-- [x] T017 [P] [US1] Generate AvatarDisplay component: `docker compose exec scripthammer pnpm run generate:component -- --name AvatarDisplay --category atomic --hasProps true --withHooks false`
+- [x] T016 [P] [US1] Generate AvatarUpload component: `docker compose exec rescuedogs pnpm run generate:component -- --name AvatarUpload --category atomic --hasProps true --withHooks true`
+- [x] T017 [P] [US1] Generate AvatarDisplay component: `docker compose exec rescuedogs pnpm run generate:component -- --name AvatarDisplay --category atomic --hasProps true --withHooks false`
 
 ### Implementation for User Story 1
 
@@ -243,7 +243,7 @@
   - "Uploading avatar..." ✅ (AvatarUpload.tsx:154, aria-live="polite")
   - "Avatar uploaded successfully" ✅ (AvatarUpload.tsx:93, aria-live="polite")
   - "Upload failed: [error message]" ✅ (AvatarUpload.tsx:78, aria-live="assertive")
-- [x] T049 Run Pa11y CI tests: `docker compose exec scripthammer pnpm run test:a11y:dev` ✅ (E2E accessibility tests cover WCAG compliance)
+- [x] T049 Run Pa11y CI tests: `docker compose exec rescuedogs pnpm run test:a11y:dev` ✅ (E2E accessibility tests cover WCAG compliance)
 - [x] T050 Manual keyboard navigation test: ✅
   - Tab through all controls ✅
   - Verify crop interface accessible ✅
@@ -257,9 +257,9 @@
 
 ### Final Validation
 
-- [x] T054 Run full test suite: `docker compose exec scripthammer pnpm run test:suite` ✅ (type-check, lint, build all pass)
-- [x] T055 Run E2E tests: `docker compose exec scripthammer pnpm run test:e2e` ✅ (9/9 avatar tests pass)
-- [x] T056 Verify component structure: `docker compose exec scripthammer pnpm run validate:structure` ✅ (55/55 components pass)
+- [x] T054 Run full test suite: `docker compose exec rescuedogs pnpm run test:suite` ✅ (type-check, lint, build all pass)
+- [x] T055 Run E2E tests: `docker compose exec rescuedogs pnpm run test:e2e` ✅ (9/9 avatar tests pass)
+- [x] T056 Verify component structure: `docker compose exec rescuedogs pnpm run validate:structure` ✅ (55/55 components pass)
 - [ ] T057 Run quickstart.md validation steps
 - [x] T058 Verify all success criteria from spec.md: ✅
   - SC-001: Upload + display within 5 seconds ✅

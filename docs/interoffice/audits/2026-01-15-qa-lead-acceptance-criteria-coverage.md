@@ -143,7 +143,7 @@ grep -B2 "Priority: P0" features/*/*/spec.md | grep "User Story"
 
 **Audit Result**: PASS
 
-The ScriptHammer feature specifications demonstrate comprehensive acceptance criteria coverage. All 46 features have properly structured Given/When/Then scenarios, priority justifications, and testability criteria. The SpecKit workflow has successfully transformed informal PRPs into audit-ready specifications.
+The RescueDogs feature specifications demonstrate comprehensive acceptance criteria coverage. All 46 features have properly structured Given/When/Then scenarios, priority justifications, and testability criteria. The SpecKit workflow has successfully transformed informal PRPs into audit-ready specifications.
 
 **Next Steps**:
 

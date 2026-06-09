@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Feature 005 is an **exemplary security specification** that systematically addresses vulnerabilities identified in code review. The spec demonstrates mature threat modeling, comprehensive OWASP coverage, and clear prioritization (P0-P3). This is the most security-focused feature in the ScriptHammer portfolio.
+Feature 005 is an **exemplary security specification** that systematically addresses vulnerabilities identified in code review. The spec demonstrates mature threat modeling, comprehensive OWASP coverage, and clear prioritization (P0-P3). This is the most security-focused feature in the RescueDogs portfolio.
 
 **Overall Risk Rating**: LOW (after implementation)
 
@@ -343,5 +343,5 @@ Feature 005 is an exemplary security specification. The minor findings (LOW seve
 ---
 
 **Security Lead**
-ScriptHammer Council
+RescueDogs Council
 2026-01-15

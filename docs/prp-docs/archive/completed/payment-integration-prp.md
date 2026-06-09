@@ -5,7 +5,7 @@
 **Version**: 0.0.1
 **Status**: 📥 Inbox
 **Created**: 2025-10-03
-**Author**: ScriptHammer Development Team
+**Author**: RescueDogs Development Team
 
 ---
 
@@ -55,7 +55,7 @@ A production-ready payment integration system with **Supabase backend** supporti
 
 ## 2. Context & Codebase Intelligence
 
-### ScriptHammer Architecture Constraint
+### RescueDogs Architecture Constraint
 
 **Static Export for GitHub Pages:**
 
@@ -185,7 +185,7 @@ pnpm add @paypal/react-paypal-js  # React components
 ### File Structure
 
 ```
-ScriptHammer/
+RescueDogs/
 ├── supabase/
 │   ├── config.toml                              # Supabase config
 │   ├── migrations/
@@ -432,22 +432,22 @@ PAYPAL_WEBHOOK_ID=xxx
 **1.2 Install Supabase CLI**
 
 ```bash
-docker compose exec scripthammer pnpm add @supabase/supabase-js
-docker compose exec scripthammer pnpm add -D supabase
+docker compose exec rescuedogs pnpm add @supabase/supabase-js
+docker compose exec rescuedogs pnpm add -D supabase
 ```
 
 **1.3 Initialize Supabase**
 
 ```bash
-docker compose exec scripthammer npx supabase init
-docker compose exec scripthammer npx supabase link --project-ref YOUR_PROJECT_REF
+docker compose exec rescuedogs npx supabase init
+docker compose exec rescuedogs npx supabase link --project-ref YOUR_PROJECT_REF
 ```
 
 **1.4 Create Database Schema**
 
 ```bash
 # Migration file created in specs/015-payment-integration/
-docker compose exec scripthammer npx supabase db push
+docker compose exec rescuedogs npx supabase db push
 ```
 
 ### Step 2: Setup Payment Providers
@@ -470,38 +470,38 @@ docker compose exec scripthammer npx supabase db push
 
 ```bash
 # Set secrets first in Supabase Dashboard
-docker compose exec scripthammer npx supabase functions deploy stripe-create-payment
-docker compose exec scripthammer npx supabase functions deploy stripe-webhook
-docker compose exec scripthammer npx supabase functions deploy paypal-create-order
-docker compose exec scripthammer npx supabase functions deploy paypal-webhook
-docker compose exec scripthammer npx supabase functions deploy payment-status
+docker compose exec rescuedogs npx supabase functions deploy stripe-create-payment
+docker compose exec rescuedogs npx supabase functions deploy stripe-webhook
+docker compose exec rescuedogs npx supabase functions deploy paypal-create-order
+docker compose exec rescuedogs npx supabase functions deploy paypal-webhook
+docker compose exec rescuedogs npx supabase functions deploy payment-status
 ```
 
 ### Step 4: Build Client Components
 
 ```bash
 # Use component generator (5-file pattern mandatory)
-docker compose exec scripthammer pnpm run generate:component --name DonateButton --category atomic --hasProps true
-docker compose exec scripthammer pnpm run generate:component --name CheckoutButton --category atomic --hasProps true
-docker compose exec scripthammer pnpm run generate:component --name SubscribeButton --category atomic --hasProps true
-docker compose exec scripthammer pnpm run generate:component --name PaymentConsentModal --category molecular --hasProps true
+docker compose exec rescuedogs pnpm run generate:component --name DonateButton --category atomic --hasProps true
+docker compose exec rescuedogs pnpm run generate:component --name CheckoutButton --category atomic --hasProps true
+docker compose exec rescuedogs pnpm run generate:component --name SubscribeButton --category atomic --hasProps true
+docker compose exec rescuedogs pnpm run generate:component --name PaymentConsentModal --category molecular --hasProps true
 ```
 
 ### Step 5: Testing
 
 ```bash
 # Local Supabase development
-docker compose exec scripthammer npx supabase start
+docker compose exec rescuedogs npx supabase start
 
 # Test Edge Functions locally
-docker compose exec scripthammer npx supabase functions serve stripe-webhook
+docker compose exec rescuedogs npx supabase functions serve stripe-webhook
 
 # Unit tests
-docker compose exec scripthammer pnpm test src/utils/payment
-docker compose exec scripthammer pnpm test src/components/payment
+docker compose exec rescuedogs pnpm test src/utils/payment
+docker compose exec rescuedogs pnpm test src/components/payment
 
 # E2E tests with Stripe test mode
-docker compose exec scripthammer pnpm exec playwright test
+docker compose exec rescuedogs pnpm exec playwright test
 ```
 
 ---

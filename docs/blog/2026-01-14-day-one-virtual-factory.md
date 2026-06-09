@@ -6,7 +6,7 @@
 
 ## The Factory Floor Opens
 
-At 08:00 on January 14th, 2026, a tmux session named `scripthammer` spawned 19 terminal windows. By end of day, 21 AI workers had produced more design artifacts than most teams generate in a week.
+At 08:00 on January 14th, 2026, a tmux session named `rescuedogs` spawned 19 terminal windows. By end of day, 21 AI workers had produced more design artifacts than most teams generate in a week.
 
 This is the story of Day One.
 
@@ -126,7 +126,7 @@ The Operator's tools were primitive:
 
 - `./scripts/tmux-session.sh --all` to launch
 - `./scripts/tmux-dispatch.sh --status` to check
-- `tmux capture-pane -t scripthammer:N -p | tail -30` to peek at any terminal
+- `tmux capture-pane -t rescuedogs:N -p | tail -30` to peek at any terminal
 
 The cognitive load was high. Keeping 21 threads in your head while typing dispatch commands is exhausting. But it scaled better than expected.
 

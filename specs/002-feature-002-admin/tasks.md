@@ -23,7 +23,7 @@
 - [x] T001 [P] Add admin environment variables to `.env`
 
   ```bash
-  TEST_USER_ADMIN_EMAIL=admin@scripthammer.com
+  TEST_USER_ADMIN_EMAIL=admin@rescuedogs.com
   TEST_USER_ADMIN_PASSWORD=<generate-with: openssl rand -base64 48>
   NEXT_PUBLIC_ADMIN_USER_ID=00000000-0000-0000-0000-000000000001
   ```
@@ -32,7 +32,7 @@
 
   ```bash
   # Admin user for system welcome messages
-  TEST_USER_ADMIN_EMAIL=admin@scripthammer.com
+  TEST_USER_ADMIN_EMAIL=admin@rescuedogs.com
   TEST_USER_ADMIN_PASSWORD=<secure-password>
   NEXT_PUBLIC_ADMIN_USER_ID=00000000-0000-0000-0000-000000000001
   ```
@@ -40,7 +40,7 @@
 - [x] T003 [P] Add admin constants to `tests/fixtures/test-user.ts`
   ```typescript
   export const TEST_EMAIL_ADMIN =
-    process.env.TEST_USER_ADMIN_EMAIL || 'admin@scripthammer.com';
+    process.env.TEST_USER_ADMIN_EMAIL || 'admin@rescuedogs.com';
   export const TEST_PASSWORD_ADMIN = process.env.TEST_USER_ADMIN_PASSWORD;
   export const ADMIN_USER_ID =
     process.env.NEXT_PUBLIC_ADMIN_USER_ID ||
@@ -73,7 +73,7 @@
   ```sql
   -- Admin profile for system messages (after user_profiles table creation)
   INSERT INTO user_profiles (id, username, display_name, welcome_message_sent)
-  VALUES ('00000000-0000-0000-0000-000000000001', 'scripthammer', 'ScriptHammer', TRUE)
+  VALUES ('00000000-0000-0000-0000-000000000001', 'rescuedogs', 'RescueDogs', TRUE)
   ON CONFLICT (id) DO NOTHING;
   ```
 
@@ -94,7 +94,7 @@
   - Added `welcome_message_sent` column to user_profiles
   - Created index `idx_user_profiles_welcome_pending`
   - Created admin user in auth.users
-  - Updated admin profile with username 'scripthammer'
+  - Updated admin profile with username 'rescuedogs'
 
 **Checkpoint**: Foundation ready - user story implementation can begin
 
@@ -102,7 +102,7 @@
 
 ## Phase 3: User Story 3 - Admin User Setup (Priority: P3)
 
-**Goal**: Admin user "ScriptHammer" exists and can be authenticated
+**Goal**: Admin user "RescueDogs" exists and can be authenticated
 
 **Independent Test**: Verify admin credentials in .env, admin profile exists in database
 
@@ -119,7 +119,7 @@
         .select('*')
         .eq('id', ADMIN_USER_ID)
         .single();
-      expect(data?.username).toBe('scripthammer');
+      expect(data?.username).toBe('rescuedogs');
     });
   });
   ```
@@ -128,7 +128,7 @@
 
 - [x] T009 [US3] Verify admin profile exists via Supabase Management API
   - Query verified: `SELECT * FROM user_profiles WHERE id = '00000000-0000-0000-0000-000000000001'`
-  - Confirmed: username='scripthammer', display_name='ScriptHammer', welcome_message_sent=true
+  - Confirmed: username='rescuedogs', display_name='RescueDogs', welcome_message_sent=true
 
 **Checkpoint**: Admin user setup complete and verified
 
@@ -160,7 +160,7 @@
 - [x] T012 [US2] Generate MessagingGate component using generator
 
   ```bash
-  docker compose exec scripthammer pnpm run generate:component
+  docker compose exec rescuedogs pnpm run generate:component
   # Name: MessagingGate
   # Directory: src/components/auth
   ```
@@ -199,7 +199,7 @@
 
 ## Phase 5: User Story 1 - Welcome Message (Priority: P1) 🎯 MVP
 
-**Goal**: New users receive encrypted welcome message from ScriptHammer on first login
+**Goal**: New users receive encrypted welcome message from RescueDogs on first login
 
 **Independent Test**: Create new user, verify email, log in, check welcome message in conversations
 
@@ -234,7 +234,7 @@
 - [x] T018 [US1] Add welcome message content constant to `src/services/messaging/welcome-service.ts`
 
   ```typescript
-  export const WELCOME_MESSAGE_CONTENT = `Welcome to ScriptHammer!
+  export const WELCOME_MESSAGE_CONTENT = `Welcome to RescueDogs!
   
   Your messages are protected by end-to-end encryption...`;
   ```
@@ -287,19 +287,19 @@
 - [x] T023 [P] Run full test suite
 
   ```bash
-  docker compose exec scripthammer pnpm test
+  docker compose exec rescuedogs pnpm test
   ```
 
 - [x] T024 [P] Run type check
 
   ```bash
-  docker compose exec scripthammer pnpm run type-check
+  docker compose exec rescuedogs pnpm run type-check
   ```
 
 - [x] T025 [P] Run linter
 
   ```bash
-  docker compose exec scripthammer pnpm run lint
+  docker compose exec rescuedogs pnpm run lint
   ```
 
 - [x] T026 Manual E2E validation following quickstart.md scenarios

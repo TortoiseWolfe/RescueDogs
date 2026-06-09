@@ -16,7 +16,7 @@ This guide provides step-by-step instructions for running the comprehensive E2E 
 
 ```bash
 docker ps
-# Should show scripthammer container running
+# Should show rescuedogs container running
 ```
 
 **If Docker is not running**:
@@ -61,7 +61,7 @@ echo "TEST_USER_TERTIARY_PASSWORD=TestPassword456!" >> .env
 
 ```bash
 # Run seed script for third test user
-docker compose exec scripthammer psql $DATABASE_URL -f supabase/migrations/seed-test-user-b.sql
+docker compose exec rescuedogs psql $DATABASE_URL -f supabase/migrations/seed-test-user-b.sql
 ```
 
 **Expected output**:
@@ -87,7 +87,7 @@ This is OK! The seed script is idempotent.
 **Start dev server** (if not already running):
 
 ```bash
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 ```
 
 **Expected output**:
@@ -114,7 +114,7 @@ curl -I http://localhost:3000
 **Command**:
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test
+docker compose exec rescuedogs pnpm exec playwright test
 ```
 
 **Expected output** (summary):
@@ -145,7 +145,7 @@ Running 48 tests using 4 workers
 **Command**:
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test e2e/messaging/
+docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/
 ```
 
 **Expected output**:
@@ -175,7 +175,7 @@ Running 6 tests using 2 workers
 **Complete workflow test**:
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
+docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
 ```
 
 **Expected output**:
@@ -214,7 +214,7 @@ Total: ~36s (well under 60s limit - SC-001)
 **Interactive Playwright UI**:
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test --ui
+docker compose exec rescuedogs pnpm exec playwright test --ui
 ```
 
 **Features**:
@@ -238,7 +238,7 @@ docker compose exec scripthammer pnpm exec playwright test --ui
 **See browser in action**:
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test --headed
+docker compose exec rescuedogs pnpm exec playwright test --headed
 ```
 
 **Note**: Requires X11 forwarding for WSL/Linux:
@@ -246,7 +246,7 @@ docker compose exec scripthammer pnpm exec playwright test --headed
 ```bash
 # On WSL, first start X server (VcXsrv/Xming)
 export DISPLAY=:0
-docker compose exec scripthammer pnpm exec playwright test --headed
+docker compose exec rescuedogs pnpm exec playwright test --headed
 ```
 
 ---
@@ -256,13 +256,13 @@ docker compose exec scripthammer pnpm exec playwright test --headed
 **Run single test by name**:
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test -g "Complete user workflow"
+docker compose exec rescuedogs pnpm exec playwright test -g "Complete user workflow"
 ```
 
 **Run tests matching pattern**:
 
 ```bash
-docker compose exec scripthammer pnpm exec playwright test -g "sign-in"
+docker compose exec rescuedogs pnpm exec playwright test -g "sign-in"
 ```
 
 ---
@@ -287,7 +287,7 @@ docker compose exec scripthammer pnpm exec playwright test -g "sign-in"
 
 ```
 # Check test output for console errors
-docker compose exec scripthammer pnpm exec playwright test --reporter=list | grep "console.error"
+docker compose exec rescuedogs pnpm exec playwright test --reporter=list | grep "console.error"
 # Should return empty
 ```
 
@@ -295,7 +295,7 @@ docker compose exec scripthammer pnpm exec playwright test --reporter=list | gre
 
 ```
 # Check for "Database contains only ciphertext" test passing
-docker compose exec scripthammer pnpm exec playwright test -g "ciphertext"
+docker compose exec rescuedogs pnpm exec playwright test -g "ciphertext"
 ```
 
 ---
@@ -319,16 +319,16 @@ docker compose exec scripthammer pnpm exec playwright test -g "ciphertext"
 
 ```bash
 # 1. Check test users exist
-docker compose exec scripthammer pnpm exec playwright test e2e/auth/sign-in.spec.ts
+docker compose exec rescuedogs pnpm exec playwright test e2e/auth/sign-in.spec.ts
 
 # 2. Check database connectivity
 curl http://localhost:3000/api/health
 
 # 3. Check dev server logs
-docker compose logs scripthammer | tail -50
+docker compose logs rescuedogs | tail -50
 
 # 4. Run with verbose logging
-docker compose exec scripthammer pnpm exec playwright test --reporter=list
+docker compose exec rescuedogs pnpm exec playwright test --reporter=list
 ```
 
 ---
@@ -372,7 +372,7 @@ DELETE FROM connections WHERE user_id IN (
 # Run test 3 times in a row
 for i in {1..3}; do
   echo "Run $i:"
-  docker compose exec scripthammer pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
+  docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
 done
 ```
 
@@ -390,24 +390,24 @@ done
 
 ```bash
 # 1. All E2E tests pass
-docker compose exec scripthammer pnpm exec playwright test
+docker compose exec rescuedogs pnpm exec playwright test
 # ✅ 48 passed
 
 # 2. No console errors in tests
-docker compose exec scripthammer pnpm exec playwright test --reporter=list | grep -i error
+docker compose exec rescuedogs pnpm exec playwright test --reporter=list | grep -i error
 # ✅ No matches
 
 # 3. Encryption test passes (FR-014)
-docker compose exec scripthammer pnpm exec playwright test -g "ciphertext"
+docker compose exec rescuedogs pnpm exec playwright test -g "ciphertext"
 # ✅ 1 passed
 
 # 4. Performance criteria met
-docker compose exec scripthammer pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
+docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
 # ✅ Test duration: <60s (SC-001)
 
 # 5. Test idempotency verified
-docker compose exec scripthammer pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
-docker compose exec scripthammer pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
+docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
+docker compose exec rescuedogs pnpm exec playwright test e2e/messaging/complete-user-workflow.spec.ts
 # ✅ Both runs pass (SC-008)
 ```
 
@@ -437,7 +437,7 @@ git push origin 024-add-third-test
 
 ```yaml
 - name: Run E2E tests
-  run: docker compose exec scripthammer pnpm exec playwright test
+  run: docker compose exec rescuedogs pnpm exec playwright test
   env:
     TEST_USER_PRIMARY_EMAIL: ${{ secrets.TEST_USER_PRIMARY_EMAIL }}
     TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
@@ -453,7 +453,7 @@ git push origin 024-add-third-test
 - `TEST_USER_TERTIARY_PASSWORD`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
-**Add secrets at**: `https://github.com/<username>/ScriptHammer/settings/secrets/actions`
+**Add secrets at**: `https://github.com/<username>/RescueDogs/settings/secrets/actions`
 
 ---
 
@@ -471,7 +471,7 @@ Error: connect ECONNREFUSED 127.0.0.1:3000
 
 ```bash
 # Start dev server
-docker compose exec scripthammer pnpm run dev
+docker compose exec rescuedogs pnpm run dev
 
 # Verify server is running
 curl http://localhost:3000
@@ -492,11 +492,11 @@ Error: Invalid login credentials
 
 ```bash
 # Verify test user exists
-docker compose exec scripthammer psql $DATABASE_URL -c \
+docker compose exec rescuedogs psql $DATABASE_URL -c \
   "SELECT email FROM auth.users WHERE email LIKE 'test%@example.com';"
 
 # If missing, run seed script
-docker compose exec scripthammer psql $DATABASE_URL -f supabase/migrations/seed-test-user-b.sql
+docker compose exec rescuedogs psql $DATABASE_URL -f supabase/migrations/seed-test-user-b.sql
 ```
 
 ---
@@ -513,13 +513,13 @@ Timeout of 60000ms exceeded
 
 ```bash
 # Check system resources
-docker stats scripthammer
+docker stats rescuedogs
 
 # Increase timeout for slow systems
 # Edit test file: test.setTimeout(120000); // 2 minutes
 
 # Or run with more time
-docker compose exec scripthammer pnpm exec playwright test --timeout=120000
+docker compose exec rescuedogs pnpm exec playwright test --timeout=120000
 ```
 
 ---
@@ -611,7 +611,7 @@ After all tests pass locally:
 
 ```bash
 # Single command to verify everything
-docker compose exec scripthammer pnpm exec playwright test && \
+docker compose exec rescuedogs pnpm exec playwright test && \
 echo "✅ All tests passed - ready to push!"
 ```
 

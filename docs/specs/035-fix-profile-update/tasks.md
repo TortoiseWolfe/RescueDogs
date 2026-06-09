@@ -121,7 +121,7 @@
 
 **Purpose**: Run tests, verify all changes work together
 
-- [x] T010 Run unit tests to verify all test mocks work with new implementation. Command: `docker compose exec scripthammer pnpm test src/components/auth/AccountSettings`
+- [x] T010 Run unit tests to verify all test mocks work with new implementation. Command: `docker compose exec rescuedogs pnpm test src/components/auth/AccountSettings`
 
 - [ ] T011 Manual end-to-end verification per quickstart.md:
   1. Sign in
@@ -132,7 +132,7 @@
   6. Refresh page
   7. Verify change persisted
 
-- [x] T012 Run type-check to ensure no TypeScript errors. Command: `docker compose exec scripthammer pnpm run type-check`
+- [x] T012 Run type-check to ensure no TypeScript errors. Command: `docker compose exec rescuedogs pnpm run type-check`
 
 ---
 

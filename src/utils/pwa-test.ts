@@ -142,11 +142,11 @@ export class PWATester {
       }
 
       const cacheNames = await caches.keys();
-      const scripthammerCaches = cacheNames.filter((name) =>
-        name.startsWith('scripthammer-')
+      const rescuedogsCaches = cacheNames.filter((name) =>
+        name.startsWith('rescuedogs-')
       );
 
-      if (scripthammerCaches.length === 0) {
+      if (rescuedogsCaches.length === 0) {
         return {
           feature: 'Offline Capability',
           status: 'warning',
@@ -155,7 +155,7 @@ export class PWATester {
       }
 
       // Check cache contents
-      const cache = await caches.open(scripthammerCaches[0]);
+      const cache = await caches.open(rescuedogsCaches[0]);
       const keys = await cache.keys();
 
       return {
@@ -163,7 +163,7 @@ export class PWATester {
         status: 'pass',
         message: `Offline cache active with ${keys.length} cached resources`,
         details: {
-          cacheNames: scripthammerCaches,
+          cacheNames: rescuedogsCaches,
           resourceCount: keys.length,
           sampleResources: keys.slice(0, 5).map((k) => k.url),
         },

@@ -14,7 +14,7 @@ import type { TouchTarget, TouchTargetValidation } from '@/types/mobile-first';
  * WCAG 2.2 Level AA: Minimum 24×24px
  * WCAG 2.2 Level AAA: Minimum 44×44px (also Apple HIG standard)
  *
- * ScriptHammer targets AAA compliance (44×44px minimum)
+ * RescueDogs targets AAA compliance (44×44px minimum)
  */
 export const TOUCH_TARGET_STANDARDS: Record<'AA' | 'AAA', TouchTarget> = {
   AA: {
@@ -32,7 +32,7 @@ export const TOUCH_TARGET_STANDARDS: Record<'AA' | 'AAA', TouchTarget> = {
 };
 
 /**
- * Default touch target standard for ScriptHammer
+ * Default touch target standard for RescueDogs
  */
 export const DEFAULT_TOUCH_TARGET = TOUCH_TARGET_STANDARDS.AAA;
 

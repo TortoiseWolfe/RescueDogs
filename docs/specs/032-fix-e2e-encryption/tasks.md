@@ -17,7 +17,7 @@
 
 **Purpose**: Dependencies and core crypto infrastructure
 
-- [ ] T001 [ALL] Install argon2-wasm-esm dependency: `docker compose exec scripthammer pnpm add argon2-wasm-esm`
+- [ ] T001 [ALL] Install argon2-wasm-esm dependency: `docker compose exec rescuedogs pnpm add argon2-wasm-esm`
 - [ ] T002 [ALL] Create database migration for encryption_salt column in `supabase/migrations/032_add_encryption_salt.sql`
 - [ ] T003 [P] [ALL] Apply migration to Supabase: run migration via Supabase dashboard or CLI
 
@@ -150,7 +150,7 @@
 ### Implementation for User Story 3
 
 - [ ] T017 [US3] Create re-authentication modal component in `src/components/organisms/ReAuthModal/`:
-  - Create with component generator: `docker compose exec scripthammer pnpm run generate:component ReAuthModal organisms`
+  - Create with component generator: `docker compose exec rescuedogs pnpm run generate:component ReAuthModal organisms`
   - Password input field
   - "Decrypt Messages" button
   - Error message display for wrong password
@@ -188,7 +188,7 @@
 **Purpose**: Users with old random-generated keys must migrate to password-derived keys
 
 - [ ] T021 [ALL] Create migration UI component in `src/components/organisms/EncryptionMigration/`:
-  - Create with component generator: `docker compose exec scripthammer pnpm run generate:component EncryptionMigration organisms`
+  - Create with component generator: `docker compose exec rescuedogs pnpm run generate:component EncryptionMigration organisms`
   - Blocking modal: "Securing your messages"
   - Progress indicator (current/total conversations)
   - Cannot dismiss until migration complete
@@ -306,9 +306,9 @@
   - Document migration for legacy users
 
 - [ ] T034 [ALL] Run full test suite and fix any regressions:
-  - `docker compose exec scripthammer pnpm test`
-  - `docker compose exec scripthammer pnpm run type-check`
-  - `docker compose exec scripthammer pnpm exec playwright test`
+  - `docker compose exec rescuedogs pnpm test`
+  - `docker compose exec rescuedogs pnpm run type-check`
+  - `docker compose exec rescuedogs pnpm exec playwright test`
 
 ---
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Purpose
 
-This folder contains **46 feature specifications** (PRPs) for ScriptHammer, ready for the SpecKit workflow.
+This folder contains **46 feature specifications** (PRPs) for RescueDogs, ready for the SpecKit workflow.
 
 ## Folder Structure
 
@@ -106,7 +106,7 @@ Don't mix-and-match patches with regen findings.
 - Machine validation: `.specify/extensions/wireframe/scripts/validate.py`
   runs 40+ structural + visual + coverage rules. Invoked automatically
   by `/speckit.wireframe.review`, or manually:
-  `docker compose exec scripthammer python3 .specify/extensions/wireframe/scripts/validate.py --all --summary`
+  `docker compose exec rescuedogs python3 .specify/extensions/wireframe/scripts/validate.py --all --summary`
 
 ## Feature File Format (PRP Structure)
 

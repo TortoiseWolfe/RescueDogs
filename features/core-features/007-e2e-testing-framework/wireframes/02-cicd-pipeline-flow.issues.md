@@ -21,7 +21,7 @@
 
 | ID   | Issue                                                           | Code          | Classification |
 | ---- | --------------------------------------------------------------- | ------------- | -------------- |
-| X-01 | Signature format wrong: 'ScriptHammer v0.1 - E2E Testing CI/... | SIGNATURE-004 | REGENERATE     |
+| X-01 | Signature format wrong: 'RescueDogs v0.1 - E2E Testing CI/... | SIGNATURE-004 | REGENERATE     |
 
 ### Annotation Issues
 

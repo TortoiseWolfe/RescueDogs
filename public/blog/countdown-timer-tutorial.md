@@ -14,12 +14,12 @@ tags:
 categories:
   - tutorial
   - business
-excerpt: Learn the PRP/SpecKit workflow by building a countdown timer. From requirements to production code with ScriptHammer template.
+excerpt: Learn the PRP/SpecKit workflow by building a countdown timer. From requirements to production code with RescueDogs template.
 featuredImage: /blog-images/countdown-timer-tutorial/countdown-banner-preview.svg
 featuredImageAlt: Countdown timer component showing days, hours, minutes, seconds with New Year sale promotion
 ogImage: /blog-images/countdown-timer-tutorial/countdown-banner-og.png
 ogTitle: Build a Countdown Timer - PRP/SpecKit Tutorial
-ogDescription: Learn the PRP/SpecKit workflow by building a countdown timer. Step-by-step tutorial from requirements to production-ready code with ScriptHammer.
+ogDescription: Learn the PRP/SpecKit workflow by building a countdown timer. Step-by-step tutorial from requirements to production-ready code with RescueDogs.
 twitterCard: summary_large_image
 linkedinAuthorUrl: https://www.linkedin.com/in/pohlner/
 ---
@@ -28,13 +28,13 @@ linkedinAuthorUrl: https://www.linkedin.com/in/pohlner/
 
 ## 🎯 The Landing Page Strategy
 
-ScriptHammer isn't just a Next.js template—it's your **entry point** to client relationships.
+RescueDogs isn't just a Next.js template—it's your **entry point** to client relationships.
 
 **The Pitch**: "I'll customize this production-ready template for your domain on GitHub Pages. $321/year. 12 hours of my time annually."
 
 That's **$27/month** for a professional landing page with:
 
-- Theme customization (most brands just pick light/dark, though ScriptHammer includes 32 themes)
+- Theme customization (most brands just pick light/dark, though RescueDogs includes 32 themes)
 - Progressive Web App (PWA) capabilities (offline support)
 - Contact forms + calendar booking
 - Search Engine Optimization (SEO)-optimized blog
@@ -94,7 +94,7 @@ A Product Requirements Prompt (PRP) focuses on **what users need**, not how to b
 /tasks Focus on Test-Driven Development (TDD) approach
 
 # 5. Generate component scaffold (run in Docker container - interactive prompts)
-docker compose exec scripthammer pnpm run generate:component
+docker compose exec rescuedogs pnpm run generate:component
 # You'll be prompted for:
 #   - Component name: CountdownBanner
 #   - Category: atomic
@@ -108,7 +108,7 @@ docker compose exec scripthammer pnpm run generate:component
 **For scripting and automation:**
 
 ```bash
-docker compose exec scripthammer pnpm run generate:component -- \
+docker compose exec rescuedogs pnpm run generate:component -- \
   --name CountdownBanner \
   --category atomic \
   --hasProps true \
@@ -277,7 +277,7 @@ export const CountdownBanner = () => {
         <div className="flex items-center gap-3">
           <div className="text-center">
             <div className="text-2xl font-bold">$321/year</div>
-            <div className="text-sm">Custom ScriptHammer Setup</div>
+            <div className="text-sm">Custom RescueDogs Setup</div>
           </div>
           <Button variant="accent" onClick={() => router.push('/schedule')}>
             Book Now
@@ -332,10 +332,10 @@ export default function RootLayout({ children }) {
 
 ```bash
 # Format code to match project style
-docker compose exec scripthammer pnpm run format
+docker compose exec rescuedogs pnpm run format
 
 # Run full test suite and build
-docker compose exec scripthammer sh -c "pnpm run test:suite && pnpm run build"
+docker compose exec rescuedogs sh -c "pnpm run test:suite && pnpm run build"
 ```
 
 ---
@@ -367,7 +367,7 @@ docker compose exec scripthammer sh -c "pnpm run test:suite && pnpm run build"
 
 **Customize**: Edit price, CTA text, target date in code
 
-**Test**: `docker compose exec scripthammer sh -c "pnpm run test:suite && pnpm run build"`
+**Test**: `docker compose exec rescuedogs sh -c "pnpm run test:suite && pnpm run build"`
 
 **Deploy**: `git add . && git commit -m "feat: Countdown banner" && git push` (GitHub Actions auto-deploys)
 
@@ -379,7 +379,7 @@ docker compose exec scripthammer sh -c "pnpm run test:suite && pnpm run build"
 
 ## 💡 The Bigger Picture
 
-This tutorial demonstrates **building a consulting business** using ScriptHammer:
+This tutorial demonstrates **building a consulting business** using RescueDogs:
 
 **Your Stack**: Template + Blog + Storybook + Calendar + Contact Form = Portfolio
 
@@ -387,7 +387,7 @@ This tutorial demonstrates **building a consulting business** using ScriptHammer
 
 **Your Offer**: $321/year entry point → Value ladder → Recurring revenue
 
-Clients want proven solutions. Developers want starting points. Consultants want leverage. ScriptHammer gives you all three.
+Clients want proven solutions. Developers want starting points. Consultants want leverage. RescueDogs gives you all three.
 
 ---
 
@@ -398,7 +398,7 @@ Clients want proven solutions. Developers want starting points. Consultants want
 ✅ Business model for consulting
 ✅ Template to showcase capabilities
 
-**Next Move**: [Fork ScriptHammer](https://github.com/TortoiseWolfe/ScriptHammer/fork) → Deploy countdown → Share on LinkedIn → Book first client
+**Next Move**: [Fork RescueDogs](https://github.com/TortoiseWolfe/RescueDogs/fork) → Deploy countdown → Share on LinkedIn → Book first client
 
 ---
 

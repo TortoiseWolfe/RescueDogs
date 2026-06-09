@@ -1,12 +1,12 @@
-# Forking ScriptHammer
+# Forking RescueDogs
 
-Complete guide to creating your own project from the ScriptHammer template.
+Complete guide to creating your own project from the RescueDogs template.
 
 ## Quick Start (5 Minutes)
 
 ```bash
 # 1. Fork and clone
-gh repo fork TortoiseWolfe/ScriptHammer --clone
+gh repo fork TortoiseWolfe/RescueDogs --clone
 cd YourProjectName
 
 # 2. Run the rebrand script
@@ -37,12 +37,12 @@ The `scripts/rebrand.sh` script automates updating 200+ files:
 
 | Category   | Changes                                                                                                |
 | ---------- | ------------------------------------------------------------------------------------------------------ |
-| **Code**   | Replaces "ScriptHammer" with your project name in all TypeScript, JavaScript, JSON, and Markdown files |
-| **Files**  | Renames files containing "ScriptHammer" (e.g., `ScriptHammerLogo.tsx` → `MyProjectLogo.tsx`)           |
+| **Code**   | Replaces "RescueDogs" with your project name in all TypeScript, JavaScript, JSON, and Markdown files |
+| **Files**  | Renames files containing "RescueDogs" (e.g., `RescueDogsLogo.tsx` → `MyProjectLogo.tsx`)           |
 | **Docker** | Updates service name in `docker-compose.yml`                                                           |
 | **Git**    | Updates remote origin URL to your repository                                                           |
 | **Config** | Updates `package.json` name, description, and repository fields                                        |
-| **Themes** | Renames `scripthammer-dark`/`scripthammer-light` theme blocks to your project name                     |
+| **Themes** | Renames `rescuedogs-dark`/`rescuedogs-light` theme blocks to your project name                     |
 | **Env**    | Updates `COMPOSE_PROJECT_NAME` and example commands in `.env.example`                                  |
 | **CNAME**  | Updates `public/CNAME` to your project domain (unless custom domain detected or `--keep-cname`)        |
 
@@ -61,7 +61,7 @@ The `scripts/rebrand.sh` script automates updating 200+ files:
 # Preserve SSH format for git remote (if your origin is SSH)
 ./scripts/rebrand.sh MyProject myuser "Description" --preserve-ssh
 
-# Keep ScriptHammer attribution link in Footer component
+# Keep RescueDogs attribution link in Footer component
 ./scripts/rebrand.sh MyProject myuser "Description" --preserve-attribution
 
 # Combine options
@@ -74,7 +74,7 @@ The `scripts/rebrand.sh` script automates updating 200+ files:
 | `--force`                | Skip all confirmation prompts                              |
 | `--keep-cname`           | Don't update `public/CNAME` file (keep existing domain)    |
 | `--preserve-ssh`         | Keep SSH format (`git@github.com:`) if currently using SSH |
-| `--preserve-attribution` | Skip Footer.tsx to keep ScriptHammer attribution link      |
+| `--preserve-attribution` | Skip Footer.tsx to keep RescueDogs attribution link      |
 
 ### Exit Codes
 
@@ -87,7 +87,7 @@ The `scripts/rebrand.sh` script automates updating 200+ files:
 
 ## Customizing Your Theme
 
-The rebrand script renames the ScriptHammer theme blocks to your project name but keeps the same colors. To customize:
+The rebrand script renames the RescueDogs theme blocks to your project name but keeps the same colors. To customize:
 
 1. Edit `src/app/globals.css` — change the oklch color values in the `@plugin "daisyui/theme"` blocks
 2. Run Storybook to preview: `docker compose exec <project> pnpm run storybook`
@@ -207,9 +207,9 @@ After forking, verify everything works:
 - [ ] `docker compose up` starts without errors
 - [ ] `docker compose exec <project> pnpm test` — all tests pass
 - [ ] `docker compose exec <project> pnpm run build` — build succeeds
-- [ ] No "ScriptHammer" references in `package.json`
+- [ ] No "RescueDogs" references in `package.json`
 - [ ] `git remote -v` shows your repository URL
-- [ ] `.env` has `COMPOSE_PROJECT_NAME=<yourproject>` (not `scripthammer`)
+- [ ] `.env` has `COMPOSE_PROJECT_NAME=<yourproject>` (not `rescuedogs`)
 - [ ] `public/CNAME` contains your domain (or is absent if no custom domain)
 - [ ] `docker compose ps` shows your project name in container names
 - [ ] GitHub Pages deployment succeeds (if enabled)
@@ -252,7 +252,7 @@ The `session-persistence.spec.ts` test previously created users in `beforeEach` 
 ### Build Fails After Rebrand
 
 1. Run `docker compose down && docker compose up --build` to rebuild
-2. Check for any remaining "ScriptHammer" references: `grep -r "ScriptHammer" src/`
+2. Check for any remaining "RescueDogs" references: `grep -r "RescueDogs" src/`
 3. Ensure all import paths are correct after file renames
 
 ### GitHub Pages Shows 404
@@ -274,20 +274,20 @@ sudo rm -rf node_modules
 docker compose exec <project> rm -rf node_modules
 ```
 
-## Syncing with Upstream (ScriptHammer)
+## Syncing with Upstream (RescueDogs)
 
-Keep your fork updated with improvements from ScriptHammer:
+Keep your fork updated with improvements from RescueDogs:
 
 ### One-Time Setup
 
 ```bash
-# Add ScriptHammer as upstream remote
-git remote add upstream https://github.com/TortoiseWolfe/ScriptHammer.git
+# Add RescueDogs as upstream remote
+git remote add upstream https://github.com/TortoiseWolfe/RescueDogs.git
 
 # Verify remotes
 git remote -v
 # origin    https://github.com/YOU/YOUR-PROJECT.git (fetch)
-# upstream  https://github.com/TortoiseWolfe/ScriptHammer.git (fetch)
+# upstream  https://github.com/TortoiseWolfe/RescueDogs.git (fetch)
 ```
 
 ### Pulling Updates
@@ -328,5 +328,5 @@ See [FORKING-FEEDBACK.md](./FORKING-FEEDBACK.md) for a changelog of fixes you ca
 
 ## Getting Help
 
-- **GitHub Issues**: [ScriptHammer Issues](https://github.com/TortoiseWolfe/ScriptHammer/issues)
+- **GitHub Issues**: [RescueDogs Issues](https://github.com/TortoiseWolfe/RescueDogs/issues)
 - **Documentation**: [CLAUDE.md](../CLAUDE.md) for comprehensive development guide

@@ -126,9 +126,9 @@ curl -I http://localhost:3000  # Should return 200 OK
 **Implementation**:
 
 ```bash
-docker compose exec scripthammer pnpm install
-docker compose exec scripthammer pnpm list tailwindcss  # Verify 4.1.13
-docker compose exec scripthammer pnpm list sharp  # Verify 0.34.4
+docker compose exec rescuedogs pnpm install
+docker compose exec rescuedogs pnpm list tailwindcss  # Verify 4.1.13
+docker compose exec rescuedogs pnpm list sharp  # Verify 0.34.4
 ```
 
 ---
@@ -143,7 +143,7 @@ docker compose exec scripthammer pnpm list sharp  # Verify 0.34.4
 
 **Description**: Create TypeScript type definitions from data-model.md
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/src/types/mobile-first.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/src/types/mobile-first.ts`
 
 **Acceptance Criteria**:
 
@@ -167,7 +167,7 @@ docker compose exec scripthammer pnpm list sharp  # Verify 0.34.4
 **Testing**:
 
 ```bash
-docker compose exec scripthammer pnpm run type-check
+docker compose exec rescuedogs pnpm run type-check
 ```
 
 ---
@@ -182,7 +182,7 @@ docker compose exec scripthammer pnpm run type-check
 
 **Description**: Create breakpoint configuration constants
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/src/config/breakpoints.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/src/config/breakpoints.ts`
 
 **Acceptance Criteria**:
 
@@ -215,7 +215,7 @@ export const BREAKPOINTS: Record<string, BreakpointConfig> = {
 
 **Description**: Create Playwright test viewport configurations
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/src/config/test-viewports.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/src/config/test-viewports.ts`
 
 **Acceptance Criteria**:
 
@@ -256,7 +256,7 @@ export const TEST_VIEWPORTS: TestViewport[] = [
 
 **Description**: Create touch target standard constants
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/src/config/touch-targets.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/src/config/touch-targets.ts`
 
 **Acceptance Criteria**:
 
@@ -302,7 +302,7 @@ export function validateTouchTarget(target: TouchTarget): boolean {
 **Parallel**: Yes (different test file)
 **Estimated Time**: 45min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/e2e/tests/mobile-navigation.spec.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/e2e/tests/mobile-navigation.spec.ts`
 
 **Description**: Test navigation fits mobile viewport with no horizontal scroll
 
@@ -350,7 +350,7 @@ test.describe('Mobile Navigation', () => {
 
 ```bash
 # Test should FAIL initially
-docker compose exec scripthammer pnpm exec playwright test e2e/tests/mobile-navigation.spec.ts
+docker compose exec rescuedogs pnpm exec playwright test e2e/tests/mobile-navigation.spec.ts
 ```
 
 ---
@@ -363,7 +363,7 @@ docker compose exec scripthammer pnpm exec playwright test e2e/tests/mobile-navi
 **Parallel**: Yes (different test file)
 **Estimated Time**: 1h
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/e2e/tests/mobile-touch-targets.spec.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/e2e/tests/mobile-touch-targets.spec.ts`
 
 **Description**: Test all interactive elements meet 44x44px minimum
 
@@ -412,7 +412,7 @@ test.describe('Touch Target Standards', () => {
 
 ```bash
 # Test should FAIL initially (current: 20px minimum)
-docker compose exec scripthammer pnpm exec playwright test e2e/tests/mobile-touch-targets.spec.ts
+docker compose exec rescuedogs pnpm exec playwright test e2e/tests/mobile-touch-targets.spec.ts
 ```
 
 ---
@@ -425,7 +425,7 @@ docker compose exec scripthammer pnpm exec playwright test e2e/tests/mobile-touc
 **Parallel**: Yes (different test file)
 **Estimated Time**: 30min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/e2e/tests/mobile-horizontal-scroll.spec.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/e2e/tests/mobile-horizontal-scroll.spec.ts`
 
 **Description**: Test zero horizontal scroll on all pages at mobile widths
 
@@ -478,7 +478,7 @@ test.describe('Horizontal Scroll Detection', () => {
 **Parallel**: Yes (different test file)
 **Estimated Time**: 30min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/e2e/tests/mobile-typography.spec.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/e2e/tests/mobile-typography.spec.ts`
 
 **Description**: Test text is readable without zoom (≥16px on mobile)
 
@@ -533,7 +533,7 @@ test.describe('Mobile Typography', () => {
 **Parallel**: Yes (different test file)
 **Estimated Time**: 45min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/e2e/tests/mobile-orientation.spec.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/e2e/tests/mobile-orientation.spec.ts`
 
 **Description**: Test mobile stays in mobile mode when rotated to landscape
 
@@ -595,7 +595,7 @@ test.describe('Mobile Orientation Detection', () => {
 **Parallel**: Yes (different test file)
 **Estimated Time**: 30min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/e2e/tests/blog-mobile-ux.spec.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/e2e/tests/blog-mobile-ux.spec.ts`
 
 **Description**: Update existing blog mobile test to enforce 44x44px touch target standards
 
@@ -643,7 +643,7 @@ test.describe('Blog Mobile UX', () => {
 **Parallel**: Yes (different test file)
 **Estimated Time**: 30min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/e2e/tests/mobile-card-layout.spec.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/e2e/tests/mobile-card-layout.spec.ts`
 
 **Description**: Test card components stack properly on mobile and expand on tablet/desktop
 
@@ -699,7 +699,7 @@ test.describe('Mobile Card Layout', () => {
 **Parallel**: Yes (different test file)
 **Estimated Time**: 45min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/e2e/tests/mobile-buttons.spec.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/e2e/tests/mobile-buttons.spec.ts`
 
 **Description**: Test all button sizes meet 44x44px minimum on mobile
 
@@ -764,7 +764,7 @@ test.describe('Mobile Button Standards', () => {
 **Parallel**: Yes (different test file)
 **Estimated Time**: 30min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/e2e/tests/mobile-form-inputs.spec.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/e2e/tests/mobile-form-inputs.spec.ts`
 
 **Description**: Test form inputs meet touch target standards and are easy to use on mobile
 
@@ -832,7 +832,7 @@ test.describe('Mobile Form Inputs', () => {
 **Parallel**: Yes (different test file)
 **Estimated Time**: 30min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/e2e/tests/mobile-images.spec.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/e2e/tests/mobile-images.spec.ts`
 
 **Description**: Test images are responsive and don't overflow viewport
 
@@ -893,7 +893,7 @@ test.describe('Mobile Responsive Images', () => {
 **Parallel**: Yes (different test file)
 **Estimated Time**: 20min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/e2e/tests/mobile-footer.spec.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/e2e/tests/mobile-footer.spec.ts`
 
 **Description**: Test footer stacks properly on mobile and all links are tappable
 
@@ -959,7 +959,7 @@ test.describe('Mobile Footer', () => {
 **Parallel**: No (same config file)
 **Estimated Time**: 30min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/tailwind.config.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/tailwind.config.ts`
 
 **Description**: Add custom mobile-first breakpoints to Tailwind config
 
@@ -1004,8 +1004,8 @@ export default config;
 **Testing**:
 
 ```bash
-docker compose restart scripthammer
-docker compose logs scripthammer | grep -i error  # Should be none
+docker compose restart rescuedogs
+docker compose logs rescuedogs | grep -i error  # Should be none
 ```
 
 ---
@@ -1018,7 +1018,7 @@ docker compose logs scripthammer | grep -i error  # Should be none
 **Parallel**: No (modifies globals.css)
 **Estimated Time**: 45min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/src/styles/globals.css`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/src/styles/globals.css`
 
 **Description**: Add fluid typography scale using clamp() functions
 
@@ -1069,7 +1069,7 @@ docker compose logs scripthammer | grep -i error  # Should be none
 **Parallel**: No (sequential after globals.css)
 **Estimated Time**: 30min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/src/styles/mobile-first-utilities.css`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/src/styles/mobile-first-utilities.css`
 
 **Description**: Create reusable mobile-first utility classes
 
@@ -1127,7 +1127,7 @@ Then add to `globals.css`:
 **Parallel**: Yes (different config file)
 **Estimated Time**: 20min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/playwright.config.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/playwright.config.ts`
 
 **Description**: Add mobile viewport test projects to Playwright config
 
@@ -1173,7 +1173,7 @@ export default defineConfig({
 **Parallel**: Yes (new script file)
 **Estimated Time**: 20min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/scripts/validate-breakpoints.js`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/scripts/validate-breakpoints.js`
 
 **Description**: Script to validate breakpoint consistency across configs
 
@@ -1227,7 +1227,7 @@ validateBreakpoints();
 **Parallel**: Yes (new hook file)
 **Estimated Time**: 1h
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/src/hooks/useDeviceType.ts`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/src/hooks/useDeviceType.ts`
 
 **Description**: Create device type detection hook from research.md
 
@@ -1308,7 +1308,7 @@ export function useDeviceType(): DeviceInfo {
 **Testing**:
 
 ```bash
-docker compose exec scripthammer pnpm test src/hooks/useDeviceType.test.ts
+docker compose exec rescuedogs pnpm test src/hooks/useDeviceType.test.ts
 ```
 
 ---
@@ -1321,7 +1321,7 @@ docker compose exec scripthammer pnpm test src/hooks/useDeviceType.test.ts
 **Parallel**: No (critical path)
 **Estimated Time**: 2h
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/src/components/GlobalNav.tsx`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/src/components/GlobalNav.tsx`
 
 **Description**: Refactor navigation to fit mobile viewports
 
@@ -1354,7 +1354,7 @@ docker compose exec scripthammer pnpm test src/hooks/useDeviceType.test.ts
 
 ```bash
 # Test should now PASS
-docker compose exec scripthammer pnpm exec playwright test e2e/tests/mobile-navigation.spec.ts
+docker compose exec rescuedogs pnpm exec playwright test e2e/tests/mobile-navigation.spec.ts
 ```
 
 ---
@@ -1386,7 +1386,7 @@ _(Full implementation details in each task - following 5-file pattern)_
 **Parallel**: No
 **Estimated Time**: 1.5h
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/src/app/page.tsx`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/src/app/page.tsx`
 
 **Description**: Update homepage layout for mobile-first
 
@@ -1432,7 +1432,7 @@ _(Full implementation details in each task - following 5-file pattern)_
 **Parallel**: Yes (new script)
 **Estimated Time**: 2h
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/scripts/optimize-images.js`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/scripts/optimize-images.js`
 
 **Description**: Create Sharp-based image optimization script from research.md
 
@@ -1460,7 +1460,7 @@ const glob = require('glob');
 **Testing**:
 
 ```bash
-docker compose exec scripthammer node scripts/optimize-images.js
+docker compose exec rescuedogs node scripts/optimize-images.js
 # Verify output in public/blog-images/
 ```
 
@@ -1486,7 +1486,7 @@ docker compose exec scripthammer node scripts/optimize-images.js
 **Parallel**: Yes
 **Estimated Time**: 30min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/CLAUDE.md`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/CLAUDE.md`
 
 **Description**: Add mobile-first design section from plan.md
 
@@ -1542,7 +1542,7 @@ docker compose exec scripthammer node scripts/optimize-images.js
 **Parallel**: Yes
 **Estimated Time**: 1h
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/docs/MOBILE-FIRST-GUIDE.md`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/docs/MOBILE-FIRST-GUIDE.md`
 
 **Description**: Create comprehensive developer guide from research.md
 
@@ -1564,7 +1564,7 @@ docker compose exec scripthammer node scripts/optimize-images.js
 **Parallel**: Yes
 **Estimated Time**: 30min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/plop-templates/Component.tsx.hbs`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/plop-templates/Component.tsx.hbs`
 
 **Description**: Update Plop templates to generate mobile-first components by default
 
@@ -1600,11 +1600,11 @@ docker compose exec scripthammer node scripts/optimize-images.js
 **Testing**:
 
 ```bash
-docker compose exec scripthammer pnpm run type-check
-docker compose exec scripthammer pnpm run lint
-docker compose exec scripthammer pnpm test
-docker compose exec scripthammer pnpm exec playwright test --project="iPhone 12"
-docker compose exec scripthammer pnpm run build
+docker compose exec rescuedogs pnpm run type-check
+docker compose exec rescuedogs pnpm run lint
+docker compose exec rescuedogs pnpm test
+docker compose exec rescuedogs pnpm exec playwright test --project="iPhone 12"
+docker compose exec rescuedogs pnpm run build
 ```
 
 ---
@@ -1629,7 +1629,7 @@ docker compose exec scripthammer pnpm run build
 **Testing**:
 
 ```bash
-docker compose exec scripthammer npx lighthouse http://localhost:3000 --preset=mobile --output=html --output-path=./lighthouse-mobile.html
+docker compose exec rescuedogs npx lighthouse http://localhost:3000 --preset=mobile --output=html --output-path=./lighthouse-mobile.html
 ```
 
 ---
@@ -1642,7 +1642,7 @@ docker compose exec scripthammer npx lighthouse http://localhost:3000 --preset=m
 **Parallel**: Yes
 **Estimated Time**: 15min
 
-**File**: `/home/turtle_wolfe/repos/ScriptHammer/docs/prp-docs/PRP-STATUS.md`
+**File**: `/home/turtle_wolfe/repos/RescueDogs/docs/prp-docs/PRP-STATUS.md`
 
 **Description**: Update status dashboard with PRP-017 completion
 

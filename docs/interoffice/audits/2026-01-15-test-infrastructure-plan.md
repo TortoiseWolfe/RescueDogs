@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-This document defines the test infrastructure for ScriptHammer implementation, derived from constitution requirements in `.specify/memory/constitution.md`. The plan covers unit testing (Vitest), E2E testing (Playwright), and accessibility testing (Pa11y).
+This document defines the test infrastructure for RescueDogs implementation, derived from constitution requirements in `.specify/memory/constitution.md`. The plan covers unit testing (Vitest), E2E testing (Playwright), and accessibility testing (Pa11y).
 
 ---
 

@@ -7,7 +7,7 @@ const mockShareOptions: ShareOptions = {
   url: 'https://example.com/blog/amazing-article',
   text: 'I just read this great article about web development and thought you might find it interesting.',
   hashtags: ['webdev', 'javascript', 'react'],
-  via: 'scripthammer',
+  via: 'rescuedogs',
 };
 
 const meta: Meta<typeof SocialShareButtons> = {
