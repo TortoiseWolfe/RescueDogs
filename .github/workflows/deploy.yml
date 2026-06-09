@@ -36,12 +36,15 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Verify PageSpeed API Key
+        # Fork divergence from upstream ScriptHammer: missing key WARNS instead
+        # of failing. The key only powers the /status page web-vitals metrics —
+        # cosmetic for RescueDogs' MVP. Add the secret to restore metrics.
         run: |
           if [ -z "${{ secrets.NEXT_PUBLIC_PAGESPEED_API_KEY }}" ]; then
-            echo "::error::NEXT_PUBLIC_PAGESPEED_API_KEY secret is empty or not set"
-            exit 1
+            echo "::warning::NEXT_PUBLIC_PAGESPEED_API_KEY secret is empty or not set — /status page metrics will be disabled"
+          else
+            echo "::notice::PageSpeed API key is set (length: ${#NEXT_PUBLIC_PAGESPEED_API_KEY})"
           fi
-          echo "::notice::PageSpeed API key is set (length: ${#NEXT_PUBLIC_PAGESPEED_API_KEY})"
         env:
           NEXT_PUBLIC_PAGESPEED_API_KEY: ${{ secrets.NEXT_PUBLIC_PAGESPEED_API_KEY }}
 
