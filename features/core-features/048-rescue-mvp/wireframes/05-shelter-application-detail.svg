@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c7ddf5"/>
+      <stop offset="1" stop-color="#b8d4f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+
+  <text x="960" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#4b5563">APPLICATION REVIEW - /shelter/application (AS-IS)</text>
+  <text x="40" y="52" font-family="system-ui, sans-serif" font-size="14" fill="#8b5cf6" font-weight="700">DESKTOP (16:9)</text>
+  <text x="1500" y="52" font-family="system-ui, sans-serif" font-size="14" fill="#d946ef" font-weight="700">MOBILE</text>
+
+  <!-- ===================== DESKTOP ===================== -->
+  <g id="desktop" transform="translate(40, 60)">
+    <rect width="1280" height="720" rx="8" fill="#e8d4b8" stroke="#b8a080"/>
+    <use href="includes/header-desktop.svg#desktop-header" x="0" y="0"/>
+
+    <!-- Back link -->
+    <text x="40" y="92" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="600">&#8592; Back to pipeline</text>
+
+    <!-- Card 1: Pet context -->
+    <rect x="40" y="104" width="1200" height="92" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <rect x="56" y="120" width="60" height="60" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="86" y="155" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">photo</text>
+    <text x="132" y="142" font-family="system-ui, sans-serif" font-size="20" fill="#1f2937" font-weight="700">Biscuit</text>
+    <text x="132" y="166" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Labrador Mix &#183; Dog</text>
+    <rect x="1060" y="130" width="150" height="34" rx="17" fill="#8b5cf6"/>
+    <text x="1135" y="152" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="700">Under Review</text>
+
+    <!-- Card 2: Why this pet -->
+    <rect x="40" y="208" width="1200" height="80" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="56" y="234" font-family="system-ui, sans-serif" font-size="16" fill="#1f2937" font-weight="700">Why this pet</text>
+    <rect x="56" y="246" width="4" height="30" fill="#8b5cf6"/>
+    <text x="72" y="258" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563" font-style="italic">"Biscuit looks like the perfect running buddy for my active</text>
+    <text x="72" y="276" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563" font-style="italic">family..."</text>
+
+    <!-- Card 3: Application snapshot -->
+    <rect x="40" y="300" width="1200" height="248" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="56" y="326" font-family="system-ui, sans-serif" font-size="16" fill="#1f2937" font-weight="700">Application snapshot</text>
+    <text x="56" y="346" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Answers exactly as submitted with this application.</text>
+
+    <!-- About You -->
+    <text x="56" y="376" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">About You</text>
+    <text x="56" y="396" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Full name</text>
+    <text x="56" y="412" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Jane Adopter</text>
+    <text x="356" y="396" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Phone</text>
+    <text x="356" y="412" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">(555) 010-2020</text>
+    <text x="656" y="396" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Address</text>
+    <text x="656" y="412" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">12 Maple St, Austin, TX, 78701</text>
+
+    <!-- Your Home -->
+    <text x="56" y="442" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Your Home</text>
+    <text x="56" y="462" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Housing</text>
+    <text x="56" y="478" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Rent</text>
+    <text x="356" y="462" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Landlord approval</text>
+    <text x="356" y="478" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Yes</text>
+    <text x="656" y="462" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Has yard</text>
+    <text x="656" y="478" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Yes</text>
+    <text x="956" y="462" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Yard fenced</text>
+    <text x="956" y="478" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Yes</text>
+
+    <!-- Household &amp; References (compact row) -->
+    <text x="56" y="508" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Household &amp; Pets</text>
+    <text x="56" y="528" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Adults 2  &#183;  Children 1  &#183;  Other pets: 1 cat</text>
+    <text x="656" y="508" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">References &amp; Experience</text>
+    <text x="656" y="528" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Vet: Dr. Lee &#183; (555) 030 &#183; Experience: 10 yrs</text>
+
+    <!-- Card 4: Update status -->
+    <rect x="40" y="560" width="588" height="72" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="56" y="584" font-family="system-ui, sans-serif" font-size="16" fill="#1f2937" font-weight="700">Update status</text>
+    <rect x="56" y="596" width="300" height="26" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="68" y="614" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">Select new status&#8230; &#9660;</text>
+    <rect x="368" y="596" width="120" height="26" rx="4" fill="#8b5cf6"/>
+    <text x="428" y="614" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="700">Update status</text>
+    <text x="500" y="614" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">+ note</text>
+
+    <!-- Card 5: Status history -->
+    <rect x="652" y="560" width="588" height="72" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="668" y="584" font-family="system-ui, sans-serif" font-size="16" fill="#1f2937" font-weight="700">Status history</text>
+    <text x="668" y="606" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Jun 14, 2026</text>
+    <text x="780" y="606" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="600">Submitted &#8594; Under Review</text>
+    <text x="668" y="624" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Jun 12, 2026 &#183; Application received &#8594; Submitted</text>
+
+    <use href="includes/footer-desktop.svg#site-footer" x="0" y="640"/>
+
+    <!-- Callouts -->
+    <g class="callout"><circle cx="1216" cy="324" r="14" fill="#dc2626"/><text x="1216" y="329" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">1</text></g>
+    <g class="callout"><circle cx="604" cy="584" r="14" fill="#dc2626"/><text x="604" y="589" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">2</text></g>
+    <g class="callout"><circle cx="1216" cy="584" r="14" fill="#dc2626"/><text x="1216" y="589" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">3</text></g>
+    <g class="callout"><circle cx="220" cy="222" r="14" fill="#dc2626"/><text x="220" y="227" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">4</text></g>
+  </g>
+
+  <!-- ===================== MOBILE ===================== -->
+  <g id="mobile" transform="translate(1360, 60)">
+    <rect width="360" height="720" rx="24" fill="#e8d4b8" stroke="#b8a080"/>
+    <use href="includes/header-mobile.svg#mobile-header-group" x="0" y="0"/>
+
+    <text x="20" y="104" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="600">&#8592; Back to pipeline</text>
+
+    <!-- Pet context -->
+    <rect x="16" y="116" width="328" height="74" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <rect x="28" y="128" width="48" height="48" rx="6" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="52" y="156" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">img</text>
+    <text x="88" y="146" font-family="system-ui, sans-serif" font-size="16" fill="#1f2937" font-weight="700">Biscuit</text>
+    <text x="88" y="166" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Labrador Mix &#183; Dog</text>
+    <rect x="212" y="124" width="120" height="24" rx="12" fill="#8b5cf6"/>
+    <text x="272" y="140" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="700">Under Review</text>
+
+    <!-- Why this pet -->
+    <rect x="16" y="198" width="328" height="56" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="28" y="218" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Why this pet</text>
+    <rect x="28" y="226" width="4" height="20" fill="#8b5cf6"/>
+    <text x="40" y="240" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563" font-style="italic">"perfect running buddy..."</text>
+
+    <!-- Snapshot (1-col) -->
+    <rect x="16" y="262" width="328" height="150" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="28" y="282" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Application snapshot</text>
+    <text x="28" y="300" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">As submitted (frozen)</text>
+    <text x="28" y="322" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">About You</text>
+    <text x="28" y="338" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Name &#183; Phone &#183; Address</text>
+    <text x="28" y="358" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Your Home</text>
+    <text x="28" y="374" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Housing &#183; Yard</text>
+    <text x="28" y="394" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Household &#183; References</text>
+
+    <!-- Update status -->
+    <rect x="16" y="420" width="328" height="86" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="28" y="440" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Update status</text>
+    <rect x="28" y="450" width="304" height="24" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="38" y="467" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">Select new status&#8230; &#9660;</text>
+    <rect x="28" y="478" width="304" height="22" rx="4" fill="#8b5cf6"/>
+    <text x="180" y="494" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="700">Update status</text>
+
+    <!-- Status history -->
+    <rect x="16" y="514" width="328" height="140" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="28" y="534" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Status history</text>
+    <rect x="28" y="544" width="304" height="40" rx="6" fill="#dcc8a8"/>
+    <text x="38" y="560" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Jun 14, 2026</text>
+    <text x="38" y="578" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="600">Submitted &#8594; Under Review</text>
+    <rect x="28" y="590" width="304" height="40" rx="6" fill="#dcc8a8"/>
+    <text x="38" y="606" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Jun 12, 2026</text>
+    <text x="38" y="624" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="600">Application received</text>
+
+    <use href="includes/footer-mobile.svg#mobile-bottom-nav" x="0" y="664"/>
+
+    <!-- Mobile callouts -->
+    <g class="callout"><circle cx="332" cy="278" r="11" fill="#dc2626"/><text x="332" y="282" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">1</text></g>
+    <g class="callout"><circle cx="332" cy="436" r="11" fill="#dc2626"/><text x="332" y="440" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">2</text></g>
+    <g class="callout"><circle cx="332" cy="530" r="11" fill="#dc2626"/><text x="332" y="534" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">3</text></g>
+  </g>
+
+  <!-- ===================== ANNOTATIONS ===================== -->
+  <g id="annotations" transform="translate(40, 800)">
+    <rect width="1840" height="220" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+
+    <a href="#us-001"><rect x="20" y="178" width="86" height="26" rx="13" fill="#8b5cf6"/><text x="63" y="196" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#fff">US-001</text></a>
+    <a href="#us-002"><rect x="116" y="178" width="86" height="26" rx="13" fill="#8b5cf6"/><text x="159" y="196" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#fff">US-002</text></a>
+    <a href="#us-003"><rect x="212" y="178" width="86" height="26" rx="13" fill="#8b5cf6"/><text x="255" y="196" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#fff">US-003</text></a>
+
+    <g class="callout"><circle cx="34" cy="40" r="14" fill="#dc2626"/><text x="34" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">1</text></g>
+    <text x="62" y="38" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Frozen application snapshot</text>
+    <text x="20" y="74" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">"Answers exactly as submitted" &#8212;</text>
+    <text x="20" y="92" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">NOT the live profile (Principle III).</text>
+
+    <g class="callout"><circle cx="494" cy="40" r="14" fill="#dc2626"/><text x="494" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">2</text></g>
+    <text x="522" y="38" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Update status dropdown</text>
+    <text x="480" y="74" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Allowed next: Reference Check, Home</text>
+    <text x="480" y="92" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Visit, Approved, Not Selected + note + advance.</text>
+
+    <g class="callout"><circle cx="954" cy="40" r="14" fill="#dc2626"/><text x="954" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">3</text></g>
+    <text x="982" y="38" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">Status history</text>
+    <text x="940" y="74" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Chronological: date + "From &#8594; To"</text>
+    <text x="940" y="92" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">label + optional note. Adopter-visible.</text>
+
+    <g class="callout"><circle cx="1414" cy="40" r="14" fill="#dc2626"/><text x="1414" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">4</text></g>
+    <text x="1442" y="38" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="700">"Why this pet" blockquote</text>
+    <text x="1400" y="74" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Adopter's italic answer with a left</text>
+    <text x="1400" y="92" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">primary border. Shown if present.</text>
+  </g>
+
+  <text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" fill="#374151" font-weight="bold">048:05 | Application Review (as-is /shelter/application) | ScriptHammer</text>
+</svg>
