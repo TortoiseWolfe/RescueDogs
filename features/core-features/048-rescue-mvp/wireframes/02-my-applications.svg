@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c7ddf5"/>
+      <stop offset="100%" stop-color="#b8d4f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <text x="960" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#4b5563" letter-spacing="1">MY APPLICATIONS - /applications (AS-IS)</text>
+  <text x="40" y="52" fill="#8b5cf6" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">DESKTOP (16:9)</text>
+  <text x="1500" y="52" fill="#d946ef" font-family="system-ui, sans-serif" font-size="15" font-weight="bold">MOBILE</text>
+
+  <g id="desktop" transform="translate(40, 60)">
+    <rect width="1280" height="720" rx="8" fill="#e8d4b8" stroke="#b8a080"/>
+    <use href="includes/header-desktop.svg#desktop-header" x="0" y="0"/>
+
+    <text x="290" y="120" font-family="system-ui, sans-serif" font-size="26" font-weight="bold" fill="#1f2937">My Applications</text>
+    <rect x="830" y="98" width="160" height="36" rx="6" fill="#8b5cf6"/>
+    <text x="910" y="121" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">Apply to adopt</text>
+
+    <rect x="290" y="156" width="700" height="120" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <rect x="290" y="156" width="100" height="120" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="340" y="222" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">photo</text>
+    <text x="406" y="190" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#1f2937">Biscuit</text>
+    <text x="406" y="212" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Labrador Mix · Dog</text>
+    <rect x="848" y="172" width="126" height="26" rx="13" fill="#8b5cf6"/>
+    <text x="911" y="190" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">Under Review</text>
+    <text x="406" y="256" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Updated 2h ago</text>
+    <rect x="846" y="238" width="128" height="32" rx="6" fill="#8b5cf6"/>
+    <text x="910" y="259" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">View status</text>
+
+    <rect x="290" y="288" width="700" height="120" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <rect x="290" y="288" width="100" height="120" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="340" y="354" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">photo</text>
+    <text x="406" y="322" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#1f2937">Pepper</text>
+    <text x="406" y="344" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Terrier · Dog</text>
+    <rect x="868" y="304" width="106" height="26" rx="13" fill="#22c55e"/>
+    <text x="921" y="322" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">Home Visit</text>
+    <text x="406" y="388" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Updated yesterday</text>
+    <rect x="846" y="370" width="128" height="32" rx="6" fill="#8b5cf6"/>
+    <text x="910" y="391" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">View status</text>
+
+    <rect x="290" y="420" width="700" height="120" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <rect x="290" y="420" width="100" height="120" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="340" y="486" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">photo</text>
+    <text x="406" y="454" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#1f2937">Tank</text>
+    <text x="406" y="476" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Pit Bull · Dog</text>
+    <rect x="876" y="436" width="98" height="26" rx="13" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="925" y="454" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1f2937">Submitted</text>
+    <text x="406" y="520" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Updated 3d ago</text>
+    <rect x="846" y="502" width="128" height="32" rx="6" fill="#8b5cf6"/>
+    <text x="910" y="523" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">View status</text>
+
+    <rect x="290" y="556" width="700" height="72" rx="8" fill="#dcc8a8" stroke="#b8a080" stroke-dasharray="6 4"/>
+    <text x="310" y="582" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#1f2937">EMPTY STATE (no applications):</text>
+    <text x="310" y="604" font-family="system-ui, sans-serif" font-size="14" fill="#374151">"No applications yet" — "track every application here…" + button "Find your new best friend"</text>
+
+    <use href="includes/footer-desktop.svg#site-footer" x="0" y="640"/>
+
+    <g class="callout"><circle cx="1010" cy="116" r="14" fill="#dc2626"/><text x="1010" y="121" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">1</text></g>
+    <g class="callout"><circle cx="994" cy="304" r="14" fill="#dc2626"/><text x="994" y="309" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">2</text></g>
+    <g class="callout"><circle cx="994" cy="254" r="14" fill="#dc2626"/><text x="994" y="259" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">3</text></g>
+    <g class="callout"><circle cx="406" cy="256" r="14" fill="#dc2626"/><text x="406" y="261" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">4</text></g>
+  </g>
+
+  <g id="mobile" transform="translate(1360, 60)">
+    <rect width="360" height="720" rx="24" fill="#e8d4b8" stroke="#b8a080"/>
+    <use href="includes/header-mobile.svg#mobile-header-group" x="0" y="0"/>
+
+    <text x="16" y="116" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1f2937">My Applications</text>
+    <rect x="208" y="98" width="136" height="32" rx="6" fill="#8b5cf6"/>
+    <text x="276" y="119" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">Apply to adopt</text>
+
+    <rect x="16" y="146" width="328" height="118" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <rect x="16" y="146" width="76" height="118" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="54" y="210" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">photo</text>
+    <text x="104" y="174" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="#1f2937">Biscuit</text>
+    <text x="104" y="194" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Labrador Mix · Dog</text>
+    <rect x="218" y="206" width="120" height="24" rx="12" fill="#8b5cf6"/>
+    <text x="278" y="223" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">Under Review</text>
+    <text x="104" y="252" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Updated 2h ago</text>
+
+    <rect x="16" y="276" width="328" height="118" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <rect x="16" y="276" width="76" height="118" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="54" y="340" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">photo</text>
+    <text x="104" y="304" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="#1f2937">Pepper</text>
+    <text x="104" y="324" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Terrier · Dog</text>
+    <rect x="238" y="336" width="100" height="24" rx="12" fill="#22c55e"/>
+    <text x="288" y="353" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">Home Visit</text>
+    <text x="104" y="382" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Updated yesterday</text>
+
+    <rect x="16" y="406" width="328" height="118" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+    <rect x="16" y="406" width="76" height="118" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="54" y="470" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">photo</text>
+    <text x="104" y="434" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="#1f2937">Tank</text>
+    <text x="104" y="454" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Pit Bull · Dog</text>
+    <rect x="246" y="466" width="92" height="24" rx="12" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="292" y="483" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1f2937">Submitted</text>
+    <text x="104" y="512" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Updated 3d ago</text>
+    <rect x="200" y="540" width="124" height="30" rx="6" fill="#8b5cf6"/>
+    <text x="262" y="560" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8d4b8">View status</text>
+
+    <use href="includes/footer-mobile.svg#mobile-bottom-nav" x="0" y="664"/>
+
+    <g class="callout"><circle cx="190" cy="114" r="11" fill="#dc2626"/><text x="190" y="119" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">1</text></g>
+    <g class="callout"><circle cx="288" cy="372" r="11" fill="#dc2626"/><text x="288" y="377" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">2</text></g>
+    <g class="callout"><circle cx="338" cy="555" r="11" fill="#dc2626"/><text x="338" y="560" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">3</text></g>
+  </g>
+
+  <g id="annotations" transform="translate(40, 800)">
+    <rect width="1840" height="220" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+    <g transform="translate(20, 16)">
+      <circle cx="14" cy="14" r="12" fill="#dc2626"/>
+      <text x="14" y="19" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">1</text>
+      <text x="38" y="19" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#1f2937">"Apply to adopt" button</text>
+      <a href="#us-001" transform="translate(258, 5)"><rect width="56" height="22" rx="11" fill="#0891b2"/><text x="28" y="17" text-anchor="middle" fill="#f5f0e6" font-size="14" font-weight="700">US-001</text></a>
+      <text x="38" y="44" font-family="system-ui, sans-serif" font-size="14" fill="#374151">btn-primary btn-sm in the header row,</text>
+      <text x="38" y="62" font-family="system-ui, sans-serif" font-size="14" fill="#374151">links to /adopt to start a new application.</text>
+    </g>
+    <g transform="translate(480, 16)">
+      <circle cx="14" cy="14" r="12" fill="#dc2626"/>
+      <text x="14" y="19" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">2</text>
+      <text x="38" y="19" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#1f2937">StatusBadge (per-status color)</text>
+      <a href="#us-002" transform="translate(330, 5)"><rect width="56" height="22" rx="11" fill="#0891b2"/><text x="28" y="17" text-anchor="middle" fill="#f5f0e6" font-size="14" font-weight="700">US-002</text></a>
+      <text x="38" y="44" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Under Review is primary; Home Visit is</text>
+      <text x="38" y="62" font-family="system-ui, sans-serif" font-size="14" fill="#374151">accent; Submitted is info. Top-right of card.</text>
+    </g>
+    <g transform="translate(940, 16)">
+      <circle cx="14" cy="14" r="12" fill="#dc2626"/>
+      <text x="14" y="19" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">3</text>
+      <text x="38" y="19" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#1f2937">"View status" button</text>
+      <a href="#us-003" transform="translate(220, 5)"><rect width="56" height="22" rx="11" fill="#0891b2"/><text x="28" y="17" text-anchor="middle" fill="#f5f0e6" font-size="14" font-weight="700">US-003</text></a>
+      <text x="38" y="44" font-family="system-ui, sans-serif" font-size="14" fill="#374151">btn-primary btn-sm to /applications/status</text>
+      <text x="38" y="62" font-family="system-ui, sans-serif" font-size="14" fill="#374151">?id=… the link into the live tracker.</text>
+    </g>
+    <g transform="translate(1400, 16)">
+      <circle cx="14" cy="14" r="12" fill="#dc2626"/>
+      <text x="14" y="19" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">4</text>
+      <text x="38" y="19" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#1f2937">Relative "Updated" timestamp</text>
+      <a href="#us-004" transform="translate(310, 5)"><rect width="56" height="22" rx="11" fill="#0891b2"/><text x="28" y="17" text-anchor="middle" fill="#f5f0e6" font-size="14" font-weight="700">US-004</text></a>
+      <text x="38" y="44" font-family="system-ui, sans-serif" font-size="14" fill="#374151">formatRelativeTime(status_changed_at):</text>
+      <text x="38" y="62" font-family="system-ui, sans-serif" font-size="14" fill="#374151">"just now" / "2h ago" / "yesterday" / "3d ago".</text>
+    </g>
+    <g transform="translate(20, 130)">
+      <text x="0" y="19" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#4b5563" letter-spacing="1">WHAT SHIPS</text>
+      <text x="0" y="44" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Source: src/app/applications/page.tsx (ProtectedRoute) + ApplicationCard.tsx. Container max-w-3xl. Vertical list of card-side</text>
+      <text x="0" y="64" font-family="system-ui, sans-serif" font-size="14" fill="#374151">ApplicationCard items via ApplicationService.getMyApplications(user.id); refetches on window focus. Empty state shows a CTA card.</text>
+    </g>
+  </g>
+  <text x="40" y="1060" fill="#374151" font-family="system-ui, sans-serif" font-size="18" font-weight="bold">048:02 | My Applications (as-is /applications) | ScriptHammer</text>
+</svg>
