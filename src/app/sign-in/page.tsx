@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import SignInForm from '@/components/auth/SignInForm';
-import OAuthButtons from '@/components/auth/OAuthButtons';
+// OAuth (Google/GitHub) sign-in is hidden until the providers are enabled in
+// Supabase. To restore: re-add this import and the <OAuthButtons /> block below.
+// import OAuthButtons from '@/components/auth/OAuthButtons';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -54,9 +56,10 @@ export default function SignInPage() {
           </Link>
         </p>
 
+        {/* OAuth sign-in hidden until Google/GitHub providers are enabled in
+            Supabase. Restore by un-commenting the import above and this block:
         <div className="divider my-6">OR</div>
-
-        <OAuthButtons />
+        <OAuthButtons /> */}
 
         <p className="mt-6 text-center text-sm">
           Don&apos;t have an account?{' '}

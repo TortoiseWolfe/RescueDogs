@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import SignUpForm from '@/components/auth/SignUpForm';
-import OAuthButtons from '@/components/auth/OAuthButtons';
+// OAuth (Google/GitHub) sign-up is hidden until the providers are enabled in
+// Supabase. To restore: re-add this import and the <OAuthButtons /> block below.
+// import OAuthButtons from '@/components/auth/OAuthButtons';
 import Link from 'next/link';
 
 function isSafeRedirectUrl(url: string): boolean {
@@ -39,9 +41,10 @@ export default function SignUpPage() {
           onSuccess={() => (window.location.href = '/verify-email')}
         />
 
+        {/* OAuth sign-up hidden until Google/GitHub providers are enabled in
+            Supabase. Restore by un-commenting the import above and this block:
         <div className="divider my-6">OR</div>
-
-        <OAuthButtons />
+        <OAuthButtons /> */}
 
         <p className="mt-6 text-center text-sm">
           Already have an account?{' '}
