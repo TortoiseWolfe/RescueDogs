@@ -74,7 +74,15 @@ export async function logAuthEvent(entry: AuditLogEntry): Promise<void> {
     const { error } = await supabase.from('auth_audit_logs').insert(logEntry);
 
     if (error) {
-      logger.error('Failed to log audit event', {
+      // auth_audit_logs only allows service_role to INSERT (see the
+      // monolithic migration's RLS policies). Browser clients run as the
+      // `authenticated` role, so this direct insert is expected to be
+      // denied by RLS (Postgres code 42501). Treat that specific case as a
+      // quiet, expected outcome rather than an error so it doesn't surface
+      // in the dev console / error overlay on every sign-in.
+      const isExpectedRlsDenial = error.code === '42501';
+      const logFn = isExpectedRlsDenial ? logger.debug : logger.error;
+      logFn('Skipped client-side audit event (RLS-protected table)', {
         error,
         eventType: entry.event_type,
       });
