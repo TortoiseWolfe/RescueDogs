@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Baloo_2, Fredoka, Geist_Mono, Nunito } from 'next/font/google';
 import './globals.css';
 import ThemeScript from '@/components/ThemeScript';
 import { GlobalNav } from '@/components/GlobalNav';
@@ -24,11 +24,12 @@ import { CountdownBanner } from '@/components/atomic/CountdownBanner';
 import { SetupBanner } from '@/components/SetupBanner';
 import A11yDevOverlay from '@/components/organisms/A11yDevOverlay';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const nunito = Nunito({
+  variable: '--font-nunito',
   subsets: ['latin'],
   display: 'swap',
   preload: true,
+  weight: ['400', '600', '700', '800'],
   fallback: [
     'system-ui',
     '-apple-system',
@@ -39,6 +40,31 @@ const geistSans = Geist({
     'Arial',
     'sans-serif',
   ],
+});
+
+const fredoka = Fredoka({
+  variable: '--font-fredoka',
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  weight: ['400', '500', '600', '700'],
+  fallback: [
+    'system-ui',
+    '-apple-system',
+    'BlinkMacSystemFont',
+    '"Segoe UI"',
+    'Roboto',
+    'sans-serif',
+  ],
+});
+
+const baloo = Baloo_2({
+  variable: '--font-baloo',
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  weight: ['500', '600', '700', '800'],
+  fallback: ['Nunito', 'system-ui', 'sans-serif'],
 });
 
 const geistMono = Geist_Mono({
@@ -67,8 +93,8 @@ export const viewport: Viewport = {
   // env() resolves to 0 and the padding is a no-op.
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f5f0eb' },
-    { media: '(prefers-color-scheme: dark)', color: '#1a1a2e' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#27408f' },
   ],
 };
 
@@ -120,7 +146,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
+        className={`${nunito.variable} ${fredoka.variable} ${baloo.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
         suppressHydrationWarning
       >
         <ThemeScript />

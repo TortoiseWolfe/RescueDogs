@@ -14,7 +14,7 @@ const defaultConfig = {
   projectName: 'RescueDogs',
   projectOwner: 'TortoiseWolfe',
   projectDescription:
-    'Opinionated Next.js template with PWA, theming, and interactive components',
+    'Pet adoption application tracker for shelters, adopters, and live status updates',
   basePath: '',
 };
 
@@ -101,9 +101,9 @@ export function generateManifest() {
     scope: `${basePath}/`,
     display: 'standalone',
     orientation: 'portrait-primary',
-    theme_color: '#1a1a2e',
-    background_color: '#1a1a2e',
-    categories: ['developer', 'productivity', 'utilities'],
+    theme_color: '#2f6bff',
+    background_color: '#ffffff',
+    categories: ['lifestyle', 'productivity', 'utilities'],
     icons: [
       {
         src: `${basePath}/favicon.svg`,
