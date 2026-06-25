@@ -172,16 +172,19 @@ test.describe('User Registration E2E', () => {
     await expect(page).toHaveURL(/\/sign-in\/?/);
   });
 
-  test('should display OAuth buttons on sign-up page', async ({ page }) => {
+  test('should hide OAuth buttons until providers are configured', async ({
+    page,
+  }) => {
     await page.goto('/sign-up', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
 
-    // Verify OAuth buttons present (buttons say "Continue with X")
+    // OAuth buttons are intentionally hidden until Google/GitHub providers are
+    // configured in Supabase. This keeps demo users away from dead sign-up paths.
     await expect(
       page.getByRole('button', { name: /continue with github/i })
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       page.getByRole('button', { name: /continue with google/i })
-    ).toBeVisible();
+    ).toHaveCount(0);
   });
 });

@@ -53,7 +53,9 @@ async function clickOAuthAndCaptureRequest(
   };
 }
 
-test.describe('OAuth CSRF Protection - REQ-SEC-002', () => {
+test.describe.skip('OAuth CSRF Protection - REQ-SEC-002', () => {
+  // OAuth providers are hidden until Google/GitHub are configured in Supabase.
+  // Re-enable this suite when the providers are enabled in the UI again.
   test('OAuth buttons should be visible and enabled on sign-in page', async ({
     page,
   }) => {
