@@ -43,6 +43,11 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # NOTE: the build + most jobs read these from `vars.*`. The per-browser REST
+  # health-check curls (see the `secrets.NEXT_PUBLIC_SUPABASE_*` usages below)
+  # read the SAME names from `secrets.*` — keep BOTH copies pointed at the same
+  # (current) Supabase project. They drifted apart during the 2026-06 backend
+  # cutover and silently failed the firefox/webkit jobs against the dead project.
   NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
   NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 

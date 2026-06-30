@@ -62,15 +62,45 @@ run_check "ESLint" "pnpm lint"
 run_check "TypeScript type check" "pnpm type-check"
 
 # 3. Unit tests
-run_check "Unit tests" "pnpm test --run"
+# --no-file-parallelism: run test files serially. On Windows/Docker hosts the
+# parallel pool leaks async module loads past environment teardown, producing
+# non-deterministic "caught after teardown" errors that fail the run even
+# though every assertion passes. CI (clean Linux runners) does not hit this and
+# keeps the default parallel `pnpm test --run`.
+run_check "Unit tests" "pnpm test --run --no-file-parallelism"
 
 # 4. Test coverage (optional - can be slow)
 if [ "$1" != "--quick" ]; then
     run_check "Test coverage" "pnpm test:coverage"
 fi
 
-# 5. Production build
-run_check "Production build" "pnpm build"
+# 5. Production build (full validation only — skipped by --quick / pre-push)
+# The production build is unreliable on Windows/Docker bind-mount hosts: Next's
+# "Collecting page data" step intermittently fails with spurious "Cannot find
+# module for page" errors because the bind mount has not flushed freshly-emitted
+# chunks. The same build is green on CI's native Linux runners (ci.yml +
+# deploy.yml), so CI is the authoritative build gate. We therefore keep the fast
+# reliable checks (lint, type-check, unit tests) in the pre-push --quick path and
+# defer the build here. NEXT_DIST_DIR keeps it off the running dev server's .next.
+if [ "$1" != "--quick" ]; then
+    echo -e "\n${YELLOW}🔍 Running: Production build${NC}"
+    echo "--------------------------------"
+    if [ "$IN_DOCKER" = true ]; then
+        if NEXT_DIST_DIR=.next-ci pnpm build; then
+            echo -e "${GREEN}✅ Production build passed${NC}"
+        else
+            echo -e "${RED}❌ Production build failed${NC}"
+            exit 1
+        fi
+    else
+        if docker compose exec -T -e NEXT_DIST_DIR=.next-ci rescuedogs pnpm build; then
+            echo -e "${GREEN}✅ Production build passed${NC}"
+        else
+            echo -e "${RED}❌ Production build failed${NC}"
+            exit 1
+        fi
+    fi
+fi
 
 # 6. Storybook build (optional - can be slow)
 if [ "$1" != "--quick" ]; then

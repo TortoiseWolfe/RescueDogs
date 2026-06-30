@@ -22,9 +22,9 @@ if [ -d "/app" ] && [ "$PWD" = "/app" ]; then
   # Inside Docker
   run_gitleaks_full
   GITLEAKS_EXIT=$?
-elif command -v docker >/dev/null 2>&1 && docker compose ps 2>/dev/null | grep -q scripthammer; then
+elif command -v docker >/dev/null 2>&1 && docker compose ps 2>/dev/null | grep -q rescuedogs; then
   # Host with Docker running
-  docker compose exec -T scripthammer pnpm run gitleaks
+  docker compose exec -T rescuedogs pnpm run gitleaks
   GITLEAKS_EXIT=$?
 else
   # Host without Docker

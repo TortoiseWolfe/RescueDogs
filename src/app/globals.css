@@ -51,41 +51,41 @@
     sunset;
 }
 
-/* RescueDogs Dark Theme — VS Code dark meets metallic craftsmanship */
+/* RescueDogs Dark Theme — playful rescue brand on deep navy */
 @plugin "daisyui/theme" {
   name: 'rescuedogs-dark';
-  default: true;
+  default: false;
   color-scheme: dark;
 
-  --color-base-100: oklch(22.84% 0.038 282.93); /* #1a1a2e charcoal */
-  --color-base-200: oklch(21.13% 0.039 282.53); /* #16162a darker */
-  --color-base-300: oklch(28.51% 0.067 281.32); /* #25254a borders */
-  --color-base-content: oklch(92.88% 0.013 255.51); /* #e2e8f0 cool gray text */
+  --color-base-100: #13245f;
+  --color-base-200: #0f1c4b;
+  --color-base-300: #27408f;
+  --color-base-content: #f8fbff;
 
-  --color-primary: oklch(76.05% 0.024 258.37); /* #a8b2c1 silver/steel */
-  --color-primary-content: oklch(22.84% 0.038 282.93);
+  --color-primary: #5b8cff;
+  --color-primary-content: #ffffff;
 
-  --color-secondary: oklch(87.91% 0.043 76.31); /* #e8d4b8 warm amber */
-  --color-secondary-content: oklch(22.84% 0.038 282.93);
+  --color-secondary: #ff5a5f;
+  --color-secondary-content: #ffffff;
 
-  --color-accent: oklch(75.35% 0.139 232.66); /* #38bdf8 electric blue */
-  --color-accent-content: oklch(22.84% 0.038 282.93);
+  --color-accent: #ffd23f;
+  --color-accent-content: #27408f;
 
-  --color-neutral: oklch(31.14% 0.052 282.99); /* #2d2d4a purple-gray */
-  --color-neutral-content: oklch(87.17% 0.009 258.34);
+  --color-neutral: #27408f;
+  --color-neutral-content: #ffffff;
 
-  --color-info: oklch(73.08% 0.13 260.06); /* #77a8f9 — AAA 7.11:1 */
-  --color-info-content: oklch(22.84% 0.038 282.93);
-  --color-success: oklch(72.27% 0.192 149.58); /* #22c55e */
-  --color-success-content: oklch(22.84% 0.038 282.93);
-  --color-warning: oklch(90.52% 0.166 98.11); /* #fde047 */
-  --color-warning-content: oklch(22.84% 0.038 282.93);
-  --color-error: oklch(74.7% 0.132 20.69); /* #f58989 — AAA 7.17:1 */
-  --color-error-content: oklch(22.84% 0.038 282.93);
+  --color-info: #8db0ff;
+  --color-info-content: #10205a;
+  --color-success: #39d98a;
+  --color-success-content: #10205a;
+  --color-warning: #ffd23f;
+  --color-warning-content: #27408f;
+  --color-error: #ff7b7f;
+  --color-error-content: #10205a;
 
-  --radius-selector: 0.75rem;
-  --radius-field: 0.5rem;
-  --radius-box: 1.5rem;
+  --radius-selector: 999px;
+  --radius-field: 1rem;
+  --radius-box: 1.625rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
@@ -93,42 +93,42 @@
   --noise: 1;
 }
 
-/* RescueDogs Light Theme — warm parchment with adjusted brand colors */
+/* RescueDogs Light Theme — bright Happy Tails-inspired rescue brand */
 @plugin "daisyui/theme" {
   name: 'rescuedogs-light';
-  default: false;
+  default: true;
   prefersdark: false;
   color-scheme: light;
 
-  --color-base-100: oklch(95.76% 0.009 67.72); /* #f5f0eb warm parchment */
-  --color-base-200: oklch(92.44% 0.013 75.36); /* #ebe5dd */
-  --color-base-300: oklch(87.66% 0.016 73.66); /* #ddd5cb */
-  --color-base-content: oklch(27.81% 0.03 256.85); /* #1f2937 dark text */
+  --color-base-100: #ffffff;
+  --color-base-200: #f1f6ff;
+  --color-base-300: #cfe0ff;
+  --color-base-content: #27408f;
 
-  --color-primary: oklch(42.79% 0.03 257.68); /* #455060 — AAA 7.22:1 */
-  --color-primary-content: oklch(100% 0 0);
+  --color-primary: #2f6bff;
+  --color-primary-content: #ffffff;
 
-  --color-secondary: oklch(44.28% 0.116 46.14); /* #853a0d — AAA 7.11:1 */
-  --color-secondary-content: oklch(100% 0 0);
+  --color-secondary: #ff5a5f;
+  --color-secondary-content: #ffffff;
 
-  --color-accent: oklch(42.86% 0.098 239.94); /* #01557f — AAA 7.11:1 */
-  --color-accent-content: oklch(100% 0 0);
+  --color-accent: #ffd23f;
+  --color-accent-content: #27408f;
 
-  --color-neutral: oklch(37.29% 0.031 259.73); /* #374151 */
-  --color-neutral-content: oklch(98.46% 0.002 247.84);
+  --color-neutral: #27408f;
+  --color-neutral-content: #ffffff;
 
-  --color-info: oklch(43.86% 0.167 262.77); /* #1b49ac — AAA 8.09:1 */
-  --color-info-content: oklch(100% 0 0);
-  --color-success: oklch(42.03% 0.11 149.9); /* #0c5d2a — AAA 8.03:1 */
-  --color-success-content: oklch(100% 0 0);
-  --color-warning: oklch(43.35% 0.09 76.98); /* #6c4902 — AAA 8.10:1 */
-  --color-warning-content: oklch(100% 0 0);
-  --color-error: oklch(44.94% 0.164 26.98); /* #9c1b1b — AAA 8.12:1 */
-  --color-error-content: oklch(100% 0 0);
+  --color-info: #5b8cff;
+  --color-info-content: #ffffff;
+  --color-success: #22c55e;
+  --color-success-content: #0c351c;
+  --color-warning: #f0b400;
+  --color-warning-content: #27408f;
+  --color-error: #d83f44;
+  --color-error-content: #ffffff;
 
-  --radius-selector: 0.75rem;
-  --radius-field: 0.5rem;
-  --radius-box: 1.5rem;
+  --radius-selector: 999px;
+  --radius-field: 1rem;
+  --radius-box: 1.625rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
@@ -141,23 +141,25 @@
 [data-theme='rescuedogs-dark'] .card,
 [data-theme='rescuedogs-light'] .card {
   box-shadow:
-    0 4px 6px -1px rgb(0 0 0 / 0.25),
-    0 10px 15px -3px rgb(0 0 0 / 0.2),
-    0 20px 25px -5px rgb(0 0 0 / 0.15);
+    0 22px 44px color-mix(in oklch, var(--color-primary) 18%, transparent),
+    0 4px 10px rgb(0 0 0 / 0.08);
 }
 
 [data-theme='rescuedogs-dark'] .btn,
 [data-theme='rescuedogs-light'] .btn {
+  font-family: var(--font-fredoka), var(--font-nunito), system-ui, sans-serif;
+  font-weight: 700;
   box-shadow:
-    0 2px 4px 0 rgb(0 0 0 / 0.2),
-    0 1px 2px -1px rgb(0 0 0 / 0.15);
+    0 10px 18px color-mix(in oklch, var(--color-primary) 22%, transparent),
+    0 4px 0 color-mix(in oklch, var(--color-primary) 58%, black);
 }
 
 [data-theme='rescuedogs-dark'] .btn:hover,
 [data-theme='rescuedogs-light'] .btn:hover {
+  transform: translateY(-1px);
   box-shadow:
-    0 4px 8px -1px rgb(0 0 0 / 0.3),
-    0 2px 4px -2px rgb(0 0 0 / 0.2);
+    0 14px 24px color-mix(in oklch, var(--color-primary) 28%, transparent),
+    0 5px 0 color-mix(in oklch, var(--color-primary) 58%, black);
 }
 
 /* DaisyUI's .stat-title and .stat-desc ship with base-content at 60% alpha,
@@ -205,6 +207,14 @@
 
 /* Accessibility Font Scaling System + Mobile-First Fluid Typography (PRP-017) */
 :root {
+  --font-sans:
+    var(--font-nunito), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  --font-display: var(--font-baloo), var(--font-fredoka), var(--font-nunito),
+    system-ui, sans-serif;
+  --font-friendly: var(--font-fredoka), var(--font-nunito), system-ui,
+    sans-serif;
+
   /* Base scale factor - controlled by accessibility settings */
   --font-scale-factor: 1;
 
@@ -251,6 +261,32 @@
   );
   --text-8xl: calc(clamp(4rem, 3rem + 4vw, 6rem) * var(--font-scale-factor));
   --text-9xl: calc(clamp(5rem, 4rem + 5vw, 8rem) * var(--font-scale-factor));
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-friendly {
+  font-family: var(--font-friendly);
 }
 
 /* Subtle Animations */

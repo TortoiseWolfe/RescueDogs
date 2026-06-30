@@ -27,7 +27,7 @@ top, ScriptHammer disciplines as Mandatory Constraints).
 - `.specify/memory/constitution.md` is RescueDogs v1.0.0 — never let an
   upstream merge overwrite it
 
-Supabase project: `RescueDogs` ref `wwcpbaigvegsoysmgiiz` (us-east-1).
+Supabase project: `RescueDogs` ref `cmdhajshektesctrappl` (us-east-2).
 Live site: https://tortoisewolfe.github.io/RescueDogs
 
 ## Core Development Principles
