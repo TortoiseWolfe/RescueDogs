@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
@@ -5,11 +6,17 @@ import { MapContainer } from './MapContainer';
 
 expect.extend(toHaveNoViolations);
 
-// Mock dynamic import for MapContainerInner
-vi.mock('./MapContainerInner', () => ({
-  default: ({ children }: any) => (
-    <div data-testid="map-container-inner">{children}</div>
-  ),
+// Mock next/dynamic so MapContainerInner resolves synchronously. Mocking the
+// inner module alone leaves next/dynamic's async import to resolve after the
+// test environment is torn down, which throws "caught after teardown" errors
+// when this file runs inside the full suite.
+vi.mock('next/dynamic', () => ({
+  default: () => {
+    const MapContainerInnerMock = ({ children }: any) => (
+      <div data-testid="map-container-inner">{children}</div>
+    );
+    return MapContainerInnerMock;
+  },
 }));
 
 // Mock LocationButton
