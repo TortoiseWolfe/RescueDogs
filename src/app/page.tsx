@@ -91,21 +91,20 @@ export default function Home() {
         <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-12 lg:flex-row lg:gap-16">
           <div className="flex-1 text-center lg:text-left">
             <div className="font-friendly bg-accent text-accent-content mb-6 inline-flex items-center rounded-full px-5 py-2 text-sm font-bold shadow-lg sm:text-base">
-              🐾 Dogs · Cats & more
+              🐾 Dogs and Cats
             </div>
 
             <h1
               id="hero-heading"
               className="font-display mb-5 text-5xl leading-none font-extrabold tracking-tight text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl lg:text-7xl"
             >
-              Find your new
-              <br />
-              best friend!
+              Find your next pet, and track the adoption process.
             </h1>
 
             <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold text-[#eaf1ff] sm:text-xl lg:mx-0">
-              Every wagging tail is waiting for a forever home. Browse pets,
-              apply online, and follow each adoption update live.
+              RescueDogs helps adopters apply with confidence while giving
+              shelters a simple way to review applications and keep everyone
+              updated.
             </p>
 
             <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
@@ -158,18 +157,34 @@ export default function Home() {
         </svg>
       </section>
 
-      <section aria-label="Rescue impact" className="bg-base-100 px-4 py-10">
-        <div className="mx-auto grid max-w-4xl gap-8 text-center sm:grid-cols-3">
-          {STATS.map((stat) => (
-            <div key={stat.label}>
-              <div
-                className={`font-display text-4xl font-extrabold drop-shadow-sm sm:text-5xl ${stat.tone}`}
-              >
-                {stat.value}
+      <section
+        aria-labelledby="how-it-works-heading"
+        className="bg-base-100 px-4 py-12 sm:px-6 lg:px-8"
+      >
+        <div className="mx-auto max-w-6xl text-center">
+          <h2
+            id="how-it-works-heading"
+            className="font-display text-base-content mb-10 text-4xl font-extrabold sm:text-5xl"
+          >
+            How adopting works
+          </h2>
+          <div className="grid gap-8 md:grid-cols-3">
+            {STEPS.map((step) => (
+              <div key={step.number} className="px-3">
+                <div
+                  className={`font-display mx-auto mb-5 grid h-24 w-24 place-items-center rounded-full text-5xl font-extrabold shadow-xl ${step.bg}`}
+                >
+                  {step.number}
+                </div>
+                <h3 className="font-friendly text-base-content text-2xl font-bold">
+                  {step.title}
+                </h3>
+                <p className="text-base-content/70 mt-2 font-semibold">
+                  {step.detail}
+                </p>
               </div>
-              <p className="text-base-content/70 font-bold">{stat.label}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
@@ -226,34 +241,18 @@ export default function Home() {
         </div>
       </section>
 
-      <section
-        aria-labelledby="how-it-works-heading"
-        className="bg-base-100 px-4 py-12 sm:px-6 lg:px-8"
-      >
-        <div className="mx-auto max-w-6xl text-center">
-          <h2
-            id="how-it-works-heading"
-            className="font-display text-base-content mb-10 text-4xl font-extrabold sm:text-5xl"
-          >
-            How adopting works
-          </h2>
-          <div className="grid gap-8 md:grid-cols-3">
-            {STEPS.map((step) => (
-              <div key={step.number} className="px-3">
-                <div
-                  className={`font-display mx-auto mb-5 grid h-24 w-24 place-items-center rounded-full text-5xl font-extrabold shadow-xl ${step.bg}`}
-                >
-                  {step.number}
-                </div>
-                <h3 className="font-friendly text-base-content text-2xl font-bold">
-                  {step.title}
-                </h3>
-                <p className="text-base-content/70 mt-2 font-semibold">
-                  {step.detail}
-                </p>
+      <section aria-label="Rescue impact" className="bg-base-100 px-4 py-10">
+        <div className="mx-auto grid max-w-4xl gap-8 text-center sm:grid-cols-3">
+          {STATS.map((stat) => (
+            <div key={stat.label}>
+              <div
+                className={`font-display text-4xl font-extrabold drop-shadow-sm sm:text-5xl ${stat.tone}`}
+              >
+                {stat.value}
               </div>
-            ))}
-          </div>
+              <p className="text-base-content/70 font-bold">{stat.label}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -278,7 +277,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
     </main>
   );
 }
