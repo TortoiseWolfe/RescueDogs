@@ -62,7 +62,12 @@ run_check "ESLint" "pnpm lint"
 run_check "TypeScript type check" "pnpm type-check"
 
 # 3. Unit tests
-run_check "Unit tests" "pnpm test --run"
+# --no-file-parallelism: run test files serially. On Windows/Docker hosts the
+# parallel pool leaks async module loads past environment teardown, producing
+# non-deterministic "caught after teardown" errors that fail the run even
+# though every assertion passes. CI (clean Linux runners) does not hit this and
+# keeps the default parallel `pnpm test --run`.
+run_check "Unit tests" "pnpm test --run --no-file-parallelism"
 
 # 4. Test coverage (optional - can be slow)
 if [ "$1" != "--quick" ]; then
