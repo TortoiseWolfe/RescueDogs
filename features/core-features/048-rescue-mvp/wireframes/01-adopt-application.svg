@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c7ddf5"/>
+      <stop offset="1" stop-color="#b8d4f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+
+  <text x="960" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#4b5563">APPLY TO ADOPT - /adopt (AS-IS)</text>
+  <text x="40" y="52" font-family="system-ui, sans-serif" font-size="14" fill="#8b5cf6" font-weight="bold">DESKTOP (16:9)</text>
+  <text x="1500" y="52" font-family="system-ui, sans-serif" font-size="14" fill="#d946ef" font-weight="bold">MOBILE</text>
+
+  <!-- ===================== DESKTOP ===================== -->
+  <g id="desktop" transform="translate(40, 60)">
+    <rect width="1280" height="720" rx="8" fill="#e8d4b8" stroke="#b8a080"/>
+    <use href="includes/header-desktop.svg#desktop-header" x="0" y="0"/>
+
+    <!-- Page header (max-w-3xl centered) -->
+    <text x="340" y="92" font-family="system-ui, sans-serif" font-size="22" fill="#1f2937" font-weight="bold">Apply to Adopt</text>
+    <text x="340" y="116" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">One application, every answer saved for next time — and you can watch its</text>
+    <text x="340" y="134" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">status live from the moment you submit.</text>
+
+    <!-- centered form column max-w-3xl : x 340..940 (width 600) -->
+
+    <!-- Section 1: This Pet -->
+    <rect x="340" y="150" width="600" height="76" rx="6" fill="#f5f0e6" stroke="#b8a080"/>
+    <rect x="356" y="142" width="86" height="20" rx="4" fill="#e8d4b8" stroke="#b8a080"/>
+    <text x="364" y="156" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">This Pet</text>
+    <text x="356" y="184" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Pet</text>
+    <text x="375" y="184" font-family="system-ui, sans-serif" font-size="14" fill="#dc2626">*</text>
+    <rect x="356" y="192" width="568" height="26" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="366" y="209" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Biscuit — Labrador Mix</text>
+    <text x="908" y="209" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">▾</text>
+
+    <!-- Section 2: About You -->
+    <rect x="340" y="238" width="600" height="186" rx="6" fill="#f5f0e6" stroke="#b8a080"/>
+    <rect x="356" y="230" width="98" height="20" rx="4" fill="#e8d4b8" stroke="#b8a080"/>
+    <text x="364" y="244" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">About You</text>
+    <text x="356" y="270" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Full name *</text>
+    <rect x="356" y="276" width="568" height="24" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="366" y="292" font-family="system-ui, sans-serif" font-size="14" fill="#9ca3af">Jane Doe</text>
+    <text x="356" y="318" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Phone</text>
+    <rect x="356" y="324" width="568" height="24" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="366" y="340" font-family="system-ui, sans-serif" font-size="14" fill="#9ca3af">555-555-0123</text>
+    <text x="356" y="366" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Street address</text>
+    <rect x="356" y="372" width="568" height="24" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <!-- 3-col City / State / ZIP -->
+    <rect x="356" y="402" width="180" height="18" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="362" y="415" font-family="system-ui, sans-serif" font-size="14" fill="#374151">City</text>
+    <rect x="550" y="402" width="180" height="18" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="556" y="415" font-family="system-ui, sans-serif" font-size="14" fill="#374151">State</text>
+    <rect x="744" y="402" width="180" height="18" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="750" y="415" font-family="system-ui, sans-serif" font-size="14" fill="#374151">ZIP</text>
+
+    <!-- Section 3: Your Home (with conditional blocks) -->
+    <rect x="340" y="436" width="600" height="150" rx="6" fill="#f5f0e6" stroke="#b8a080"/>
+    <rect x="356" y="428" width="98" height="20" rx="4" fill="#e8d4b8" stroke="#b8a080"/>
+    <text x="364" y="442" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">Your Home</text>
+    <text x="356" y="464" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Housing situation *</text>
+    <rect x="356" y="470" width="568" height="22" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="366" y="485" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Rent — apartment</text>
+    <text x="908" y="485" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">▾</text>
+    <!-- conditional renting/landlord shaded sub-block -->
+    <rect x="356" y="498" width="568" height="44" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <rect x="372" y="505" width="16" height="16" rx="3" fill="#22c55e" stroke="#b8a080"/>
+    <text x="396" y="518" font-family="system-ui, sans-serif" font-size="14" fill="#374151">My landlord has approved a pet</text>
+    <text x="372" y="537" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Landlord contact</text>
+    <rect x="500" y="527" width="412" height="14" rx="3" fill="#f5f0e6" stroke="#b8a080"/>
+    <!-- has yard + conditional fenced -->
+    <rect x="356" y="548" width="16" height="16" rx="3" fill="#22c55e" stroke="#b8a080"/>
+    <text x="382" y="561" font-family="system-ui, sans-serif" font-size="14" fill="#374151">I have a yard</text>
+    <rect x="500" y="548" width="16" height="16" rx="3" fill="#22c55e" stroke="#b8a080"/>
+    <text x="526" y="561" font-family="system-ui, sans-serif" font-size="14" fill="#374151">The yard is fenced</text>
+
+    <!-- Section 4 + 5 condensed + Submit -->
+    <rect x="340" y="594" width="370" height="14" rx="3" fill="#e8d4b8" stroke="#b8a080"/>
+    <text x="346" y="605" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">Household &amp; Pets / References &amp; Experience</text>
+    <rect x="730" y="592" width="210" height="18" rx="4" fill="#8b5cf6"/>
+    <text x="835" y="605" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#f5f0e6" font-weight="bold">Submit application</text>
+
+    <use href="includes/footer-desktop.svg#site-footer" x="0" y="640"/>
+
+    <!-- Callouts -->
+    <g class="callout"><circle cx="912" cy="205" r="14" fill="#dc2626"/><text x="912" y="210" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">1</text></g>
+    <g class="callout"><circle cx="372" cy="513" r="14" fill="#dc2626"/><text x="372" y="518" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">2</text></g>
+    <g class="callout"><circle cx="500" cy="556" r="14" fill="#dc2626"/><text x="500" y="561" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">3</text></g>
+    <g class="callout"><circle cx="730" cy="580" r="14" fill="#dc2626"/><text x="730" y="585" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">4</text></g>
+  </g>
+
+  <!-- ===================== MOBILE ===================== -->
+  <g id="mobile" transform="translate(1360, 60)">
+    <rect width="360" height="720" rx="24" fill="#e8d4b8" stroke="#b8a080"/>
+    <use href="includes/header-mobile.svg#mobile-header-group" x="0" y="0"/>
+
+    <!-- Page header -->
+    <text x="20" y="108" font-family="system-ui, sans-serif" font-size="16" fill="#1f2937" font-weight="bold">Apply to Adopt</text>
+    <text x="20" y="126" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">One application, saved for</text>
+    <text x="20" y="142" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">next time. Watch it live.</text>
+
+    <!-- Section 1: This Pet -->
+    <rect x="20" y="152" width="320" height="58" rx="6" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="30" y="170" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">This Pet</text>
+    <rect x="30" y="178" width="300" height="24" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="38" y="194" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Biscuit — Labrador Mix ▾</text>
+
+    <!-- Section 2: About You -->
+    <rect x="20" y="218" width="320" height="100" rx="6" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="30" y="236" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">About You</text>
+    <rect x="30" y="244" width="300" height="20" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="38" y="258" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Full name *</text>
+    <rect x="30" y="268" width="300" height="20" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="38" y="282" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Phone</text>
+    <rect x="30" y="292" width="96" height="20" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="36" y="306" font-family="system-ui, sans-serif" font-size="14" fill="#374151">City</text>
+    <rect x="132" y="292" width="96" height="20" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="138" y="306" font-family="system-ui, sans-serif" font-size="14" fill="#374151">State</text>
+    <rect x="234" y="292" width="96" height="20" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="240" y="306" font-family="system-ui, sans-serif" font-size="14" fill="#374151">ZIP</text>
+
+    <!-- Section 3: Your Home -->
+    <rect x="20" y="326" width="320" height="118" rx="6" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="30" y="344" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">Your Home</text>
+    <rect x="30" y="352" width="300" height="22" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <text x="38" y="367" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Rent — apartment ▾</text>
+    <rect x="30" y="378" width="300" height="36" rx="4" fill="#dcc8a8" stroke="#b8a080"/>
+    <rect x="38" y="386" width="14" height="14" rx="3" fill="#22c55e" stroke="#b8a080"/>
+    <text x="58" y="398" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Landlord approved</text>
+    <rect x="38" y="420" width="14" height="14" rx="3" fill="#22c55e" stroke="#b8a080"/>
+    <text x="58" y="432" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Yard / fenced</text>
+
+    <!-- Section 4 + 5 condensed -->
+    <rect x="20" y="452" width="320" height="40" rx="6" fill="#f5f0e6" stroke="#b8a080"/>
+    <text x="30" y="470" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">Household &amp; Pets</text>
+    <text x="30" y="486" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">References &amp; Experience</text>
+
+    <!-- Submit -->
+    <rect x="20" y="500" width="320" height="30" rx="6" fill="#8b5cf6"/>
+    <text x="180" y="520" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#f5f0e6" font-weight="bold">Submit application</text>
+
+    <use href="includes/footer-mobile.svg#mobile-bottom-nav" x="0" y="664"/>
+
+    <!-- Mobile callouts -->
+    <g class="callout"><circle cx="320" cy="190" r="11" fill="#dc2626"/><text x="320" y="195" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">1</text></g>
+    <g class="callout"><circle cx="40" cy="393" r="11" fill="#dc2626"/><text x="40" y="398" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">2</text></g>
+    <g class="callout"><circle cx="40" cy="427" r="11" fill="#dc2626"/><text x="40" y="432" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">3</text></g>
+    <g class="callout"><circle cx="335" cy="515" r="11" fill="#dc2626"/><text x="335" y="520" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">4</text></g>
+  </g>
+
+  <!-- ===================== ANNOTATIONS ===================== -->
+  <g id="annotations" transform="translate(40, 800)">
+    <rect width="1840" height="220" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+
+    <g class="callout"><circle cx="34" cy="34" r="14" fill="#dc2626"/><text x="34" y="39" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">1</text></g>
+    <text x="62" y="32" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">Pet select (required)</text>
+    <a href="#us-001"><rect x="62" y="44" width="64" height="22" rx="4" fill="#8b5cf6"/><text x="94" y="60" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#f5f0e6" font-weight="700">US-001</text></a>
+    <text x="20" y="92" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Section "This Pet" — required &lt;select&gt; listing</text>
+    <text x="20" y="112" font-family="system-ui, sans-serif" font-size="14" fill="#374151">rescues, e.g. "Biscuit — Labrador Mix".</text>
+
+    <g class="callout"><circle cx="494" cy="34" r="14" fill="#dc2626"/><text x="494" y="39" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">2</text></g>
+    <text x="522" y="32" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">Conditional renting block</text>
+    <a href="#us-002"><rect x="522" y="44" width="64" height="22" rx="4" fill="#8b5cf6"/><text x="554" y="60" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#f5f0e6" font-weight="700">US-002</text></a>
+    <text x="480" y="92" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Shaded sub-block shown only when renting.</text>
+    <text x="480" y="112" font-family="system-ui, sans-serif" font-size="14" fill="#374151">"Landlord approved" + "Landlord contact".</text>
+
+    <g class="callout"><circle cx="954" cy="34" r="14" fill="#dc2626"/><text x="954" y="39" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">3</text></g>
+    <text x="982" y="32" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">Conditional yard-fenced</text>
+    <a href="#us-003"><rect x="982" y="44" width="64" height="22" rx="4" fill="#8b5cf6"/><text x="1014" y="60" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#f5f0e6" font-weight="700">US-003</text></a>
+    <text x="940" y="92" font-family="system-ui, sans-serif" font-size="14" fill="#374151">"I have a yard" reveals nested checkbox</text>
+    <text x="940" y="112" font-family="system-ui, sans-serif" font-size="14" fill="#374151">"The yard is fenced" only when checked.</text>
+
+    <g class="callout"><circle cx="1414" cy="34" r="14" fill="#dc2626"/><text x="1414" y="39" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">4</text></g>
+    <text x="1442" y="32" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937" font-weight="bold">Submit application</text>
+    <a href="#us-004"><rect x="1442" y="44" width="64" height="22" rx="4" fill="#8b5cf6"/><text x="1474" y="60" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#f5f0e6" font-weight="700">US-004</text></a>
+    <text x="1400" y="92" font-family="system-ui, sans-serif" font-size="14" fill="#374151">Full-width primary button; disabled +</text>
+    <text x="1400" y="112" font-family="system-ui, sans-serif" font-size="14" fill="#374151">spinner while submitting, then status.</text>
+  </g>
+
+  <text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" fill="#374151" font-weight="bold">048:01 | Apply To Adopt (as-is /adopt) | ScriptHammer</text>
+</svg>

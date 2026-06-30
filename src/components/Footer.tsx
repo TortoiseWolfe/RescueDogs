@@ -2,39 +2,22 @@ import React from 'react';
 
 export function Footer() {
   return (
-    <footer className="bg-base-300 mt-auto py-4 text-center sm:py-6">
+    <footer className="mt-auto bg-[#27408f] py-5 text-center text-[#dbe6ff] shadow-[0_-8px_24px_rgba(39,64,143,0.25)] sm:py-6">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <p className="text-base-content text-sm leading-relaxed">
-          Made by{' '}
-          <a
-            href="https://crudgames.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="link-hover link inline-block min-h-11 align-middle leading-11 font-medium"
-          >
-            CRUDgames.com
-          </a>{' '}
-          for{' '}
-          <a
-            href="https://geolarp.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="link-hover link inline-block min-h-11 align-middle leading-11 font-medium"
-          >
-            geoLARP.com
-          </a>
+        <p className="font-friendly text-sm leading-relaxed font-bold">
+          🐾 RescueDogs · Every pet deserves a happy tail.
         </p>
-        <p className="text-base-content mt-1 text-xs">
-          Built with{' '}
+        <p className="mt-1 text-xs text-[#aebfe8]">
+          Built by{' '}
           <a
             href="https://github.com/TortoiseWolfe/RescueDogs"
             target="_blank"
             rel="noopener noreferrer"
-            className="link-hover link"
+            className="link-hover link text-[#ffd23f]"
           >
             RescueDogs
-          </a>{' '}
-          template
+          </a>
+          , powered by Supabase.
         </p>
       </div>
     </footer>

@@ -11,6 +11,7 @@
 Dockerfile text eol=lf
 *.dockerfile text eol=lf
 docker-entrypoint.sh text eol=lf
+.husky/* text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
 

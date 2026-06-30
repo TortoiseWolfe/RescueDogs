@@ -182,7 +182,7 @@ export function GlobalNav() {
   ];
 
   return (
-    <header className="border-base-300 bg-base-100 sticky top-0 z-50 border-b shadow-sm">
+    <header className="bg-primary text-primary-content sticky top-0 z-50 shadow-[0_8px_24px_rgba(31,79,196,0.35)]">
       <nav className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo & Brand */}
@@ -214,10 +214,10 @@ export function GlobalNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`btn btn-ghost btn-sm ${
+                className={`btn btn-ghost btn-sm text-primary-content hover:bg-white/15 ${
                   pathname === item.href ||
                   (pathname?.startsWith(item.href + '/') && item.href !== '/')
-                    ? 'btn-active'
+                    ? 'bg-white/20'
                     : ''
                 }`}
               >
@@ -339,13 +339,13 @@ export function GlobalNav() {
               <>
                 <Link
                   href="/sign-in"
-                  className="btn btn-ghost btn-sm hidden min-h-11 min-w-11 lg:inline-flex"
+                  className="btn btn-ghost btn-sm text-primary-content hidden min-h-11 min-w-11 hover:bg-white/15 lg:inline-flex"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/sign-up"
-                  className="btn btn-primary btn-sm hidden min-h-11 min-w-11 lg:inline-flex"
+                  className="btn btn-accent btn-sm hidden min-h-11 min-w-11 lg:inline-flex"
                 >
                   Sign Up
                 </Link>
@@ -356,7 +356,7 @@ export function GlobalNav() {
             <div className="dropdown dropdown-end lg:hidden">
               <label
                 tabIndex={0}
-                className="btn btn-ghost btn-circle min-h-11 min-w-11"
+                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-white/15"
                 aria-label="Navigation menu"
               >
                 <svg
@@ -491,7 +491,7 @@ export function GlobalNav() {
             <div className="dropdown dropdown-end hidden lg:block">
               <label
                 tabIndex={0}
-                className="btn btn-ghost btn-circle min-h-11 min-w-11"
+                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-white/15"
                 title="Change theme"
                 aria-label="Change theme"
               >

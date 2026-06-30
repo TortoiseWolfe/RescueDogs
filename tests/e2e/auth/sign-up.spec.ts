@@ -276,18 +276,21 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     console.log('Navigation to sign-in works correctly');
   });
 
-  test('should display OAuth buttons on sign-up page', async ({ page }) => {
+  test('should hide OAuth buttons until providers are configured', async ({
+    page,
+  }) => {
     await page.goto('/sign-up');
     await dismissCookieBanner(page);
 
-    // Verify OAuth buttons present (may be GitHub, Google, etc.)
+    // OAuth buttons are intentionally hidden until Google/GitHub providers are
+    // configured in Supabase. This keeps demo users away from dead sign-up paths.
     const oauthButtons = page
       .locator('button')
       .filter({ hasText: /github|google|continue with/i });
     const count = await oauthButtons.count();
 
-    expect(count).toBeGreaterThan(0);
-    console.log(`Found ${count} OAuth button(s)`);
+    expect(count).toBe(0);
+    console.log('OAuth sign-up buttons are hidden until providers are enabled');
   });
 });
 

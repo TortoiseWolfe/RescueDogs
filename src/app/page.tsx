@@ -1,102 +1,80 @@
 import Link from 'next/link';
-import { LayeredRescueDogsLogo } from '@/components/atomic/SpinningLogo';
-import { AnimatedLogo } from '@/components/atomic/AnimatedLogo';
-import TemplateStats, {
-  type TemplateStat,
-  type TemplateDemo,
-} from '@/components/molecular/TemplateStats';
-import { detectedConfig } from '@/config/project-detected';
 
-// ── Hosted-demo landing — audience is a developer deciding whether to
-//     fork. Visual hierarchy: spinning logo + animated title draw the eye,
-//     one `btn-primary` is the only filled button, proof numbers below. ──
-//
-// Server component: logo and animated-title are 'use client' internally,
-// but this page itself ships zero client JS beyond those islands.
-
-const STATS: readonly TemplateStat[] = [
+const STATS = [
   {
-    value: '32',
-    label: 'Themes',
-    detail: 'DaisyUI · live switching',
-    href: '/themes',
+    value: '3,200+',
+    label: 'pets rescued',
+    tone: 'text-primary',
   },
   {
-    value: '2,400+',
-    label: 'Tests',
-    detail: 'Unit · a11y · E2E',
-    href: '/status',
+    value: '2,850',
+    label: 'happy families',
+    tone: 'text-secondary',
   },
   {
-    value: 'WCAG AA',
-    label: 'Accessible',
-    detail: 'Skip links · font scaling',
-    href: '/accessibility',
-  },
-  {
-    value: 'PWA',
-    label: 'Offline-first',
-    detail: 'Service worker · installable',
-    href: '/docs',
+    value: '140',
+    label: 'volunteers',
+    tone: 'text-warning',
   },
 ];
 
-const DEMOS: readonly TemplateDemo[] = [
-  { label: 'Blog', href: '/blog' },
-  { label: 'Payments', href: '/payment-demo' },
-  { label: 'Messaging', href: '/messages' },
-  { label: 'Map', href: '/map' },
-  { label: 'Game', href: '/game' },
-  { label: 'Wireframes', href: '/wireframes' },
-  { label: 'Schedule', href: '/schedule' },
-  { label: 'Contact', href: '/contact' },
-];
-
-const STORYBOOK_URL = 'https://tortoisewolfe.github.io/RescueDogs/storybook/';
-
-// Promoted hero card — stands alone above the grouped grid.
-const PRODUCTION_READY = {
-  emoji: '🚀',
-  label: 'Production Ready',
-  desc: 'CI/CD pipeline, 2,400+ tests, Lighthouse monitoring, GitHub Pages deploy on every push',
-  href: '/status',
-  ariaLabel: 'Rocket launch',
-} as const;
-
-const FEATURES = [
+const PETS = [
   {
-    emoji: '🎨',
-    label: '32 Themes',
-    desc: 'Light & dark with live switching',
-    href: '/themes',
-    ariaLabel: 'Artist palette',
+    name: 'Biscuit',
+    emoji: '🐶',
+    detail: '2 yrs · loves belly rubs & long walks',
+    bg: 'bg-[#f1f6ff]',
+    border: 'border-[#cfe0ff]',
+    image: 'from-[#d7e6ff] to-[#e9f1ff]',
+    title: 'text-[#27408f]',
+    cta: 'btn-primary',
   },
   {
-    emoji: '📐',
-    label: 'Wireframes',
-    desc: '46 interactive SVG design specs',
-    href: '/wireframes',
-    ariaLabel: 'Triangular ruler',
+    name: 'Pepper',
+    emoji: '🐾',
+    detail: '4 yrs · smart, loyal, and treat motivated',
+    bg: 'bg-[#fff4f4]',
+    border: 'border-[#ffd2d4]',
+    image: 'from-[#ffd9da] to-[#ffe9ea]',
+    title: 'text-[#c0353a]',
+    cta: 'btn-secondary',
   },
   {
-    emoji: '📱',
-    label: 'PWA Ready',
-    desc: 'Installable with offline support',
-    href: '/docs',
-    ariaLabel: 'Mobile phone',
+    name: 'Tank',
+    emoji: '🦴',
+    detail: '6 yrs · gentle giant with couch-potato energy',
+    bg: 'bg-[#fffaf0]',
+    border: 'border-[#ffd277]',
+    image: 'from-[#ffe7a3] to-[#fff6d8]',
+    title: 'text-[#8a6500]',
+    cta: 'btn-accent',
+  },
+] as const;
+
+const STEPS = [
+  {
+    number: '1',
+    title: 'Browse & pick',
+    detail: 'Meet our pets and find the one that makes your heart melt.',
+    bg: 'bg-accent text-accent-content',
   },
   {
-    emoji: '♿',
-    label: 'Accessible',
-    desc: 'WCAG compliant & customizable',
-    href: '/accessibility',
-    ariaLabel: 'Wheelchair accessibility symbol',
+    number: '2',
+    title: 'Apply online',
+    detail: 'Send one application and track every update in real time.',
+    bg: 'bg-primary text-primary-content',
+  },
+  {
+    number: '3',
+    title: 'Bring them home',
+    detail: 'Work with the shelter team and start your happily-ever-after.',
+    bg: 'bg-secondary text-secondary-content',
   },
 ] as const;
 
 export default function Home() {
   return (
-    <main className="bg-base-200 flex min-h-full flex-col">
+    <main className="bg-base-100 flex min-h-full flex-col overflow-hidden">
       {/* Skip link — load-bearing a11y, do not remove (PRP-017 T036). */}
       <a
         href="#main-content"
@@ -105,155 +83,197 @@ export default function Home() {
         Skip to main content
       </a>
 
-      {/* ── Tier 1: Hero ─────────────────────────────────────────────── */}
       <section
         id="main-content"
         aria-labelledby="hero-heading"
-        className="mx-auto w-full max-w-6xl flex-1 px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+        className="relative bg-gradient-to-b from-[#2f6bff] to-[#5b8cff] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-24"
       >
-        <div className="flex flex-col items-center gap-8 lg:flex-row lg:gap-16">
-          {/* Logo — responsive sizing, spins slowly, pauses on hover */}
-          <div className="flex-shrink-0">
-            <div className="h-48 w-48 sm:h-52 sm:w-52 md:h-56 md:w-56 lg:h-[350px] lg:w-[350px]">
-              <LayeredRescueDogsLogo speed="slow" pauseOnHover />
+        <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-12 lg:flex-row lg:gap-16">
+          <div className="flex-1 text-center lg:text-left">
+            <div className="font-friendly bg-accent text-accent-content mb-6 inline-flex items-center rounded-full px-5 py-2 text-sm font-bold shadow-lg sm:text-base">
+              🐾 Dogs and Cats
+            </div>
+
+            <h1
+              id="hero-heading"
+              className="font-display mb-5 text-5xl leading-none font-extrabold tracking-tight text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl lg:text-7xl"
+            >
+              Find your next pet, and track the adoption process.
+            </h1>
+
+            <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold text-[#eaf1ff] sm:text-xl lg:mx-0">
+              RescueDogs helps adopters apply with confidence while giving
+              shelters a simple way to review applications and keep everyone
+              updated.
+            </p>
+
+            <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
+              <Link
+                href="/adopt"
+                className="btn btn-secondary btn-lg min-h-11 px-10 text-lg"
+              >
+                Adopt a Pet
+              </Link>
+              <Link
+                href="/sign-in"
+                className="btn btn-accent btn-lg min-h-11 px-10 text-lg"
+              >
+                View Demo
+              </Link>
             </div>
           </div>
 
-          {/* Content — stacked below logo on mobile, beside it on desktop */}
-          <div className="text-center lg:text-left">
-            <h1 id="hero-heading" className="mb-4 sm:mb-6">
-              <AnimatedLogo
-                text={detectedConfig.projectName}
-                className="!text-2xl font-bold sm:!text-3xl md:!text-5xl lg:!text-6xl"
-                animationSpeed="normal"
-              />
-            </h1>
-
-            <p className="text-base-content/80 mb-6 max-w-2xl text-lg leading-relaxed sm:text-xl">
-              Auth, payments, messaging, and offline support are already wired
-              to Supabase and tested. Fork it, change the theme, start on your
-              features.
-            </p>
-
-            {/* Tech stack badges */}
-            <div
-              className="mb-8 flex flex-wrap justify-center gap-2 lg:justify-start"
-              role="list"
-              aria-label="Technology stack"
-            >
-              {[
-                'Next.js 15.5',
-                'React 19',
-                'TypeScript',
-                'Tailwind CSS',
-                'PWA Ready',
-              ].map((tech) => (
-                <span
-                  key={tech}
-                  role="listitem"
-                  className="badge badge-outline badge-sm sm:badge-md"
-                >
-                  {tech}
-                </span>
-              ))}
+          <div className="relative h-72 w-full max-w-sm shrink-0 animate-[floaty_5s_ease-in-out_infinite] sm:h-80 lg:h-[400px] lg:max-w-[440px]">
+            <div className="absolute inset-0 rotate-3 rounded-[2rem] border-[7px] border-[#ffd23f] bg-white shadow-2xl" />
+            <div className="absolute inset-4 rotate-3 rounded-[1.625rem] bg-[repeating-linear-gradient(45deg,#dbe6ff,#dbe6ff_14px,#edf2ff_14px,#edf2ff_28px)]">
+              <div className="grid h-full place-items-center text-center">
+                <div>
+                  <div
+                    className="text-7xl drop-shadow-xl sm:text-8xl"
+                    role="img"
+                    aria-label="Happy rescue pets"
+                  >
+                    🐶🐱
+                  </div>
+                  <p className="font-friendly mt-4 text-lg font-bold text-[#27408f]">
+                    Happy tails start here
+                  </p>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
 
-            <nav
-              aria-label="Primary actions"
-              className="flex flex-col items-center gap-4 lg:items-start"
-            >
-              <a
-                href={`${detectedConfig.projectUrl}/generate`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary btn-lg min-h-11 min-w-11"
-              >
-                Use this template
-              </a>
-              <a
-                href={STORYBOOK_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                // Solid text-base-content for AAA contrast (7:1) on
-                // rescuedogs-light's #ebe5dd panel. /70 was 4.98:1 — fine
-                // for AA but failed AAA per #21. The muted-secondary feel
-                // is preserved via text-sm + the smaller font, not opacity.
-                className="link link-hover text-base-content inline-flex min-h-11 items-center gap-2 text-sm"
-              >
-                or explore the component catalogue in Storybook
-                <span aria-hidden="true">→</span>
-              </a>
-            </nav>
+        <svg
+          viewBox="0 0 1440 60"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          className="absolute -bottom-px left-0 h-12 w-full sm:h-16"
+        >
+          <path
+            d="M0,60 C260,10 520,10 760,35 C1010,60 1240,55 1440,20 L1440,60 Z"
+            fill="var(--color-base-100)"
+          />
+        </svg>
+      </section>
+
+      <section
+        aria-labelledby="how-it-works-heading"
+        className="bg-base-100 px-4 py-12 sm:px-6 lg:px-8"
+      >
+        <div className="mx-auto max-w-6xl text-center">
+          <h2
+            id="how-it-works-heading"
+            className="font-display text-base-content mb-10 text-4xl font-extrabold sm:text-5xl"
+          >
+            How adopting works
+          </h2>
+          <div className="grid gap-8 md:grid-cols-3">
+            {STEPS.map((step) => (
+              <div key={step.number} className="px-3">
+                <div
+                  className={`font-display mx-auto mb-5 grid h-24 w-24 place-items-center rounded-full text-5xl font-extrabold shadow-xl ${step.bg}`}
+                >
+                  {step.number}
+                </div>
+                <h3 className="font-friendly text-base-content text-2xl font-bold">
+                  {step.title}
+                </h3>
+                <p className="text-base-content/70 mt-2 font-semibold">
+                  {step.detail}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── Tiers 2 & 3: proof + demos ───────────────────────────────── */}
-      <TemplateStats stats={STATS} demos={DEMOS} />
-
-      {/* ── Gradient: base-100 → base-200 (smooth transition from TemplateStats) */}
-      <div
-        aria-hidden="true"
-        className="h-16 sm:h-24"
-        style={{
-          background:
-            'linear-gradient(to bottom, var(--color-base-100), var(--color-base-200))',
-        }}
-      />
-
-      {/* ── Feature cards — 1 promoted + 4 grouped ───────────────────── */}
       <section
-        aria-label="Key features"
-        className="px-4 pt-4 pb-12 sm:px-6 lg:px-8"
+        aria-labelledby="meet-pets-heading"
+        className="bg-base-100 px-4 py-10 sm:px-6 lg:px-8"
       >
-        <div className="mx-auto flex max-w-6xl flex-col gap-4">
-          <h2 className="sr-only">Key Features</h2>
-
-          {/* Promoted: Production Ready. Full-width, primary border accent,
-              horizontal layout on sm+ so the longer copy can breathe. Border
-              uses the DaisyUI semantic token so it holds across all 32 themes. */}
-          <Link
-            href={PRODUCTION_READY.href}
-            className="card bg-base-100 border-primary focus-within:ring-primary border-2 shadow-md transition-all focus-within:ring-2 hover:-translate-y-1 hover:shadow-lg"
+        <div className="mx-auto max-w-6xl text-center">
+          <h2
+            id="meet-pets-heading"
+            className="font-display text-base-content text-4xl font-extrabold sm:text-5xl"
           >
-            <div className="card-body flex-col items-center gap-4 p-6 text-center sm:flex-row sm:text-left">
-              <div
-                className="shrink-0 text-5xl"
-                role="img"
-                aria-label={PRODUCTION_READY.ariaLabel}
-              >
-                {PRODUCTION_READY.emoji}
-              </div>
-              <div>
-                <h3 className="card-title text-lg">{PRODUCTION_READY.label}</h3>
-                <p className="text-base-content/85 text-sm">
-                  {PRODUCTION_READY.desc}
-                </p>
-              </div>
-            </div>
-          </Link>
+            Say hello!
+          </h2>
+          <p className="text-base-content/70 mt-2 mb-8 text-lg font-semibold">
+            A few demo pets are ready for your tour.
+          </p>
 
-          {/* Grouped: remaining 4 in a 2×2 / 4-wide grid */}
-          <div className="grid grid-cols-1 gap-4 min-[500px]:grid-cols-2 lg:grid-cols-4">
-            {FEATURES.map((f) => (
-              <Link
-                key={f.href}
-                href={f.href}
-                className="card bg-base-100 focus-within:ring-primary shadow-md transition-all focus-within:ring-2 hover:-translate-y-1 hover:shadow-lg"
+          <div className="grid gap-7 md:grid-cols-3">
+            {PETS.map((pet) => (
+              <article
+                key={pet.name}
+                className={`card border-[3px] text-left ${pet.bg} ${pet.border}`}
               >
-                <div className="card-body items-center p-4 text-center">
+                <div className="card-body gap-4 p-4">
                   <div
-                    className="mb-3 text-3xl"
-                    role="img"
-                    aria-label={f.ariaLabel}
+                    className={`grid h-52 place-items-center rounded-2xl bg-gradient-to-br ${pet.image}`}
                   >
-                    {f.emoji}
+                    <span
+                      className="text-7xl drop-shadow-lg"
+                      role="img"
+                      aria-label={`${pet.name} pet icon`}
+                    >
+                      {pet.emoji}
+                    </span>
                   </div>
-                  <h3 className="card-title text-base">{f.label}</h3>
-                  <p className="text-base-content/85 text-xs">{f.desc}</p>
+                  <div className="px-2">
+                    <h3
+                      className={`font-friendly text-2xl font-bold ${pet.title}`}
+                    >
+                      {pet.name}
+                    </h3>
+                    <p className="text-base-content/70 font-semibold">
+                      {pet.detail}
+                    </p>
+                  </div>
+                  <Link href="/adopt" className={`btn ${pet.cta} w-full`}>
+                    Meet {pet.name}
+                  </Link>
                 </div>
-              </Link>
+              </article>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="Rescue impact" className="bg-base-100 px-4 py-10">
+        <div className="mx-auto grid max-w-4xl gap-8 text-center sm:grid-cols-3">
+          {STATS.map((stat) => (
+            <div key={stat.label}>
+              <div
+                className={`font-display text-4xl font-extrabold drop-shadow-sm sm:text-5xl ${stat.tone}`}
+              >
+                {stat.value}
+              </div>
+              <p className="text-base-content/70 font-bold">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-base-100 px-4 pb-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#ff5a5f] p-8 text-white shadow-2xl sm:p-12 lg:flex lg:items-center lg:justify-between lg:gap-8">
+          <div>
+            <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
+              Want to see the live rescue loop?
+            </h2>
+            <p className="mt-2 max-w-2xl text-lg font-bold text-[#ffe3e4]">
+              Sign in with the demo accounts to watch adopter and shelter
+              updates sync in real time.
+            </p>
+          </div>
+          <div className="mt-6 flex flex-wrap gap-4 lg:mt-0 lg:shrink-0">
+            <Link href="/sign-in" className="btn bg-white text-[#ff5a5f]">
+              Try Demo Login
+            </Link>
+            <Link href="/applications/status/" className="btn btn-accent">
+              Status Tracker
+            </Link>
           </div>
         </div>
       </section>
