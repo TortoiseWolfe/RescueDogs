@@ -40,7 +40,7 @@ describe('Project Configuration', () => {
       expect(config.projectName).toBe('RescueDogs');
       expect(config.projectOwner).toBe('TortoiseWolfe');
       expect(config.projectDescription).toContain(
-        'Opinionated Next.js template'
+        'Pet adoption application tracker'
       );
       expect(config.basePath).toBe('');
       expect(config.deployUrl).toBe('http://localhost:3000');
@@ -184,11 +184,13 @@ describe('Project Configuration', () => {
 
       expect(manifest.name).toContain('RescueDogs');
       expect(manifest.short_name).toBe('RescueDogs');
-      expect(manifest.description).toContain('Opinionated Next.js template');
+      expect(manifest.description).toContain(
+        'Pet adoption application tracker'
+      );
       expect(manifest.start_url).toBe('/');
       expect(manifest.display).toBe('standalone');
-      expect(manifest.theme_color).toBe('#1a1a2e');
-      expect(manifest.background_color).toBe('#1a1a2e');
+      expect(manifest.theme_color).toBe('#2f6bff');
+      expect(manifest.background_color).toBe('#ffffff');
     });
 
     it('should include basePath in manifest URLs when set', () => {
