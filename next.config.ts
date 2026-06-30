@@ -41,6 +41,10 @@ const basePath = detectProjectConfig();
 
 const nextConfig: NextConfig = {
   output: 'export',
+  // Allow an alternate build directory so a production build (e.g. the
+  // pre-push CI mirror) does not collide with a running `next dev` server
+  // that is using the default .next directory in this dev environment.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   basePath: basePath,
   assetPrefix: basePath ? `${basePath}/` : '',
   trailingSlash: true,
