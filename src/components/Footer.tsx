@@ -7,13 +7,13 @@ export function Footer() {
         <p className="font-friendly text-sm leading-relaxed font-bold">
           🐾 RescueDogs · Every pet deserves a happy tail.
         </p>
-        <p className="mt-1 text-xs text-[#aebfe8]">
+        <p className="mt-1 text-xs text-[#dbe6fb]">
           Built by{' '}
           <a
             href="https://github.com/TortoiseWolfe/RescueDogs"
             target="_blank"
             rel="noopener noreferrer"
-            className="link-hover link text-[#ffd23f]"
+            className="link-hover link text-[#ffdd6b]"
           >
             RescueDogs
           </a>
