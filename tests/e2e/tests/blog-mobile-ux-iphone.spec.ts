@@ -37,7 +37,7 @@ test.describe('Blog Post Mobile UX - iPhone 12', () => {
 
     // Verify footer contains expected text
     await expect(footer).toContainText('Built by');
-    await expect(footer).toContainText('CRUDgames.com');
+    await expect(footer).toContainText('RescueDogs');
 
     // Take screenshot for visual verification
     await page.screenshot({
