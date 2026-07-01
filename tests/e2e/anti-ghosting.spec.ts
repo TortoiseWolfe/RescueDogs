@@ -102,8 +102,11 @@ test.describe('anti-ghosting loop', () => {
       .getByRole('button', { name: /submit application/i })
       .click();
 
-    // Lands on the tracker with the new application id
-    await adopterPage.waitForURL(/\/applications\/status\?id=/, {
+    // Lands on the tracker with the new application id. The optional trailing
+    // slash matters: the static export uses `trailingSlash: true`, so the real
+    // URL is /applications/status/?id=… — without the `/?` the regex never
+    // matches and waitForURL times out even though navigation succeeded.
+    await adopterPage.waitForURL(/\/applications\/status\/?\?id=/, {
       timeout: 30000,
     });
     applicationId = new URL(adopterPage.url()).searchParams.get('id')!;

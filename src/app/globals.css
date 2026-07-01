@@ -62,11 +62,15 @@
   --color-base-300: #27408f;
   --color-base-content: #f8fbff;
 
-  --color-primary: #5b8cff;
-  --color-primary-content: #ffffff;
+  /* Lightened from #5b8cff (4.59:1 on the dark base) to clear WCAG AAA 7:1.
+   * On a dark background, higher contrast means a LIGHTER tint. */
+  --color-primary: #a3c1ff;
+  --color-primary-content: #10205a;
 
-  --color-secondary: #ff5a5f;
-  --color-secondary-content: #ffffff;
+  /* Lightened coral so it clears AAA 7:1 as text on the dark base (was 4.76:1).
+   * secondary-content flips to dark navy so white-on-nothing pairings hold. */
+  --color-secondary: #ffa0a3;
+  --color-secondary-content: #10205a;
 
   --color-accent: #ffd23f;
   --color-accent-content: #27408f;
@@ -105,10 +109,14 @@
   --color-base-300: #cfe0ff;
   --color-base-content: #27408f;
 
-  --color-primary: #2f6bff;
+  /* Darkened from #2f6bff to hit WCAG AAA 7:1 as text on white (was 4.49:1). */
+  --color-primary: #1a4bbd;
   --color-primary-content: #ffffff;
 
-  --color-secondary: #ff5a5f;
+  /* Darkened from the bright coral #ff5a5f (only 3.05:1) to a deep rescue-red
+   * that clears AAA 7:1 BOTH as text-on-white and as a background under white
+   * text (7.34:1 either way). */
+  --color-secondary: #a81d21;
   --color-secondary-content: #ffffff;
 
   --color-accent: #ffd23f;
@@ -164,12 +172,14 @@
 
 /* DaisyUI's .stat-title and .stat-desc ship with base-content at 60% alpha,
  * which falls short of WCAG AA (3.86:1 on rescuedogs-light, needs 4.5:1).
- * Raising alpha to 80% gives ~7.1:1 on light and ~9.3:1 on dark — AAA on both. */
+ * 80% measured only 5.52:1 on light (the stat card is white) — below the AAA
+ * 7:1 gate. 92% gives ~7.66:1 on light and ~12:1 on dark — AAA on both while
+ * still reading as muted secondary text. */
 [data-theme='rescuedogs-dark'] .stat-title,
 [data-theme='rescuedogs-dark'] .stat-desc,
 [data-theme='rescuedogs-light'] .stat-title,
 [data-theme='rescuedogs-light'] .stat-desc {
-  color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
+  color: color-mix(in oklab, var(--color-base-content) 92%, transparent);
 }
 
 /* Avatar glow/shadow — uses base-content so it auto-adapts:
@@ -208,12 +218,13 @@
 /* Accessibility Font Scaling System + Mobile-First Fluid Typography (PRP-017) */
 :root {
   --font-sans:
-    var(--font-nunito), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    var(--font-nunito), system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
+  --font-display:
+    var(--font-baloo), var(--font-fredoka), var(--font-nunito), system-ui,
     sans-serif;
-  --font-display: var(--font-baloo), var(--font-fredoka), var(--font-nunito),
-    system-ui, sans-serif;
-  --font-friendly: var(--font-fredoka), var(--font-nunito), system-ui,
-    sans-serif;
+  --font-friendly:
+    var(--font-fredoka), var(--font-nunito), system-ui, sans-serif;
 
   /* Base scale factor - controlled by accessibility settings */
   --font-scale-factor: 1;

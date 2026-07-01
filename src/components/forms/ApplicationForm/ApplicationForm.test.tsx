@@ -121,6 +121,26 @@ describe('ApplicationForm', () => {
       expect(petSelect()).toHaveValue(MOCHI_ID);
     });
 
+    it('applies preselectedPetId that arrives AFTER the initial render', async () => {
+      // Under static export the /adopt page reads ?pet= via useSearchParams in
+      // a useEffect, so preselectedPetId is undefined on first paint and only
+      // arrives on a later re-render. React Hook Form captures defaultValues
+      // once at mount, so the late prop must be applied reactively — otherwise
+      // the /adopt?pet=<id> deep-link never selects the pet (anti-ghosting E2E).
+      const { rerender } = renderForm({ preselectedPetId: undefined });
+      expect(petSelect()).toHaveValue('');
+
+      rerender(
+        <ApplicationForm
+          pets={pets}
+          onSubmit={onSubmit}
+          preselectedPetId={MOCHI_ID}
+        />
+      );
+
+      await waitFor(() => expect(petSelect()).toHaveValue(MOCHI_ID));
+    });
+
     it('defaults to the placeholder when no pet is preselected', () => {
       renderForm();
       expect(petSelect()).toHaveValue('');
