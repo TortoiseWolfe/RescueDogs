@@ -3,10 +3,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { getAssetUrl } from '@/config/project.config';
 
-export default function WireframesPage() {
+interface WireframesViewerProps {
+  /**
+   * Manifest path of the SVG to deep-link to ("<feature>/<file>.svg"), or
+   * null for the index view. Passed straight through to the viewer iframe as
+   * a URL hash, which viewer.html reads on load and via hashchange.
+   */
+  wireframePath: string | null;
+}
+
+/**
+ * Embeds the manifest-driven wireframe viewer (viewer.html) in an iframe.
+ * When a wireframePath is provided, it is appended as the iframe's hash so
+ * the viewer opens directly on that SVG — the deep-link contract.
+ */
+export default function WireframesViewer({
+  wireframePath,
+}: WireframesViewerProps) {
   const [loading, setLoading] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const iframeSrc = getAssetUrl('/wireframes/viewer.html');
+
+  const base = getAssetUrl('/wireframes/viewer.html');
+  const iframeSrc = wireframePath ? `${base}#${wireframePath}` : base;
 
   // Iframe's load event races with React hydration — if the iframe finishes
   // loading before React attaches onLoad, the spinner sticks forever.
