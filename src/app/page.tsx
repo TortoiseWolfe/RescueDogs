@@ -231,7 +231,10 @@ export default function Home() {
                       {pet.detail}
                     </p>
                   </div>
-                  <Link href="/adopt" className={`btn ${pet.cta} w-full`}>
+                  <Link
+                    href="/adopt"
+                    className={`btn ${pet.cta} min-h-11 w-full`}
+                  >
                     Meet {pet.name}
                   </Link>
                 </div>
@@ -268,10 +271,16 @@ export default function Home() {
             </p>
           </div>
           <div className="mt-6 flex flex-wrap gap-4 lg:mt-0 lg:shrink-0">
-            <Link href="/sign-in" className="btn bg-white text-[#a81d21]">
+            <Link
+              href="/sign-in"
+              className="btn min-h-11 bg-white text-[#a81d21]"
+            >
               Try Demo Login
             </Link>
-            <Link href="/applications/status/" className="btn btn-accent">
+            <Link
+              href="/applications/status/"
+              className="btn btn-accent min-h-11"
+            >
               Status Tracker
             </Link>
           </div>
