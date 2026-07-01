@@ -1616,7 +1616,24 @@
         link.classList.toggle('active', link.dataset.svg === wf.path);
       });
       expandSectionForPath(wf.path);
+
+      // Reflect the current wireframe in the URL hash so deep-links are
+      // copyable from the address bar and survive reload. replaceState (not
+      // a hash assignment) avoids piling history entries on every click and
+      // does not re-fire hashchange.
+      if (wf.path && window.location.hash.replace(/^#/, '') !== wf.path) {
+        history.replaceState(null, '', '#' + wf.path);
+      }
     }
+
+    // External hash changes (browser back/forward, a parent frame setting
+    // location.hash, or a pasted deep-link) select the matching wireframe.
+    window.addEventListener('hashchange', () => {
+      const hashPath = window.location.hash.replace(/^#/, '');
+      if (!hashPath) return;
+      const idx = findIndexByPath(hashPath);
+      if (idx !== currentIndex) updateView(idx);
+    });
 
     // Nav link clicks are wired up in attachNavHandlers() after
     // buildNavFromManifest() populates the DOM.
