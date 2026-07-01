@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
@@ -180,6 +181,7 @@ export default function ApplicationForm({
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<ApplicationFormInput, unknown, ApplicationFormData>({
     resolver: zodResolver(applicationSchema),
@@ -213,6 +215,18 @@ export default function ApplicationForm({
       ...(preselectedPetId ? { pet_id: preselectedPetId } : {}),
     },
   });
+
+  // Apply a preselected pet that arrives AFTER mount. Under static export the
+  // /adopt page reads ?pet= via useSearchParams in a useEffect, so
+  // preselectedPetId is undefined on first paint. React Hook Form only reads
+  // defaultValues once at mount, so without this the /adopt?pet=<id> deep-link
+  // never selects the pet. Guarded on a real value so it can't stomp a user's
+  // manual choice back to the placeholder.
+  useEffect(() => {
+    if (preselectedPetId) {
+      setValue('pet_id', preselectedPetId);
+    }
+  }, [preselectedPetId, setValue]);
 
   const housingType = watch('housing_type') as HousingType | undefined;
   const renting = !!housingType && isRenting(housingType);

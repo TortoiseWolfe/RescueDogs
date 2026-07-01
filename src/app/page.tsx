@@ -179,7 +179,7 @@ export default function Home() {
                 <h3 className="font-friendly text-base-content text-2xl font-bold">
                   {step.title}
                 </h3>
-                <p className="text-base-content/70 mt-2 font-semibold">
+                <p className="text-base-content/95 mt-2 font-semibold">
                   {step.detail}
                 </p>
               </div>
@@ -199,7 +199,7 @@ export default function Home() {
           >
             Say hello!
           </h2>
-          <p className="text-base-content/70 mt-2 mb-8 text-lg font-semibold">
+          <p className="text-base-content/95 mt-2 mb-8 text-lg font-semibold">
             A few demo pets are ready for your tour.
           </p>
 
@@ -227,11 +227,14 @@ export default function Home() {
                     >
                       {pet.name}
                     </h3>
-                    <p className="text-base-content/70 font-semibold">
+                    <p className="text-base-content/95 font-semibold">
                       {pet.detail}
                     </p>
                   </div>
-                  <Link href="/adopt" className={`btn ${pet.cta} w-full`}>
+                  <Link
+                    href="/adopt"
+                    className={`btn ${pet.cta} min-h-11 w-full`}
+                  >
                     Meet {pet.name}
                   </Link>
                 </div>
@@ -250,28 +253,34 @@ export default function Home() {
               >
                 {stat.value}
               </div>
-              <p className="text-base-content/70 font-bold">{stat.label}</p>
+              <p className="text-base-content/95 font-bold">{stat.label}</p>
             </div>
           ))}
         </div>
       </section>
 
       <section className="bg-base-100 px-4 pb-12 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#ff5a5f] p-8 text-white shadow-2xl sm:p-12 lg:flex lg:items-center lg:justify-between lg:gap-8">
+        <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#a81d21] p-8 text-white shadow-2xl sm:p-12 lg:flex lg:items-center lg:justify-between lg:gap-8">
           <div>
             <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
               Want to see the live rescue loop?
             </h2>
-            <p className="mt-2 max-w-2xl text-lg font-bold text-[#ffe3e4]">
+            <p className="mt-2 max-w-2xl text-lg font-bold text-white">
               Sign in with the demo accounts to watch adopter and shelter
               updates sync in real time.
             </p>
           </div>
           <div className="mt-6 flex flex-wrap gap-4 lg:mt-0 lg:shrink-0">
-            <Link href="/sign-in" className="btn bg-white text-[#ff5a5f]">
+            <Link
+              href="/sign-in"
+              className="btn min-h-11 bg-white text-[#a81d21]"
+            >
               Try Demo Login
             </Link>
-            <Link href="/applications/status/" className="btn btn-accent">
+            <Link
+              href="/applications/status/"
+              className="btn btn-accent min-h-11"
+            >
               Status Tracker
             </Link>
           </div>
