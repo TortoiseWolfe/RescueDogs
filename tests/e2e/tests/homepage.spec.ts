@@ -16,88 +16,32 @@ test.describe('Homepage Navigation', () => {
     await expect(heading).toBeVisible();
   });
 
-  test('navigate to themes page', async ({ page }) => {
-    // Click the 32 Themes link (stats card)
-    await page.getByRole('link', { name: '32 Themes' }).first().click();
+  test('navigate to the adopt page', async ({ page }) => {
+    // The rescue homepage leads with adoption — the pet-card CTAs link to /adopt.
+    await page.locator('a[href*="/adopt"]').first().click();
 
-    // Verify navigation to themes page
-    await expect(page).toHaveURL(/.*themes/);
-
-    // Verify themes page content loads
-    const themesHeading = page.locator('h1').filter({ hasText: /Theme/i });
-    await expect(themesHeading).toBeVisible();
+    await expect(page).toHaveURL(/.*adopt/);
   });
 
-  test('navigate to storybook page', async ({ page, context }) => {
-    // Storybook opens in new tab (external link)
-    const [newPage] = await Promise.all([
-      context.waitForEvent('page'),
-      page.click('a[href*="storybook"]'),
-    ]);
+  test('navigate to the status tracker', async ({ page }) => {
+    // The CTA banner links to the live application status tracker.
+    await page.locator('a[href*="/applications/status"]').first().click();
 
-    // Check the new tab URL contains storybook
-    await newPage.waitForLoadState();
-    expect(newPage.url()).toContain('storybook');
-    await newPage.close();
+    await expect(page).toHaveURL(/.*applications\/status/);
   });
 
-  test('key features section is present', async ({ page }) => {
-    // Check that the Key Features section exists
-    const featuresHeading = page
-      .locator('h2')
-      .filter({ hasText: /Key Features/i });
-    await expect(featuresHeading).toBeVisible();
-
-    // Check feature cards are present
-    const featureCards = page.locator('h3');
-    await expect(featureCards.filter({ hasText: /32 Themes/i })).toBeVisible();
-    await expect(featureCards.filter({ hasText: /PWA Ready/i })).toBeVisible();
-    await expect(featureCards.filter({ hasText: /Accessible/i })).toBeVisible();
-    await expect(
-      featureCards.filter({ hasText: /Production Ready/i })
-    ).toBeVisible();
+  test('key stats section is present', async ({ page }) => {
+    // The rescue homepage replaced the template "Key Features" with impact
+    // stats (pets rescued / happy families / volunteers).
+    const stats = page.getByText(/pets rescued|happy families|volunteers/i);
+    await expect(stats.first()).toBeVisible();
   });
 
-  test('navigate to game page', async ({ page }) => {
-    // Click the Game link in demos section
-    await page.getByRole('link', { name: 'Game' }).first().click();
+  test('navigate to sign-in from the homepage', async ({ page }) => {
+    // The "Try Demo Login" CTA links to /sign-in.
+    await page.locator('a[href*="/sign-in"]').first().click();
 
-    // Verify navigation to game page
-    await expect(page).toHaveURL(/.*game/);
-  });
-
-  test('navigation links in secondary nav work', async ({ page }) => {
-    // Test Status link - use href selector to avoid matching hidden hamburger nav items
-    const statusLink = page.locator('a[href*="/status"]').first();
-    await statusLink.click();
-    await expect(page).toHaveURL(/.*status/);
-    await page.goBack();
-    await page.waitForLoadState('networkidle');
-    await dismissCookieBanner(page);
-
-    // Test Accessibility page link - find the "Accessible" card which links to /accessibility
-    const accessibilityLink = page
-      .getByRole('link', { name: /accessible/i })
-      .first();
-    await accessibilityLink.scrollIntoViewIfNeeded();
-    await accessibilityLink.click();
-    await expect(page).toHaveURL(/.*accessibility/);
-    await page.goBack();
-  });
-
-  test('GitHub repository link opens in new tab', async ({ page, context }) => {
-    test.skip(!!process.env.CI, 'External tab popups unreliable in CI');
-
-    // Listen for new page/tab
-    const [newPage] = await Promise.all([
-      context.waitForEvent('page'),
-      page.click('text=View Source'),
-    ]);
-
-    // Check the new tab URL
-    await newPage.waitForLoadState();
-    expect(newPage.url()).toContain('github.com');
-    await newPage.close();
+    await expect(page).toHaveURL(/.*sign-in/);
   });
 
   test('skip to main content link works', async ({ page }) => {

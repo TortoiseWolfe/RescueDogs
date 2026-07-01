@@ -210,20 +210,23 @@ export function GlobalNav() {
 
           {/* Main Navigation */}
           <nav className="hidden items-center gap-1 lg:flex">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`btn btn-ghost btn-sm text-primary-content hover:bg-white/15 ${
-                  pathname === item.href ||
-                  (pathname?.startsWith(item.href + '/') && item.href !== '/')
-                    ? 'bg-white/20'
-                    : ''
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (pathname?.startsWith(item.href + '/') && item.href !== '/');
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`btn btn-ghost btn-sm text-primary-content hover:bg-white/15 ${
+                    isActive ? 'bg-white/20' : ''
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Right Section: Auth, Theme & PWA - Mobile-first spacing (PRP-017 T025) */}
