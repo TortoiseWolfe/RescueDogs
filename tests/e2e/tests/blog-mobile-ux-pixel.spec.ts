@@ -26,7 +26,7 @@ test.describe('Blog Post Mobile UX - Pixel 5', () => {
 
     const footer = page.locator('footer');
     await expect(footer).toBeVisible();
-    await expect(footer).toContainText('Made by');
+    await expect(footer).toContainText('Built by');
   });
 
   test('should not have horizontal scroll', async ({ page }) => {

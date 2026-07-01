@@ -240,7 +240,7 @@ export default function BlogPostViewer({
         {seoScore !== undefined && (
           <button
             onClick={onSeoClick}
-            className={`inline-flex min-h-8 min-w-8 items-center justify-center gap-1 rounded-lg border-none px-2 py-1 text-xs font-medium shadow-md ${
+            className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg border-none px-2 py-1 text-xs font-medium shadow-md ${
               seoScore >= 80
                 ? 'bg-success text-success-content'
                 : seoScore >= 60
