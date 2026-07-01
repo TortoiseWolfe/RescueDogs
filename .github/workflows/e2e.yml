@@ -81,6 +81,14 @@ jobs:
       - name: Build application
         run: pnpm build
         env:
+          # The E2E suite serves this build from the ROOT (`serve out -l 3000`).
+          # DISABLE_BASE_PATH forces a basePath-less build so /_next/*.js assets
+          # resolve at /. Without it the build bakes in the GitHub Pages basePath
+          # (/RescueDogs), every /RescueDogs/_next/*.js 404s under serve-at-root,
+          # React never hydrates, and every form-interaction E2E test fails.
+          # `GITHUB_ACTIONS: false` alone did NOT work: the runner re-injects
+          # GITHUB_ACTIONS=true into the child processes pnpm build spawns.
+          DISABLE_BASE_PATH: 'true'
           GITHUB_ACTIONS: false
           NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
           NEXT_PUBLIC_EMAILJS_SERVICE_ID: ${{ vars.NEXT_PUBLIC_EMAILJS_SERVICE_ID }}

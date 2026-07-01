@@ -5,6 +5,7 @@ const assert = require('node:assert');
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { generateConfig } = require('../detect-project.js');
 
 // Mock functions
 const mockExecSync = (command) => {
@@ -184,6 +185,51 @@ describe('detect-project.js', () => {
       if (originalGHA !== undefined) {
         process.env.GITHUB_ACTIONS = originalGHA;
       }
+    });
+
+    test('DISABLE_BASE_PATH forces an empty basePath even under GitHub Actions', () => {
+      // The E2E job builds the static export and serves it from the ROOT with
+      // `serve out`. If the build bakes in the GitHub Pages basePath
+      // (/RescueDogs), every /RescueDogs/_next/*.js asset 404s, React never
+      // hydrates, and the whole suite fails. The job must be able to force a
+      // basePath-less build regardless of the ambient GITHUB_ACTIONS value
+      // (which the runner re-injects into child processes, defeating a
+      // step-level `GITHUB_ACTIONS: false`).
+      const original = { ...process.env };
+      process.env.GITHUB_ACTIONS = 'true';
+      process.env.GITHUB_REPOSITORY = 'TortoiseWolfe/RescueDogs';
+      delete process.env.NEXT_PUBLIC_BASE_PATH;
+      process.env.DISABLE_BASE_PATH = 'true';
+
+      const config = generateConfig();
+
+      assert.strictEqual(
+        config.basePath,
+        '',
+        'DISABLE_BASE_PATH=true must yield an empty basePath so serve-at-root works'
+      );
+
+      process.env = original;
+    });
+
+    test('basePath is still auto-detected under GitHub Actions when not disabled', () => {
+      // Guard the production GitHub Pages path: without DISABLE_BASE_PATH the
+      // deploy build must still get /RescueDogs.
+      const original = { ...process.env };
+      process.env.GITHUB_ACTIONS = 'true';
+      process.env.GITHUB_REPOSITORY = 'TortoiseWolfe/RescueDogs';
+      delete process.env.NEXT_PUBLIC_BASE_PATH;
+      delete process.env.DISABLE_BASE_PATH;
+
+      const config = generateConfig();
+
+      assert.strictEqual(
+        config.basePath,
+        '/RescueDogs',
+        'without DISABLE_BASE_PATH the GitHub Pages basePath must remain'
+      );
+
+      process.env = original;
     });
   });
 
