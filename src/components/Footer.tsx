@@ -13,7 +13,10 @@ export function Footer() {
             href="https://github.com/TortoiseWolfe/RescueDogs"
             target="_blank"
             rel="noopener noreferrer"
-            className="link-hover link text-[#ffdd6b]"
+            /* Persistent underline (not link-hover) so the link is
+               distinguishable from surrounding footer text by more than color
+               alone — satisfies axe's link-in-text-block (WCAG 1.4.1). */
+            className="link text-[#ffdd6b] underline"
           >
             RescueDogs
           </a>
