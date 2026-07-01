@@ -7,13 +7,16 @@ export function Footer() {
         <p className="font-friendly text-sm leading-relaxed font-bold">
           🐾 RescueDogs · Every pet deserves a happy tail.
         </p>
-        <p className="mt-1 text-xs text-[#aebfe8]">
+        <p className="mt-1 text-xs text-[#dbe6fb]">
           Built by{' '}
           <a
             href="https://github.com/TortoiseWolfe/RescueDogs"
             target="_blank"
             rel="noopener noreferrer"
-            className="link-hover link text-[#ffd23f]"
+            /* Persistent underline (not link-hover) so the link is
+               distinguishable from surrounding footer text by more than color
+               alone — satisfies axe's link-in-text-block (WCAG 1.4.1). */
+            className="link text-[#ffdd6b] underline"
           >
             RescueDogs
           </a>

@@ -441,6 +441,75 @@ export const DEFAULT_TEST_PASSWORD = 'TestPassword123!';
  * await dismissCookieBanner(page);
  * // Now safe to interact with the sign-up form
  */
+/**
+ * Wait until a React controlled input on the page is actually hydrated —
+ * i.e. its onChange handler is attached so typing updates React state.
+ *
+ * Why this exists: the CI E2E suite serves the STATIC export (`serve out`).
+ * The sign-up form's HTML is server-rendered and immediately visible/clickable,
+ * but its React `onSubmit`/`onChange` handlers only attach after hydration. On
+ * slow CI runners the tests would fill fields and click "Sign Up" BEFORE
+ * hydration, so nothing happened: no redirect, no error, no validation message —
+ * exactly the `waitForURL` timeouts and `expect(hasError || redirected)` ==
+ * false failures seen in CI. `waitForLoadState('domcontentloaded')` does NOT
+ * cover this — the DOM is parsed long before React hydrates.
+ *
+ * Detection: type a sentinel into the target input, then poll until React has
+ * re-rendered it back to that exact value. An un-hydrated (uncontrolled) input
+ * would keep whatever the browser typed, but a hydrated *controlled* input only
+ * shows the value once React's onChange → setState → re-render round-trips. We
+ * clear the sentinel afterward so the real fill starts clean.
+ *
+ * @param page - Playwright page, already navigated to the form
+ * @param options.selector - a controlled input to probe (default: the Email field)
+ * @param options.timeout - max wait for hydration (default: 15000ms)
+ *
+ * @example
+ * await page.goto('/sign-up');
+ * await waitForHydration(page);
+ * await dismissCookieBanner(page);
+ * // Now the form's handlers are attached — safe to fill and submit
+ */
+export async function waitForHydration(
+  page: Page,
+  options: { selector?: string; timeout?: number } = {}
+): Promise<void> {
+  const { selector = 'input#email', timeout = 15000 } = options;
+
+  // The React root must exist before any input can be controlled.
+  await page.waitForLoadState('domcontentloaded');
+
+  const input = page.locator(selector).first();
+  await input.waitFor({ state: 'visible', timeout });
+
+  const SENTINEL = '__hydration_probe__';
+
+  await page.waitForFunction(
+    ({ sel, sentinel }) => {
+      const el = document.querySelector<HTMLInputElement>(sel);
+      if (!el) return false;
+      // Use the native setter so the keystroke path React listens to fires,
+      // then dispatch input so a hydrated onChange runs. If hydrated, React
+      // will have set el.value back to the sentinel on its next render tick.
+      if (el.value !== sentinel) {
+        const setter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          'value'
+        )?.set;
+        setter?.call(el, sentinel);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        return false; // give React a tick to round-trip; re-check next poll
+      }
+      return el.value === sentinel;
+    },
+    { sel: selector, sentinel: SENTINEL },
+    { timeout, polling: 100 }
+  );
+
+  // Clear the sentinel so the real fill starts from an empty field.
+  await input.fill('');
+}
+
 export async function dismissCookieBanner(
   page: Page,
   options: { timeout?: number } = {}

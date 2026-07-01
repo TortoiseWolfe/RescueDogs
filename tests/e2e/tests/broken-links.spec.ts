@@ -87,10 +87,24 @@ test.describe('Broken Links Detection', () => {
     url: string,
     currentPageUrl: string
   ): Promise<string> {
-    // Handle relative URLs
+    const base = new URL(currentPageUrl);
+
+    // Handle relative URLs against the page under test.
     if (!url.startsWith('http')) {
-      const base = new URL(currentPageUrl);
       return new URL(url, base.origin).href;
+    }
+
+    // og:image / twitter:image render as ABSOLUTE production URLs
+    // (https://<owner>.github.io/<repo>/…). E2E must validate the asset in the
+    // build under test, not whatever is currently live on GitHub Pages — a
+    // brand-new post's image 404s on production until the very deploy this run
+    // gates. Re-point any github.io deploy-host URL at the local server so we
+    // check the built asset. Third-party absolute URLs pass through unchanged.
+    const parsed = new URL(url);
+    if (parsed.hostname.endsWith('github.io')) {
+      // Strip the /<repo> basePath prefix; the E2E build serves at root.
+      const path = parsed.pathname.replace(/^\/[^/]+\//, '/');
+      return new URL(path, base.origin).href;
     }
     return url;
   }

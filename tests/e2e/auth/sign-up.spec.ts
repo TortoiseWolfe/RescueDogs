@@ -18,6 +18,7 @@ import {
   isAdminClientAvailable,
   DEFAULT_TEST_PASSWORD,
   dismissCookieBanner,
+  waitForHydration,
   waitForAuthenticatedState,
 } from '../utils/test-user-factory';
 
@@ -84,6 +85,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     createdEmails.push(testEmail);
 
     await page.goto('/sign-up');
+    await waitForHydration(page);
     await dismissCookieBanner(page);
 
     // Page heading is "Create Account"
@@ -150,6 +152,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     createdEmails.push(existingEmail);
 
     await page.goto('/sign-up');
+    await waitForHydration(page);
     await dismissCookieBanner(page);
 
     // Try to sign up with the same email
@@ -191,6 +194,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
 
   test('should show validation error for weak password', async ({ page }) => {
     await page.goto('/sign-up');
+    await waitForHydration(page);
     await dismissCookieBanner(page);
 
     const testEmail = generateSignUpEmail('weak');
@@ -217,6 +221,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     page,
   }) => {
     await page.goto('/sign-up');
+    await waitForHydration(page);
     await dismissCookieBanner(page);
 
     // Use email with a single-char TLD — passes HTML5 validation but fails
@@ -241,6 +246,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
 
   test('should show error for password mismatch', async ({ page }) => {
     await page.goto('/sign-up');
+    await waitForHydration(page);
     await dismissCookieBanner(page);
 
     const testEmail = generateSignUpEmail('mismatch');
@@ -265,6 +271,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
 
   test('should navigate to sign-in from sign-up page', async ({ page }) => {
     await page.goto('/sign-up');
+    await waitForHydration(page);
     await dismissCookieBanner(page);
 
     // Click the inline sign-in link (not the header button)
@@ -280,6 +287,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     page,
   }) => {
     await page.goto('/sign-up');
+    await waitForHydration(page);
     await dismissCookieBanner(page);
 
     // OAuth buttons are intentionally hidden until Google/GitHub providers are
@@ -316,6 +324,7 @@ test.describe('Sign-up with Admin Confirmation', () => {
     try {
       // Now sign in with the created user
       await page.goto('/sign-in');
+      await waitForHydration(page);
       await dismissCookieBanner(page);
       await page.getByLabel('Email').fill(testEmail);
       await page.getByLabel('Password').fill(DEFAULT_TEST_PASSWORD);
