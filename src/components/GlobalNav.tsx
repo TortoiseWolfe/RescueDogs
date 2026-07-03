@@ -284,7 +284,7 @@ export function GlobalNav() {
                 </label>
                 <ul
                   tabIndex={0}
-                  className="menu menu-sm dropdown-content bg-base-100 rounded-box -right-2 z-[1] mt-3 w-48 max-w-[calc(100vw-4rem)] p-2 shadow sm:w-52"
+                  className="menu menu-sm dropdown-content bg-base-100 text-base-content rounded-box -right-2 z-50 mt-3 w-48 max-w-[calc(100vw-4rem)] p-2 shadow sm:w-52"
                 >
                   <li className="menu-title">
                     <span>{user.email}</span>
@@ -379,7 +379,7 @@ export function GlobalNav() {
               </label>
               <ul
                 tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box -right-2 z-[1] mt-3 w-40 max-w-[calc(100vw-4rem)] p-2 shadow sm:w-44"
+                className="menu menu-sm dropdown-content bg-base-100 text-base-content rounded-box -right-2 z-50 mt-3 w-40 max-w-[calc(100vw-4rem)] p-2 shadow sm:w-44"
               >
                 {navItems.map((item) => (
                   <li key={item.href}>
@@ -515,7 +515,7 @@ export function GlobalNav() {
               </label>
               <ul
                 tabIndex={0}
-                className="dropdown-content bg-base-100 rounded-box z-[1] max-h-96 w-44 max-w-[calc(100vw-4rem)] overflow-y-auto p-2 shadow-lg sm:w-52"
+                className="dropdown-content bg-base-100 text-base-content rounded-box z-50 max-h-96 w-44 max-w-[calc(100vw-4rem)] overflow-y-auto p-2 shadow-lg sm:w-52"
               >
                 {themes.map((t) => (
                   <li key={t}>
