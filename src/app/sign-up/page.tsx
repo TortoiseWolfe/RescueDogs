@@ -6,6 +6,7 @@ import SignUpForm from '@/components/auth/SignUpForm';
 // Supabase. To restore: re-add this import and the <OAuthButtons /> block below.
 // import OAuthButtons from '@/components/auth/OAuthButtons';
 import Link from 'next/link';
+import { getInternalUrl } from '@/config/project.config';
 
 function isSafeRedirectUrl(url: string): boolean {
   if (!url || !url.startsWith('/')) return false;
@@ -38,7 +39,9 @@ export default function SignUpPage() {
         </h1>
 
         <SignUpForm
-          onSuccess={() => (window.location.href = '/verify-email')}
+          onSuccess={() =>
+            (window.location.href = getInternalUrl('/verify-email'))
+          }
         />
 
         {/* OAuth sign-up hidden until Google/GitHub providers are enabled in
