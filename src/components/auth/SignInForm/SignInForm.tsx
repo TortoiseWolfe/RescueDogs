@@ -253,8 +253,8 @@ export default function SignInForm({
       onSubmit={handleSubmit}
       className={`space-y-4${className ? ` ${className}` : ''}`}
     >
-      <div className="flex flex-row items-center gap-x-6">
-        <label className="w-20 shrink-0 text-right" htmlFor="email">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="email">
           <span className="label-text">Email</span>
         </label>
         <input
@@ -270,8 +270,8 @@ export default function SignInForm({
         />
       </div>
 
-      <div className="flex flex-row items-center gap-x-6">
-        <label className="w-20 shrink-0 text-right" htmlFor="password">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="password">
           <span className="label-text">Password</span>
         </label>
         <input
@@ -287,10 +287,14 @@ export default function SignInForm({
         />
       </div>
 
-      <div className="form-control">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <div
+          className="hidden sm:block sm:w-36 sm:shrink-0"
+          aria-hidden="true"
+        />
         <label
           htmlFor="remember-me"
-          className="label cursor-pointer justify-start gap-3"
+          className="label cursor-pointer justify-start gap-3 p-0"
         >
           <input
             id="remember-me"

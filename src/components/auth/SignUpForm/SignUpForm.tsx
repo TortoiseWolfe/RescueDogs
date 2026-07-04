@@ -164,8 +164,8 @@ export default function SignUpForm({
       onSubmit={handleSubmit}
       className={`space-y-4${className ? ` ${className}` : ''}`}
     >
-      <div className="flex flex-row items-center gap-x-6">
-        <label className="w-36 shrink-0 text-right" htmlFor="email">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="email">
           <span className="label-text">Email</span>
         </label>
         <input
@@ -180,8 +180,11 @@ export default function SignUpForm({
         />
       </div>
 
-      <div className="flex flex-row items-start gap-x-6">
-        <label className="w-36 shrink-0 pt-3 text-right" htmlFor="password">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-x-6">
+        <label
+          className="sm:w-36 sm:shrink-0 sm:pt-3 sm:text-right"
+          htmlFor="password"
+        >
           <span className="label-text">Password</span>
         </label>
         <div className="min-w-0 flex-1">
@@ -202,8 +205,11 @@ export default function SignUpForm({
         </div>
       </div>
 
-      <div className="flex flex-row items-center gap-x-6">
-        <label className="w-36 shrink-0 text-right" htmlFor="confirm-password">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <label
+          className="sm:w-36 sm:shrink-0 sm:text-right"
+          htmlFor="confirm-password"
+        >
           <span className="label-text">Confirm Password</span>
         </label>
         <input
@@ -218,8 +224,12 @@ export default function SignUpForm({
         />
       </div>
 
-      <div className="form-control">
-        <label className="label cursor-pointer justify-start gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <div
+          className="hidden sm:block sm:w-36 sm:shrink-0"
+          aria-hidden="true"
+        />
+        <label className="label cursor-pointer justify-start gap-2 p-0">
           <input
             type="checkbox"
             checked={rememberMe}

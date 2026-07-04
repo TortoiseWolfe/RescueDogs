@@ -6,7 +6,8 @@
 # point the push process dies with SIGPIPE (exit 141) AFTER validation passes
 # but BEFORE any objects are transferred. Consuming stdin here first closes
 # the race so the push actually completes.
-cat >/dev/null 2>&1 || true
+# Skip when stdin is a TTY so a manual `./.husky/pre-push` does not hang on cat.
+[ -t 0 ] || cat >/dev/null 2>&1 || true
 
 # Function to run full gitleaks scan
 run_gitleaks_full() {
