@@ -315,6 +315,38 @@ NEXT_PUBLIC_AUTHOR_EMAIL=your@email.com
 
 See `README.md` for the complete list of available secrets.
 
+## Collaboration Conventions
+
+### Issues & PR review comments carry a paste-ready Cursor prompt (HOUSE RULE)
+
+Collaborators (e.g. schlajo) implement fixes in **Cursor** on Windows. Every
+issue that asks for a code change, and every PR review that requests changes,
+**MUST include a fenced code block the author can paste straight into Cursor's
+chat** — not just a prose description of the fix.
+
+**Format:**
+
+- Wrap the prompt in a **four-backtick** fence (` ```` `), not three — the prompt
+  itself often contains triple-backtick or nested class strings, and four
+  backticks guarantee GitHub renders it as one copyable block with a working
+  Copy button.
+- Open the prompt with the **context line**: the issue/PR number(s) and the repo
+  issue URL, so Cursor's agent can pull the surrounding context.
+- Give **exact find/replace targets** pulled byte-for-byte from the PR branch
+  (`git show origin/<branch>:<path>`), not paraphrased code — Cursor matches on
+  whitespace.
+- End with the **in-container verify commands** (`docker compose exec rescuedogs
+pnpm run type-check` / `lint`) and a concrete manual check.
+- After the fenced block, list **reference links**: the open-source repo URL
+  (`https://github.com/TortoiseWolfe/RescueDogs`, MIT), the tracking issue, and
+  any upstream docs (Tailwind, DaisyUI, `docs/MOBILE-FIRST.md`, etc.).
+
+**Also:** open a tracking issue for any merge-blocking regression before (or
+alongside) the request-changes review, and reference it from both the review and
+the Cursor prompt so the fix has a durable target. Reject-and-return uses
+GitHub's **`gh pr review <n> --request-changes`** (never push fixup commits to a
+collaborator's branch — it erases their authorship).
+
 ## Documentation
 
 | Topic               | Location                               |
