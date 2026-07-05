@@ -164,8 +164,8 @@ export default function SignUpForm({
       onSubmit={handleSubmit}
       className={`space-y-4${className ? ` ${className}` : ''}`}
     >
-      <div className="form-control">
-        <label className="label" htmlFor="email">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="email">
           <span className="label-text">Email</span>
         </label>
         <input
@@ -173,35 +173,43 @@ export default function SignUpForm({
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="input input-bordered min-h-11"
+          className="input input-bordered min-h-11 min-w-0 flex-1"
           placeholder="you@example.com"
           required
           disabled={loading}
         />
       </div>
 
-      <div className="form-control">
-        <label className="label" htmlFor="password">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-x-6">
+        <label
+          className="sm:w-36 sm:shrink-0 sm:pt-3 sm:text-right"
+          htmlFor="password"
+        >
           <span className="label-text">Password</span>
         </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="input input-bordered min-h-11"
-          placeholder="••••••••"
-          required
-          disabled={loading}
-        />
-        {/* Password strength indicator (T042) */}
-        <div className="mt-2">
-          <PasswordStrengthIndicator password={password} />
+        <div className="min-w-0 flex-1">
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="input input-bordered min-h-11 w-full"
+            placeholder="••••••••"
+            required
+            disabled={loading}
+          />
+          {/* Password strength indicator (T042) */}
+          <div className="mt-2">
+            <PasswordStrengthIndicator password={password} />
+          </div>
         </div>
       </div>
 
-      <div className="form-control">
-        <label className="label" htmlFor="confirm-password">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <label
+          className="sm:w-36 sm:shrink-0 sm:text-right"
+          htmlFor="confirm-password"
+        >
           <span className="label-text">Confirm Password</span>
         </label>
         <input
@@ -209,15 +217,19 @@ export default function SignUpForm({
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="input input-bordered min-h-11"
+          className="input input-bordered min-h-11 min-w-0 flex-1"
           placeholder="••••••••"
           required
           disabled={loading}
         />
       </div>
 
-      <div className="form-control">
-        <label className="label cursor-pointer justify-start gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <div
+          className="hidden sm:block sm:w-36 sm:shrink-0"
+          aria-hidden="true"
+        />
+        <label className="label cursor-pointer justify-start gap-2 p-0">
           <input
             type="checkbox"
             checked={rememberMe}
