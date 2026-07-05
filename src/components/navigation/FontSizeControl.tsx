@@ -32,7 +32,7 @@ export function FontSizeControl() {
       </label>
       <div
         tabIndex={0}
-        className="dropdown-content bg-base-100 rounded-box z-[1] w-56 max-w-[calc(100vw-2rem)] p-4 shadow-lg sm:w-72"
+        className="dropdown-content bg-base-100 text-base-content rounded-box z-50 w-56 max-w-[calc(100vw-2rem)] p-4 shadow-lg sm:w-72"
       >
         <h3 className="text-base-content/85 mb-3 text-sm font-semibold tracking-wide uppercase">
           Text Settings

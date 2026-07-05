@@ -367,6 +367,8 @@ The project automatically detects your repository name and owner from git remote
 
 ## 📚 Documentation
 
+- **Product vision & roadmap**: [docs/product/VISION.md](./docs/product/VISION.md) — founding pillars, what's in scope vs deferred
+- **Business model (draft)**: [docs/product/BUSINESS-MODEL.md](./docs/product/BUSINESS-MODEL.md) — revenue strategy, pricing tiers, nonprofit options
 - **Developer Guide**: See [CLAUDE.md](./CLAUDE.md) for comprehensive development documentation
 - **Component Creation**: [docs/CREATING_COMPONENTS.md](./docs/CREATING_COMPONENTS.md)
 - **PRP/SpecKit Workflow**: [docs/prp-docs/SPECKIT-PRP-GUIDE.md](./docs/prp-docs/SPECKIT-PRP-GUIDE.md) - Quick reference for feature development

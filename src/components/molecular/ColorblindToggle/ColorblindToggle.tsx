@@ -117,7 +117,7 @@ export const ColorblindToggle: React.FC<ColorblindToggleProps> = ({
 
       <div
         tabIndex={0}
-        className="dropdown-content card card-compact bg-base-100 z-50 w-64 max-w-[calc(100vw-2rem)] p-4 shadow sm:w-80"
+        className="dropdown-content card card-compact bg-base-100 text-base-content z-50 w-64 max-w-[calc(100vw-2rem)] p-4 shadow sm:w-80"
       >
         <div className="card-body">
           <h3 className="text-lg font-bold">Color Vision Assistance</h3>
