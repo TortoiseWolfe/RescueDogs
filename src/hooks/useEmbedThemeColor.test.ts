@@ -45,13 +45,13 @@ describe('useEmbedThemeColor', () => {
   });
 
   it('reports isDark from the active data-theme', () => {
-    document.documentElement.setAttribute('data-theme', 'dracula');
+    document.documentElement.setAttribute('data-theme', 'trusted-care-dark');
     const { result } = renderHook(() => useEmbedThemeColor('p'));
     expect(result.current.isDark).toBe(true);
   });
 
   it('recomputes when data-theme changes', async () => {
-    document.documentElement.setAttribute('data-theme', 'light');
+    document.documentElement.setAttribute('data-theme', 'trusted-care-light');
     document.documentElement.style.setProperty('--color-primary', '0.4 0.2 30');
     const { result } = renderHook(() => useEmbedThemeColor('p'));
 
@@ -64,7 +64,10 @@ describe('useEmbedThemeColor', () => {
         '--color-primary',
         '0.7 0.2 250'
       );
-      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute(
+        'data-theme',
+        'modern-connection-dark'
+      );
     });
 
     await waitFor(() => {
