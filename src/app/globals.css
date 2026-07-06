@@ -15,123 +15,42 @@
 
 @plugin "daisyui" {
   themes:
-    rescuedogs-dark --default,
-    rescuedogs-light,
-    light,
-    dark,
-    cupcake,
-    bumblebee,
-    emerald,
-    corporate,
-    synthwave,
-    retro,
-    cyberpunk,
-    valentine,
-    halloween,
-    garden,
-    forest,
-    aqua,
-    lofi,
-    pastel,
-    fantasy,
-    wireframe,
-    black,
-    luxury,
-    dracula,
-    cmyk,
-    autumn,
-    business,
-    acid,
-    lemonade,
-    night,
-    coffee,
-    winter,
-    dim,
-    nord,
-    sunset;
+    trusted-care-light --default,
+    trusted-care-dark,
+    modern-connection-light,
+    modern-connection-dark,
+    retro-friendly-light,
+    retro-friendly-dark;
 }
 
-/* RescueDogs Dark Theme — playful rescue brand on deep navy */
+/* Option 1 — Trusted Care (issue #17): blue trust + warm orange accent */
 @plugin "daisyui/theme" {
-  name: 'rescuedogs-dark';
-  default: false;
-  color-scheme: dark;
-
-  --color-base-100: #13245f;
-  --color-base-200: #0f1c4b;
-  --color-base-300: #27408f;
-  --color-base-content: #f8fbff;
-
-  /* Lightened from #5b8cff (4.59:1 on the dark base) to clear WCAG AAA 7:1.
-   * On a dark background, higher contrast means a LIGHTER tint. */
-  --color-primary: #a3c1ff;
-  --color-primary-content: #10205a;
-
-  /* Lightened coral so it clears AAA 7:1 as text on the dark base (was 4.76:1).
-   * secondary-content flips to dark navy so white-on-nothing pairings hold. */
-  --color-secondary: #ffa0a3;
-  --color-secondary-content: #10205a;
-
-  --color-accent: #ffd23f;
-  --color-accent-content: #27408f;
-
-  --color-neutral: #27408f;
-  --color-neutral-content: #ffffff;
-
-  --color-info: #8db0ff;
-  --color-info-content: #10205a;
-  --color-success: #39d98a;
-  --color-success-content: #10205a;
-  --color-warning: #ffd23f;
-  --color-warning-content: #27408f;
-  --color-error: #ff7b7f;
-  --color-error-content: #10205a;
-
-  --radius-selector: 999px;
-  --radius-field: 1rem;
-  --radius-box: 1.625rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 1;
-}
-
-/* RescueDogs Light Theme — bright Happy Tails-inspired rescue brand */
-@plugin "daisyui/theme" {
-  name: 'rescuedogs-light';
+  name: 'trusted-care-light';
   default: true;
   prefersdark: false;
   color-scheme: light;
 
-  --color-base-100: #ffffff;
-  --color-base-200: #f1f6ff;
-  --color-base-300: #cfe0ff;
-  --color-base-content: #27408f;
+  --color-base-100: #fdfbf7;
+  --color-base-200: #f5f0e8;
+  --color-base-300: #e7e0d5;
+  --color-base-content: #1e3a8a;
 
-  /* Darkened from #2f6bff to hit WCAG AAA 7:1 as text on white (was 4.49:1). */
-  --color-primary: #1a4bbd;
+  --color-primary: #1e3a8a;
   --color-primary-content: #ffffff;
-
-  /* Darkened from the bright coral #ff5a5f (only 3.05:1) to a deep rescue-red
-   * that clears AAA 7:1 BOTH as text-on-white and as a background under white
-   * text (7.34:1 either way). */
-  --color-secondary: #a81d21;
+  --color-secondary: #f97316;
   --color-secondary-content: #ffffff;
+  --color-accent: #f97316;
+  --color-accent-content: #ffffff;
 
-  --color-accent: #ffd23f;
-  --color-accent-content: #27408f;
-
-  --color-neutral: #27408f;
+  --color-neutral: #334155;
   --color-neutral-content: #ffffff;
-
-  --color-info: #5b8cff;
+  --color-info: #2563eb;
   --color-info-content: #ffffff;
-  --color-success: #22c55e;
-  --color-success-content: #0c351c;
-  --color-warning: #f0b400;
-  --color-warning-content: #27408f;
-  --color-error: #d83f44;
+  --color-success: #16a34a;
+  --color-success-content: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-content: #1e3a8a;
+  --color-error: #dc2626;
   --color-error-content: #ffffff;
 
   --radius-selector: 999px;
@@ -144,17 +63,218 @@
   --noise: 1;
 }
 
-/* RescueDogs visual polish — scoped to custom themes only.
- * Stock DaisyUI themes keep their original look untouched. */
-[data-theme='rescuedogs-dark'] .card,
-[data-theme='rescuedogs-light'] .card {
+@plugin "daisyui/theme" {
+  name: 'trusted-care-dark';
+  default: false;
+  color-scheme: dark;
+
+  --color-base-100: #0c1929;
+  --color-base-200: #0a1422;
+  --color-base-300: #1e3a8a;
+  --color-base-content: #f8fafc;
+
+  --color-primary: #93c5fd;
+  --color-primary-content: #0c1929;
+  --color-secondary: #fb923c;
+  --color-secondary-content: #0c1929;
+  --color-accent: #fb923c;
+  --color-accent-content: #0c1929;
+
+  --color-neutral: #1e3a8a;
+  --color-neutral-content: #f8fafc;
+  --color-info: #60a5fa;
+  --color-info-content: #0c1929;
+  --color-success: #4ade80;
+  --color-success-content: #0c1929;
+  --color-warning: #fbbf24;
+  --color-warning-content: #0c1929;
+  --color-error: #f87171;
+  --color-error-content: #0c1929;
+
+  --radius-selector: 999px;
+  --radius-field: 1rem;
+  --radius-box: 1.625rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+/* Option 2 — Modern Connection: teal calm + coral joy */
+@plugin "daisyui/theme" {
+  name: 'modern-connection-light';
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #f8fafc;
+  --color-base-200: #f1f5f9;
+  --color-base-300: #e2e8f0;
+  --color-base-content: #0f766e;
+
+  --color-primary: #0f766e;
+  --color-primary-content: #ffffff;
+  --color-secondary: #fb7185;
+  --color-secondary-content: #ffffff;
+  --color-accent: #fb7185;
+  --color-accent-content: #ffffff;
+
+  --color-neutral: #334155;
+  --color-neutral-content: #ffffff;
+  --color-info: #0ea5e9;
+  --color-info-content: #ffffff;
+  --color-success: #10b981;
+  --color-success-content: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-content: #0f766e;
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
+
+  --radius-selector: 999px;
+  --radius-field: 1rem;
+  --radius-box: 1.625rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+@plugin "daisyui/theme" {
+  name: 'modern-connection-dark';
+  default: false;
+  color-scheme: dark;
+
+  --color-base-100: #0f172a;
+  --color-base-200: #0b1220;
+  --color-base-300: #134e4a;
+  --color-base-content: #f8fafc;
+
+  --color-primary: #2dd4bf;
+  --color-primary-content: #0f172a;
+  --color-secondary: #fb7185;
+  --color-secondary-content: #0f172a;
+  --color-accent: #fb7185;
+  --color-accent-content: #0f172a;
+
+  --color-neutral: #134e4a;
+  --color-neutral-content: #f8fafc;
+  --color-info: #38bdf8;
+  --color-info-content: #0f172a;
+  --color-success: #34d399;
+  --color-success-content: #0f172a;
+  --color-warning: #fbbf24;
+  --color-warning-content: #0f172a;
+  --color-error: #f87171;
+  --color-error-content: #0f172a;
+
+  --radius-selector: 999px;
+  --radius-field: 1rem;
+  --radius-box: 1.625rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+/* Option 3 — Retro Friendly: charcoal + gold + crimson */
+@plugin "daisyui/theme" {
+  name: 'retro-friendly-light';
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #fffbeb;
+  --color-base-200: #fef3c7;
+  --color-base-300: #fde68a;
+  --color-base-content: #334155;
+
+  --color-primary: #334155;
+  --color-primary-content: #ffffff;
+  --color-secondary: #ef4444;
+  --color-secondary-content: #ffffff;
+  --color-accent: #eab308;
+  --color-accent-content: #334155;
+
+  --color-neutral: #475569;
+  --color-neutral-content: #ffffff;
+  --color-info: #3b82f6;
+  --color-info-content: #ffffff;
+  --color-success: #22c55e;
+  --color-success-content: #ffffff;
+  --color-warning: #eab308;
+  --color-warning-content: #334155;
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
+
+  --radius-selector: 999px;
+  --radius-field: 1rem;
+  --radius-box: 1.625rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+@plugin "daisyui/theme" {
+  name: 'retro-friendly-dark';
+  default: false;
+  color-scheme: dark;
+
+  --color-base-100: #1e293b;
+  --color-base-200: #172033;
+  --color-base-300: #334155;
+  --color-base-content: #f8fafc;
+
+  --color-primary: #94a3b8;
+  --color-primary-content: #1e293b;
+  --color-secondary: #f87171;
+  --color-secondary-content: #1e293b;
+  --color-accent: #eab308;
+  --color-accent-content: #1e293b;
+
+  --color-neutral: #475569;
+  --color-neutral-content: #f8fafc;
+  --color-info: #60a5fa;
+  --color-info-content: #1e293b;
+  --color-success: #4ade80;
+  --color-success-content: #1e293b;
+  --color-warning: #facc15;
+  --color-warning-content: #1e293b;
+  --color-error: #f87171;
+  --color-error-content: #1e293b;
+
+  --radius-selector: 999px;
+  --radius-field: 1rem;
+  --radius-box: 1.625rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+/* RescueDogs visual polish — all six branded palette themes */
+[data-theme='trusted-care-light'] .card,
+[data-theme='trusted-care-dark'] .card,
+[data-theme='modern-connection-light'] .card,
+[data-theme='modern-connection-dark'] .card,
+[data-theme='retro-friendly-light'] .card,
+[data-theme='retro-friendly-dark'] .card {
   box-shadow:
     0 22px 44px color-mix(in oklch, var(--color-primary) 18%, transparent),
     0 4px 10px rgb(0 0 0 / 0.08);
 }
 
-[data-theme='rescuedogs-dark'] .btn,
-[data-theme='rescuedogs-light'] .btn {
+[data-theme='trusted-care-light'] .btn,
+[data-theme='trusted-care-dark'] .btn,
+[data-theme='modern-connection-light'] .btn,
+[data-theme='modern-connection-dark'] .btn,
+[data-theme='retro-friendly-light'] .btn,
+[data-theme='retro-friendly-dark'] .btn {
   font-family: var(--font-fredoka), var(--font-nunito), system-ui, sans-serif;
   font-weight: 700;
   box-shadow:
@@ -162,8 +282,12 @@
     0 4px 0 color-mix(in oklch, var(--color-primary) 58%, black);
 }
 
-[data-theme='rescuedogs-dark'] .btn:hover,
-[data-theme='rescuedogs-light'] .btn:hover {
+[data-theme='trusted-care-light'] .btn:hover,
+[data-theme='trusted-care-dark'] .btn:hover,
+[data-theme='modern-connection-light'] .btn:hover,
+[data-theme='modern-connection-dark'] .btn:hover,
+[data-theme='retro-friendly-light'] .btn:hover,
+[data-theme='retro-friendly-dark'] .btn:hover {
   transform: translateY(-1px);
   box-shadow:
     0 14px 24px color-mix(in oklch, var(--color-primary) 28%, transparent),
@@ -175,10 +299,18 @@
  * 80% measured only 5.52:1 on light (the stat card is white) — below the AAA
  * 7:1 gate. 92% gives ~7.66:1 on light and ~12:1 on dark — AAA on both while
  * still reading as muted secondary text. */
-[data-theme='rescuedogs-dark'] .stat-title,
-[data-theme='rescuedogs-dark'] .stat-desc,
-[data-theme='rescuedogs-light'] .stat-title,
-[data-theme='rescuedogs-light'] .stat-desc {
+[data-theme='trusted-care-light'] .stat-title,
+[data-theme='trusted-care-dark'] .stat-title,
+[data-theme='trusted-care-light'] .stat-desc,
+[data-theme='trusted-care-dark'] .stat-desc,
+[data-theme='modern-connection-light'] .stat-title,
+[data-theme='modern-connection-dark'] .stat-title,
+[data-theme='modern-connection-light'] .stat-desc,
+[data-theme='modern-connection-dark'] .stat-desc,
+[data-theme='retro-friendly-light'] .stat-title,
+[data-theme='retro-friendly-dark'] .stat-title,
+[data-theme='retro-friendly-light'] .stat-desc,
+[data-theme='retro-friendly-dark'] .stat-desc {
   color: color-mix(in oklab, var(--color-base-content) 92%, transparent);
 }
 
@@ -414,6 +546,9 @@ p:not([class*='text-']) {
 }
 
 /* Dark background for map container before tiles load */
+[data-theme='trusted-care-dark'] .leaflet-container,
+[data-theme='modern-connection-dark'] .leaflet-container,
+[data-theme='retro-friendly-dark'] .leaflet-container,
 [data-theme='rescuedogs-dark'] .leaflet-container,
 [data-theme='dark'] .leaflet-container,
 [data-theme='dracula'] .leaflet-container,
@@ -431,6 +566,9 @@ p:not([class*='text-']) {
 }
 
 /* Invert OSM tiles for dark mode — preserves color/detail unlike CartoDB dark_all */
+[data-theme='trusted-care-dark'] .leaflet-tile-pane,
+[data-theme='modern-connection-dark'] .leaflet-tile-pane,
+[data-theme='retro-friendly-dark'] .leaflet-tile-pane,
 [data-theme='rescuedogs-dark'] .leaflet-tile-pane,
 [data-theme='dark'] .leaflet-tile-pane,
 [data-theme='dracula'] .leaflet-tile-pane,
@@ -487,6 +625,9 @@ p:not([class*='text-']) {
 }
 
 /* Fix Leaflet controls for dark mode */
+[data-theme='trusted-care-dark'] .leaflet-control,
+[data-theme='modern-connection-dark'] .leaflet-control,
+[data-theme='retro-friendly-dark'] .leaflet-control,
 [data-theme='rescuedogs-dark'] .leaflet-control,
 [data-theme='dark'] .leaflet-control,
 [data-theme='dracula'] .leaflet-control,
@@ -508,6 +649,9 @@ p:not([class*='text-']) {
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
+[data-theme='trusted-care-dark'] .leaflet-control a,
+[data-theme='modern-connection-dark'] .leaflet-control a,
+[data-theme='retro-friendly-dark'] .leaflet-control a,
 [data-theme='rescuedogs-dark'] .leaflet-control a,
 [data-theme='dark'] .leaflet-control a,
 [data-theme='dracula'] .leaflet-control a,

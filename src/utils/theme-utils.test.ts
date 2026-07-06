@@ -19,14 +19,13 @@ import { isDarkTheme, getDaisyUIColorAsThree } from './theme-utils';
 
 describe('isDarkTheme', () => {
   it('returns true for known dark themes', () => {
-    expect(isDarkTheme('dark')).toBe(true);
-    expect(isDarkTheme('dracula')).toBe(true);
-    expect(isDarkTheme('rescuedogs-dark')).toBe(true);
+    expect(isDarkTheme('trusted-care-dark')).toBe(true);
+    expect(isDarkTheme('modern-connection-dark')).toBe(true);
   });
 
   it('returns false for light themes', () => {
-    expect(isDarkTheme('light')).toBe(false);
-    expect(isDarkTheme('cupcake')).toBe(false);
+    expect(isDarkTheme('trusted-care-light')).toBe(false);
+    expect(isDarkTheme('modern-connection-light')).toBe(false);
   });
 });
 

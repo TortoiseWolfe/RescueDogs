@@ -1,40 +1,14 @@
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
-// All 32 DaisyUI themes for random selection
+// RescueDogs branded palette themes (#17)
 const THEMES = [
-  'light',
-  'dark',
-  'cupcake',
-  'bumblebee',
-  'emerald',
-  'corporate',
-  'synthwave',
-  'retro',
-  'cyberpunk',
-  'valentine',
-  'halloween',
-  'garden',
-  'forest',
-  'aqua',
-  'lofi',
-  'pastel',
-  'fantasy',
-  'wireframe',
-  'black',
-  'luxury',
-  'dracula',
-  'cmyk',
-  'autumn',
-  'business',
-  'acid',
-  'lemonade',
-  'night',
-  'coffee',
-  'winter',
-  'dim',
-  'nord',
-  'sunset',
+  'trusted-care-light',
+  'trusted-care-dark',
+  'modern-connection-light',
+  'modern-connection-dark',
+  'retro-friendly-light',
+  'retro-friendly-dark',
 ];
 
 test.describe('Cross-Page Navigation', () => {

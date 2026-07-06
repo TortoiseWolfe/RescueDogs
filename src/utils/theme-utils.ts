@@ -1,24 +1,11 @@
 import { Color as ThreeColor } from 'three';
+import { DARK_THEME_IDS } from '@/config/themes';
 
 /**
  * Centralized dark theme detection for DaisyUI themes.
  * Used by map tiles, Disqus, Calendly, Cal.com, and Leaflet CSS.
  */
-export const DARK_THEMES = [
-  'rescuedogs-dark',
-  'dark',
-  'synthwave',
-  'halloween',
-  'forest',
-  'black',
-  'luxury',
-  'dracula',
-  'business',
-  'night',
-  'coffee',
-  'dim',
-  'sunset',
-] as const;
+export const DARK_THEMES = DARK_THEME_IDS;
 
 export type DarkTheme = (typeof DARK_THEMES)[number];
 

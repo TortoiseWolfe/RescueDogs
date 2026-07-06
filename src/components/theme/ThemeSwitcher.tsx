@@ -4,108 +4,71 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { canUseCookies } from '../../utils/consent';
 import { CookieCategory } from '../../utils/consent-types';
 import { useAnalytics } from '@/hooks/useAnalytics';
-
-// DaisyUI themes (custom themes listed first)
-const THEMES = [
-  'rescuedogs-dark',
-  'rescuedogs-light',
-  'light',
-  'dark',
-  'cupcake',
-  'bumblebee',
-  'emerald',
-  'corporate',
-  'synthwave',
-  'retro',
-  'cyberpunk',
-  'valentine',
-  'halloween',
-  'garden',
-  'forest',
-  'aqua',
-  'lofi',
-  'pastel',
-  'fantasy',
-  'wireframe',
-  'black',
-  'luxury',
-  'dracula',
-  'cmyk',
-  'autumn',
-  'business',
-  'acid',
-  'lemonade',
-  'night',
-  'coffee',
-  'winter',
-  'dim',
-  'nord',
-  'sunset',
-];
+import {
+  DEFAULT_THEME_DARK,
+  normalizeThemeId,
+  THEME_OPTIONS,
+  type ThemeId,
+} from '@/config/themes';
 
 export function ThemeSwitcher() {
-  const [currentTheme, setCurrentTheme] = useState('rescuedogs-dark');
+  const [currentTheme, setCurrentTheme] = useState<ThemeId>(DEFAULT_THEME_DARK);
   const { trackThemeChange } = useAnalytics();
 
   useEffect(() => {
-    // Check if we can use persistent storage
     const canPersist = canUseCookies(CookieCategory.FUNCTIONAL);
-
-    // Try to load saved theme
-    let savedTheme = 'rescuedogs-dark';
+    let savedTheme: string = DEFAULT_THEME_DARK;
 
     if (canPersist) {
-      // Use localStorage if functional cookies allowed
-      savedTheme = localStorage.getItem('theme') || 'rescuedogs-dark';
+      savedTheme =
+        localStorage.getItem('theme') ||
+        document.documentElement.getAttribute('data-theme') ||
+        DEFAULT_THEME_DARK;
     } else {
-      // Use sessionStorage as fallback
-      savedTheme = sessionStorage.getItem('theme') || 'rescuedogs-dark';
+      savedTheme =
+        sessionStorage.getItem('theme') ||
+        document.documentElement.getAttribute('data-theme') ||
+        DEFAULT_THEME_DARK;
     }
 
-    setCurrentTheme(savedTheme);
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    const resolved = normalizeThemeId(savedTheme);
+    setCurrentTheme(resolved);
+    document.documentElement.setAttribute('data-theme', resolved);
   }, []);
 
   const handleThemeChange = useCallback(
     (theme: string) => {
+      const resolved = normalizeThemeId(theme);
       const previousTheme = currentTheme;
-      setCurrentTheme(theme);
+      setCurrentTheme(resolved);
 
-      // Track theme change in analytics
-      trackThemeChange(theme, previousTheme);
+      trackThemeChange(resolved, previousTheme);
 
-      // Apply to DOM
-      document.documentElement.setAttribute('data-theme', theme);
-      document.body?.setAttribute('data-theme', theme);
+      document.documentElement.setAttribute('data-theme', resolved);
+      document.body?.setAttribute('data-theme', resolved);
 
-      // Check if we can persist the preference
       const canPersist = canUseCookies(CookieCategory.FUNCTIONAL);
 
       if (canPersist) {
-        // Save to localStorage for persistence across sessions
-        localStorage.setItem('theme', theme);
-        // Also save to sessionStorage for consistency
-        sessionStorage.setItem('theme', theme);
+        localStorage.setItem('theme', resolved);
+        sessionStorage.setItem('theme', resolved);
 
-        // Broadcast to other tabs/windows
         window.dispatchEvent(
           new StorageEvent('storage', {
             key: 'theme',
-            newValue: theme,
+            newValue: resolved,
             url: window.location.href,
             storageArea: localStorage,
           })
         );
       } else {
-        // Only save to sessionStorage for current session
-        sessionStorage.setItem('theme', theme);
+        sessionStorage.setItem('theme', resolved);
       }
 
-      // Force update service worker if available
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({
           type: 'THEME_CHANGE',
-          theme: theme,
+          theme: resolved,
         });
       }
     },
@@ -117,20 +80,20 @@ export function ThemeSwitcher() {
       <div className="card-body">
         <h2 className="card-title">Theme Selector</h2>
         <p className="text-base-content/95 text-sm">
-          Choose from 34 themes (2 custom + 32 DaisyUI)
+          Three rescue brand palettes, each with light and dark modes
         </p>
 
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-          {THEMES.map((theme) => (
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {THEME_OPTIONS.map((theme) => (
             <button
-              key={theme}
-              onClick={() => handleThemeChange(theme)}
+              key={theme.id}
+              onClick={() => handleThemeChange(theme.id)}
               className={`btn btn-sm ${
-                currentTheme === theme ? 'btn-primary' : 'btn-ghost'
+                currentTheme === theme.id ? 'btn-primary' : 'btn-ghost'
               }`}
-              data-theme={theme}
+              data-theme={theme.id}
             >
-              <span className="capitalize">{theme}</span>
+              {theme.label}
             </button>
           ))}
         </div>
