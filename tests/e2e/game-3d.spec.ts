@@ -204,15 +204,14 @@ test.describe('/game/3d — US-2: Theme-Aware 3D Scene', () => {
       .getAttribute('data-mesh-color');
     expect(initial).not.toBeNull();
 
-    // Force-switch the theme via DOM attribute. We use `cupcake` (a very
-    // light pastel theme) because the page's default theme is
-    // `rescuedogs-dark` and the two have wildly different OKLCH primary
-    // tokens — guaranteeing a visible delta. (Earlier the test used `dark`,
-    // which happens to share an OKLCH primary with `rescuedogs-dark` in
-    // some configurations; this caused intermittent E2E failures across
-    // all 3 browsers.)
+    // Force-switch the theme via DOM attribute. We use `trusted-care-light`
+    // (deep-blue primary #1e3a8a) because the page's default theme is
+    // `trusted-care-dark` (light-blue primary #93c5fd) — the two have
+    // clearly different primary tokens, guaranteeing a visible mesh-color
+    // delta. (The picker was reduced to the two branded themes in #17; the
+    // old stock DaisyUI themes like `cupcake` no longer exist.)
     await page.evaluate(() => {
-      document.documentElement.setAttribute('data-theme', 'cupcake');
+      document.documentElement.setAttribute('data-theme', 'trusted-care-light');
     });
 
     // Poll for the data-mesh-color attribute to change. The Scene's
