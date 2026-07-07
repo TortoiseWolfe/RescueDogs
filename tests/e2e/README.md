@@ -29,7 +29,6 @@ e2e/
 ├── pages/              # Page Object Models
 │   ├── BasePage.ts     # Base class with common functionality
 │   ├── HomePage.ts     # Homepage specific methods
-│   ├── ThemePage.ts    # Theme page specific methods
 │   └── ComponentsPage.ts # Components page specific methods
 ├── fixtures/           # Test data
 │   ├── test-data.json  # General test data
@@ -199,8 +198,7 @@ The `BasePage` class provides common functionality:
 
 Each page has its own class extending BasePage:
 
-- **HomePage**: Hero section, navigation, game demo
-- **ThemePage**: Theme selection, search, persistence
+- **HomePage**: Hero section, navigation
 - **ComponentsPage**: Component interactions, forms
 
 ## Test Data
