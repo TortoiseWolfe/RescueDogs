@@ -230,8 +230,8 @@ describe('Project Configuration', () => {
     it('should generate a valid PWA manifest', () => {
       const manifest = generateManifest();
 
-      expect(manifest.name).toContain('RescueDogs');
-      expect(manifest.short_name).toBe('RescueDogs');
+      expect(manifest.name).toContain('Held Paws');
+      expect(manifest.short_name).toBe('Held Paws');
       expect(manifest.description).toContain(
         'Pet adoption application tracker'
       );
@@ -297,11 +297,12 @@ describe('Project Configuration', () => {
 
     it('should use custom project name in manifest', () => {
       process.env.NEXT_PUBLIC_PROJECT_NAME = 'MyApp';
+      process.env.NEXT_PUBLIC_PROJECT_DISPLAY_NAME = 'My App';
 
       const manifest = generateManifest();
 
-      expect(manifest.name).toContain('MyApp');
-      expect(manifest.short_name).toBe('MyApp');
+      expect(manifest.name).toContain('My App');
+      expect(manifest.short_name).toBe('My App');
     });
   });
 

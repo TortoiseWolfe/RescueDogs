@@ -8,6 +8,7 @@ vi.mock('./AnimatedLogo.module.css', () => ({
   default: {
     animatedLogo: 'animatedLogo',
     letter: 'letter',
+    wordSpace: 'wordSpace',
   },
 }));
 
@@ -16,12 +17,12 @@ import { AnimatedLogo } from './AnimatedLogo';
 describe('AnimatedLogo', () => {
   it('renders with default text', () => {
     const { container } = render(<AnimatedLogo />);
-    expect(container.textContent).toContain('RescueDogs');
+    expect(container.textContent).toContain('Held Paws');
   });
 
-  it('renders with custom text', () => {
-    const { container } = render(<AnimatedLogo text="TestApp" />);
-    expect(container.textContent).toContain('TestApp');
+  it('renders multi-word brand text with a visible space', () => {
+    const { container } = render(<AnimatedLogo text="Held Paws" />);
+    expect(container.textContent).toBe('Held Paws');
   });
 
   it('applies size classes', () => {

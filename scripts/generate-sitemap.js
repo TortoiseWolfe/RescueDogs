@@ -22,7 +22,6 @@ const staticPages = [
   '/status',
   '/contact',
   '/docs',
-  '/game',
   '/map',
   '/schedule',
 ];

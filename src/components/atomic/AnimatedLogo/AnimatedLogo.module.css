@@ -15,6 +15,10 @@
   animation: none;
 }
 
+.wordSpace {
+  min-width: 0.3em;
+}
+
 @keyframes popUp {
   0% {
     transform: translateY(0) scale(1) rotate(0);

@@ -1,32 +1,42 @@
+import { THEME_SCRIPT_CONFIG } from '@/config/themes';
+
 export default function ThemeScript() {
+  const cfg = JSON.stringify(THEME_SCRIPT_CONFIG);
+
   const themeScript = `
     (function() {
-      function getSystemTheme() {
-        // Check if user prefers dark mode
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          return 'rescuedogs-dark';
-        }
-        return 'rescuedogs-light';
+      var CFG = ${cfg};
+
+      function normalizeTheme(theme) {
+        if (!theme) return CFG.defaultLight;
+        if (CFG.themeIds.indexOf(theme) !== -1) return theme;
+        if (CFG.legacyAliases[theme]) return CFG.legacyAliases[theme];
+        if (CFG.legacyDark.indexOf(theme) !== -1) return CFG.defaultDark;
+        return CFG.defaultLight;
       }
 
-      function applyTheme(theme) {
+      function getSystemTheme() {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          return CFG.defaultDark;
+        }
+        return CFG.defaultLight;
+      }
+
+      function applyTheme(rawTheme) {
+        var theme = rawTheme;
         if (!theme) {
           try {
-            // First check if user has manually selected a theme
             theme = localStorage.getItem('theme');
-
-            // If no saved theme, use system preference
             if (!theme) {
               theme = getSystemTheme();
             }
           } catch (e) {
-            // Fallback if localStorage is not available
             theme = getSystemTheme();
           }
         }
 
+        theme = normalizeTheme(theme);
         document.documentElement.setAttribute('data-theme', theme);
-        // Also set on body as backup
         if (document.body) {
           document.body.setAttribute('data-theme', theme);
         }
@@ -34,35 +44,30 @@ export default function ThemeScript() {
         return theme;
       }
 
-      // Apply theme immediately on initial load
       var currentTheme = applyTheme();
 
-      // Reapply when DOM is ready (only on initial load)
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
           applyTheme(currentTheme);
         });
       }
 
-      // Listen for storage changes (theme changes from other tabs/windows)
       window.addEventListener('storage', function(e) {
         if (e.key === 'theme' && e.newValue) {
-          currentTheme = e.newValue;
+          currentTheme = normalizeTheme(e.newValue);
           applyTheme(currentTheme);
         }
       });
 
-      // Listen for custom theme change events (from same tab)
       window.addEventListener('themechange', function(e) {
         if (e.detail && e.detail.theme) {
-          currentTheme = e.detail.theme;
+          currentTheme = normalizeTheme(e.detail.theme);
           applyTheme(currentTheme);
         }
       });
 
-      // Fallback: watch for body element if it doesn't exist yet
       if (!document.body) {
-        var observer = new MutationObserver(function(mutations) {
+        var observer = new MutationObserver(function() {
           if (document.body) {
             applyTheme(currentTheme);
             observer.disconnect();
@@ -71,10 +76,8 @@ export default function ThemeScript() {
         observer.observe(document.documentElement, { childList: true, subtree: true });
       }
 
-      // Listen for system theme changes
       if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-          // Only apply system theme if user hasn't manually selected a theme
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
           if (!localStorage.getItem('theme')) {
             currentTheme = getSystemTheme();
             applyTheme(currentTheme);

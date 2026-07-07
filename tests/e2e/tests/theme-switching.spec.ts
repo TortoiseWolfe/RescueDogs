@@ -19,42 +19,7 @@ async function waitForThemeSaved(page: Page, theme: string): Promise<void> {
   );
 }
 
-const themes = [
-  // Light themes
-  'light',
-  'cupcake',
-  'bumblebee',
-  'emerald',
-  'corporate',
-  'synthwave',
-  'retro',
-  'cyberpunk',
-  'valentine',
-  'halloween',
-  'garden',
-  'forest',
-  'aqua',
-  'lofi',
-  'pastel',
-  'fantasy',
-  'wireframe',
-  'autumn',
-  'acid',
-  'lemonade',
-  'winter',
-  // Dark themes
-  'dark',
-  'dracula',
-  'night',
-  'coffee',
-  'dim',
-  'sunset',
-  'luxury',
-  'business',
-  'black',
-  'nord',
-  'sunset',
-];
+const themes = ['trusted-care-light', 'trusted-care-dark'];
 
 test.describe('Theme Switching', () => {
   test.beforeEach(async ({ page }) => {
@@ -88,7 +53,7 @@ test.describe('Theme Switching', () => {
     await expect(themeHeading).toBeVisible();
 
     // Check that theme buttons exist
-    const darkButton = page.locator('button[data-theme="dark"]');
+    const darkButton = page.locator('button[data-theme="trusted-care-dark"]');
     await expect(darkButton).toBeVisible();
   });
 
@@ -97,21 +62,29 @@ test.describe('Theme Switching', () => {
     await dismissCookieBanner(page);
 
     // Find and click the dark theme button
-    const darkThemeButton = page.locator('button[data-theme="dark"]');
+    const darkThemeButton = page.locator(
+      'button[data-theme="trusted-care-dark"]'
+    );
     await darkThemeButton.click();
 
     // Wait for theme to be applied and saved
-    await waitForThemeSaved(page, 'dark');
+    await waitForThemeSaved(page, 'trusted-care-dark');
 
     // Reload page and verify theme persists
     await page.reload({ waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'trusted-care-dark'
+    );
 
     // Navigate to another page and verify theme persists
     await page.goto('/themes', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'trusted-care-dark'
+    );
   });
 
   test('switch to light theme and verify persistence', async ({ page }) => {
@@ -119,29 +92,36 @@ test.describe('Theme Switching', () => {
     await dismissCookieBanner(page);
 
     // First set to dark theme
-    const darkThemeButton = page.locator('button[data-theme="dark"]');
+    const darkThemeButton = page.locator(
+      'button[data-theme="trusted-care-dark"]'
+    );
     await darkThemeButton.click();
-    await waitForThemeSaved(page, 'dark');
+    await waitForThemeSaved(page, 'trusted-care-dark');
 
     // Then switch back to light
-    const lightThemeButton = page.locator('button[data-theme="light"]');
+    const lightThemeButton = page.locator(
+      'button[data-theme="trusted-care-light"]'
+    );
     await lightThemeButton.click();
-    await waitForThemeSaved(page, 'light');
+    await waitForThemeSaved(page, 'trusted-care-light');
 
     // Verify persistence
     await page.reload({ waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-theme',
+      'trusted-care-light'
+    );
   });
 
   test('theme applies to all pages consistently', async ({ page }) => {
     await page.goto('/themes', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
 
-    // Set synthwave theme
-    const synthwaveButton = page.locator('button[data-theme="synthwave"]');
-    await synthwaveButton.click();
-    await waitForThemeSaved(page, 'synthwave');
+    // Set the dark theme
+    const darkButton = page.locator('button[data-theme="trusted-care-dark"]');
+    await darkButton.click();
+    await waitForThemeSaved(page, 'trusted-care-dark');
 
     // Check theme on different pages
     const pages = ['/', '/themes', '/accessibility', '/status'];
@@ -151,7 +131,7 @@ test.describe('Theme Switching', () => {
       await dismissCookieBanner(page);
       await expect(page.locator('html')).toHaveAttribute(
         'data-theme',
-        'synthwave'
+        'trusted-care-dark'
       );
     }
   });
@@ -161,14 +141,7 @@ test.describe('Theme Switching', () => {
     await dismissCookieBanner(page);
 
     // Check that all major themes have buttons
-    const expectedThemes = [
-      'light',
-      'dark',
-      'cupcake',
-      'cyberpunk',
-      'dracula',
-      'synthwave',
-    ];
+    const expectedThemes = ['trusted-care-light', 'trusted-care-dark'];
 
     for (const theme of expectedThemes) {
       const themeButton = page.locator(`button[data-theme="${theme}"]`);
@@ -198,14 +171,14 @@ test.describe('Theme Switching', () => {
     await page.goto('/themes', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
 
-    // Set dracula theme
-    const draculaButton = page.locator('button[data-theme="dracula"]');
-    await draculaButton.click();
-    await waitForThemeSaved(page, 'dracula');
+    // Set the dark theme
+    const darkButton = page.locator('button[data-theme="trusted-care-dark"]');
+    await darkButton.click();
+    await waitForThemeSaved(page, 'trusted-care-dark');
 
     // Check localStorage
     const theme = await page.evaluate(() => localStorage.getItem('theme'));
-    expect(theme).toBe('dracula');
+    expect(theme).toBe('trusted-care-dark');
   });
 
   test('theme transition is smooth', async ({ page }) => {
@@ -223,8 +196,7 @@ test.describe('Theme Switching', () => {
   });
 
   // Parameterized test for multiple themes
-  for (const theme of themes.slice(0, 5)) {
-    // Test first 5 themes to keep test time reasonable
+  for (const theme of themes) {
     test(`can switch to ${theme} theme`, async ({ page }) => {
       await page.goto('/themes', { waitUntil: 'domcontentloaded' });
       await dismissCookieBanner(page);

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Reset Password - RescueDogs',
-  description: 'Set a new password for your RescueDogs account',
+  title: 'Reset Password - Held Paws',
+  description: 'Set a new password for your Held Paws account',
   robots: {
     index: false,
     follow: false,

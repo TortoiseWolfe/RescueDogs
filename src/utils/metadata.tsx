@@ -19,8 +19,9 @@ export interface MetadataOptions {
  * Following 2025 best practices for Open Graph and Twitter Cards
  */
 export function generateMetadata(options: MetadataOptions = {}): Metadata {
+  const displayName = projectConfig.projectDisplayName;
   const {
-    title = projectConfig.projectName,
+    title = displayName,
     description = projectConfig.projectDescription,
     path = '/',
     image = '/opengraph-image.png',
@@ -33,9 +34,9 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
   } = options;
 
   const fullTitle =
-    title === projectConfig.projectName
-      ? `${title} - Modern Web Starter`
-      : `${title} | ${projectConfig.projectName}`;
+    title === displayName
+      ? `${displayName} - Modern Web Starter`
+      : `${title} | ${displayName}`;
 
   const canonicalUrl = `${projectConfig.deployUrl}${path}`;
 
@@ -55,7 +56,7 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
     description,
     authors: [{ name: author }],
     generator: 'Next.js',
-    applicationName: projectConfig.projectName,
+    applicationName: displayName,
     referrer: 'origin-when-cross-origin',
     keywords: ['Next.js', 'React', 'TypeScript', 'PWA', 'DaisyUI', ...tags],
     creator: author,
@@ -73,7 +74,7 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
       title: fullTitle,
       description,
       url: canonicalUrl,
-      siteName: projectConfig.projectName,
+      siteName: displayName,
       images: [
         {
           url: imageUrl,
@@ -133,8 +134,9 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
  * Generate JSON-LD structured data for enhanced SEO
  */
 export function generateJsonLd(options: MetadataOptions = {}) {
+  const displayName = projectConfig.projectDisplayName;
   const {
-    title = projectConfig.projectName,
+    title = displayName,
     description = projectConfig.projectDescription,
     path = '/',
     type = 'website',
@@ -146,7 +148,7 @@ export function generateJsonLd(options: MetadataOptions = {}) {
   const baseStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: projectConfig.projectName,
+    name: displayName,
     description: projectConfig.projectDescription,
     url: projectConfig.deployUrl,
     publisher: {

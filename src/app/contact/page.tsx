@@ -2,13 +2,13 @@ import type { Metadata } from 'next';
 import { ContactForm } from '@/components/forms/ContactForm';
 
 export const metadata: Metadata = {
-  title: 'Contact Us | RescueDogs',
+  title: 'Contact Us | Held Paws',
   description:
-    "Get in touch with the RescueDogs team. We'd love to hear from you!",
-  keywords: ['contact', 'support', 'help', 'feedback', 'RescueDogs'],
+    "Get in touch with the Held Paws team. We'd love to hear from you!",
+  keywords: ['contact', 'support', 'help', 'feedback', 'Held Paws'],
   openGraph: {
-    title: 'Contact Us | RescueDogs',
-    description: 'Get in touch with the RescueDogs team',
+    title: 'Contact Us | Held Paws',
+    description: 'Get in touch with the Held Paws team',
     type: 'website',
   },
 };

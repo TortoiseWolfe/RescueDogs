@@ -12,6 +12,10 @@
 // Default configuration
 const defaultConfig = {
   projectName: 'RescueDogs',
+  // User-facing brand name. Kept separate from projectName because projectName
+  // drives the GitHub repo URL and basePath (github.com/<owner>/RescueDogs) and
+  // must not change, while the displayed brand can be rebranded freely.
+  projectDisplayName: 'Held Paws',
   projectOwner: 'TortoiseWolfe',
   projectDescription:
     'Pet adoption application tracker for shelters, adopters, and live status updates',
@@ -30,6 +34,9 @@ export function getProjectConfig() {
   const config = {
     projectName:
       process.env.NEXT_PUBLIC_PROJECT_NAME || defaultConfig.projectName,
+    projectDisplayName:
+      process.env.NEXT_PUBLIC_PROJECT_DISPLAY_NAME ||
+      defaultConfig.projectDisplayName,
     projectOwner:
       process.env.NEXT_PUBLIC_PROJECT_OWNER || defaultConfig.projectOwner,
     projectDescription: defaultConfig.projectDescription,
@@ -127,8 +134,8 @@ export function generateManifest() {
   const basePath = config.basePath || '';
 
   return {
-    name: `${config.projectName} - Modern Web Starter`,
-    short_name: config.projectName,
+    name: `${config.projectDisplayName} - Modern Web Starter`,
+    short_name: config.projectDisplayName,
     description: config.projectDescription,
     start_url: `${basePath}/`,
     scope: `${basePath}/`,

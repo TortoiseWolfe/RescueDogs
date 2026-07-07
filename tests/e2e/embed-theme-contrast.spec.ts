@@ -33,59 +33,10 @@ import { test, expect } from '@playwright/test';
 // No theme allowlist is needed; if one were, it would carry a justification,
 // never a silent skip.
 
-const THEMES = [
-  'rescuedogs-dark',
-  'rescuedogs-light',
-  'light',
-  'dark',
-  'cupcake',
-  'bumblebee',
-  'emerald',
-  'corporate',
-  'synthwave',
-  'retro',
-  'cyberpunk',
-  'valentine',
-  'halloween',
-  'garden',
-  'forest',
-  'aqua',
-  'lofi',
-  'pastel',
-  'fantasy',
-  'wireframe',
-  'black',
-  'luxury',
-  'dracula',
-  'cmyk',
-  'autumn',
-  'business',
-  'acid',
-  'lemonade',
-  'night',
-  'coffee',
-  'winter',
-  'dim',
-  'nord',
-  'sunset',
-] as const;
+const THEMES = ['trusted-care-light', 'trusted-care-dark'] as const;
 
 // Mirrors src/utils/theme-utils.ts DARK_THEMES (drives the Disqus bg choice).
-const DARK_THEMES = new Set([
-  'rescuedogs-dark',
-  'dark',
-  'synthwave',
-  'halloween',
-  'forest',
-  'black',
-  'luxury',
-  'dracula',
-  'business',
-  'night',
-  'coffee',
-  'dim',
-  'sunset',
-]);
+const DARK_THEMES = new Set(['trusted-care-dark']);
 
 // Mirrors DisqusComments.tsx constants.
 const DISQUS_BG_DARK = '#111827';

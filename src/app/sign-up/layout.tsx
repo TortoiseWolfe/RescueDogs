@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Sign Up - RescueDogs',
-  description: 'Create a new RescueDogs account',
+  title: 'Sign Up - Held Paws',
+  description: 'Create a new Held Paws account',
   robots: {
     index: false,
     follow: false,
