@@ -179,6 +179,14 @@ export function getDaisyUIColorAsThree(token: string): ThreeColor {
     if (!value) continue;
     const parsed = parseOklchTriplet(value);
     if (parsed) return parsed;
+    // Themes may define tokens as plain hex (#rrggbb) instead of OKLCH.
+    if (/^#[0-9a-f]{3,8}$/i.test(value)) {
+      try {
+        return new ThreeColor().setStyle(value);
+      } catch {
+        /* fall through to fallback */
+      }
+    }
   }
 
   return fallback;

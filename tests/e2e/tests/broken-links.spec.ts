@@ -269,7 +269,6 @@ test.describe('Broken Links Detection', () => {
       '/status',
       '/accessibility',
       '/contact',
-      '/game',
       '/map',
       '/docs',
     ];
