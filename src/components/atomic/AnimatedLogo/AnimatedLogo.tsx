@@ -26,12 +26,12 @@ const speedMultipliers = {
 };
 
 export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
-  text = 'RescueDogs',
+  text = 'Held Paws',
   className = '',
   size = 'xl',
   animationSpeed = 'normal',
 }) => {
-  const letters = text.split('');
+  const words = text.split(' ');
   const speedMultiplier = speedMultipliers[animationSpeed];
 
   return (
@@ -41,16 +41,28 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
         filter: 'drop-shadow(2px 2px 2px rgb(0 0 0 / 0.8))',
       }}
     >
-      {letters.map((letter, index) => (
-        <span
-          key={index}
-          className={styles.letter}
-          style={{
-            animationDelay: `${index * 0.05 * speedMultiplier}s`,
-            animationDuration: `${0.6 * speedMultiplier}s`,
-          }}
-        >
-          {letter}
+      {words.map((word, wordIndex) => (
+        <span key={wordIndex} className="inline-flex">
+          {wordIndex > 0 && (
+            <span
+              className={`${styles.letter} ${styles.wordSpace}`}
+              aria-hidden
+            >
+              &nbsp;
+            </span>
+          )}
+          {word.split('').map((letter, letterIndex) => (
+            <span
+              key={`${wordIndex}-${letterIndex}`}
+              className={styles.letter}
+              style={{
+                animationDelay: `${(wordIndex * word.length + letterIndex) * 0.05 * speedMultiplier}s`,
+                animationDuration: `${0.6 * speedMultiplier}s`,
+              }}
+            >
+              {letter}
+            </span>
+          ))}
         </span>
       ))}
     </span>

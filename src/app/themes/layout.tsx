@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Theme Playground - RescueDogs',
+  title: 'Theme Playground - Held Paws',
   description:
     'Explore 32+ beautiful DaisyUI themes. Customize the look and feel of your application with our interactive theme switcher.',
 };

@@ -41,7 +41,7 @@ type Story = StoryObj<typeof AnimatedLogo>;
 
 export const Default: Story = {
   args: {
-    text: 'RescueDogs',
+    text: 'Held Paws',
     size: 'xl',
     animationSpeed: 'normal',
   },
@@ -106,7 +106,7 @@ export const LongText: Story = {
 
 export const ThemeShowcase: Story = {
   args: {
-    text: 'RescueDogs',
+    text: 'Held Paws',
   },
   render: () => (
     <div className="flex flex-col gap-8">
@@ -114,19 +114,19 @@ export const ThemeShowcase: Story = {
         <p className="text-base-content/80 mb-2 text-sm">
           Uses text-primary — adapts to current theme
         </p>
-        <AnimatedLogo text="RescueDogs" size="2xl" />
+        <AnimatedLogo text="Held Paws" size="2xl" />
       </div>
       <div className="flex flex-col gap-4">
         <p className="text-base-content/80 text-sm">All sizes</p>
-        <AnimatedLogo text="RescueDogs" size="sm" />
-        <AnimatedLogo text="RescueDogs" size="md" />
-        <AnimatedLogo text="RescueDogs" size="lg" />
-        <AnimatedLogo text="RescueDogs" size="xl" />
+        <AnimatedLogo text="Held Paws" size="sm" />
+        <AnimatedLogo text="Held Paws" size="md" />
+        <AnimatedLogo text="Held Paws" size="lg" />
+        <AnimatedLogo text="Held Paws" size="xl" />
       </div>
       <div>
         <p className="text-base-content/80 mb-2 text-sm">On neutral surface</p>
         <div className="bg-neutral rounded-box inline-block p-6">
-          <AnimatedLogo text="RescueDogs" size="xl" />
+          <AnimatedLogo text="Held Paws" size="xl" />
         </div>
       </div>
     </div>

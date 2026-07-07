@@ -16,11 +16,7 @@
 @plugin "daisyui" {
   themes:
     trusted-care-light --default,
-    trusted-care-dark,
-    modern-connection-light,
-    modern-connection-dark,
-    retro-friendly-light,
-    retro-friendly-dark;
+    trusted-care-dark;
 }
 
 /* Option 1 — Trusted Care (issue #17): blue trust + warm orange accent */
@@ -75,9 +71,9 @@
 
   --color-primary: #93c5fd;
   --color-primary-content: #0c1929;
-  --color-secondary: #fb923c;
+  --color-secondary: #f97316;
   --color-secondary-content: #0c1929;
-  --color-accent: #fb923c;
+  --color-accent: #f97316;
   --color-accent-content: #0c1929;
 
   --color-neutral: #1e3a8a;
@@ -101,180 +97,16 @@
   --noise: 1;
 }
 
-/* Option 2 — Modern Connection: teal calm + coral joy */
-@plugin "daisyui/theme" {
-  name: 'modern-connection-light';
-  default: false;
-  prefersdark: false;
-  color-scheme: light;
-
-  --color-base-100: #f8fafc;
-  --color-base-200: #f1f5f9;
-  --color-base-300: #e2e8f0;
-  --color-base-content: #0f766e;
-
-  --color-primary: #0f766e;
-  --color-primary-content: #ffffff;
-  --color-secondary: #fb7185;
-  --color-secondary-content: #ffffff;
-  --color-accent: #fb7185;
-  --color-accent-content: #ffffff;
-
-  --color-neutral: #334155;
-  --color-neutral-content: #ffffff;
-  --color-info: #0ea5e9;
-  --color-info-content: #ffffff;
-  --color-success: #10b981;
-  --color-success-content: #ffffff;
-  --color-warning: #f59e0b;
-  --color-warning-content: #0f766e;
-  --color-error: #ef4444;
-  --color-error-content: #ffffff;
-
-  --radius-selector: 999px;
-  --radius-field: 1rem;
-  --radius-box: 1.625rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 1;
-}
-
-@plugin "daisyui/theme" {
-  name: 'modern-connection-dark';
-  default: false;
-  color-scheme: dark;
-
-  --color-base-100: #0f172a;
-  --color-base-200: #0b1220;
-  --color-base-300: #134e4a;
-  --color-base-content: #f8fafc;
-
-  --color-primary: #2dd4bf;
-  --color-primary-content: #0f172a;
-  --color-secondary: #fb7185;
-  --color-secondary-content: #0f172a;
-  --color-accent: #fb7185;
-  --color-accent-content: #0f172a;
-
-  --color-neutral: #134e4a;
-  --color-neutral-content: #f8fafc;
-  --color-info: #38bdf8;
-  --color-info-content: #0f172a;
-  --color-success: #34d399;
-  --color-success-content: #0f172a;
-  --color-warning: #fbbf24;
-  --color-warning-content: #0f172a;
-  --color-error: #f87171;
-  --color-error-content: #0f172a;
-
-  --radius-selector: 999px;
-  --radius-field: 1rem;
-  --radius-box: 1.625rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 1;
-}
-
-/* Option 3 — Retro Friendly: charcoal + gold + crimson */
-@plugin "daisyui/theme" {
-  name: 'retro-friendly-light';
-  default: false;
-  prefersdark: false;
-  color-scheme: light;
-
-  --color-base-100: #fffbeb;
-  --color-base-200: #fef3c7;
-  --color-base-300: #fde68a;
-  --color-base-content: #334155;
-
-  --color-primary: #334155;
-  --color-primary-content: #ffffff;
-  --color-secondary: #ef4444;
-  --color-secondary-content: #ffffff;
-  --color-accent: #eab308;
-  --color-accent-content: #334155;
-
-  --color-neutral: #475569;
-  --color-neutral-content: #ffffff;
-  --color-info: #3b82f6;
-  --color-info-content: #ffffff;
-  --color-success: #22c55e;
-  --color-success-content: #ffffff;
-  --color-warning: #eab308;
-  --color-warning-content: #334155;
-  --color-error: #ef4444;
-  --color-error-content: #ffffff;
-
-  --radius-selector: 999px;
-  --radius-field: 1rem;
-  --radius-box: 1.625rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 1;
-}
-
-@plugin "daisyui/theme" {
-  name: 'retro-friendly-dark';
-  default: false;
-  color-scheme: dark;
-
-  --color-base-100: #1e293b;
-  --color-base-200: #172033;
-  --color-base-300: #334155;
-  --color-base-content: #f8fafc;
-
-  --color-primary: #94a3b8;
-  --color-primary-content: #1e293b;
-  --color-secondary: #f87171;
-  --color-secondary-content: #1e293b;
-  --color-accent: #eab308;
-  --color-accent-content: #1e293b;
-
-  --color-neutral: #475569;
-  --color-neutral-content: #f8fafc;
-  --color-info: #60a5fa;
-  --color-info-content: #1e293b;
-  --color-success: #4ade80;
-  --color-success-content: #1e293b;
-  --color-warning: #facc15;
-  --color-warning-content: #1e293b;
-  --color-error: #f87171;
-  --color-error-content: #1e293b;
-
-  --radius-selector: 999px;
-  --radius-field: 1rem;
-  --radius-box: 1.625rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 1;
-}
-
-/* RescueDogs visual polish — all six branded palette themes */
+/* RescueDogs visual polish — Trusted Care light + dark */
 [data-theme='trusted-care-light'] .card,
-[data-theme='trusted-care-dark'] .card,
-[data-theme='modern-connection-light'] .card,
-[data-theme='modern-connection-dark'] .card,
-[data-theme='retro-friendly-light'] .card,
-[data-theme='retro-friendly-dark'] .card {
+[data-theme='trusted-care-dark'] .card {
   box-shadow:
     0 22px 44px color-mix(in oklch, var(--color-primary) 18%, transparent),
     0 4px 10px rgb(0 0 0 / 0.08);
 }
 
 [data-theme='trusted-care-light'] .btn,
-[data-theme='trusted-care-dark'] .btn,
-[data-theme='modern-connection-light'] .btn,
-[data-theme='modern-connection-dark'] .btn,
-[data-theme='retro-friendly-light'] .btn,
-[data-theme='retro-friendly-dark'] .btn {
+[data-theme='trusted-care-dark'] .btn {
   font-family: var(--font-fredoka), var(--font-nunito), system-ui, sans-serif;
   font-weight: 700;
   box-shadow:
@@ -283,11 +115,7 @@
 }
 
 [data-theme='trusted-care-light'] .btn:hover,
-[data-theme='trusted-care-dark'] .btn:hover,
-[data-theme='modern-connection-light'] .btn:hover,
-[data-theme='modern-connection-dark'] .btn:hover,
-[data-theme='retro-friendly-light'] .btn:hover,
-[data-theme='retro-friendly-dark'] .btn:hover {
+[data-theme='trusted-care-dark'] .btn:hover {
   transform: translateY(-1px);
   box-shadow:
     0 14px 24px color-mix(in oklch, var(--color-primary) 28%, transparent),
@@ -302,21 +130,37 @@
 [data-theme='trusted-care-light'] .stat-title,
 [data-theme='trusted-care-dark'] .stat-title,
 [data-theme='trusted-care-light'] .stat-desc,
-[data-theme='trusted-care-dark'] .stat-desc,
-[data-theme='modern-connection-light'] .stat-title,
-[data-theme='modern-connection-dark'] .stat-title,
-[data-theme='modern-connection-light'] .stat-desc,
-[data-theme='modern-connection-dark'] .stat-desc,
-[data-theme='retro-friendly-light'] .stat-title,
-[data-theme='retro-friendly-dark'] .stat-title,
-[data-theme='retro-friendly-light'] .stat-desc,
-[data-theme='retro-friendly-dark'] .stat-desc {
+[data-theme='trusted-care-dark'] .stat-desc {
   color: color-mix(in oklab, var(--color-base-content) 92%, transparent);
+}
+
+/* Menu bar (#17): white background on light mode, orange on dark mode.
+ * The header markup uses bg-primary / text-primary-content throughout, so we
+ * remap the primary tokens at header scope — every descendant that references
+ * those tokens (nav links, toggles, brand title) stays in sync and legible.
+ * Foreground is the inverse of the bar: orange on white, white on orange. */
+[data-theme='trusted-care-light'] .site-header {
+  --color-primary: #ffffff;
+  --color-primary-content: #f97316;
+  box-shadow: 0 8px 24px rgba(30, 58, 138, 0.12);
+}
+
+[data-theme='trusted-care-dark'] .site-header {
+  --color-primary: #f97316;
+  --color-primary-content: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* The brand title (AnimatedLogo) hardcodes text-primary; inside the menu bar
+ * that equals the bar background, so force it to the foreground token to match
+ * the nav buttons (orange on white / white on orange). */
+.site-header .brand-logo {
+  color: var(--color-primary-content);
 }
 
 /* Avatar glow/shadow — uses base-content so it auto-adapts:
  * dark themes → light glow, light themes → dark shadow.
- * Works across all 35 DaisyUI themes. */
+ * Works across both Trusted Care themes. */
 .avatar {
   filter: drop-shadow(
     0 4px 8px color-mix(in oklch, currentColor 25%, transparent)
@@ -547,8 +391,6 @@ p:not([class*='text-']) {
 
 /* Dark background for map container before tiles load */
 [data-theme='trusted-care-dark'] .leaflet-container,
-[data-theme='modern-connection-dark'] .leaflet-container,
-[data-theme='retro-friendly-dark'] .leaflet-container,
 [data-theme='rescuedogs-dark'] .leaflet-container,
 [data-theme='dark'] .leaflet-container,
 [data-theme='dracula'] .leaflet-container,
@@ -567,8 +409,6 @@ p:not([class*='text-']) {
 
 /* Invert OSM tiles for dark mode — preserves color/detail unlike CartoDB dark_all */
 [data-theme='trusted-care-dark'] .leaflet-tile-pane,
-[data-theme='modern-connection-dark'] .leaflet-tile-pane,
-[data-theme='retro-friendly-dark'] .leaflet-tile-pane,
 [data-theme='rescuedogs-dark'] .leaflet-tile-pane,
 [data-theme='dark'] .leaflet-tile-pane,
 [data-theme='dracula'] .leaflet-tile-pane,
@@ -626,8 +466,6 @@ p:not([class*='text-']) {
 
 /* Fix Leaflet controls for dark mode */
 [data-theme='trusted-care-dark'] .leaflet-control,
-[data-theme='modern-connection-dark'] .leaflet-control,
-[data-theme='retro-friendly-dark'] .leaflet-control,
 [data-theme='rescuedogs-dark'] .leaflet-control,
 [data-theme='dark'] .leaflet-control,
 [data-theme='dracula'] .leaflet-control,
@@ -650,8 +488,6 @@ p:not([class*='text-']) {
 }
 
 [data-theme='trusted-care-dark'] .leaflet-control a,
-[data-theme='modern-connection-dark'] .leaflet-control a,
-[data-theme='retro-friendly-dark'] .leaflet-control a,
 [data-theme='rescuedogs-dark'] .leaflet-control a,
 [data-theme='dark'] .leaflet-control a,
 [data-theme='dracula'] .leaflet-control a,

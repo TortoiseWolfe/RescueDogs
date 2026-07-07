@@ -101,7 +101,7 @@ export const viewport: Viewport = {
 // Generate comprehensive metadata using the utility function
 export const metadata: Metadata = {
   ...generateMetadata({
-    title: projectConfig.projectName,
+    title: projectConfig.projectDisplayName,
     description: projectConfig.projectDescription,
     path: '/',
     tags: ['Next.js', 'React', 'TypeScript', 'PWA', 'DaisyUI', 'TailwindCSS'],
@@ -114,7 +114,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: projectConfig.projectName,
+    title: projectConfig.projectDisplayName,
   },
   other: {
     'Cache-Control': 'no-cache, no-store, must-revalidate',

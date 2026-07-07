@@ -33,21 +33,10 @@ import { test, expect } from '@playwright/test';
 // No theme allowlist is needed; if one were, it would carry a justification,
 // never a silent skip.
 
-const THEMES = [
-  'trusted-care-light',
-  'trusted-care-dark',
-  'modern-connection-light',
-  'modern-connection-dark',
-  'retro-friendly-light',
-  'retro-friendly-dark',
-] as const;
+const THEMES = ['trusted-care-light', 'trusted-care-dark'] as const;
 
 // Mirrors src/utils/theme-utils.ts DARK_THEMES (drives the Disqus bg choice).
-const DARK_THEMES = new Set([
-  'trusted-care-dark',
-  'modern-connection-dark',
-  'retro-friendly-dark',
-]);
+const DARK_THEMES = new Set(['trusted-care-dark']);
 
 // Mirrors DisqusComments.tsx constants.
 const DISQUS_BG_DARK = '#111827';

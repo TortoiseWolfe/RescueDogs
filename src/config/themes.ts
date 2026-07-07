@@ -1,16 +1,9 @@
 /**
  * RescueDogs branded theme catalog (#17).
- * Three palettes × light/dark — replaces the full DaisyUI theme list in the nav.
+ * One palette — Trusted Care (orange / navy / white) — with light and dark modes.
  */
 
-export const THEME_IDS = [
-  'trusted-care-light',
-  'trusted-care-dark',
-  'modern-connection-light',
-  'modern-connection-dark',
-  'retro-friendly-light',
-  'retro-friendly-dark',
-] as const;
+export const THEME_IDS = ['trusted-care-light', 'trusted-care-dark'] as const;
 
 export type ThemeId = (typeof THEME_IDS)[number];
 
@@ -33,40 +26,24 @@ export type ThemeOption = {
 export const THEME_OPTIONS: readonly ThemeOption[] = [
   {
     id: 'trusted-care-light',
-    label: 'Trusted Care — Light',
+    label: 'Light',
     palette: 'Trusted Care',
   },
   {
     id: 'trusted-care-dark',
-    label: 'Trusted Care — Dark',
+    label: 'Dark',
     palette: 'Trusted Care',
-  },
-  {
-    id: 'modern-connection-light',
-    label: 'Modern Connection — Light',
-    palette: 'Modern Connection',
-  },
-  {
-    id: 'modern-connection-dark',
-    label: 'Modern Connection — Dark',
-    palette: 'Modern Connection',
-  },
-  {
-    id: 'retro-friendly-light',
-    label: 'Retro Friendly — Light',
-    palette: 'Retro Friendly',
-  },
-  {
-    id: 'retro-friendly-dark',
-    label: 'Retro Friendly — Dark',
-    palette: 'Retro Friendly',
   },
 ];
 
-/** Direct renames from pre-#17 RescueDogs / default DaisyUI ids. */
+/** Direct renames from pre-#17 RescueDogs / retired multi-palette ids. */
 export const LEGACY_THEME_ALIASES: Record<string, ThemeId> = {
   'rescuedogs-light': 'trusted-care-light',
   'rescuedogs-dark': 'trusted-care-dark',
+  'modern-connection-light': 'trusted-care-light',
+  'modern-connection-dark': 'trusted-care-dark',
+  'retro-friendly-light': 'trusted-care-light',
+  'retro-friendly-dark': 'trusted-care-dark',
   light: 'trusted-care-light',
   dark: 'trusted-care-dark',
 };

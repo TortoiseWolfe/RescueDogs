@@ -80,7 +80,7 @@ export function ThemeSwitcher() {
       <div className="card-body">
         <h2 className="card-title">Theme Selector</h2>
         <p className="text-base-content/95 text-sm">
-          Three rescue brand palettes, each with light and dark modes
+          The Held Paws palette in light and dark modes
         </p>
 
         <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">

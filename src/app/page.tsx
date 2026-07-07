@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import Image from 'next/image';
+import { detectedConfig } from '@/config/project-detected';
 
 const STATS = [
   {
@@ -14,7 +16,7 @@ const STATS = [
   {
     value: '140',
     label: 'volunteers',
-    tone: 'text-warning',
+    tone: 'text-neutral',
   },
 ];
 
@@ -23,31 +25,31 @@ const PETS = [
     name: 'Biscuit',
     emoji: '🐶',
     detail: '2 yrs · loves belly rubs & long walks',
-    bg: 'bg-[#f1f6ff]',
-    border: 'border-[#cfe0ff]',
-    image: 'from-[#d7e6ff] to-[#e9f1ff]',
-    title: 'text-[#27408f]',
+    bg: 'bg-[#e8edf7]',
+    border: 'border-[#a8b8d8]',
+    image: 'from-[#7a94c4] to-[#e8edf7]',
+    title: 'text-[#1e3a8a]',
     cta: 'btn-primary',
   },
   {
     name: 'Pepper',
     emoji: '🐾',
     detail: '4 yrs · smart, loyal, and treat motivated',
-    bg: 'bg-[#fff4f4]',
-    border: 'border-[#ffd2d4]',
-    image: 'from-[#ffd9da] to-[#ffe9ea]',
-    title: 'text-[#c0353a]',
+    bg: 'bg-[#fff7ed]',
+    border: 'border-[#fed7aa]',
+    image: 'from-[#ffedd5] to-[#fff7ed]',
+    title: 'text-[#c2410c]',
     cta: 'btn-secondary',
   },
   {
     name: 'Tank',
     emoji: '🦴',
     detail: '6 yrs · gentle giant with couch-potato energy',
-    bg: 'bg-[#fffaf0]',
-    border: 'border-[#ffd277]',
-    image: 'from-[#ffe7a3] to-[#fff6d8]',
-    title: 'text-[#8a6500]',
-    cta: 'btn-accent',
+    bg: 'bg-[#f1f6ff]',
+    border: 'border-[#cfe0ff]',
+    image: 'from-[#d7e6ff] to-[#e9f1ff]',
+    title: 'text-[#27408f]',
+    cta: 'border-[#cfe0ff] bg-[#d7e6ff] text-[#27408f] hover:border-[#a8c4f5] hover:bg-[#cfe0ff]',
   },
 ] as const;
 
@@ -68,7 +70,7 @@ const STEPS = [
     number: '3',
     title: 'Bring them home',
     detail: 'Work with the shelter team and start your happily-ever-after.',
-    bg: 'bg-secondary text-secondary-content',
+    bg: 'bg-neutral text-neutral-content',
   },
 ] as const;
 
@@ -86,7 +88,7 @@ export default function Home() {
       <section
         id="main-content"
         aria-labelledby="hero-heading"
-        className="relative bg-gradient-to-b from-[#2f6bff] to-[#5b8cff] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-24"
+        className="relative bg-gradient-to-b from-[#1e3a8a] to-[#2a4da3] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-24"
       >
         <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-12 lg:flex-row lg:gap-16">
           <div className="flex-1 text-center lg:text-left">
@@ -102,7 +104,7 @@ export default function Home() {
             </h1>
 
             <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold text-[#eaf1ff] sm:text-xl lg:mx-0">
-              RescueDogs helps adopters apply with confidence while giving
+              Held Paws helps adopters apply with confidence while giving
               shelters a simple way to review applications and keep everyone
               updated.
             </p>
@@ -123,23 +125,17 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="relative h-72 w-full max-w-sm shrink-0 animate-[floaty_5s_ease-in-out_infinite] sm:h-80 lg:h-[400px] lg:max-w-[440px]">
-            <div className="absolute inset-0 rotate-3 rounded-[2rem] border-[7px] border-[#ffd23f] bg-white shadow-2xl" />
-            <div className="absolute inset-4 rotate-3 rounded-[1.625rem] bg-[repeating-linear-gradient(45deg,#dbe6ff,#dbe6ff_14px,#edf2ff_14px,#edf2ff_28px)]">
-              <div className="grid h-full place-items-center text-center">
-                <div>
-                  <div
-                    className="text-7xl drop-shadow-xl sm:text-8xl"
-                    role="img"
-                    aria-label="Happy rescue pets"
-                  >
-                    🐶🐱
-                  </div>
-                  <p className="font-friendly mt-4 text-lg font-bold text-[#27408f]">
-                    Happy tails start here
-                  </p>
-                </div>
-              </div>
+          <div className="relative aspect-[16/9] w-full max-w-sm shrink-0 animate-[floaty_5s_ease-in-out_infinite] lg:max-w-[520px]">
+            <div className="absolute inset-0 rotate-3 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl" />
+            <div className="absolute inset-2 rotate-3 overflow-hidden rounded-[1.625rem]">
+              <Image
+                src={`${detectedConfig.basePath}/hero-held-paws.png`}
+                alt="A smiling adopter with a rescued dog and cat in a sunny park"
+                fill
+                sizes="(max-width: 1024px) 100vw, 520px"
+                className="object-cover"
+                priority
+              />
             </div>
           </div>
         </div>
@@ -260,7 +256,7 @@ export default function Home() {
       </section>
 
       <section className="bg-base-100 px-4 pb-12 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#a81d21] p-8 text-white shadow-2xl sm:p-12 lg:flex lg:items-center lg:justify-between lg:gap-8">
+        <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#f97316] p-8 text-white shadow-2xl sm:p-12 lg:flex lg:items-center lg:justify-between lg:gap-8">
           <div>
             <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
               Want to see the live rescue loop?
@@ -273,13 +269,13 @@ export default function Home() {
           <div className="mt-6 flex flex-wrap gap-4 lg:mt-0 lg:shrink-0">
             <Link
               href="/sign-in"
-              className="btn min-h-11 bg-white text-[#a81d21]"
+              className="btn min-h-11 bg-white text-[#1e3a8a]"
             >
               Try Demo Login
             </Link>
             <Link
               href="/applications/status/"
-              className="btn btn-accent min-h-11"
+              className="btn btn-primary min-h-11"
             >
               Status Tracker
             </Link>

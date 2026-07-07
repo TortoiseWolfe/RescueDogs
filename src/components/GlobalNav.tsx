@@ -7,7 +7,7 @@ import { LayeredRescueDogsLogo } from '@/components/atomic/SpinningLogo';
 import { AnimatedLogo } from '@/components/atomic/AnimatedLogo';
 import { ColorblindToggle } from '@/components/molecular/ColorblindToggle';
 import { FontSizeControl } from '@/components/navigation/FontSizeControl';
-import { detectedConfig } from '@/config/project-detected';
+import { projectConfig } from '@/config/project.config';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import AvatarDisplay from '@/components/atomic/AvatarDisplay';
@@ -148,13 +148,13 @@ export function GlobalNav() {
     ...(user ? [{ href: '/applications', label: 'My Applications' }] : []),
     ...(isShelterStaff ? [{ href: '/shelter', label: 'Shelter' }] : []),
     { href: '/blog', label: 'Blog' },
-    { href: '/docs', label: 'Docs' },
+    // { href: '/docs', label: 'Docs' },
   ];
 
   const themes = THEME_OPTIONS;
 
   return (
-    <header className="bg-primary text-primary-content sticky top-0 z-50 shadow-[0_8px_24px_rgba(31,79,196,0.35)]">
+    <header className="site-header bg-primary text-primary-content sticky top-0 z-50">
       <nav className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo & Brand */}
@@ -172,8 +172,8 @@ export function GlobalNav() {
               </div>
               <span className="hidden sm:block">
                 <AnimatedLogo
-                  text={detectedConfig.projectName}
-                  className="!text-xl font-bold"
+                  text={projectConfig.projectDisplayName}
+                  className="brand-logo !text-xl font-bold"
                   animationSpeed="normal"
                 />
               </span>
@@ -191,8 +191,8 @@ export function GlobalNav() {
                   key={item.href}
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`btn btn-ghost btn-sm text-primary-content hover:bg-white/15 ${
-                    isActive ? 'bg-white/20' : ''
+                  className={`btn btn-ghost btn-sm text-primary-content hover:bg-black/10 ${
+                    isActive ? 'bg-black/15' : ''
                   }`}
                 >
                   {item.label}
@@ -314,7 +314,7 @@ export function GlobalNav() {
               <>
                 <Link
                   href="/sign-in"
-                  className="btn btn-ghost btn-sm text-primary-content hidden min-h-11 min-w-11 hover:bg-white/15 lg:inline-flex"
+                  className="btn btn-ghost btn-sm text-primary-content hidden min-h-11 min-w-11 hover:bg-black/10 lg:inline-flex"
                 >
                   Sign In
                 </Link>
@@ -331,7 +331,7 @@ export function GlobalNav() {
             <div className="dropdown dropdown-end lg:hidden">
               <label
                 tabIndex={0}
-                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-white/15"
+                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-black/10"
                 aria-label="Navigation menu"
               >
                 <svg
@@ -432,7 +432,7 @@ export function GlobalNav() {
             {showInstallButton && !isInstalled && (
               <button
                 onClick={handleInstallClick}
-                className="btn btn-primary btn-sm min-h-11 min-w-11"
+                className="btn btn-neutral btn-sm min-h-11 min-w-11"
                 title="Progressive Web App (PWA) - Install this app for offline access and better performance"
               >
                 <svg
@@ -466,7 +466,7 @@ export function GlobalNav() {
             <div className="dropdown dropdown-end hidden lg:block">
               <label
                 tabIndex={0}
-                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-white/15"
+                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-black/10"
                 title="Change theme"
                 aria-label="Change theme"
               >

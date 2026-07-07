@@ -20,12 +20,10 @@ import { isDarkTheme, getDaisyUIColorAsThree } from './theme-utils';
 describe('isDarkTheme', () => {
   it('returns true for known dark themes', () => {
     expect(isDarkTheme('trusted-care-dark')).toBe(true);
-    expect(isDarkTheme('modern-connection-dark')).toBe(true);
   });
 
   it('returns false for light themes', () => {
     expect(isDarkTheme('trusted-care-light')).toBe(false);
-    expect(isDarkTheme('modern-connection-light')).toBe(false);
   });
 });
 

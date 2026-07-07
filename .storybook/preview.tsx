@@ -68,10 +68,6 @@ const preview: Preview = {
       themes: {
         'trusted-care-light': 'trusted-care-light',
         'trusted-care-dark': 'trusted-care-dark',
-        'modern-connection-light': 'modern-connection-light',
-        'modern-connection-dark': 'modern-connection-dark',
-        'retro-friendly-light': 'retro-friendly-light',
-        'retro-friendly-dark': 'retro-friendly-dark',
       },
       defaultTheme: 'trusted-care-light',
       attributeName: 'data-theme',

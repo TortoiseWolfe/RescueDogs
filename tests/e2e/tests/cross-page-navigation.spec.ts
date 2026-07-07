@@ -2,14 +2,7 @@ import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
 // RescueDogs branded palette themes (#17)
-const THEMES = [
-  'trusted-care-light',
-  'trusted-care-dark',
-  'modern-connection-light',
-  'modern-connection-dark',
-  'retro-friendly-light',
-  'retro-friendly-dark',
-];
+const THEMES = ['trusted-care-light', 'trusted-care-dark'];
 
 test.describe('Cross-Page Navigation', () => {
   test('navigate through all main pages', async ({ page }) => {
@@ -34,8 +27,9 @@ test.describe('Cross-Page Navigation', () => {
     await dismissCookieBanner(page);
     await expect(page).toHaveURL(/\/blog/);
 
-    // Navigate to Docs via nav
-    await page.click('a:has-text("Docs")');
+    // Docs link is hidden from nav for now — reach /docs directly to keep
+    // multi-page navigation coverage.
+    await page.goto('/docs', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
     await expect(page).toHaveURL(/\/docs/);
 

@@ -64,10 +64,7 @@ describe('useEmbedThemeColor', () => {
         '--color-primary',
         '0.7 0.2 250'
       );
-      document.documentElement.setAttribute(
-        'data-theme',
-        'modern-connection-dark'
-      );
+      document.documentElement.setAttribute('data-theme', 'trusted-care-dark');
     });
 
     await waitFor(() => {

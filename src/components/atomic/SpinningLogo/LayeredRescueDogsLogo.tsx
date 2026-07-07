@@ -12,9 +12,11 @@ export interface LayeredRescueDogsLogoProps {
   pauseOnHover?: boolean;
 }
 
-export const LayeredRescueDogsLogo: React.FC<
-  LayeredRescueDogsLogoProps
-> = ({ className = '', speed = 'slow', pauseOnHover = true }) => {
+export const LayeredRescueDogsLogo: React.FC<LayeredRescueDogsLogoProps> = ({
+  className = '',
+  speed = 'slow',
+  pauseOnHover = true,
+}) => {
   return (
     <div
       className={`relative ${className}`}
@@ -56,7 +58,7 @@ export const LayeredRescueDogsLogo: React.FC<
       <SpinningLogo speed={speed} pauseOnHover={pauseOnHover}>
         <Image
           src={`${detectedConfig.basePath}/rescuedogs-logo.svg`}
-          alt="RescueDogs.com gear logo"
+          alt="Held Paws gear logo"
           width={400}
           height={400}
           className="absolute inset-0 h-full w-full"

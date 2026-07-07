@@ -55,14 +55,7 @@ interface AxeResults {
 // Both custom themes covered — Pa11y's headless Chromium defaults to
 // prefers-color-scheme: light, so before this spec the dark palette had
 // no automated contrast coverage at all.
-const THEMES = [
-  'trusted-care-light',
-  'trusted-care-dark',
-  'modern-connection-light',
-  'modern-connection-dark',
-  'retro-friendly-light',
-  'retro-friendly-dark',
-] as const;
+const THEMES = ['trusted-care-light', 'trusted-care-dark'] as const;
 
 // Mirrors config/pa11yci.json's urls[].
 const PAGES = ['/', '/themes/', '/accessibility/', '/status/'] as const;
