@@ -15,7 +15,7 @@ export const RescueDogsLogo: React.FC<RescueDogsLogoProps> = ({
   return (
     <Image
       src="/rescuedogs-logo.svg"
-      alt="RescueDogs Logo"
+      alt="Held Paws Logo"
       width={width}
       height={height}
       className={className}

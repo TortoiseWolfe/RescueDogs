@@ -9,10 +9,10 @@ export default function ThemesPage() {
       <div className="container mx-auto px-4 py-6 sm:py-8 md:py-12">
         <div className="mb-8 text-center">
           <h1 className="mb-4 !text-2xl font-bold sm:!text-4xl md:!text-5xl">
-            RescueDogs Theme Playground
+            Held Paws Theme Playground
           </h1>
           <p className="text-base-content text-base sm:text-lg md:text-xl">
-            Explore 34 themes including custom RescueDogs variants
+            The Held Paws palette in light and dark modes
           </p>
         </div>
 

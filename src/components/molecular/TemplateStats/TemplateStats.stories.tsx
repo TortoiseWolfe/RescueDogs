@@ -33,7 +33,6 @@ const SAMPLE_DEMOS = [
   { label: 'Payments', href: '/payment-demo' },
   { label: 'Messaging', href: '/messages' },
   { label: 'Map', href: '/map' },
-  { label: 'Game', href: '/game' },
 ];
 
 const meta: Meta<typeof TemplateStats> = {

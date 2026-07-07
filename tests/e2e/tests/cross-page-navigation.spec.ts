@@ -1,41 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
-// All 32 DaisyUI themes for random selection
-const THEMES = [
-  'light',
-  'dark',
-  'cupcake',
-  'bumblebee',
-  'emerald',
-  'corporate',
-  'synthwave',
-  'retro',
-  'cyberpunk',
-  'valentine',
-  'halloween',
-  'garden',
-  'forest',
-  'aqua',
-  'lofi',
-  'pastel',
-  'fantasy',
-  'wireframe',
-  'black',
-  'luxury',
-  'dracula',
-  'cmyk',
-  'autumn',
-  'business',
-  'acid',
-  'lemonade',
-  'night',
-  'coffee',
-  'winter',
-  'dim',
-  'nord',
-  'sunset',
-];
+// RescueDogs branded palette themes (#17)
+const THEMES = ['trusted-care-light', 'trusted-care-dark'];
 
 test.describe('Cross-Page Navigation', () => {
   test('navigate through all main pages', async ({ page }) => {
@@ -60,8 +27,9 @@ test.describe('Cross-Page Navigation', () => {
     await dismissCookieBanner(page);
     await expect(page).toHaveURL(/\/blog/);
 
-    // Navigate to Docs via nav
-    await page.click('a:has-text("Docs")');
+    // Docs link is hidden from nav for now — reach /docs directly to keep
+    // multi-page navigation coverage.
+    await page.goto('/docs', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
     await expect(page).toHaveURL(/\/docs/);
 

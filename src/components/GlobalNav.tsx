@@ -7,7 +7,7 @@ import { LayeredRescueDogsLogo } from '@/components/atomic/SpinningLogo';
 import { AnimatedLogo } from '@/components/atomic/AnimatedLogo';
 import { ColorblindToggle } from '@/components/molecular/ColorblindToggle';
 import { FontSizeControl } from '@/components/navigation/FontSizeControl';
-import { detectedConfig } from '@/config/project-detected';
+import { projectConfig } from '@/config/project.config';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import AvatarDisplay from '@/components/atomic/AvatarDisplay';
@@ -15,6 +15,11 @@ import { useUnreadCount } from '@/hooks/useUnreadCount';
 import { AdminAuthService } from '@/services/admin/admin-auth-service';
 import { ShelterApplicationService } from '@/services/applications';
 import { createClient } from '@/lib/supabase/client';
+import {
+  DEFAULT_THEME_DARK,
+  normalizeThemeId,
+  THEME_OPTIONS,
+} from '@/config/themes';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -60,10 +65,11 @@ export function GlobalNav() {
   // ThemeScript runs before hydration and sets data-theme from localStorage
   // or system preference; we just sync React state to it here.
   useEffect(() => {
-    const savedTheme =
+    const savedTheme = normalizeThemeId(
       localStorage.getItem('theme') ||
-      document.documentElement.getAttribute('data-theme') ||
-      'rescuedogs-dark';
+        document.documentElement.getAttribute('data-theme') ||
+        DEFAULT_THEME_DARK
+    );
     setTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
 
@@ -74,19 +80,20 @@ export function GlobalNav() {
   }, []);
 
   const handleThemeChange = (newTheme: string) => {
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
+    const resolved = normalizeThemeId(newTheme);
+    setTheme(resolved);
+    localStorage.setItem('theme', resolved);
+    document.documentElement.setAttribute('data-theme', resolved);
 
     // Also set on body for consistency
     if (document.body) {
-      document.body.setAttribute('data-theme', newTheme);
+      document.body.setAttribute('data-theme', resolved);
     }
 
     // Dispatch custom event for other components to listen to
     window.dispatchEvent(
       new CustomEvent('themechange', {
-        detail: { theme: newTheme },
+        detail: { theme: resolved },
       })
     );
   };
@@ -141,48 +148,13 @@ export function GlobalNav() {
     ...(user ? [{ href: '/applications', label: 'My Applications' }] : []),
     ...(isShelterStaff ? [{ href: '/shelter', label: 'Shelter' }] : []),
     { href: '/blog', label: 'Blog' },
-    { href: '/docs', label: 'Docs' },
+    // { href: '/docs', label: 'Docs' },
   ];
 
-  const themes = [
-    'rescuedogs-dark',
-    'rescuedogs-light',
-    'light',
-    'dark',
-    'cupcake',
-    'bumblebee',
-    'emerald',
-    'corporate',
-    'synthwave',
-    'retro',
-    'cyberpunk',
-    'valentine',
-    'halloween',
-    'garden',
-    'forest',
-    'aqua',
-    'lofi',
-    'pastel',
-    'fantasy',
-    'wireframe',
-    'black',
-    'luxury',
-    'dracula',
-    'cmyk',
-    'autumn',
-    'business',
-    'acid',
-    'lemonade',
-    'night',
-    'coffee',
-    'winter',
-    'dim',
-    'nord',
-    'sunset',
-  ];
+  const themes = THEME_OPTIONS;
 
   return (
-    <header className="bg-primary text-primary-content sticky top-0 z-50 shadow-[0_8px_24px_rgba(31,79,196,0.35)]">
+    <header className="site-header bg-primary text-primary-content sticky top-0 z-50">
       <nav className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo & Brand */}
@@ -200,8 +172,8 @@ export function GlobalNav() {
               </div>
               <span className="hidden sm:block">
                 <AnimatedLogo
-                  text={detectedConfig.projectName}
-                  className="!text-xl font-bold"
+                  text={projectConfig.projectDisplayName}
+                  className="brand-logo !text-xl font-bold"
                   animationSpeed="normal"
                 />
               </span>
@@ -219,8 +191,8 @@ export function GlobalNav() {
                   key={item.href}
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`btn btn-ghost btn-sm text-primary-content hover:bg-white/15 ${
-                    isActive ? 'bg-white/20' : ''
+                  className={`btn btn-ghost btn-sm text-primary-content hover:bg-black/10 ${
+                    isActive ? 'bg-black/15' : ''
                   }`}
                 >
                   {item.label}
@@ -342,7 +314,7 @@ export function GlobalNav() {
               <>
                 <Link
                   href="/sign-in"
-                  className="btn btn-ghost btn-sm text-primary-content hidden min-h-11 min-w-11 hover:bg-white/15 lg:inline-flex"
+                  className="btn btn-ghost btn-sm text-primary-content hidden min-h-11 min-w-11 hover:bg-black/10 lg:inline-flex"
                 >
                   Sign In
                 </Link>
@@ -359,7 +331,7 @@ export function GlobalNav() {
             <div className="dropdown dropdown-end lg:hidden">
               <label
                 tabIndex={0}
-                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-white/15"
+                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-black/10"
                 aria-label="Navigation menu"
               >
                 <svg
@@ -460,7 +432,7 @@ export function GlobalNav() {
             {showInstallButton && !isInstalled && (
               <button
                 onClick={handleInstallClick}
-                className="btn btn-primary btn-sm min-h-11 min-w-11"
+                className="btn btn-neutral btn-sm min-h-11 min-w-11"
                 title="Progressive Web App (PWA) - Install this app for offline access and better performance"
               >
                 <svg
@@ -494,7 +466,7 @@ export function GlobalNav() {
             <div className="dropdown dropdown-end hidden lg:block">
               <label
                 tabIndex={0}
-                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-white/15"
+                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-black/10"
                 title="Change theme"
                 aria-label="Change theme"
               >
@@ -518,12 +490,12 @@ export function GlobalNav() {
                 className="dropdown-content bg-base-100 text-base-content rounded-box z-50 max-h-96 w-44 max-w-[calc(100vw-4rem)] overflow-y-auto p-2 shadow-lg sm:w-52"
               >
                 {themes.map((t) => (
-                  <li key={t}>
+                  <li key={t.id}>
                     <button
-                      className={`btn btn-ghost btn-sm w-full justify-start ${theme === t ? 'btn-active' : ''}`}
-                      onClick={() => handleThemeChange(t)}
+                      className={`btn btn-ghost btn-sm w-full justify-start ${theme === t.id ? 'btn-active' : ''}`}
+                      onClick={() => handleThemeChange(t.id)}
                     >
-                      <span className="capitalize">{t}</span>
+                      {t.label}
                     </button>
                   </li>
                 ))}

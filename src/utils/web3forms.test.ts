@@ -95,7 +95,7 @@ describe('Web3Forms Utilities', () => {
         body: JSON.stringify({
           access_key: WEB3FORMS_CONFIG.accessKey,
           ...validFormData,
-          from_name: 'RescueDogs Contact Form',
+          from_name: 'Held Paws Contact Form',
           botcheck: false,
         }),
       });
