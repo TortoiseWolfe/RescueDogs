@@ -297,11 +297,12 @@ describe('Project Configuration', () => {
 
     it('should use custom project name in manifest', () => {
       process.env.NEXT_PUBLIC_PROJECT_NAME = 'MyApp';
+      process.env.NEXT_PUBLIC_PROJECT_DISPLAY_NAME = 'My App';
 
       const manifest = generateManifest();
 
-      expect(manifest.name).toContain('MyApp');
-      expect(manifest.short_name).toBe('MyApp');
+      expect(manifest.name).toContain('My App');
+      expect(manifest.short_name).toBe('My App');
     });
   });
 

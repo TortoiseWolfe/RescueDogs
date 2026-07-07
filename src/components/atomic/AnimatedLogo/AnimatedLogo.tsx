@@ -48,7 +48,7 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
               className={`${styles.letter} ${styles.wordSpace}`}
               aria-hidden
             >
-              &nbsp;
+              {' '}
             </span>
           )}
           {word.split('').map((letter, letterIndex) => (
