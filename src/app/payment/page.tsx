@@ -4,7 +4,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import PaymentHubContent from './PaymentHubContent';
 
 export const metadata: Metadata = {
-  title: 'Payments - Held Paws',
+  title: 'Payments - Raised Paws',
   description: 'Manage your payments and subscriptions',
   robots: {
     index: false,
