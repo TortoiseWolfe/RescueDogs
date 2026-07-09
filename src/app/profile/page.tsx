@@ -5,7 +5,7 @@ import UserProfileCard from '@/components/auth/UserProfileCard';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Your Profile - Held Paws',
+  title: 'Your Profile - Raised Paws',
   description: 'View and manage your user profile',
   robots: {
     index: false,

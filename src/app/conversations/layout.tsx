@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Conversations - Held Paws',
+  title: 'Conversations - Raised Paws',
   description: 'Your conversations',
   robots: {
     index: false,

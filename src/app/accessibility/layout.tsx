@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Accessibility Controls - Held Paws',
+  title: 'Accessibility Controls - Raised Paws',
   description:
     'Customize your reading experience with accessibility controls. Adjust font size, line height, font family, and color vision settings for improved readability.',
 };

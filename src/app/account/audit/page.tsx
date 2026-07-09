@@ -5,7 +5,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import UserAuditTrail from '@/components/molecular/UserAuditTrail';
 
 export const metadata: Metadata = {
-  title: 'Security Activity - Held Paws',
+  title: 'Security Activity - Raised Paws',
   description: 'Review recent security activity on your account',
   robots: {
     index: false,

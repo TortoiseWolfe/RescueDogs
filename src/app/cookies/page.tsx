@@ -3,9 +3,9 @@ import { Metadata } from 'next';
 import { CookieActions } from '@/components/privacy/CookieActions';
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy - Held Paws',
+  title: 'Cookie Policy - Raised Paws',
   description:
-    'Learn how Held Paws uses cookies and how you can manage your cookie preferences.',
+    'Learn how Raised Paws uses cookies and how you can manage your cookie preferences.',
 };
 
 export default function CookiePolicyPage() {
