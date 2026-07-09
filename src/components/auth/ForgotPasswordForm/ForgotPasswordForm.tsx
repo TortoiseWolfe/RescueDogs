@@ -108,8 +108,8 @@ export default function ForgotPasswordForm({
       onSubmit={handleSubmit}
       className={`space-y-4${className ? ` ${className}` : ''}`}
     >
-      <div className="form-control">
-        <label className="label" htmlFor="email">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="email">
           <span className="label-text">Email</span>
         </label>
         <input
@@ -117,7 +117,7 @@ export default function ForgotPasswordForm({
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="input input-bordered min-h-11"
+          className="input input-bordered min-h-11 min-w-0 flex-1"
           placeholder="you@example.com"
           required
           disabled={loading}
