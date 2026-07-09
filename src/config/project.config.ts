@@ -15,7 +15,7 @@ const defaultConfig = {
   // User-facing brand name. Kept separate from projectName because projectName
   // drives the GitHub repo URL and basePath (github.com/<owner>/RescueDogs) and
   // must not change, while the displayed brand can be rebranded freely.
-  projectDisplayName: 'Held Paws',
+  projectDisplayName: 'Raised Paws',
   projectOwner: 'TortoiseWolfe',
   projectDescription:
     'Pet adoption application tracker for shelters, adopters, and live status updates',

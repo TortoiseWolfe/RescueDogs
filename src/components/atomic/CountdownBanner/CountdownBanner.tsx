@@ -107,7 +107,7 @@ export const CountdownBanner = () => {
         <div className="flex items-center gap-3">
           <div className="text-center">
             <div className="text-2xl font-bold">{price}</div>
-            <div className="text-sm">Custom Held Paws Setup</div>
+            <div className="text-sm">Custom Raised Paws Setup</div>
           </div>
           <Button variant="accent" onClick={() => router.push('/schedule')}>
             Book Now

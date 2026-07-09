@@ -58,7 +58,7 @@ export const LayeredRescueDogsLogo: React.FC<LayeredRescueDogsLogoProps> = ({
       <SpinningLogo speed={speed} pauseOnHover={pauseOnHover}>
         <Image
           src={`${detectedConfig.basePath}/rescuedogs-logo.svg`}
-          alt="Held Paws gear logo"
+          alt="Raised Paws gear logo"
           width={400}
           height={400}
           className="absolute inset-0 h-full w-full"

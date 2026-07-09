@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Project Status - Held Paws',
+  title: 'Project Status - Raised Paws',
   description:
     'View comprehensive project status including PWA capabilities, Lighthouse scores, web vitals, deployment history, and task progress tracking.',
 };
