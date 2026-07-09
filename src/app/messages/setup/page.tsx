@@ -223,8 +223,11 @@ export default function MessagingSetupPage() {
             />
 
             {/* Visible email field */}
-            <div className="form-control">
-              <label className="label" htmlFor="setup-email">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+              <label
+                className="sm:w-36 sm:shrink-0 sm:text-right"
+                htmlFor="setup-email"
+              >
                 <span className="label-text">Account</span>
               </label>
               <input
@@ -233,18 +236,20 @@ export default function MessagingSetupPage() {
                 name="email"
                 value={user?.email || ''}
                 readOnly
-                className="input input-bordered bg-base-200 min-h-11 w-full"
+                className="input input-bordered bg-base-200 min-h-11 min-w-0 flex-1"
                 autoComplete="username email"
               />
             </div>
 
             {/* Password field */}
-            <div className="form-control">
-              <label className="label" htmlFor="setup-password">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-x-6">
+              <label
+                className="sm:w-36 sm:shrink-0 sm:pt-3 sm:text-right"
+                htmlFor="setup-password"
+              >
                 <span className="label-text">Messaging Password</span>
-                <span className="label-text-alt text-warning">Save this!</span>
               </label>
-              <div className="relative">
+              <div className="relative min-w-0 flex-1">
                 <input
                   id="setup-password"
                   name="password"
@@ -266,31 +271,35 @@ export default function MessagingSetupPage() {
                 >
                   {showPassword ? '👁️' : '👁️‍🗨️'}
                 </button>
+                <p className="label-text-alt text-warning mt-1">Save this!</p>
               </div>
             </div>
 
             {/* Confirm password */}
-            <div className="form-control">
-              <label className="label" htmlFor="setup-confirm">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-x-6">
+              <label
+                className="sm:w-36 sm:shrink-0 sm:pt-3 sm:text-right"
+                htmlFor="setup-confirm"
+              >
                 <span className="label-text">Confirm Password</span>
               </label>
-              <input
-                id="setup-confirm"
-                name="confirm-password"
-                type={showPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="input input-bordered min-h-11 w-full"
-                placeholder="Confirm your password"
-                autoComplete="new-password"
-                disabled={loading}
-                required
-              />
-              <label className="label">
-                <span className="label-text-alt text-warning">
+              <div className="min-w-0 flex-1">
+                <input
+                  id="setup-confirm"
+                  name="confirm-password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="input input-bordered min-h-11 w-full"
+                  placeholder="Confirm your password"
+                  autoComplete="new-password"
+                  disabled={loading}
+                  required
+                />
+                <p className="label-text-alt text-warning mt-1">
                   Your password manager should prompt to save this password
-                </span>
-              </label>
+                </p>
+              </div>
             </div>
 
             {error && (

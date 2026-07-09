@@ -244,47 +244,55 @@ export default function AccountSettings({
     <div className={`space-y-6${className ? ` ${className}` : ''}`}>
       {/* Profile Settings */}
       <form onSubmit={handleUpdateProfile} className="card bg-base-200">
-        <div className="card-body">
+        <div className="card-body space-y-4">
           <h3 className="card-title">Profile Settings</h3>
 
           {/* Display Name Field */}
-          <div className="form-control">
-            <label htmlFor="displayname-input" className="label">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+            <label
+              className="sm:w-36 sm:shrink-0 sm:text-right"
+              htmlFor="displayname-input"
+            >
               <span className="label-text">Display Name</span>
             </label>
-            <input
-              id="displayname-input"
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className="input input-bordered min-h-11"
-              placeholder="e.g., John Doe"
-              disabled={loading || isUpdatingProfile}
-            />
-            <label className="label">
-              <span className="label-text-alt">
+            <div className="min-w-0 flex-1">
+              <input
+                id="displayname-input"
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="input input-bordered min-h-11 w-full"
+                placeholder="e.g., John Doe"
+                disabled={loading || isUpdatingProfile}
+              />
+              <p className="label-text-alt text-base-content/85 mt-1">
                 Your friendly name shown to other users
-              </span>
-            </label>
+              </p>
+            </div>
           </div>
 
           {/* Bio Field */}
-          <div className="form-control">
-            <label htmlFor="bio-textarea" className="label">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-x-6">
+            <label
+              className="sm:w-36 sm:shrink-0 sm:pt-3 sm:text-right"
+              htmlFor="bio-textarea"
+            >
               <span className="label-text">Bio</span>
             </label>
-            <textarea
-              id="bio-textarea"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              className="textarea textarea-bordered"
-              rows={3}
-              placeholder="Tell us about yourself..."
-              disabled={loading || isUpdatingProfile}
-            />
-            <label className="label">
-              <span className="label-text-alt">Maximum 500 characters</span>
-            </label>
+            <div className="min-w-0 flex-1">
+              <textarea
+                id="bio-textarea"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                className="textarea textarea-bordered w-full"
+                rows={3}
+                placeholder="Tell us about yourself..."
+                disabled={loading || isUpdatingProfile}
+              />
+              <p className="label-text-alt text-base-content/85 mt-1">
+                Maximum 500 characters
+              </p>
+            </div>
           </div>
 
           <button
@@ -368,10 +376,13 @@ export default function AccountSettings({
 
       {/* Password Change */}
       <form onSubmit={handleChangePassword} className="card bg-base-200">
-        <div className="card-body">
+        <div className="card-body space-y-4">
           <h3 className="card-title">Change Password</h3>
-          <div className="form-control">
-            <label htmlFor="new-password-input" className="label">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+            <label
+              className="sm:w-36 sm:shrink-0 sm:text-right"
+              htmlFor="new-password-input"
+            >
               <span className="label-text">New Password</span>
             </label>
             <input
@@ -379,12 +390,15 @@ export default function AccountSettings({
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input input-bordered min-h-11"
+              className="input input-bordered min-h-11 min-w-0 flex-1"
               disabled={loading || isUpdatingProfile}
             />
           </div>
-          <div className="form-control">
-            <label htmlFor="confirm-password-input" className="label">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+            <label
+              className="sm:w-36 sm:shrink-0 sm:text-right"
+              htmlFor="confirm-password-input"
+            >
               <span className="label-text">Confirm Password</span>
             </label>
             <input
@@ -392,7 +406,7 @@ export default function AccountSettings({
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="input input-bordered min-h-11"
+              className="input input-bordered min-h-11 min-w-0 flex-1"
               disabled={loading || isUpdatingProfile}
             />
           </div>
