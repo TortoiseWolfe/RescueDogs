@@ -230,8 +230,8 @@ describe('Project Configuration', () => {
     it('should generate a valid PWA manifest', () => {
       const manifest = generateManifest();
 
-      expect(manifest.name).toContain('Held Paws');
-      expect(manifest.short_name).toBe('Held Paws');
+      expect(manifest.name).toContain('Raised Paws');
+      expect(manifest.short_name).toBe('Raised Paws');
       expect(manifest.description).toContain(
         'Pet adoption application tracker'
       );

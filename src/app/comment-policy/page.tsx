@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Comment Policy - Held Paws',
+  title: 'Comment Policy - Raised Paws',
   description:
     'Our comment policy promotes constructive dialogue. We welcome diverse opinions expressed respectfully.',
 };

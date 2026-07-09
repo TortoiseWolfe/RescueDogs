@@ -17,12 +17,12 @@ import { AnimatedLogo } from './AnimatedLogo';
 describe('AnimatedLogo', () => {
   it('renders with default text', () => {
     const { container } = render(<AnimatedLogo />);
-    expect(container.textContent).toContain('Held Paws');
+    expect(container.textContent).toContain('Raised Paws');
   });
 
   it('renders multi-word brand text with a visible space', () => {
-    const { container } = render(<AnimatedLogo text="Held Paws" />);
-    expect(container.textContent).toBe('Held Paws');
+    const { container } = render(<AnimatedLogo text="Raised Paws" />);
+    expect(container.textContent).toBe('Raised Paws');
   });
 
   it('applies size classes', () => {

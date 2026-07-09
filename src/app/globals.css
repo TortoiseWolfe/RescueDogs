@@ -69,12 +69,12 @@
   --color-base-300: #1e3a8a;
   --color-base-content: #f8fafc;
 
-  --color-primary: #93c5fd;
-  --color-primary-content: #0c1929;
+  --color-primary: #1e3a8a;
+  --color-primary-content: #ffffff;
   --color-secondary: #f97316;
-  --color-secondary-content: #0c1929;
+  --color-secondary-content: #ffffff;
   --color-accent: #f97316;
-  --color-accent-content: #0c1929;
+  --color-accent-content: #ffffff;
 
   --color-neutral: #1e3a8a;
   --color-neutral-content: #f8fafc;
@@ -134,14 +134,12 @@
   color: color-mix(in oklab, var(--color-base-content) 92%, transparent);
 }
 
-/* Menu bar (#17): white background on light mode, orange on dark mode.
- * The header markup uses bg-primary / text-primary-content throughout, so we
- * remap the primary tokens at header scope — every descendant that references
- * those tokens (nav links, toggles, brand title) stays in sync and legible.
- * Foreground is the inverse of the bar: orange on white, white on orange. */
+/* Menu bar: orange background in both light and dark modes.
+ * Remap primary tokens at header scope so nav links, toggles, and brand
+ * title stay legible — white text on orange in both themes. */
 [data-theme='trusted-care-light'] .site-header {
-  --color-primary: #ffffff;
-  --color-primary-content: #f97316;
+  --color-primary: #f97316;
+  --color-primary-content: #ffffff;
   box-shadow: 0 8px 24px rgba(30, 58, 138, 0.12);
 }
 
@@ -152,8 +150,8 @@
 }
 
 /* The brand title (AnimatedLogo) hardcodes text-primary; inside the menu bar
- * that equals the bar background, so force it to the foreground token to match
- * the nav buttons (orange on white / white on orange). */
+ * that equals the bar background, so force it to the foreground token (white
+ * on orange in both themes). */
 .site-header .brand-logo {
   color: var(--color-primary-content);
 }

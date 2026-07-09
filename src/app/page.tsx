@@ -16,7 +16,7 @@ const STATS = [
   {
     value: '140',
     label: 'volunteers',
-    tone: 'text-neutral',
+    tone: 'text-[#5da8e0]',
   },
 ];
 
@@ -58,19 +58,19 @@ const STEPS = [
     number: '1',
     title: 'Browse & pick',
     detail: 'Meet our pets and find the one that makes your heart melt.',
-    bg: 'bg-accent text-accent-content',
+    bg: 'bg-[#1e3a8a] text-white',
   },
   {
     number: '2',
     title: 'Apply online',
     detail: 'Send one application and track every update in real time.',
-    bg: 'bg-primary text-primary-content',
+    bg: 'bg-[#f97316] text-white',
   },
   {
     number: '3',
     title: 'Bring them home',
     detail: 'Work with the shelter team and start your happily-ever-after.',
-    bg: 'bg-neutral text-neutral-content',
+    bg: 'bg-[#d7e6ff] text-[#1e3a8a]',
   },
 ] as const;
 
@@ -88,7 +88,7 @@ export default function Home() {
       <section
         id="main-content"
         aria-labelledby="hero-heading"
-        className="relative bg-gradient-to-b from-[#1e3a8a] to-[#2a4da3] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-24"
+        className="relative bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-24"
       >
         <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-12 lg:flex-row lg:gap-16">
           <div className="flex-1 text-center lg:text-left">
@@ -103,8 +103,8 @@ export default function Home() {
               Find your next pet, and track the adoption process.
             </h1>
 
-            <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold text-[#eaf1ff] sm:text-xl lg:mx-0">
-              Held Paws helps adopters apply with confidence while giving
+            <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold text-white/90 sm:text-xl lg:mx-0">
+              Raised Paws helps adopters apply with confidence while giving
               shelters a simple way to review applications and keep everyone
               updated.
             </p>
@@ -125,7 +125,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="relative aspect-[16/9] w-full max-w-sm shrink-0 animate-[floaty_5s_ease-in-out_infinite] lg:max-w-[520px]">
+          <div className="relative -mt-8 aspect-[16/9] w-full max-w-sm shrink-0 animate-[floaty_5s_ease-in-out_infinite] lg:-mt-20 lg:max-w-[520px]">
             <div className="absolute inset-0 rotate-3 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl" />
             <div className="absolute inset-2 rotate-3 overflow-hidden rounded-[1.625rem]">
               <Image
