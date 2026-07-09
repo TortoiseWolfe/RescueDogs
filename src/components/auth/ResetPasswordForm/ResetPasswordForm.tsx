@@ -62,8 +62,8 @@ export default function ResetPasswordForm({
       onSubmit={handleSubmit}
       className={`space-y-4${className ? ` ${className}` : ''}`}
     >
-      <div className="form-control">
-        <label className="label" htmlFor="password">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="password">
           <span className="label-text">New Password</span>
         </label>
         <input
@@ -71,15 +71,18 @@ export default function ResetPasswordForm({
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="input input-bordered min-h-11"
+          className="input input-bordered min-h-11 min-w-0 flex-1"
           placeholder="••••••••"
           required
           disabled={loading}
         />
       </div>
 
-      <div className="form-control">
-        <label className="label" htmlFor="confirm-password">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
+        <label
+          className="sm:w-36 sm:shrink-0 sm:text-right"
+          htmlFor="confirm-password"
+        >
           <span className="label-text">Confirm Password</span>
         </label>
         <input
@@ -87,7 +90,7 @@ export default function ResetPasswordForm({
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="input input-bordered min-h-11"
+          className="input input-bordered min-h-11 min-w-0 flex-1"
           placeholder="••••••••"
           required
           disabled={loading}
