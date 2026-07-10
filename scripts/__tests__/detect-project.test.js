@@ -212,22 +212,65 @@ describe('detect-project.js', () => {
       process.env = original;
     });
 
-    test('basePath is still auto-detected under GitHub Actions when not disabled', () => {
-      // Guard the production GitHub Pages path: without DISABLE_BASE_PATH the
-      // deploy build must still get /RescueDogs.
+    test('basePath is empty under GitHub Actions when public/CNAME exists (go-live)', () => {
+      // Production deploy on a custom apex domain: public/CNAME drops /RescueDogs.
       const original = { ...process.env };
       process.env.GITHUB_ACTIONS = 'true';
       process.env.GITHUB_REPOSITORY = 'TortoiseWolfe/RescueDogs';
       delete process.env.NEXT_PUBLIC_BASE_PATH;
       delete process.env.DISABLE_BASE_PATH;
 
+      const cnamePath = path.join(__dirname, '..', '..', 'public', 'CNAME');
+      assert.ok(
+        fs.existsSync(cnamePath),
+        'fixture: public/CNAME must exist for go-live basePath test'
+      );
+
       const config = generateConfig();
 
       assert.strictEqual(
         config.basePath,
-        '/RescueDogs',
-        'without DISABLE_BASE_PATH the GitHub Pages basePath must remain'
+        '',
+        'with public/CNAME the GitHub Pages deploy build must use an empty basePath'
       );
+
+      process.env = original;
+    });
+
+    test('basePath is /RescueDogs under GitHub Actions when public/CNAME is absent', () => {
+      // Forks and pre-go-live github.io paths still auto-detect /RepoName.
+      const original = { ...process.env };
+      process.env.GITHUB_ACTIONS = 'true';
+      process.env.GITHUB_REPOSITORY = 'TortoiseWolfe/RescueDogs';
+      delete process.env.NEXT_PUBLIC_BASE_PATH;
+      delete process.env.DISABLE_BASE_PATH;
+
+      const cnamePath = path.join(__dirname, '..', '..', 'public', 'CNAME');
+      const cnameBackup = path.join(
+        __dirname,
+        '..',
+        '..',
+        'public',
+        'CNAME.test-bak'
+      );
+      const hadCname = fs.existsSync(cnamePath);
+      if (hadCname) {
+        fs.renameSync(cnamePath, cnameBackup);
+      }
+
+      try {
+        const config = generateConfig();
+
+        assert.strictEqual(
+          config.basePath,
+          '/RescueDogs',
+          'without public/CNAME the GitHub Pages basePath must remain /RescueDogs'
+        );
+      } finally {
+        if (hadCname && fs.existsSync(cnameBackup)) {
+          fs.renameSync(cnameBackup, cnamePath);
+        }
+      }
 
       process.env = original;
     });
