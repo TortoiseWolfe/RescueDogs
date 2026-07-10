@@ -104,7 +104,13 @@ export const metadata: Metadata = {
     title: projectConfig.projectDisplayName,
     description: projectConfig.projectDescription,
     path: '/',
-    tags: ['Next.js', 'React', 'TypeScript', 'PWA', 'DaisyUI', 'TailwindCSS'],
+    tags: [
+      'pet adoption',
+      'animal rescue',
+      'shelter',
+      'adoption tracker',
+      'Raised Paws',
+    ],
   }),
   manifest: projectConfig.manifestPath,
   icons: {
