@@ -59,7 +59,7 @@ export const blogConfig = {
   seo: {
     titleTemplate: '%s | Blog',
     defaultDescription: 'A modern blog with offline-first capabilities',
-    defaultImage: '/opengraph-image.png',
+    defaultImage: '/hero-held-paws.png',
     twitterHandle: '@yourtwitterhandle',
   },
 
