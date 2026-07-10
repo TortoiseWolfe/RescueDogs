@@ -165,13 +165,13 @@ heldpaws.*        abandoned (no DNS work)
 
 ## Open / TBD
 
-| Item                                                                  | Status                        |
-| --------------------------------------------------------------------- | ----------------------------- |
-| Comment #26 on GitHub with revised domain plan (2 active, 1 redirect) | Pending                       |
-| Comment #30 on GitHub with “chose GitHub Pages”                       | Pending                       |
-| Who clicks DNS in Namecheap (schlajo vs Jon)                          | schlajo owns Namecheap        |
-| `raisedpaws.org` redirect: URL forwarding vs Advanced DNS             | Decide at Phase 2             |
-| Future Vercel migration                                               | Documented above; no schedule |
+| Item                                                                  | Status                                   |
+| --------------------------------------------------------------------- | ---------------------------------------- |
+| Comment #26 on GitHub with revised domain plan (2 active, 1 redirect) | Pending                                  |
+| Comment #30 on GitHub with “chose GitHub Pages”                       | Pending                                  |
+| Who clicks DNS in Namecheap (schlajo vs Jon)                          | schlajo                                  |
+| `raisedpaws.org` redirect propagation                                 | Configured 2026-07-10; verify in browser |
+| Future Vercel migration                                               | Documented above; no schedule            |
 
 ---
 
