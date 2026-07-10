@@ -24,7 +24,7 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
     title = displayName,
     description = projectConfig.projectDescription,
     path = '/',
-    image = '/opengraph-image.png',
+    image = '/hero-held-paws.png',
     type = 'website',
     publishedTime,
     modifiedTime,
@@ -35,7 +35,7 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
 
   const fullTitle =
     title === displayName
-      ? `${displayName} - Modern Web Starter`
+      ? `${displayName} — ${projectConfig.projectTagline}`
       : `${title} | ${displayName}`;
 
   const canonicalUrl = `${projectConfig.deployUrl}${path}`;
@@ -43,7 +43,7 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
   // For Open Graph images, we need absolute URLs
   let imageUrl: string;
   if (image.startsWith('/')) {
-    // For assets like opengraph-image.png, construct the full URL
+    // For assets like hero-held-paws.png, construct the full URL
     // The deployUrl already includes the project name for GitHub Pages
     imageUrl = `${projectConfig.deployUrl}${image}`;
   } else {
@@ -58,7 +58,14 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
     generator: 'Next.js',
     applicationName: displayName,
     referrer: 'origin-when-cross-origin',
-    keywords: ['Next.js', 'React', 'TypeScript', 'PWA', 'DaisyUI', ...tags],
+    keywords: [
+      'pet adoption',
+      'animal rescue',
+      'shelter',
+      'adoption application',
+      'Raised Paws',
+      ...tags,
+    ],
     creator: author,
     publisher: projectConfig.projectOwner,
     formatDetection: {
@@ -173,7 +180,7 @@ export function generateJsonLd(options: MetadataOptions = {}) {
       '@type': 'Article',
       headline: title,
       description,
-      image: `${projectConfig.deployUrl}/opengraph-image.png`,
+      image: `${projectConfig.deployUrl}/hero-held-paws.png`,
       datePublished: publishedTime,
       dateModified: modifiedTime || publishedTime,
       author: {
