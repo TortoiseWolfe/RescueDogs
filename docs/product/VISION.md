@@ -112,6 +112,115 @@ pillar 3 is proven with a real shelter.
 
 ---
 
+## Future horizons (possible additions after pillars 1–5)
+
+These ideas extend the original vision but are **not approved pillars, roadmap
+commitments, or current scope**. Revisit them only after pillar 3 is proven and
+the original deferred pillars have been evaluated in sequence. Each horizon
+requires customer discovery, partner validation, legal/privacy review, and its
+own SpecKit cycle before implementation.
+
+### Horizon A — Human–animal wellness network
+
+Bring animal-assisted wellness organizations onto the platform, including
+equine grooming and care programs for people experiencing PTSD or anxiety,
+therapeutic riding programs, and other qualified organizations that facilitate
+structured human–animal interaction.
+
+**Why it could matter:**
+
+- Expands the ecosystem beyond adoption while remaining connected to animal
+  welfare and community support
+- Helps specialized organizations become discoverable without requiring them to
+  operate a shelter or list animals for adoption
+- Could complement pillar 4 by connecting adopters to appropriate post-adoption
+  behavioral, grooming, or wellness support
+
+**Risks and questions to resolve:**
+
+- Distinguish clinical therapy, non-clinical wellness, grooming, and recreational
+  programs accurately; do not imply that RescueDogs provides medical treatment
+- Verify credentials, animal-welfare standards, insurance, and safeguarding
+  practices without presenting a listing as an endorsement
+- Avoid collecting diagnoses or sensitive mental-health intake data. An initial
+  version should favor verified organization profiles and external referrals
+  over clinical scheduling or patient records
+- Validate that participation benefits the animals as well as the people
+
+### Horizon B — Microchip identity and reunion network
+
+Reduce the fragmented lookup process faced by veterinarians, shelters, and
+people who find lost pets. A scanned chip number could be routed to the correct
+participating registry from one workflow instead of requiring calls or searches
+across multiple databases.
+
+**Why it could matter:**
+
+- Creates a direct path from pillar 2's stray response workflow to safe reunion
+- Supports shelter intake and pillar 4's post-adoption lifecycle
+- Solves a concrete coordination problem without requiring RescueDogs to become
+  the owner of every registry's records
+
+**Risks and questions to resolve:**
+
+- Treat this as a standards, partnership, and API effort—not unauthorized
+  scraping or a promise that every registry can be searched
+- Existing universal lookup services may already cover part of the problem;
+  identify the remaining gaps before building
+- Prefer a privacy-preserving lookup router that identifies the responsible
+  registry or relays contact, rather than exposing owner information
+- Establish authorization rules for veterinarians, shelters, animal-control
+  agencies, and members of the public; log and audit sensitive lookups
+- Require formal agreements with registries and a security review before
+  handling chip-linked identity data
+
+### Horizon C — Federated animal-services hub
+
+Connect shelters, rescues, foster groups, stray-response volunteers,
+veterinarians, low-cost clinics, trainers, groomers, animal-assisted wellness
+programs, microchip registries, and other mission-aligned organizations through
+one trusted entry point.
+
+This should be a **federated service network**, not a generic pet-business
+directory. Organizations should participate because they complete a meaningful
+animal-care workflow—adoption, reunion, fostering, treatment, training, or
+retention—not merely because they want a listing.
+
+**Why it could matter:**
+
+- Gives people a coherent path through services that are currently fragmented
+- Lets each completed pillar become a connected part of a larger ecosystem
+- Creates shared referral and outcome data that can reduce dead ends between
+  organizations
+
+**Risks and questions to resolve:**
+
+- A broad directory launched too early would dilute the anti-ghosting
+  positioning and compete on listing volume rather than outcomes
+- Profiles require verification, moderation, freshness checks, category
+  standards, dispute handling, and a clear removal process
+- Paid placement must never determine welfare recommendations or obscure why an
+  organization appears in results
+- Geographic coverage should expand only where listings and referrals can be
+  kept trustworthy and useful
+
+### Long-term narrative and sequencing
+
+The possible arc is:
+
+1. **Finish adoptions** — prove the anti-ghosting shelter loop
+2. **Support the animal's journey** — foster, stray response, retention, and
+   lifestyle fit through pillars 1–5
+3. **Reunite and connect** — microchip routing and qualified wellness partners
+4. **Federate the ecosystem** — become a trusted front door to animal services
+   without becoming an advertising-driven directory
+
+The long-term promise is not "every pet organization in one app" by itself. It
+is **one trusted place to finish adoptions, reunite lost animals, and find the
+organizations that keep animals and their people supported**.
+
+---
+
 ## ScriptHammer template vs RescueDogs product
 
 RescueDogs is a **fork of ScriptHammer** (Next.js, Supabase, Docker, SpecKit).
@@ -148,6 +257,7 @@ and must restate Principle V.
 
 ## Revision history
 
-| Date       | Change                                                                       |
-| ---------- | ---------------------------------------------------------------------------- |
-| 2026-07-04 | Initial capture from founding brainstorm + constitution/MVP alignment review |
+| Date       | Change                                                                                                 |
+| ---------- | ------------------------------------------------------------------------------------------------------ |
+| 2026-07-11 | Added post-pillar future horizons for wellness, microchip reunion, and a federated animal-services hub |
+| 2026-07-04 | Initial capture from founding brainstorm + constitution/MVP alignment review                           |

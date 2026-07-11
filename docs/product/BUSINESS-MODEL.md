@@ -26,6 +26,14 @@ final.
 This is **B2B shelter SaaS** (and grant-funded mission work), not a Petfinder-style
 consumer listing business.
 
+The possible long-term expansion described in
+[VISION.md — Future horizons](./VISION.md#future-horizons-possible-additions-after-pillars-15)
+does not change the near-term position. If validated later, RescueDogs could
+grow from the shelter operating system into a **federated animal-services
+network** for adoption, reunion, and ongoing support. That expansion must be
+earned through completed workflows and trusted partnerships—not listing volume
+or advertising traffic.
+
 ---
 
 ## Organizational structure options
@@ -158,15 +166,102 @@ is validated in production with at least one real shelter.
 
 ---
 
+### Tier D — Far-future horizons (not committed)
+
+These models correspond to the possible additions documented in
+[VISION.md](./VISION.md#future-horizons-possible-additions-after-pillars-15).
+They are hypotheses for later customer and partner discovery, not forecasts or
+approval to build.
+
+#### 9. Human–animal wellness organization network
+
+Potential customers and partners include qualified equine programs,
+animal-assisted wellness organizations, therapeutic riding programs, and
+post-adoption behavioral or grooming providers.
+
+Possible sustainable models:
+
+- Organization subscriptions for verified profiles, referral intake, scheduling
+  tools, and outcome reporting
+- Program-service grants supporting access for veterans, trauma survivors, or
+  other eligible communities
+- Institution or health-system partnerships that fund qualified referrals
+- Transparent booking or referral fees only when they do not influence rankings
+  or restrict access
+
+**Required guardrails:** RescueDogs must not market non-clinical services as
+medical treatment, sell health-related data, or store diagnoses merely to
+facilitate discovery. Credential verification, animal-welfare standards,
+insurance, safeguarding, and legal review are prerequisites.
+
+#### 10. Microchip identity and reunion network
+
+The strongest initial model is likely **B2B/B2G infrastructure**, not a consumer
+fee. Veterinarians, shelters, municipalities, animal-control agencies, and
+participating registries benefit from faster routing and fewer manual calls.
+
+Possible sustainable models:
+
+- API or enterprise access for high-volume professional lookup workflows
+- Municipal or regional contracts tied to reunion speed and reduced shelter
+  intake
+- Registry integration, implementation, and support agreements
+- Grants or mission-aligned sponsorships that keep public lost-pet lookup free
+
+**Required guardrails:** Never charge a pet owner to recover contact with a
+found pet, sell chip-linked identity data, scrape registries without permission,
+or expose owner contact details when a privacy-preserving relay is sufficient.
+Commercial viability depends on registry participation, standards, and formal
+data-sharing agreements.
+
+#### 11. Federated animal-services hub
+
+The hub should monetize workflow and coordination value—not access to a
+pay-to-play directory.
+
+Possible sustainable models:
+
+- Organization subscriptions for verified profiles, referrals, case handoffs,
+  and service availability
+- Regional network contracts for coordinated care and reporting
+- Integration/API fees for participating platforms
+- Grants or sponsorships that fund verified listings in underserved areas
+
+Search placement and welfare recommendations must not be sold to the highest
+bidder. If sponsorship exists, it must be clearly labeled and separated from
+verification, relevance, and safety ranking.
+
+#### Validation gates before Tier D
+
+Before approving any Tier D business line:
+
+1. Demonstrate that pillars 1–5 have created a real need for the proposed
+   connection rather than assuming a general directory will attract users
+2. Interview each side of the market and secure willing pilot partners
+3. Map regulatory, privacy, credentialing, safeguarding, and insurance duties
+4. Define an animal-outcome metric and a partner-time-saved metric
+5. Prove that the model can operate without selling personal data or distorting
+   referrals
+6. Run one geographically limited pilot before claiming broad coverage
+
+Per Constitution **Principle V**, Tier D begins only after the earlier loops have
+been validated and deliberately prioritized. "Be the place for everything" is a
+direction, not a release scope.
+
+---
+
 ## What to avoid
 
-| Avoid                                                | Why                                    |
-| ---------------------------------------------------- | -------------------------------------- |
-| Selling or profiling applicant data                  | Violates Principle III; destroys trust |
-| Pay-to-apply or pay-to-track                         | Adds barrier; hurts adoptions          |
-| Fees tied to rejection or ghosting                   | Perverse incentives                    |
-| Ad-heavy consumer experience                         | Optimizes traffic, not placements      |
-| Large undocumented cuts of animal-directed donations | Erodes shelter and adopter trust       |
+| Avoid                                                | Why                                                  |
+| ---------------------------------------------------- | ---------------------------------------------------- |
+| Selling or profiling applicant data                  | Violates Principle III; destroys trust               |
+| Selling owner, microchip, or health-related data     | Endangers people and animals; destroys network trust |
+| Pay-to-apply or pay-to-track                         | Adds barrier; hurts adoptions                        |
+| Pay-to-reunite a lost animal                         | Exploits an urgent welfare event                     |
+| Pay-to-rank service organizations                    | Distorts referrals and safety signals                |
+| Fees tied to rejection or ghosting                   | Perverse incentives                                  |
+| Ad-heavy consumer experience                         | Optimizes traffic, not placements                    |
+| Large undocumented cuts of animal-directed donations | Erodes shelter and adopter trust                     |
 
 ---
 
@@ -208,6 +303,10 @@ rescues and pilot expansion.
 | **Grantmakers**                     | Measurable welfare outcomes      | Fund pilots and free tier access              |
 | **Corporate sponsors**              | Brand alignment with rescue      | Sponsor free seats; no consumer data deals    |
 
+Possible far-future segments—animal-assisted wellness organizations,
+veterinarians, microchip registries, municipalities, and other animal-service
+providers—remain discovery targets rather than current customers.
+
 ---
 
 ## Metrics that matter (for pricing and grants)
@@ -236,6 +335,7 @@ Align with Constitution **Principle IV** — animal outcomes, not vanity metrics
 
 ## Revision history
 
-| Date       | Change                                         |
-| ---------- | ---------------------------------------------- |
-| 2026-07-04 | Initial draft from product/strategy discussion |
+| Date       | Change                                                                   |
+| ---------- | ------------------------------------------------------------------------ |
+| 2026-07-11 | Added business analysis and guardrails for possible post-pillar horizons |
+| 2026-07-04 | Initial draft from product/strategy discussion                           |
