@@ -82,6 +82,92 @@ Shelters drown in "what's my status?" email. Silence is the default failure mode
 
 ---
 
+## Shelter onboarding and application strategy
+
+One of the hardest adoption problems is not building the loop — it is getting
+real shelters to use it without asking them to replace everything they already
+have. This section captures the go-to-market strategy for pillar 3: what we ask
+shelters to change, what we do not ask, and how pet data and applications fit
+together.
+
+### What we are not trying to do
+
+- **Not Petfinder.** We do not need to become the national pet photo directory
+  or manually upload every shelter's animals nationwide.
+- **Not rip-and-replace on day one.** Many shelters have county contracts,
+  insurance waivers, or board-approved PDFs they cannot abandon immediately.
+- **Not duplicate data entry forever.** Manual import is a pilot tactic, not the
+  long-term operating model.
+
+The wedge is narrower and stronger:
+
+> Shelters can keep listing pets wherever they already do. Use RescueDogs so
+> applicants stop getting ghosted.
+
+### How pet information gets into the system
+
+The shipped MVP seeds pets and shelters for demo (`048-rescue-mvp`). Real shelter
+onboarding is future work, planned in phases:
+
+| Phase                     | How pets enter                                                                 | Who does the work                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| **Pilots (1–5 shelters)** | Spreadsheet import, Petfinder export, or copy from the shelter's existing site | RescueDogs + shelter during paid onboarding (see [BUSINESS-MODEL.md](./BUSINESS-MODEL.md)) |
+| **Growth**                | Simple shelter self-service: add and edit currently available pets             | Shelter staff                                                                              |
+| **Scale**                 | Sync with Petfinder, shelter management software, or website feeds             | Paid integrations (Tier B in business model)                                               |
+
+For early pilots, a shelter may only need **currently available** animals in the
+system — often 10–30 pets, not their full historical catalog. Listing
+elsewhere (Petfinder, website, social) can continue; our apply link and pipeline
+are the product entry point.
+
+### Universal application vs shelter-specific forms
+
+Shelters often already have their own applications. That is expected. RescueDogs
+does not need to win a fight over every legal document in year one. What must
+not break is the anti-ghosting loop: **status must live in RescueDogs.**
+
+| Principle                             | Implication                                                                 |
+| ------------------------------------- | --------------------------------------------------------------------------- |
+| **I — No One Gets Ghosted**           | Pipeline and live tracker require applications to flow through our system   |
+| **II — Shelter Staff Time Is Sacred** | Adopters fill core data once; staff should not re-type the same answers     |
+| **III — Applicant Data Is a Trust**   | Frozen application snapshot for shelter review; no selling or profiling PII |
+
+**Raised Paws universal application = system of record** for intake, pipeline,
+and status. Their forms, when still required, are supplementary — not where
+status dies in an inbox.
+
+### Three patterns (per shelter)
+
+| Pattern                             | When to use                                  | Adopter experience                                                                                        |
+| ----------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **A — RescueDogs only**             | Small rescue with a flexible process         | One form → full tracker                                                                                   |
+| **B — RescueDogs + export**         | Shelter keeps a PDF or Google Form for files | Fill once on RescueDogs; shelter receives export or adopter copies fields into their form                 |
+| **C — RescueDogs + shelter packet** | Legally required external form               | Step 1: RescueDogs (status starts). Step 2: link to their form. Staff marks "packet received" in pipeline |
+
+Do **not** host random shelter application iframes as the primary apply flow —
+inconsistent hosts, no reliable data capture, and status still disappears into
+their inbox. Do allow a **link or checklist step** in the pipeline while status
+remains in RescueDogs.
+
+Pre-fill is the bridge between "apply once" and shelter reality. The shipped
+form already supports profile prefill; future work includes PDF export, copy for
+external web forms, and integrations with shelter management tools.
+
+### The pilot ask (simple and concrete)
+
+1. Import **currently available** pets (spreadsheet, export, or manual one-time setup).
+2. Send applicants to the **RescueDogs apply link** for those pets.
+3. Staff run **status updates in the pipeline** — even if they still file a
+   separate county PDF offline.
+
+**What we sell:** fewer "what's my status?" emails, one dashboard to advance
+applications, adopters who stay engaged because updates are visible.
+
+**What we do not sell yet:** replacing Petfinder, replacing every legal adoption
+document, or re-keying an entire animal database by hand.
+
+---
+
 ## Deferred pillars (intentionally parked)
 
 These remain part of the **long-term vision** named in the constitution. They
@@ -259,5 +345,6 @@ and must restate Principle V.
 
 | Date       | Change                                                                                                 |
 | ---------- | ------------------------------------------------------------------------------------------------------ |
+| 2026-07-12 | Added shelter onboarding and application strategy for pillar 3 pilots                                  |
 | 2026-07-11 | Added post-pillar future horizons for wellness, microchip reunion, and a federated animal-services hub |
 | 2026-07-04 | Initial capture from founding brainstorm + constitution/MVP alignment review                           |
