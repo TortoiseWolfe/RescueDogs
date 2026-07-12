@@ -120,6 +120,24 @@ system — often 10–30 pets, not their full historical catalog. Listing
 elsewhere (Petfinder, website, social) can continue; our apply link and pipeline
 are the product entry point.
 
+### Data integrations (what we are not building)
+
+We are **not** planning a universal scraper or an extractor that pulls
+everything from every shelter database. Early pilots use a **one-time import**
+of currently available pets (spreadsheet, Petfinder export, or copy from their
+site). Shelters can keep listing animals on Petfinder or their own website.
+
+Over time we add **self-service pet management** in Raised Paws, then
+**targeted official integrations** (Petfinder, shelter management software such
+as PetPoint or Shelterluv, website feeds) — built **one system at a time** through
+APIs and partnerships, not unauthorized scraping.
+
+We do **not** need to mirror a shelter's full historical animal database — only
+the pets they are actively taking applications for. For **applications**, Raised
+Paws is the system of record for new intake and live status; we do not pull old
+applications out of their existing systems. Supplemental shelter PDFs or forms
+can remain, but status tracking lives in our pipeline.
+
 ### Universal application vs shelter-specific forms
 
 Shelters often already have their own applications. That is expected. RescueDogs
@@ -345,6 +363,7 @@ and must restate Principle V.
 
 | Date       | Change                                                                                                 |
 | ---------- | ------------------------------------------------------------------------------------------------------ |
+| 2026-07-12 | Added data-integration guardrails under shelter onboarding; clarified no universal DB extractor        |
 | 2026-07-12 | Added shelter onboarding and application strategy for pillar 3 pilots                                  |
 | 2026-07-11 | Added post-pillar future horizons for wellness, microchip reunion, and a federated animal-services hub |
 | 2026-07-04 | Initial capture from founding brainstorm + constitution/MVP alignment review                           |
