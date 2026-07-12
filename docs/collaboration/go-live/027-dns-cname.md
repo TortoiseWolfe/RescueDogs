@@ -80,8 +80,8 @@ Manual: `https://raisedpaws.com` loads Raised Paws; asset paths use `/_next/...`
 
 **#27 ops substantially complete.** Live at **`https://raisedpaws.com`**.
 
-| Remaining                                 | Ticket                         |
-| ----------------------------------------- | ------------------------------ |
-| Confirm `.org` redirect propagation       | #27 follow-up (Namecheap only) |
-| Supabase Site URL + redirect allow-list   | **#28**                        |
-| PWA manifest check + CLAUDE.md CNAME note | **#29**                        |
+| Remaining                                 | Ticket                                                       |
+| ----------------------------------------- | ------------------------------------------------------------ |
+| Confirm `.org` redirect propagation       | #27 follow-up (Namecheap only)                               |
+| Supabase Site URL + redirect allow-list   | **#28** — see [028-supabase-auth.md](./028-supabase-auth.md) |
+| PWA manifest check + CLAUDE.md CNAME note | **#29**                                                      |
