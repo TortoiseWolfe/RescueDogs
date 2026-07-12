@@ -120,12 +120,14 @@ Supabase.
 
 ## Outcome
 
-| Step                                    | Status                           |
-| --------------------------------------- | -------------------------------- |
-| `auth-config.raisedpaws.json` + journal | ✅ In repo (this PR)             |
-| Supabase Auth URL config                | ⏳ Pending — script or dashboard |
-| Edge `NEXT_PUBLIC_SITE_URL` secret      | ⏳ Pending                       |
-| GitHub Actions variables                | ✅ Done in #27                   |
-| Live verify on raisedpaws.com           | ⏳ After Supabase cutover        |
+| Step                                    | Status                                                                 |
+| --------------------------------------- | ---------------------------------------------------------------------- |
+| `auth-config.raisedpaws.json` + journal | ✅ In repo (PR #41)                                                    |
+| Supabase Auth URL config                | ✅ Applied via `supabase:auth-config:raisedpaws --apply` (2026-07-12)  |
+| Edge `NEXT_PUBLIC_SITE_URL` secret      | ✅ Set in Supabase dashboard                                           |
+| GitHub Actions variables                | ✅ Done in #27                                                         |
+| Demo sign-in on raisedpaws.com          | ✅ `adopter@demo.test` verified                                        |
+| Sign-up / password-reset email links    | ⏳ Deferred — built-in SMTP rate limit; retry later or add custom SMTP |
+| Remove legacy github.io redirect URLs   | ⏳ After optional email-link verify                                    |
 
 **Next after #28:** [#29](https://github.com/TortoiseWolfe/RescueDogs/issues/29) PWA manifest + `CLAUDE.md` CNAME note.
