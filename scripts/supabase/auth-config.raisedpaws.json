@@ -1,0 +1,4 @@
+{
+  "site_url": "https://raisedpaws.com",
+  "uri_allow_list": "https://raisedpaws.com/auth/callback/,https://raisedpaws.com/reset-password/,https://tortoisewolfe.github.io/RescueDogs/auth/callback/,https://tortoisewolfe.github.io/RescueDogs/reset-password/,http://localhost:3000/auth/callback/,http://localhost:3000/reset-password/"
+}
