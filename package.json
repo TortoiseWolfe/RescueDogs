@@ -33,6 +33,7 @@
     "supabase:local:up": "docker compose --profile supabase up -d",
     "supabase:local:down": "docker compose --profile supabase down",
     "supabase:auth-config": "tsx scripts/supabase/set-auth-config.ts",
+    "supabase:auth-config:raisedpaws": "tsx scripts/supabase/set-auth-config.ts --config scripts/supabase/auth-config.raisedpaws.json",
     "db:reset": "tsx scripts/reset-database.ts",
     "generate:sitemap": "node scripts/generate-sitemap.js",
     "generate:rss": "node scripts/generate-rss.js",
