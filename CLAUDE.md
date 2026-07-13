@@ -16,9 +16,12 @@ top, ScriptHammer disciplines as Mandatory Constraints).
 ./scripts/rebrand.sh RescueDogs TortoiseWolfe "Pet adoption application tracker" --preserve-ssh --keep-cname --force
 ```
 
-- `public/CNAME` must NOT exist (any CNAME breaks basePath auto-detection
-  for tortoisewolfe.github.io/RescueDogs; `--keep-cname` only prevents the
-  script from rewriting it — delete the file if the merge restores it)
+- `public/CNAME` **MUST exist** and contain the canonical domain
+  `raisedpaws.com`. That file is what points GitHub Pages at the custom
+  domain and drops the `/RescueDogs` basePath. Preserve it across
+  `git merge upstream/main` and rebrand runs (`--keep-cname`); do **not**
+  delete it — removing CNAME silently sends the site back to github.io
+  and breaks auth redirects
 - `package.json` name must be `rescuedogs` (HatCoatAndBoots' upstream sync
   silently reverted it to the upstream name)
 - Do NOT restore `supabase/migrations/999_drop_all_tables.sql` — it sorts
@@ -28,7 +31,7 @@ top, ScriptHammer disciplines as Mandatory Constraints).
   upstream merge overwrite it
 
 Supabase project: `RescueDogs` ref `cmdhajshektesctrappl` (us-east-2).
-Live site: https://tortoisewolfe.github.io/RescueDogs
+Live site: https://raisedpaws.com
 
 ## Core Development Principles
 

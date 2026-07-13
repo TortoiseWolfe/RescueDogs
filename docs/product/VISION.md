@@ -35,6 +35,30 @@ their time back.
 
 ---
 
+## How we refer to Raised Paws
+
+The consumer-facing brand is **Raised Paws**. The repo/project name remains
+`RescueDogs` for GitHub and tooling.
+
+| Audience / context            | Prefer                                                                 | Avoid as the primary label                             |
+| ----------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------ |
+| Adopters, social, short title | **Pet adoption application tracker** or **pet adoption tracker**       | “Pet rescue and adoption app”                          |
+| Shelters, grants, tech lead   | **Anti-ghosting adoption platform** (or OS) for shelters               | “Petfinder alternative” / browse directory             |
+| One-line product honesty      | Apply once → shelter pipeline → **live status** so nobody gets ghosted | Vague “we help rescue animals” without naming the loop |
+
+**Why “tracker” over “rescue app”:** a “pet rescue and adoption app” sounds like a
+listing marketplace (Petfinder-class). Today’s shipped product is the **application
+status loop** — that is the wedge. Broader rescue-ecosystem language fits later
+pillars and future horizons; it is not the accurate label for what people can
+use on [raisedpaws.com](https://raisedpaws.com) right now.
+
+**Draft lines to reuse:**
+
+- Adopters: _Raised Paws — track your pet adoption application so you’re never ghosted._
+- Shelters: _Raised Paws — the anti-ghosting adoption platform: one application, a simple pipeline, live status for applicants._
+
+---
+
 ## Five strategic pillars (original brainstorm)
 
 These angles came from early product exploration. They are **not** all in scope
@@ -363,6 +387,7 @@ and must restate Principle V.
 
 | Date       | Change                                                                                                 |
 | ---------- | ------------------------------------------------------------------------------------------------------ |
+| 2026-07-13 | Added “How we refer to Raised Paws” (tracker vs rescue-app naming)                                     |
 | 2026-07-12 | Added data-integration guardrails under shelter onboarding; clarified no universal DB extractor        |
 | 2026-07-12 | Added shelter onboarding and application strategy for pillar 3 pilots                                  |
 | 2026-07-11 | Added post-pillar future horizons for wellness, microchip reunion, and a federated animal-services hub |
