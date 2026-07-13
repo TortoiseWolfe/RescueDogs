@@ -16,7 +16,7 @@ const defaultConfig = {
   // drives the GitHub repo URL and basePath (github.com/<owner>/RescueDogs) and
   // must not change, while the displayed brand can be rebranded freely.
   projectDisplayName: 'Raised Paws',
-  projectTagline: 'Pet Adoption App',
+  projectTagline: 'Pet Adoption Tracker',
   projectOwner: 'TortoiseWolfe',
   projectDescription:
     'Pet adoption application tracker for shelters, adopters, and live status updates',
@@ -143,7 +143,7 @@ export function generateManifest() {
     scope: `${basePath}/`,
     display: 'standalone',
     orientation: 'portrait-primary',
-    theme_color: '#2f6bff',
+    theme_color: '#1e3a8a',
     background_color: '#ffffff',
     categories: ['lifestyle', 'productivity', 'utilities'],
     icons: [
@@ -173,33 +173,33 @@ export function generateManifest() {
     ],
     screenshots: [
       {
-        src: `${basePath}/screenshot-wide.png`,
-        sizes: '1280x720',
+        src: `${basePath}/screenshots/desktop.png`,
+        sizes: '1920x1080',
         type: 'image/png',
         form_factor: 'wide',
       },
       {
-        src: `${basePath}/screenshot-narrow.png`,
-        sizes: '720x1280',
+        src: `${basePath}/screenshots/mobile.png`,
+        sizes: '390x844',
         type: 'image/png',
         form_factor: 'narrow',
       },
     ],
     shortcuts: [
       {
-        name: 'Themes',
-        url: `${basePath}/themes/`,
-        description: 'Browse and switch themes',
+        name: 'Adopt',
+        url: `${basePath}/adopt/`,
+        description: 'Start a universal adoption application',
       },
       {
-        name: 'Components',
-        url: `${basePath}/components/`,
-        description: 'View component gallery',
+        name: 'My applications',
+        url: `${basePath}/applications/`,
+        description: 'Track your adoption applications',
       },
       {
-        name: 'Accessibility',
-        url: `${basePath}/accessibility/`,
-        description: 'Adjust reading preferences',
+        name: 'Sign in',
+        url: `${basePath}/sign-in/`,
+        description: 'Sign in to Raised Paws',
       },
     ],
   };

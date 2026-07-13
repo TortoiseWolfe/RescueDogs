@@ -1,17 +1,14 @@
 {
-  "name": "RescueDogs",
-  "short_name": "RescueDogs",
-  "description": "RescueDogs - Modern Next.js template with PWA, theming, and interactive components",
-  "theme_color": "#1a1a2e",
-  "background_color": "#1a1a2e",
+  "name": "Raised Paws — Pet Adoption Tracker",
+  "short_name": "Raised Paws",
+  "description": "Pet adoption application tracker for shelters, adopters, and live status updates",
+  "theme_color": "#1e3a8a",
+  "background_color": "#ffffff",
   "display": "standalone",
   "start_url": "/",
   "scope": "/",
   "orientation": "portrait-primary",
-  "categories": [
-    "productivity",
-    "utilities"
-  ],
+  "categories": ["lifestyle", "productivity", "utilities"],
   "lang": "en",
   "dir": "ltr",
   "prefer_related_applications": false,
@@ -95,49 +92,23 @@
   ],
   "shortcuts": [
     {
-      "name": "Components",
-      "url": "/components",
-      "description": "View all components",
-      "icons": [
-        {
-          "src": "/icon-96.svg",
-          "sizes": "96x96"
-        }
-      ]
+      "name": "Adopt",
+      "url": "/adopt/",
+      "description": "Start a universal adoption application",
+      "icons": [{ "src": "/icon-96.svg", "sizes": "96x96" }]
     },
     {
-      "name": "Contact",
-      "url": "/contact",
-      "description": "Send us a message",
-      "icons": [
-        {
-          "src": "/icon-96.svg",
-          "sizes": "96x96"
-        }
-      ]
+      "name": "My applications",
+      "url": "/applications/",
+      "description": "Track your adoption applications",
+      "icons": [{ "src": "/icon-96.svg", "sizes": "96x96" }]
     },
     {
-      "name": "Themes",
-      "url": "/themes",
-      "description": "Choose your theme",
-      "icons": [
-        {
-          "src": "/icon-96.svg",
-          "sizes": "96x96"
-        }
-      ]
+      "name": "Sign in",
+      "url": "/sign-in/",
+      "description": "Sign in to Raised Paws",
+      "icons": [{ "src": "/icon-96.svg", "sizes": "96x96" }]
     }
   ],
-  "related_applications": [],
-  "protocol_handlers": [],
-  "share_target": {
-    "action": "/share",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  }
+  "related_applications": []
 }

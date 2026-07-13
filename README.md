@@ -18,7 +18,7 @@ Everything runs against a seeded demo shelter (**Second Chance Rescue**) with
 two demo accounts. **Sign in first** — these pages are gated, and `/shelter`
 bounces non-staff accounts back to the home page (that's the gate working).
 
-**Sign in:** <https://tortoisewolfe.github.io/RescueDogs/sign-in/>
+**Sign in:** <https://raisedpaws.com/sign-in/>
 
 | Role                | Email               | Password       |
 | ------------------- | ------------------- | -------------- |
@@ -31,29 +31,29 @@ bounces non-staff accounts back to the home page (that's the gate working).
 ### Adopter pages (sign in as `adopter@demo.test`)
 
 - **Apply to adopt** (prefilled from the saved universal application):
-  <https://tortoisewolfe.github.io/RescueDogs/adopt/>
+  <https://raisedpaws.com/adopt/>
 - **My applications** (Biscuit submitted, Pepper in reference check, Tank not selected):
-  <https://tortoisewolfe.github.io/RescueDogs/applications/>
+  <https://raisedpaws.com/applications/>
 - **Live status tracker** for Pepper:
-  <https://tortoisewolfe.github.io/RescueDogs/applications/status/?id=55555555-5555-5555-5555-555555555502>
+  <https://raisedpaws.com/applications/status/?id=55555555-5555-5555-5555-555555555502>
 
 ### Shelter staff pages (sign in as `staff@demo.test`)
 
 - **Pipeline dashboard** (filter tabs + counts):
-  <https://tortoisewolfe.github.io/RescueDogs/shelter/>
+  <https://raisedpaws.com/shelter/>
 - **Review Biscuit** (Submitted — advance it!):
-  <https://tortoisewolfe.github.io/RescueDogs/shelter/application/?id=55555555-5555-5555-5555-555555555501>
+  <https://raisedpaws.com/shelter/application/?id=55555555-5555-5555-5555-555555555501>
 - **Review Pepper** (Reference Check):
-  <https://tortoisewolfe.github.io/RescueDogs/shelter/application/?id=55555555-5555-5555-5555-555555555502>
+  <https://raisedpaws.com/shelter/application/?id=55555555-5555-5555-5555-555555555502>
 - **Review Tank** (Not Selected — terminal, no further actions):
-  <https://tortoisewolfe.github.io/RescueDogs/shelter/application/?id=55555555-5555-5555-5555-555555555503>
+  <https://raisedpaws.com/shelter/application/?id=55555555-5555-5555-5555-555555555503>
 
 ### The two-window demo (the whole point)
 
 1. Window 1: sign in as **staff** → open Biscuit's review page.
 2. Window 2 (incognito / second profile): sign in as the **adopter** → open
    Biscuit's tracker at
-   `https://tortoisewolfe.github.io/RescueDogs/applications/status/?id=55555555-5555-5555-5555-555555555501`.
+   `https://raisedpaws.com/applications/status/?id=55555555-5555-5555-5555-555555555501`.
 3. In window 1, set the status to _Under Review_ and add a note.
 4. Watch window 2: the tracker advances and the note appears — **no reload**.
    That's the anti-ghosting loop (Supabase Realtime + RLS-scoped events).
