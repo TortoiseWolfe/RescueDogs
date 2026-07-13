@@ -237,7 +237,7 @@ describe('Project Configuration', () => {
       );
       expect(manifest.start_url).toBe('/');
       expect(manifest.display).toBe('standalone');
-      expect(manifest.theme_color).toBe('#2f6bff');
+      expect(manifest.theme_color).toBe('#1e3a8a');
       expect(manifest.background_color).toBe('#ffffff');
     });
 
@@ -278,10 +278,10 @@ describe('Project Configuration', () => {
       );
 
       expect(wideScreenshot).toBeDefined();
-      expect(wideScreenshot?.sizes).toBe('1280x720');
+      expect(wideScreenshot?.sizes).toBe('1920x1080');
 
       expect(narrowScreenshot).toBeDefined();
-      expect(narrowScreenshot?.sizes).toBe('720x1280');
+      expect(narrowScreenshot?.sizes).toBe('390x844');
     });
 
     it('should include application shortcuts', () => {
@@ -290,9 +290,9 @@ describe('Project Configuration', () => {
       expect(manifest.shortcuts).toHaveLength(3);
 
       const shortcuts = manifest.shortcuts.map((s) => s.name);
-      expect(shortcuts).toContain('Themes');
-      expect(shortcuts).toContain('Components');
-      expect(shortcuts).toContain('Accessibility');
+      expect(shortcuts).toContain('Adopt');
+      expect(shortcuts).toContain('My applications');
+      expect(shortcuts).toContain('Sign in');
     });
 
     it('should use custom project name in manifest', () => {
