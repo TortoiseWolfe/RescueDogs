@@ -90,23 +90,19 @@ export default function Home() {
         aria-labelledby="hero-heading"
         className="relative bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-24"
       >
-        <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-12 lg:flex-row lg:gap-16">
-          <div className="flex-1 text-center lg:text-left">
-            <div className="font-friendly bg-accent text-accent-content mb-6 inline-flex items-center rounded-full px-5 py-2 text-sm font-bold shadow-lg sm:text-base">
-              🐾 Dogs and Cats
-            </div>
-
+        <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
+          <div className="flex-1 text-center lg:-translate-y-4 lg:text-left">
             <h1
               id="hero-heading"
               className="font-display mb-5 text-5xl leading-none font-extrabold tracking-tight text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl lg:text-7xl"
             >
-              Find your next pet, and track the adoption process.
+              <span className="text-[#f97316]">Raised Paws</span> tracks your
+              adoption application.
             </h1>
 
-            <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold text-white/90 sm:text-xl lg:mx-0">
-              Raised Paws helps adopters apply with confidence while giving
-              shelters a simple way to review applications and keep everyone
-              updated.
+            <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold text-[#f97316] sm:text-xl lg:mx-0">
+              Apply once, watch every status update live, and give shelters a
+              simple pipeline.
             </p>
 
             <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
@@ -125,17 +121,31 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="relative -mt-8 aspect-[16/9] w-full max-w-sm shrink-0 animate-[floaty_5s_ease-in-out_infinite] lg:-mt-20 lg:max-w-[520px]">
-            <div className="absolute inset-0 rotate-3 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl" />
-            <div className="absolute inset-2 rotate-3 overflow-hidden rounded-[1.625rem]">
-              <Image
-                src={`${detectedConfig.basePath}/hero-held-paws.png`}
-                alt="A smiling adopter with a rescued dog and cat in a sunny park"
-                fill
-                sizes="(max-width: 1024px) 100vw, 520px"
-                className="object-cover"
-                priority
-              />
+          {/* Right column: badge + hero image
+              Tune these Tailwind knobs:
+              - Whole column up/down: `lg:-mt-*` on this outer div (negative = higher)
+              - Badge right/left: `self-end` / `self-start` / `self-center`, plus `mr-*` or `ml-*`
+              - Space between badge & photo: badge `mb-*` and column `gap-*`
+              - Photo up/down relative to badge: `lg:-mt-*` on the image wrapper
+              - Photo size: `max-w-md` / `lg:max-w-[640px]` on the column
+          */}
+          <div className="flex w-full max-w-md shrink-0 flex-col items-center gap-4 lg:-mt-16 lg:max-w-[640px] lg:items-stretch">
+            <div className="font-friendly bg-accent text-accent-content mb-4 inline-flex -translate-y-4 items-center self-end rounded-full px-5 py-2 text-sm font-bold shadow-lg sm:text-base lg:mr-8 lg:-translate-y-4">
+              🐾 Dogs and Cats
+            </div>
+
+            <div className="relative aspect-[4/3] w-full animate-[floaty_5s_ease-in-out_infinite] lg:-mt-4">
+              <div className="absolute inset-0 rotate-3 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl" />
+              <div className="absolute inset-2 rotate-3 overflow-hidden rounded-[1.625rem]">
+                <Image
+                  src={`${detectedConfig.basePath}/hero-held-paws.png`}
+                  alt="A smiling adopter with a rescued dog and cat in a sunny park"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 640px"
+                  className="object-cover"
+                  priority
+                />
+              </div>
             </div>
           </div>
         </div>
