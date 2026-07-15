@@ -160,13 +160,8 @@ test.describe('User Registration E2E', () => {
     await page.goto('/sign-up', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
 
-    // Click sign-in link in the "Already have an account?" section (not the header link)
-    // Use locator that targets the link after the specific text
-    await page
-      .locator('text=Already have an account?')
-      .locator('..')
-      .getByRole('link')
-      .click();
+    // Footer line only — avoid For Adopters / For Shelters links in the same card
+    await page.getByRole('link', { name: 'Sign in', exact: true }).click();
 
     // Verify navigated to sign-in (with optional trailing slash)
     await expect(page).toHaveURL(/\/sign-in\/?/);
