@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { LayeredRescueDogsLogo } from '@/components/atomic/SpinningLogo';
 import { AnimatedLogo } from '@/components/atomic/AnimatedLogo';
 import { ColorblindToggle } from '@/components/molecular/ColorblindToggle';
 import { FontSizeControl } from '@/components/navigation/FontSizeControl';
@@ -161,15 +161,16 @@ export function GlobalNav() {
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 transition-opacity hover:opacity-80"
+              className="flex min-h-11 items-center gap-2 transition-opacity hover:opacity-80"
             >
-              <div className="h-8 w-8">
-                <LayeredRescueDogsLogo
-                  size={32}
-                  speed="slow"
-                  className="drop-shadow-sm"
-                />
-              </div>
+              <Image
+                src={`${projectConfig.basePath}/raised-paws-logo.png`}
+                alt="Raised Paws"
+                width={32}
+                height={32}
+                className="h-8 w-8 drop-shadow-sm"
+                priority
+              />
               <span className="hidden sm:block">
                 <AnimatedLogo
                   text={projectConfig.projectDisplayName}
