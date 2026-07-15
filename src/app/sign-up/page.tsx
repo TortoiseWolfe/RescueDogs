@@ -7,6 +7,11 @@ import SignUpForm from '@/components/auth/SignUpForm';
 // import OAuthButtons from '@/components/auth/OAuthButtons';
 import Link from 'next/link';
 import { getInternalUrl } from '@/config/project.config';
+import {
+  buildSignInHref,
+  isPortalType,
+  type PortalType,
+} from '@/lib/portal/portal-preference';
 
 function isSafeRedirectUrl(url: string): boolean {
   if (!url || !url.startsWith('/')) return false;
@@ -21,6 +26,7 @@ function isSafeRedirectUrl(url: string): boolean {
 
 export default function SignUpPage() {
   const [returnUrl, setReturnUrl] = useState('/profile');
+  const [portal, setPortal] = useState<PortalType | null>(null);
 
   useEffect(() => {
     // Read query params client-side for static export compatibility
@@ -29,14 +35,54 @@ export default function SignUpPage() {
     if (url && isSafeRedirectUrl(decodeURIComponent(url))) {
       setReturnUrl(url);
     }
+    const portalParam = params.get('portal');
+    if (isPortalType(portalParam)) {
+      setPortal(portalParam);
+    }
   }, []);
+
+  const heading =
+    portal === 'shelter'
+      ? 'Create shelter account'
+      : portal === 'adopter'
+        ? 'Create adopter account'
+        : 'Create Account';
+
+  const signInHref = portal
+    ? buildSignInHref(portal, returnUrl !== '/profile' ? returnUrl : null)
+    : `/sign-in${returnUrl !== '/profile' ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`;
 
   return (
     <main className="container mx-auto px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <div className="mx-auto max-w-md">
-        <h1 className="mb-6 text-center text-3xl font-bold sm:mb-8">
-          Create Account
+        <h1 className="mb-2 text-center text-3xl font-bold sm:mb-3">
+          {heading}
         </h1>
+        {portal ? (
+          <p className="text-base-content/70 mb-6 text-center text-sm sm:mb-8">
+            Wrong audience?{' '}
+            <Link href="/for-adopters" className="link link-primary">
+              For Adopters
+            </Link>
+            {' · '}
+            <Link href="/for-shelters" className="link link-primary">
+              For Shelters
+            </Link>
+            .
+          </p>
+        ) : (
+          <p className="text-base-content/70 mb-6 text-center text-sm sm:mb-8">
+            Not sure which door?{' '}
+            <Link href="/for-adopters" className="link link-primary">
+              For Adopters
+            </Link>
+            {' · '}
+            <Link href="/for-shelters" className="link link-primary">
+              For Shelters
+            </Link>
+            .
+          </p>
+        )}
 
         <SignUpForm
           onSuccess={() =>
@@ -51,10 +97,7 @@ export default function SignUpPage() {
 
         <p className="mt-6 text-center text-sm">
           Already have an account?{' '}
-          <Link
-            href={`/sign-in${returnUrl !== '/profile' ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`}
-            className="link-primary"
-          >
+          <Link href={signInHref} className="link-primary">
             Sign in
           </Link>
         </p>

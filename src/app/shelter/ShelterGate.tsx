@@ -7,8 +7,8 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { ShelterApplicationService } from '@/services/applications';
 import type { ShelterMembershipInfo } from '@/services/applications';
@@ -38,15 +38,16 @@ export function useShelterMembership(): ShelterMembershipInfo {
  * regression cases:
  *
  * - `wasStaff` ref: once a membership check succeeded on this mount, a
- *   transient token-refresh flip must not trigger router.push('/').
+ *   transient token-refresh flip must not clear the shelter chrome (we keep
+ *   lastMembership). Non-staff see an explicit no-access card (no silent
+ *   redirect to `/`).
  * - `cancelled` flag: async membership resolution must not setState after
  *   the effect cleaned up (user switched, unmount).
- * - Dep array `[user, authLoading, router]`: a `user` change re-runs the
+ * - Dep array `[user, authLoading]`: a `user` change re-runs the
  *   check against the new user.
  */
 export function ShelterGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading: authLoading } = useAuth();
-  const router = useRouter();
   const [membership, setMembership] = useState<
     ShelterMembershipInfo | null | undefined
   >(undefined); // undefined = checking, null = confirmed non-staff
@@ -69,12 +70,11 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
       const result = await service.getMyShelterMembership(user.id);
       if (cancelled) return;
       setMembership(result);
-      if (!result && !wasStaff.current) router.push('/');
     })();
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading, router]);
+  }, [user, authLoading]);
 
   if (authLoading || membership === undefined) {
     return (
@@ -87,7 +87,48 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
   }
 
   const effectiveMembership = membership ?? lastMembership.current;
-  if (!effectiveMembership) return null;
+  if (!effectiveMembership) {
+    return (
+      <div className="container mx-auto max-w-lg px-4 py-16">
+        <div className="card bg-base-100 border-base-300 border shadow-xl">
+          <div className="card-body gap-4">
+            <h1 className="card-title text-2xl">
+              No shelter access on this account
+            </h1>
+            <p className="text-base-content/80">
+              This login is not linked to a shelter membership. Shelter pipeline
+              pages are for staff who have been added to a rescue.
+            </p>
+            <ul className="text-base-content/80 list-disc space-y-1 pl-5 text-sm">
+              <li>
+                Trying the demo? Sign in as{' '}
+                <code className="bg-base-200 rounded px-1">
+                  staff@demo.test
+                </code>{' '}
+                (password in the Live Demo section of the README / get-started
+                demo hints).
+              </li>
+              <li>
+                Adopting instead? Use the adopter door — membership for shelters
+                is separate from tracking an application.
+              </li>
+            </ul>
+            <div className="card-actions mt-2 flex flex-wrap gap-3">
+              <Link
+                href="/get-started?choose=1&demo=1"
+                className="btn btn-primary min-h-11"
+              >
+                Choose portal again
+              </Link>
+              <Link href="/" className="btn btn-ghost min-h-11">
+                Back home
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ShelterContext.Provider value={effectiveMembership}>

@@ -21,6 +21,7 @@ import { useIdleTimeout } from '@/hooks/useIdleTimeout';
 import { retryWithBackoff } from '@/lib/auth/retry-utils';
 import { createLogger } from '@/lib/logger';
 import IdleTimeoutModal from '@/components/molecular/IdleTimeoutModal';
+import { clearPortalPreference } from '@/lib/portal/portal-preference';
 
 const logger = createLogger('contexts:auth');
 
@@ -303,6 +304,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setSession(null);
     setError(null);
+    // Portal chooser preference is skippable UX only — clear on sign-out so
+    // switching adopter ↔ shelter is one logout away (#48).
+    clearPortalPreference();
 
     // Allow the E2E storage adapter to remove auth tokens during sign-out
     setAllowAuthTokenRemoval(true);
