@@ -90,11 +90,11 @@ export default function Home() {
         aria-labelledby="hero-heading"
         className="relative bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-24"
       >
-        <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
-          <div className="flex-1 text-center lg:-translate-y-4 lg:text-left">
+        <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
+          <div className="w-full min-w-0 flex-1 text-center lg:-translate-y-4 lg:text-left">
             <h1
               id="hero-heading"
-              className="font-display mb-5 text-5xl leading-none font-extrabold tracking-tight text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl lg:text-7xl"
+              className="font-display mb-5 text-5xl leading-none font-extrabold tracking-tight break-words text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl lg:text-7xl"
             >
               <span className="text-[#f97316]">Raised Paws</span> tracks your
               adoption application.
@@ -129,14 +129,14 @@ export default function Home() {
               - Photo up/down relative to badge: `lg:-mt-*` on the image wrapper
               - Photo size: `max-w-md` / `lg:max-w-[640px]` on the column
           */}
-          <div className="flex w-full max-w-md shrink-0 flex-col items-center gap-4 lg:-mt-16 lg:max-w-[640px] lg:items-stretch">
+          <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 lg:-mt-16 lg:max-w-[640px] lg:items-stretch">
             <div className="font-friendly bg-accent text-accent-content mb-4 inline-flex -translate-y-4 items-center self-end rounded-full px-5 py-2 text-sm font-bold shadow-lg sm:text-base lg:mr-8 lg:-translate-y-4">
               🐾 Dogs and Cats
             </div>
 
             <div className="relative aspect-[4/3] w-full animate-[floaty_5s_ease-in-out_infinite] lg:-mt-4">
-              <div className="absolute inset-0 rotate-3 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl" />
-              <div className="absolute inset-2 rotate-3 overflow-hidden rounded-[1.625rem]">
+              <div className="absolute inset-0 rotate-1 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl sm:rotate-3" />
+              <div className="absolute inset-2 rotate-1 overflow-hidden rounded-[1.625rem] sm:rotate-3">
                 <Image
                   src={`${detectedConfig.basePath}/hero-held-paws.png`}
                   alt="A smiling adopter with a rescued dog and cat in a sunny park"
