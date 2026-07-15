@@ -23,11 +23,11 @@ test.describe('Homepage Navigation', () => {
     await expect(page).toHaveURL(/.*adopt/);
   });
 
-  test('navigate to the status tracker', async ({ page }) => {
-    // The CTA banner links to the live application status tracker.
-    await page.locator('a[href*="/applications/status"]').first().click();
+  test('navigate to demo login tips from the homepage', async ({ page }) => {
+    // Orange CTA band points at demo tips (get-started), not the status tracker.
+    await page.locator('a[href*="/get-started"]').first().click();
 
-    await expect(page).toHaveURL(/.*applications\/status/);
+    await expect(page).toHaveURL(/.*get-started/);
   });
 
   test('key stats section is present', async ({ page }) => {
@@ -38,8 +38,8 @@ test.describe('Homepage Navigation', () => {
   });
 
   test('navigate to sign-in from the homepage', async ({ page }) => {
-    // The "Try Demo Login" CTA links to /sign-in.
-    await page.locator('a[href*="/sign-in"]').first().click();
+    // Nav "Log in" goes straight to /sign-in (portal chooser is not required).
+    await page.getByRole('link', { name: /^(Sign In|Log in)$/i }).click();
 
     await expect(page).toHaveURL(/.*sign-in/);
   });

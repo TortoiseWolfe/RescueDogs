@@ -88,7 +88,10 @@ test.describe('Capture Decryption Logs', () => {
       await pageA.getByLabel('Email').fill(USER_A.email);
       await pageA.getByLabel('Password', { exact: true }).fill(USER_A.password);
       await pageA.getByRole('button', { name: 'Sign In' }).click();
-      await pageA.waitForURL(/.*\/profile/, { timeout: 15000 });
+      // Bare log-in destinations: membership redirect (adopter/shelter) or legacy /profile
+      await pageA.waitForURL(/\/(profile|applications|shelter)\/?/, {
+        timeout: 15000,
+      });
       console.log('[Test] User A signed in');
 
       // Navigate to conversation with messages

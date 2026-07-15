@@ -276,7 +276,9 @@ test.describe('Session Persistence E2E', () => {
 
     // Verify page1 is signed out
     await expect(page1).toHaveURL(/\/$/);
-    await expect(page1.getByRole('link', { name: 'Sign In' })).toBeVisible();
+    await expect(
+      page1.getByRole('link', { name: /^(Sign In|Log in)$/i })
+    ).toBeVisible();
 
     // If auth had synced to page2, verify it's now signed out too. The cross-tab
     // SIGNED_OUT event (onAuthStateChange) has no delivery-latency guarantee and

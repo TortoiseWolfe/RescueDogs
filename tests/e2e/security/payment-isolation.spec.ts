@@ -168,7 +168,7 @@ test.describe('Payment Isolation E2E - REQ-SEC-001', () => {
 
     // The page should show sign-in links OR the payment demo without user info
     // Check for either redirect to sign-in OR sign-in links in navbar
-    const signInLink = page.getByRole('link', { name: /Sign In/i });
+    const signInLink = page.getByRole('link', { name: /^(Sign In|Log in)$/i });
     const isSignInVisible = await signInLink.isVisible().catch(() => false);
 
     if (isSignInVisible) {
