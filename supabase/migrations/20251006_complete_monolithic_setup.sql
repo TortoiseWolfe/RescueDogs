@@ -631,6 +631,11 @@ ALTER TABLE webhook_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payment_provider_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE auth_audit_logs ENABLE ROW LEVEL SECURITY;
+-- Edge-function idempotency cache (#46 / advisor rls_disabled_in_public).
+-- Service-role only (Edge Functions); no policies → deny anon/authenticated.
+-- service_role bypasses RLS.
+ALTER TABLE edge_idempotency_keys ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE edge_idempotency_keys FROM anon, authenticated;
 
 -- Payment intents (Feature 017: Stricter policies)
 DROP POLICY IF EXISTS "Users can view own payment intents" ON payment_intents;
