@@ -144,7 +144,13 @@ export function GlobalNav() {
 
   const navItems = [
     { href: '/', label: 'Home' },
-    { href: '/adopt', label: 'Adopt' },
+    ...(!user
+      ? [
+          { href: '/for-adopters', label: 'For Adopters' },
+          { href: '/for-shelters', label: 'For Shelters' },
+          { href: '/#meet-pets-heading', label: 'Browse pets' },
+        ]
+      : [{ href: '/adopt', label: 'Apply to adopt' }]),
     ...(user ? [{ href: '/applications', label: 'My Applications' }] : []),
     ...(isShelterStaff ? [{ href: '/shelter', label: 'Shelter' }] : []),
     { href: '/blog', label: 'Blog' },
@@ -317,13 +323,7 @@ export function GlobalNav() {
                   href="/sign-in"
                   className="btn btn-ghost btn-sm text-primary-content hidden min-h-11 min-w-11 hover:bg-black/10 lg:inline-flex"
                 >
-                  Sign In
-                </Link>
-                <Link
-                  href="/sign-up"
-                  className="btn btn-accent btn-sm hidden min-h-11 min-w-11 lg:inline-flex"
-                >
-                  Sign Up
+                  Log in
                 </Link>
               </>
             )}
@@ -419,10 +419,7 @@ export function GlobalNav() {
                       <span>Account</span>
                     </li>
                     <li>
-                      <Link href="/sign-in">Sign In</Link>
-                    </li>
-                    <li>
-                      <Link href="/sign-up">Sign Up</Link>
+                      <Link href="/sign-in">Log in</Link>
                     </li>
                   </>
                 )}
