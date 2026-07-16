@@ -237,8 +237,10 @@ test.describe('Session Persistence E2E', () => {
       throw new Error(`Sign-in failed on page1: ${signInResult.error}`);
     }
 
-    // Verify page1 is authenticated
-    await expect(page1).toHaveURL(/\/(profile|verify-email)/);
+    // Verify page1 is authenticated (bare login lands on applications/shelter/profile)
+    await expect(page1).toHaveURL(
+      /\/(profile|verify-email|applications|shelter)/
+    );
     await waitForAuthenticatedState(page1);
 
     // Auth is verified by waitForAuthenticatedState - no need to check localStorage keys
