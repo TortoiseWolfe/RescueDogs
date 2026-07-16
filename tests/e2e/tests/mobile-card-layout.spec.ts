@@ -64,7 +64,7 @@ test.describe('Mobile Card Layout', () => {
     await waitForLayoutStability(page);
 
     const container = page.locator(
-      'section[aria-labelledby="meet-pets-heading"] .grid'
+      'section[aria-labelledby="meet-pets-heading"] > div > .grid'
     );
 
     await expect(container).toBeVisible();
