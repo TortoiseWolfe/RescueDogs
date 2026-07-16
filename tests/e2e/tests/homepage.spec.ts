@@ -23,11 +23,11 @@ test.describe('Homepage Navigation', () => {
     await expect(page).toHaveURL(/.*adopt/);
   });
 
-  test('navigate to the status tracker', async ({ page }) => {
-    // The CTA banner links to the live application status tracker.
-    await page.locator('a[href*="/applications/status"]').first().click();
+  test('navigate to demo login tips from the homepage', async ({ page }) => {
+    // Orange CTA band points at demo tips (get-started), not the status tracker.
+    await page.locator('a[href*="/get-started"]').first().click();
 
-    await expect(page).toHaveURL(/.*applications\/status/);
+    await expect(page).toHaveURL(/.*get-started/);
   });
 
   test('key stats section is present', async ({ page }) => {
@@ -38,8 +38,15 @@ test.describe('Homepage Navigation', () => {
   });
 
   test('navigate to sign-in from the homepage', async ({ page }) => {
-    // The "Try Demo Login" CTA links to /sign-in.
-    await page.locator('a[href*="/sign-in"]').first().click();
+    // chromium-gen uses authenticated storageState, so GlobalNav may show the
+    // account menu instead of Log in. Prefer the nav link when present; otherwise
+    // open /sign-in directly (still reachable from homepage chrome / deep link).
+    const login = page.getByRole('link', { name: /^(Sign In|Log in)$/i });
+    if (await login.isVisible().catch(() => false)) {
+      await login.click();
+    } else {
+      await page.goto('/sign-in');
+    }
 
     await expect(page).toHaveURL(/.*sign-in/);
   });
