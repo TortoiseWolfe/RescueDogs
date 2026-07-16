@@ -311,7 +311,10 @@ test.describe('Session Persistence E2E', () => {
       throw new Error(`Sign-in failed: ${result.error}`);
     }
 
-    // Reload page
+    // Bare sign-in now lands on a membership route (e.g. /applications), which
+    // does not render the email. Go to /profile where the email is shown, then
+    // reload to prove the session persists across a full page load.
+    await page.goto('/profile', { waitUntil: 'domcontentloaded' });
     await page.reload({ waitUntil: 'domcontentloaded' });
 
     // Verify still authenticated
