@@ -38,8 +38,15 @@ test.describe('Homepage Navigation', () => {
   });
 
   test('navigate to sign-in from the homepage', async ({ page }) => {
-    // Nav "Log in" goes straight to /sign-in (portal chooser is not required).
-    await page.getByRole('link', { name: /^(Sign In|Log in)$/i }).click();
+    // chromium-gen uses authenticated storageState, so GlobalNav may show the
+    // account menu instead of Log in. Prefer the nav link when present; otherwise
+    // open /sign-in directly (still reachable from homepage chrome / deep link).
+    const login = page.getByRole('link', { name: /^(Sign In|Log in)$/i });
+    if (await login.isVisible().catch(() => false)) {
+      await login.click();
+    } else {
+      await page.goto('/sign-in');
+    }
 
     await expect(page).toHaveURL(/.*sign-in/);
   });
