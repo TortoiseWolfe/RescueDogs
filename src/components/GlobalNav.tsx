@@ -5,8 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { AnimatedLogo } from '@/components/atomic/AnimatedLogo';
-import { ColorblindToggle } from '@/components/molecular/ColorblindToggle';
-import { FontSizeControl } from '@/components/navigation/FontSizeControl';
 import { projectConfig } from '@/config/project.config';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -21,21 +19,12 @@ import {
   THEME_OPTIONS,
 } from '@/config/themes';
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
-
 export function GlobalNav() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
   const { profile } = useUserProfile();
   const unreadCount = useUnreadCount();
   const [theme, setTheme] = useState<string>('');
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
-  const [showInstallButton, setShowInstallButton] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isShelterStaff, setIsShelterStaff] = useState(false);
 
@@ -96,50 +85,6 @@ export function GlobalNav() {
         detail: { theme: resolved },
       })
     );
-  };
-
-  // PWA installation
-  useEffect(() => {
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
-      return;
-    }
-
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setShowInstallButton(true);
-    };
-
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setShowInstallButton(false);
-      setDeferredPrompt(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener(
-        'beforeinstallprompt',
-        handleBeforeInstallPrompt
-      );
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      setShowInstallButton(false);
-    }
-    setDeferredPrompt(null);
   };
 
   const navItems = [
@@ -424,40 +369,6 @@ export function GlobalNav() {
                   </>
                 )}
               </ul>
-            </div>
-
-            {/* PWA Install Button */}
-            {showInstallButton && !isInstalled && (
-              <button
-                onClick={handleInstallClick}
-                className="btn btn-neutral btn-sm min-h-11 min-w-11"
-                title="Progressive Web App (PWA) - Install this app for offline access and better performance"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4 stroke-current"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  />
-                </svg>
-                <span className="hidden lg:inline">Install App</span>
-              </button>
-            )}
-
-            {/* Font Size Control - Hidden below lg (1024px) — accessible via hamburger */}
-            <div className="hidden lg:block">
-              <FontSizeControl />
-            </div>
-
-            {/* Color Vision Control - Hidden below lg (1024px) */}
-            <div className="hidden lg:block">
-              <ColorblindToggle className="compact" />
             </div>
 
             {/* Theme Selector - Hidden below lg (1024px) */}
