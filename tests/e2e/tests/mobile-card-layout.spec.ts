@@ -38,21 +38,23 @@ test.describe('Mobile Card Layout', () => {
     await dismissCookieBanner(page);
     await waitForLayoutStability(page);
 
-    const cards = await page.locator('[class*="card"]').all();
-    if (cards.length >= 2) {
-      const box1 = await cards[0].boundingBox();
-      const box2 = await cards[1].boundingBox();
+    // Scope to pet cards — `[class*="card"]` also matches card-body/title and
+    // nests, which falsely fail a vertical-stack check (parent contains child).
+    const cards = page.locator(
+      'section[aria-labelledby="meet-pets-heading"] article.card'
+    );
+    await expect(cards).toHaveCount(3);
 
-      if (box1 && box2) {
-        // Vertical stacking: second card should be below first
-        expect(
-          box2.y,
-          'Cards should stack vertically on mobile'
-        ).toBeGreaterThan(
-          box1.y + box1.height - 10 // Allow small overlap for spacing
-        );
-      }
-    }
+    const box1 = await cards.nth(0).boundingBox();
+    const box2 = await cards.nth(1).boundingBox();
+
+    expect(box1, 'First pet card should be visible').toBeTruthy();
+    expect(box2, 'Second pet card should be visible').toBeTruthy();
+
+    // Vertical stacking: second card should be below first
+    expect(box2!.y, 'Cards should stack vertically on mobile').toBeGreaterThan(
+      box1!.y + box1!.height - 10 // Allow small overlap for spacing
+    );
   });
 
   test('Cards use grid layout on tablet (768px+)', async ({ page }) => {
@@ -61,15 +63,16 @@ test.describe('Mobile Card Layout', () => {
     await dismissCookieBanner(page);
     await waitForLayoutStability(page);
 
-    const container = page.locator('[class*="grid"]').first();
+    const container = page.locator(
+      'section[aria-labelledby="meet-pets-heading"] > div > .grid'
+    );
 
-    if (await container.isVisible()) {
-      const display = await container.evaluate(
-        (el) => window.getComputedStyle(el).display
-      );
+    await expect(container).toBeVisible();
+    const display = await container.evaluate(
+      (el) => window.getComputedStyle(el).display
+    );
 
-      expect(display, 'Should use grid layout on tablet').toBe('grid');
-    }
+    expect(display, 'Should use grid layout on tablet').toBe('grid');
   });
 
   test('Cards fit within viewport at all mobile widths', async ({ page }) => {
@@ -81,10 +84,13 @@ test.describe('Mobile Card Layout', () => {
       await dismissCookieBanner(page);
       await waitForLayoutStability(page);
 
-      const cards = await page.locator('[class*="card"]').all();
+      const cards = page.locator(
+        'section[aria-labelledby="meet-pets-heading"] article.card'
+      );
 
-      for (const card of cards.slice(0, 5)) {
-        const box = await card.boundingBox();
+      const count = await cards.count();
+      for (let i = 0; i < count; i++) {
+        const box = await cards.nth(i).boundingBox();
 
         if (box) {
           expect(

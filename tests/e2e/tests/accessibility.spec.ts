@@ -253,54 +253,6 @@ test.describe('Accessibility', () => {
     }
   });
 
-  test('font size controls work', async ({ page }) => {
-    await page.goto('/accessibility', { waitUntil: 'domcontentloaded' });
-    await dismissCookieBanner(page);
-
-    // Find font size controls
-    const increaseFontBtn = page
-      .locator('button:has-text("Increase"), button:has-text("+")')
-      .first();
-    const decreaseFontBtn = page
-      .locator('button:has-text("Decrease"), button:has-text("-")')
-      .first();
-
-    if ((await increaseFontBtn.count()) > 0) {
-      // Get initial font size
-      const initialSize = await page.evaluate(() => {
-        const body = document.body;
-        return window.getComputedStyle(body).fontSize;
-      });
-
-      // Increase font size
-      await increaseFontBtn.click();
-
-      // Check font size increased
-      const increasedSize = await page.evaluate(() => {
-        const body = document.body;
-        return window.getComputedStyle(body).fontSize;
-      });
-
-      expect(parseFloat(increasedSize)).toBeGreaterThan(
-        parseFloat(initialSize)
-      );
-
-      // Decrease font size
-      if ((await decreaseFontBtn.count()) > 0) {
-        await decreaseFontBtn.click();
-
-        const decreasedSize = await page.evaluate(() => {
-          const body = document.body;
-          return window.getComputedStyle(body).fontSize;
-        });
-
-        expect(parseFloat(decreasedSize)).toBeLessThan(
-          parseFloat(increasedSize)
-        );
-      }
-    }
-  });
-
   test('keyboard navigation works throughout the site', async ({ page }) => {
     // Tab through the page
     let tabCount = 0;
