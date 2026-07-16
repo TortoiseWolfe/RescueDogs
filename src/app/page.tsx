@@ -105,20 +105,28 @@ export default function Home() {
               simple pipeline.
             </p>
 
-            <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
+            <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <Link
-                href="/adopt"
-                className="btn btn-secondary btn-lg min-h-11 px-10 text-lg"
+                href="/for-adopters"
+                className="btn btn-secondary btn-lg min-h-11 w-full px-8 text-lg sm:w-auto"
               >
-                Adopt a Pet
+                For Adopters
               </Link>
               <Link
-                href="/sign-in"
-                className="btn btn-accent btn-lg min-h-11 px-10 text-lg"
+                href="/for-shelters"
+                className="btn btn-accent btn-lg min-h-11 w-full px-8 text-lg sm:w-auto"
               >
-                View Demo
+                For Shelters
               </Link>
             </div>
+            <p className="mt-4 text-sm text-white/80 sm:text-base lg:text-left">
+              <Link
+                href="/#meet-pets-heading"
+                className="link link-hover text-white"
+              >
+                Browse pets
+              </Link>
+            </p>
           </div>
 
           {/* Right column: badge + hero image
@@ -278,16 +286,10 @@ export default function Home() {
           </div>
           <div className="mt-6 flex flex-wrap gap-4 lg:mt-0 lg:shrink-0">
             <Link
-              href="/sign-in"
+              href="/get-started?demo=1&choose=1"
               className="btn min-h-11 bg-white text-[#1e3a8a]"
             >
-              Try Demo Login
-            </Link>
-            <Link
-              href="/applications/status/"
-              className="btn btn-primary min-h-11"
-            >
-              Status Tracker
+              Demo login tips
             </Link>
           </div>
         </div>

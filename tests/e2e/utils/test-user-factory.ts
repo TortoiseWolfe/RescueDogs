@@ -998,14 +998,15 @@ export async function signOutViaDropdown(page: Page): Promise<void> {
     { timeout: 15000 }
   );
 
-  // Verify signed-out state. Prefer observing GlobalNav's "Sign In" link;
-  // but on WebKit under concurrent load, getSession() occasionally
+  // Verify signed-out state. Prefer observing GlobalNav's "Log in" link
+  // (formerly "Sign In"); accept either name during the rename window.
+  // On WebKit under concurrent load, getSession() occasionally
   // re-resolves to a stale-but-valid session after window.location.href='/'
   // navigates, leaving GlobalNav showing authenticated links indefinitely.
   // If the Sign In link never appears within 30s, force a hard reload
   // (which reinitializes the Supabase client from scratch with the cleared
   // cookies) and re-check.
-  const signInLink = page.getByRole('link', { name: 'Sign In' });
+  const signInLink = page.getByRole('link', { name: /^(Sign In|Log in)$/i });
   const appeared = await signInLink
     .waitFor({ state: 'visible', timeout: 30000 })
     .then(() => true)
@@ -1070,8 +1071,10 @@ export async function waitForAuthenticatedState(
     // Wait a bit for any hydration to complete
     await page.waitForLoadState('networkidle').catch(() => {});
 
-    // Check for Sign In link AFTER page has settled
-    const signInLink = page.getByRole('link', { name: 'Sign In' });
+    // Check for Log in / Sign In link AFTER page has settled
+    const signInLink = page.getByRole('link', {
+      name: /^(Sign In|Log in)$/i,
+    });
     const isSignInVisible = await signInLink.isVisible().catch(() => false);
 
     if (isSignInVisible) {

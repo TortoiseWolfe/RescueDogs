@@ -18,7 +18,13 @@ Everything runs against a seeded demo shelter (**Second Chance Rescue**) with
 two demo accounts. **Sign in first** — these pages are gated, and `/shelter`
 bounces non-staff accounts back to the home page (that's the gate working).
 
-**Sign in:** <https://raisedpaws.com/sign-in/>
+**Sign in / portals:**
+
+- Adopters: <https://raisedpaws.com/for-adopters/>
+- Shelters: <https://raisedpaws.com/for-shelters/>
+- Log in (no portal required): <https://raisedpaws.com/sign-in/>
+- Browse pets (public): homepage “Say hello!” section
+- Demo tips: <https://raisedpaws.com/get-started/?demo=1&choose=1>
 
 | Role                | Email               | Password       |
 | ------------------- | ------------------- | -------------- |

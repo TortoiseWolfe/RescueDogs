@@ -237,8 +237,10 @@ test.describe('Session Persistence E2E', () => {
       throw new Error(`Sign-in failed on page1: ${signInResult.error}`);
     }
 
-    // Verify page1 is authenticated
-    await expect(page1).toHaveURL(/\/(profile|verify-email)/);
+    // Verify page1 is authenticated (bare login lands on applications/shelter/profile)
+    await expect(page1).toHaveURL(
+      /\/(profile|verify-email|applications|shelter)/
+    );
     await waitForAuthenticatedState(page1);
 
     // Auth is verified by waitForAuthenticatedState - no need to check localStorage keys
@@ -276,7 +278,9 @@ test.describe('Session Persistence E2E', () => {
 
     // Verify page1 is signed out
     await expect(page1).toHaveURL(/\/$/);
-    await expect(page1.getByRole('link', { name: 'Sign In' })).toBeVisible();
+    await expect(
+      page1.getByRole('link', { name: /^(Sign In|Log in)$/i })
+    ).toBeVisible();
 
     // If auth had synced to page2, verify it's now signed out too. The cross-tab
     // SIGNED_OUT event (onAuthStateChange) has no delivery-latency guarantee and
@@ -307,7 +311,10 @@ test.describe('Session Persistence E2E', () => {
       throw new Error(`Sign-in failed: ${result.error}`);
     }
 
-    // Reload page
+    // Bare sign-in now lands on a membership route (e.g. /applications), which
+    // does not render the email. Go to /profile where the email is shown, then
+    // reload to prove the session persists across a full page load.
+    await page.goto('/profile', { waitUntil: 'domcontentloaded' });
     await page.reload({ waitUntil: 'domcontentloaded' });
 
     // Verify still authenticated
