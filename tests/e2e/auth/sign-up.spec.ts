@@ -275,7 +275,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     await dismissCookieBanner(page);
 
     // Click the inline sign-in link (not the header button)
-    await page.getByRole('link', { name: 'Sign in', exact: true }).click();
+    await page.getByRole('link', { name: 'Sign In', exact: true }).click();
 
     // Verify navigated to sign-in (allow trailing slash)
     await expect(page).toHaveURL(/\/sign-in\/?$/);
