@@ -197,9 +197,9 @@ export function generateManifest() {
         description: 'Track your adoption applications',
       },
       {
-        name: 'Sign in',
+        name: 'Sign In',
         url: `${basePath}/sign-in/`,
-        description: 'Sign in to Raised Paws',
+        description: 'Sign In to Raised Paws',
       },
     ],
   };

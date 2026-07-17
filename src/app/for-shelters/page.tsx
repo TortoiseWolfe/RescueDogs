@@ -32,19 +32,19 @@ export default function ForSheltersPage() {
               href={buildSignInHref('shelter')}
               className="btn btn-secondary btn-lg min-h-11 px-8"
             >
-              Log in
+              Log In
             </Link>
             <Link
               href={buildSignUpHref('shelter')}
               className="btn btn-accent btn-lg min-h-11 px-8"
             >
-              Create account
+              Create Account
             </Link>
             <Link
               href="/get-started?demo=1&choose=1"
               className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
             >
-              Demo login tips
+              Demo Login Tips
             </Link>
           </div>
         </div>

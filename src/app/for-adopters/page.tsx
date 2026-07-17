@@ -32,19 +32,19 @@ export default function ForAdoptersPage() {
               href={buildSignInHref('adopter')}
               className="btn btn-secondary btn-lg min-h-11 px-8"
             >
-              Log in
+              Log In
             </Link>
             <Link
               href={buildSignUpHref('adopter')}
               className="btn btn-accent btn-lg min-h-11 px-8"
             >
-              Create account
+              Create Account
             </Link>
             <Link
               href="/#meet-pets-heading"
               className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
             >
-              Browse pets
+              Browse Pets
             </Link>
           </div>
         </div>
