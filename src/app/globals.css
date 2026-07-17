@@ -134,24 +134,24 @@
   color: color-mix(in oklab, var(--color-base-content) 92%, transparent);
 }
 
-/* Menu bar: navy background in both light and dark modes (#53).
- * Remap primary tokens at header scope so nav links, toggles, and brand
- * title stay legible — white text on navy in both themes. */
+/* Menu bar: orange background in both light and dark modes.
+ * Remap primary tokens at header scope so brand title stays white on orange.
+ * Nav chrome buttons use explicit navy classes in GlobalNav (#53). */
 [data-theme='trusted-care-light'] .site-header {
-  --color-primary: #1e3a8a;
+  --color-primary: #f97316;
   --color-primary-content: #ffffff;
   box-shadow: 0 8px 24px rgba(30, 58, 138, 0.12);
 }
 
 [data-theme='trusted-care-dark'] .site-header {
-  --color-primary: #1e3a8a;
+  --color-primary: #f97316;
   --color-primary-content: #ffffff;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 /* The brand title (AnimatedLogo) hardcodes text-primary; inside the menu bar
  * that equals the bar background, so force it to the foreground token (white
- * on navy in both themes). */
+ * on orange in both themes). */
 .site-header .brand-logo {
   color: var(--color-primary-content);
 }
