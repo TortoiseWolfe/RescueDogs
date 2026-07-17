@@ -104,7 +104,7 @@ export default function GetStartedPage() {
         </Link>
         {' · '}
         <Link href="/sign-in" className="link link-primary">
-          Log in
+          Log In
         </Link>
         {' · '}
         <Link href="/" className="link link-primary">

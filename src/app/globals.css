@@ -134,24 +134,24 @@
   color: color-mix(in oklab, var(--color-base-content) 92%, transparent);
 }
 
-/* Menu bar: orange background in both light and dark modes.
+/* Menu bar: navy background in both light and dark modes (#53).
  * Remap primary tokens at header scope so nav links, toggles, and brand
- * title stay legible — white text on orange in both themes. */
+ * title stay legible — white text on navy in both themes. */
 [data-theme='trusted-care-light'] .site-header {
-  --color-primary: #f97316;
+  --color-primary: #1e3a8a;
   --color-primary-content: #ffffff;
   box-shadow: 0 8px 24px rgba(30, 58, 138, 0.12);
 }
 
 [data-theme='trusted-care-dark'] .site-header {
-  --color-primary: #f97316;
+  --color-primary: #1e3a8a;
   --color-primary-content: #ffffff;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 /* The brand title (AnimatedLogo) hardcodes text-primary; inside the menu bar
  * that equals the bar background, so force it to the foreground token (white
- * on orange in both themes). */
+ * on navy in both themes). */
 .site-header .brand-logo {
   color: var(--color-primary-content);
 }

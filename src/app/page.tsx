@@ -56,19 +56,19 @@ const PETS = [
 const STEPS = [
   {
     number: '1',
-    title: 'Browse & pick',
+    title: 'Browse & Pick',
     detail: 'Meet our pets and find the one that makes your heart melt.',
     bg: 'bg-[#1e3a8a] text-white',
   },
   {
     number: '2',
-    title: 'Apply online',
+    title: 'Apply Online',
     detail: 'Send one application and track every update in real time.',
     bg: 'bg-[#f97316] text-white',
   },
   {
     number: '3',
-    title: 'Bring them home',
+    title: 'Bring Them Home',
     detail: 'Work with the shelter team and start your happily-ever-after.',
     bg: 'bg-[#d7e6ff] text-[#1e3a8a]',
   },
@@ -82,7 +82,7 @@ export default function Home() {
         href="#main-content"
         className="btn btn-sm btn-primary sr-only min-h-11 min-w-11 focus:not-sr-only focus:absolute focus:top-4 focus:left-4"
       >
-        Skip to main content
+        Skip To Main Content
       </a>
 
       <section
@@ -92,12 +92,15 @@ export default function Home() {
       >
         <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
           <div className="w-full min-w-0 flex-1 text-center lg:-translate-y-4 lg:text-left">
+            <div className="font-friendly bg-accent text-accent-content mb-4 inline-flex items-center rounded-full px-5 py-2 text-sm font-bold shadow-lg sm:text-base">
+              🐾 Dogs and Cats
+            </div>
+
             <h1
               id="hero-heading"
               className="font-display mb-5 text-5xl leading-none font-extrabold tracking-tight break-words text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl lg:text-7xl"
             >
-              <span className="text-[#f97316]">Raised Paws</span> tracks your
-              adoption application.
+              Track your pet adoption applications.
             </h1>
 
             <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold text-[#f97316] sm:text-xl lg:mx-0">
@@ -119,29 +122,15 @@ export default function Home() {
                 For Shelters
               </Link>
             </div>
-            <p className="mt-4 text-sm text-white/80 sm:text-base lg:text-left">
-              <Link
-                href="/#meet-pets-heading"
-                className="link link-hover text-white"
-              >
-                Browse pets
-              </Link>
-            </p>
           </div>
 
-          {/* Right column: badge + hero image
+          {/* Right column: hero image
               Tune these Tailwind knobs:
               - Whole column up/down: `lg:-mt-*` on this outer div (negative = higher)
-              - Badge right/left: `self-end` / `self-start` / `self-center`, plus `mr-*` or `ml-*`
-              - Space between badge & photo: badge `mb-*` and column `gap-*`
-              - Photo up/down relative to badge: `lg:-mt-*` on the image wrapper
+              - Photo up/down: `lg:-mt-*` on the image wrapper
               - Photo size: `max-w-md` / `lg:max-w-[640px]` on the column
           */}
           <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 lg:-mt-16 lg:max-w-[640px] lg:items-stretch">
-            <div className="font-friendly bg-accent text-accent-content mb-4 inline-flex -translate-y-4 items-center self-end rounded-full px-5 py-2 text-sm font-bold shadow-lg sm:text-base lg:mr-8 lg:-translate-y-4">
-              🐾 Dogs and Cats
-            </div>
-
             <div className="relative aspect-[4/3] w-full animate-[floaty_5s_ease-in-out_infinite] lg:-mt-4">
               <div className="absolute inset-0 rotate-1 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl sm:rotate-3" />
               <div className="absolute inset-2 rotate-1 overflow-hidden rounded-[1.625rem] sm:rotate-3">
@@ -289,7 +278,7 @@ export default function Home() {
               href="/get-started?demo=1&choose=1"
               className="btn min-h-11 bg-white text-[#1e3a8a]"
             >
-              Demo login tips
+              Demo Login Tips
             </Link>
           </div>
         </div>

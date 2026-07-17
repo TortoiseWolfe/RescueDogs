@@ -35,8 +35,8 @@ const DOORS: Array<{
     title: "I'm adopting",
     subtitle:
       "Apply once and track every status update live so you're never ghosted.",
-    ctaSignIn: 'Continue as adopter',
-    ctaSignUp: 'Create adopter account',
+    ctaSignIn: 'Continue As Adopter',
+    ctaSignUp: 'Create Adopter Account',
     accent: 'border-[#f97316]',
   },
   {
@@ -44,8 +44,8 @@ const DOORS: Array<{
     title: "I'm a shelter / rescue",
     subtitle:
       'Review applications in a simple pipeline and keep adopters in the loop.',
-    ctaSignIn: 'Continue as shelter',
-    ctaSignUp: 'Create shelter account',
+    ctaSignIn: 'Continue As Shelter',
+    ctaSignUp: 'Create Shelter Account',
     accent: 'border-[#1e3a8a]',
   },
 ];
