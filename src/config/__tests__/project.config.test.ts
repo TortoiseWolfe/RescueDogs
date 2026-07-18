@@ -292,7 +292,7 @@ describe('Project Configuration', () => {
       const shortcuts = manifest.shortcuts.map((s) => s.name);
       expect(shortcuts).toContain('Adopt');
       expect(shortcuts).toContain('My applications');
-      expect(shortcuts).toContain('Sign in');
+      expect(shortcuts).toContain('Sign In');
     });
 
     it('should use custom project name in manifest', () => {

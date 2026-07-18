@@ -62,10 +62,10 @@ export default function SignInPage() {
 
   const heading =
     portal === 'shelter'
-      ? 'Shelter sign in'
+      ? 'Shelter Sign In'
       : portal === 'adopter'
-        ? 'Adopter sign in'
-        : 'Log in';
+        ? 'Adopter Sign In'
+        : 'Log In';
 
   return (
     <main className="container mx-auto px-4 py-12 sm:px-6 md:py-16 lg:px-8">
@@ -121,7 +121,7 @@ export default function SignInPage() {
 
         <p className="mt-4 text-center text-sm">
           <Link href="/forgot-password" className="link-primary">
-            Forgot password?
+            Forgot Password?
           </Link>
         </p>
 
@@ -140,7 +140,7 @@ export default function SignInPage() {
             }
             className="link-primary"
           >
-            Sign up
+            Sign Up
           </Link>
         </p>
       </div>
