@@ -43,9 +43,9 @@ export default function SignUpPage() {
 
   const heading =
     portal === 'shelter'
-      ? 'Create shelter account'
+      ? 'Create Shelter Account'
       : portal === 'adopter'
-        ? 'Create adopter account'
+        ? 'Create Adopter Account'
         : 'Create Account';
 
   const signInHref = portal
@@ -98,7 +98,7 @@ export default function SignUpPage() {
         <p className="mt-6 text-center text-sm">
           Already have an account?{' '}
           <Link href={signInHref} className="link-primary">
-            Sign in
+            Sign In
           </Link>
         </p>
       </div>

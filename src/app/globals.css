@@ -135,8 +135,8 @@
 }
 
 /* Menu bar: orange background in both light and dark modes.
- * Remap primary tokens at header scope so nav links, toggles, and brand
- * title stay legible — white text on orange in both themes. */
+ * Remap primary tokens at header scope so brand title stays white on orange.
+ * Nav chrome buttons use explicit navy classes in GlobalNav (#53). */
 [data-theme='trusted-care-light'] .site-header {
   --color-primary: #f97316;
   --color-primary-content: #ffffff;

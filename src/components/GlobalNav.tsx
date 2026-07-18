@@ -15,9 +15,15 @@ import { ShelterApplicationService } from '@/services/applications';
 import { createClient } from '@/lib/supabase/client';
 import {
   DEFAULT_THEME_DARK,
+  DEFAULT_THEME_LIGHT,
   normalizeThemeId,
-  THEME_OPTIONS,
 } from '@/config/themes';
+
+/** Navy chrome buttons on the orange site header (#53). */
+const navChromeBtn =
+  'btn btn-sm min-h-11 border-0 bg-[#1e3a8a] text-white hover:bg-[#172554]';
+const navChromeIconBtn =
+  'btn btn-circle min-h-11 min-w-11 border-0 bg-[#1e3a8a] text-white hover:bg-[#172554]';
 
 export function GlobalNav() {
   const pathname = usePathname();
@@ -87,22 +93,25 @@ export function GlobalNav() {
     );
   };
 
+  const isDarkTheme = theme.endsWith('-dark');
+  const handleThemeToggle = () => {
+    handleThemeChange(isDarkTheme ? DEFAULT_THEME_LIGHT : DEFAULT_THEME_DARK);
+  };
+
   const navItems = [
     { href: '/', label: 'Home' },
     ...(!user
       ? [
           { href: '/for-adopters', label: 'For Adopters' },
           { href: '/for-shelters', label: 'For Shelters' },
-          { href: '/#meet-pets-heading', label: 'Browse pets' },
+          { href: '/#meet-pets-heading', label: 'Browse Pets' },
         ]
-      : [{ href: '/adopt', label: 'Apply to adopt' }]),
+      : [{ href: '/adopt', label: 'Apply To Adopt' }]),
     ...(user ? [{ href: '/applications', label: 'My Applications' }] : []),
     ...(isShelterStaff ? [{ href: '/shelter', label: 'Shelter' }] : []),
     { href: '/blog', label: 'Blog' },
     // { href: '/docs', label: 'Docs' },
   ];
-
-  const themes = THEME_OPTIONS;
 
   return (
     <header className="site-header bg-primary text-primary-content sticky top-0 z-50">
@@ -143,9 +152,7 @@ export function GlobalNav() {
                   key={item.href}
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`btn btn-ghost btn-sm text-primary-content hover:bg-black/10 ${
-                    isActive ? 'bg-black/15' : ''
-                  }`}
+                  className={`${navChromeBtn} ${isActive ? 'bg-[#172554] ring-2 ring-white/40' : ''}`}
                 >
                   {item.label}
                 </Link>
@@ -160,7 +167,7 @@ export function GlobalNav() {
             {user && (
               <Link
                 href="/messages"
-                className="btn btn-ghost btn-circle indicator min-h-11 min-w-11"
+                className={`${navChromeIconBtn} indicator`}
                 title="Messages"
                 aria-label="Messages"
               >
@@ -193,7 +200,7 @@ export function GlobalNav() {
               <div className="dropdown dropdown-end">
                 <label
                   tabIndex={0}
-                  className="btn btn-ghost btn-circle min-h-11 min-w-11"
+                  className={navChromeIconBtn}
                   aria-label="User account menu"
                 >
                   <AvatarDisplay
@@ -266,9 +273,9 @@ export function GlobalNav() {
               <>
                 <Link
                   href="/sign-in"
-                  className="btn btn-ghost btn-sm text-primary-content hidden min-h-11 min-w-11 hover:bg-black/10 lg:inline-flex"
+                  className={`${navChromeBtn} hidden lg:inline-flex`}
                 >
-                  Log in
+                  Log In
                 </Link>
               </>
             )}
@@ -277,7 +284,7 @@ export function GlobalNav() {
             <div className="dropdown dropdown-end lg:hidden">
               <label
                 tabIndex={0}
-                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-black/10"
+                className={navChromeIconBtn}
                 aria-label="Navigation menu"
               >
                 <svg
@@ -364,52 +371,59 @@ export function GlobalNav() {
                       <span>Account</span>
                     </li>
                     <li>
-                      <Link href="/sign-in">Log in</Link>
+                      <Link href="/sign-in">Log In</Link>
                     </li>
                   </>
                 )}
               </ul>
             </div>
 
-            {/* Theme Selector - Hidden below lg (1024px) */}
-            <div className="dropdown dropdown-end hidden lg:block">
-              <label
-                tabIndex={0}
-                className="btn btn-ghost btn-circle text-primary-content min-h-11 min-w-11 hover:bg-black/10"
-                title="Change theme"
-                aria-label="Change theme"
-              >
+            {/* Light / dark toggle — shows current mode (moon = dark, sun = light) */}
+            <button
+              type="button"
+              onClick={handleThemeToggle}
+              className={navChromeIconBtn}
+              title={
+                isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'
+              }
+              aria-label={
+                isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'
+              }
+            >
+              {isDarkTheme ? (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-4 w-4 sm:h-5 sm:w-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
                   />
                 </svg>
-              </label>
-              <ul
-                tabIndex={0}
-                className="dropdown-content bg-base-100 text-base-content rounded-box z-50 max-h-96 w-44 max-w-[calc(100vw-4rem)] overflow-y-auto p-2 shadow-lg sm:w-52"
-              >
-                {themes.map((t) => (
-                  <li key={t.id}>
-                    <button
-                      className={`btn btn-ghost btn-sm w-full justify-start ${theme === t.id ? 'btn-active' : ''}`}
-                      onClick={() => handleThemeChange(t.id)}
-                    >
-                      {t.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 sm:h-5 sm:w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                  />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       </nav>
