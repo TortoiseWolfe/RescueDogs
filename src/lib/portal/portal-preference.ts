@@ -58,14 +58,32 @@ function resolveReturnUrl(
   return PORTAL_DEFAULT_RETURN[portal];
 }
 
+/** Public seed accounts (README Live Demo). Safe to ship in the client. */
+export const DEMO_CREDENTIALS: Record<
+  PortalType,
+  { email: string; password: string }
+> = {
+  adopter: { email: 'adopter@demo.test', password: 'DemoPass123!' },
+  shelter: { email: 'staff@demo.test', password: 'DemoPass123!' },
+};
+
+export type BuildAuthHrefOptions = {
+  /** When true, sign-in links carry demo=1 so SignInForm prefills (#59). */
+  demo?: boolean;
+};
+
 export function buildSignInHref(
   portal: PortalType,
-  returnUrl?: string | null
+  returnUrl?: string | null,
+  options?: BuildAuthHrefOptions
 ): string {
   const params = new URLSearchParams({
     portal,
     returnUrl: resolveReturnUrl(portal, returnUrl),
   });
+  if (options?.demo) {
+    params.set('demo', '1');
+  }
   return `/sign-in?${params.toString()}`;
 }
 
@@ -83,9 +101,10 @@ export function buildSignUpHref(
 export function buildPortalAuthHref(
   portal: PortalType,
   intent: PortalAuthIntent = 'sign-in',
-  returnUrl?: string | null
+  returnUrl?: string | null,
+  options?: BuildAuthHrefOptions
 ): string {
   return intent === 'sign-up'
     ? buildSignUpHref(portal, returnUrl)
-    : buildSignInHref(portal, returnUrl);
+    : buildSignInHref(portal, returnUrl, options);
 }
