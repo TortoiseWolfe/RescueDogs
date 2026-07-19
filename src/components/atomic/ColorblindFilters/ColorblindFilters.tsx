@@ -6,6 +6,7 @@ import {
   COLORBLIND_MATRICES,
   matrixToSVGString,
 } from '@/utils/colorblind-matrices';
+import { useColorblindMode } from '@/hooks/useColorblindMode';
 
 export interface ColorblindFiltersProps {
   className?: string;
@@ -14,6 +15,13 @@ export interface ColorblindFiltersProps {
 export const ColorblindFilters: React.FC<ColorblindFiltersProps> = ({
   className = '',
 }) => {
+  // Apply persisted colorblind settings on every page. The SVG defs alone are
+  // not enough — without a mounted consumer of useColorblindMode, localStorage
+  // preferences never touch the DOM (regression after ColorblindToggle left
+  // GlobalNav; /accessibility still mounts the toggle, but / and everywhere
+  // else would ignore a saved mode).
+  useColorblindMode();
+
   // Define all filter types except NONE
   const filterTypes = [
     ColorblindType.PROTANOPIA,
