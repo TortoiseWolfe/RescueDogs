@@ -41,6 +41,8 @@ test.describe('#305 colorblind mode vs position:fixed', () => {
       [STORAGE_KEY]
     );
 
+    // ColorblindFilters in root layout mounts useColorblindMode so a saved
+    // preference applies on every route (not only /accessibility).
     await page.goto('/');
 
     // Wait for the hook's mount effect to apply the filter ANYWHERE — <html>
@@ -62,6 +64,13 @@ test.describe('#305 colorblind mode vs position:fixed', () => {
       .toBe(true);
 
     const result = await page.evaluate(() => {
+      // Homepage content can sit inside overflow:hidden flex children that do
+      // not grow the document. A tall spacer makes scrollHeight > viewport so
+      // the containing-block regression is actually observable.
+      const spacer = document.createElement('div');
+      spacer.style.cssText = 'height:200vh;width:1px;pointer-events:none;';
+      document.body.appendChild(spacer);
+
       const probe = document.createElement('div');
       probe.style.cssText =
         'position:fixed;top:64px;left:0;right:0;bottom:0;pointer-events:none;';
@@ -74,14 +83,17 @@ test.describe('#305 colorblind mode vs position:fixed', () => {
       const scrolled = at();
       const scrollY = Math.round(window.scrollY);
 
+      const pageScrolls =
+        document.documentElement.scrollHeight > window.innerHeight;
       probe.remove();
+      spacer.remove();
       window.scrollTo(0, 0);
       return {
         unscrolled,
         scrolled,
         scrollY,
         bodyFilter: document.body.style.filter,
-        pageScrolls: document.documentElement.scrollHeight > window.innerHeight,
+        pageScrolls,
       };
     });
 
