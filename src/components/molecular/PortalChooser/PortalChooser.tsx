@@ -16,6 +16,11 @@ export interface PortalChooserProps {
   intent?: PortalAuthIntent;
   /** Highlight demo credentials under the doors (public seed accounts). */
   showDemoHints?: boolean;
+  /**
+   * When true (demo path), sign-in door links include demo=1 so credentials
+   * prefill on /sign-in (#59). Does not apply to sign-up.
+   */
+  demoPrefill?: boolean;
   /** Additional CSS classes */
   className?: string;
   /** Called after a door is chosen (preference already saved). */
@@ -60,6 +65,7 @@ export default function PortalChooser({
   returnUrl = null,
   intent = 'sign-in',
   showDemoHints = false,
+  demoPrefill = false,
   className = '',
   onSelect,
 }: PortalChooserProps) {
@@ -78,7 +84,9 @@ export default function PortalChooser({
         {DOORS.map((door) => (
           <Link
             key={door.portal}
-            href={buildPortalAuthHref(door.portal, intent, returnUrl)}
+            href={buildPortalAuthHref(door.portal, intent, returnUrl, {
+              demo: demoPrefill && intent === 'sign-in',
+            })}
             onClick={() => handleSelect(door.portal)}
             className={`border-base-300 bg-base-100 hover:border-primary focus-visible:outline-primary flex min-h-11 flex-col rounded-2xl border-2 p-6 text-left shadow-sm transition-colors ${door.accent}`}
           >
@@ -116,7 +124,8 @@ export default function PortalChooser({
             </li>
           </ul>
           <p className="text-base-content/70 mt-3">
-            Pick a door above, sign in with the matching account, then open{' '}
+            Pick a door above — sign-in will prefill the matching demo account
+            (editable). Then open{' '}
             <Link href="/applications" className="link link-primary">
               applications
             </Link>{' '}
