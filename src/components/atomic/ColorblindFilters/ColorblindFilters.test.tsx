@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { ColorblindFilters } from './ColorblindFilters';
-import { ColorblindType } from '@/utils/colorblind';
+import { ColorblindType, COLORBLIND_STORAGE_KEY } from '@/utils/colorblind';
 import {
   COLORBLIND_MATRICES,
   matrixToSVGString,
@@ -190,5 +190,31 @@ describe('ColorblindFilters', () => {
     // Should not have display or visibility styles that would make it visible
     const computedStyle = window.getComputedStyle(svg as Element);
     expect(computedStyle.display).not.toBe('block');
+  });
+
+  describe('persisted mode application', () => {
+    beforeEach(() => {
+      localStorage.clear();
+      document.documentElement.style.filter = '';
+      document.body.style.filter = '';
+    });
+
+    afterEach(() => {
+      localStorage.clear();
+      document.documentElement.style.filter = '';
+      document.body.style.filter = '';
+    });
+
+    it('applies saved colorblind mode to <html> on mount', () => {
+      localStorage.setItem(
+        COLORBLIND_STORAGE_KEY,
+        JSON.stringify({ mode: 'protanopia', patternsEnabled: false })
+      );
+
+      render(<ColorblindFilters />);
+
+      expect(document.documentElement.style.filter).toBe('url(#protanopia)');
+      expect(document.body.style.filter).toBe('');
+    });
   });
 });
