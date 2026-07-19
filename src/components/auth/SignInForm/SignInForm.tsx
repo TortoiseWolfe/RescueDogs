@@ -19,6 +19,12 @@ export interface SignInFormProps {
   onSuccess?: () => void;
   /** Additional CSS classes */
   className?: string;
+  /** Prefill email (demo path #59). Fields stay editable. */
+  initialEmail?: string;
+  /** Prefill password (demo path #59). Fields stay editable. */
+  initialPassword?: string;
+  /** Show the shared demo-account note when credentials were prefilled. */
+  showDemoBanner?: boolean;
 }
 
 /**
@@ -30,10 +36,13 @@ export interface SignInFormProps {
 export default function SignInForm({
   onSuccess,
   className = '',
+  initialEmail = '',
+  initialPassword = '',
+  showDemoBanner = false,
 }: SignInFormProps) {
   const { signIn, user } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(initialEmail);
+  const [password, setPassword] = useState(initialPassword);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -253,6 +262,19 @@ export default function SignInForm({
       onSubmit={handleSubmit}
       className={`space-y-4${className ? ` ${className}` : ''}`}
     >
+      {showDemoBanner ? (
+        <div
+          className="alert alert-info text-sm"
+          role="status"
+          data-testid="demo-account-banner"
+        >
+          <span>
+            Demo account — shared public login (editable if you need a different
+            account).
+          </span>
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
         <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="email">
           <span className="label-text">Email</span>

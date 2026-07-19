@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import {
   buildSignUpHref,
+  DEMO_CREDENTIALS,
   isPortalType,
   setPortalPreference,
   type PortalType,
@@ -34,6 +35,7 @@ export default function SignInPage() {
     null
   );
   const [portal, setPortal] = useState<PortalType | null>(null);
+  const [demoPrefill, setDemoPrefill] = useState(false);
   // Block onSuccess navigation until the returnUrl effect has run. On a
   // fast network or already-authenticated user, sign-in can resolve before
   // the URL-parsing effect finishes, sending the user to the default
@@ -57,8 +59,12 @@ export default function SignInPage() {
       portalRef.current = portalParam;
       setPortalPreference(portalParam);
     }
+    setDemoPrefill(params.get('demo') === '1');
     setMounted(true);
   }, []);
+
+  const demoCredentials =
+    demoPrefill && portal ? DEMO_CREDENTIALS[portal] : null;
 
   const heading =
     portal === 'shelter'
@@ -99,25 +105,38 @@ export default function SignInPage() {
           </p>
         )}
 
-        <SignInForm
-          onSuccess={() => {
-            if (!mounted) return;
-            void (async () => {
-              const {
-                data: { session },
-              } = await supabase.auth.getSession();
-              const userId = session?.user?.id;
-              const path = userId
-                ? await resolvePostLoginPath({
-                    userId,
-                    explicitReturnUrl: explicitReturnUrlRef.current,
-                    portal: portalRef.current,
-                  })
-                : explicitReturnUrlRef.current || '/applications';
-              router.push(path);
-            })();
-          }}
-        />
+        {!mounted ? (
+          <div className="flex min-h-40 items-center justify-center">
+            <span
+              className="loading loading-spinner loading-lg"
+              role="status"
+              aria-label="Loading"
+            />
+          </div>
+        ) : (
+          <SignInForm
+            initialEmail={demoCredentials?.email}
+            initialPassword={demoCredentials?.password}
+            showDemoBanner={Boolean(demoCredentials)}
+            onSuccess={() => {
+              if (!mounted) return;
+              void (async () => {
+                const {
+                  data: { session },
+                } = await supabase.auth.getSession();
+                const userId = session?.user?.id;
+                const path = userId
+                  ? await resolvePostLoginPath({
+                      userId,
+                      explicitReturnUrl: explicitReturnUrlRef.current,
+                      portal: portalRef.current,
+                    })
+                  : explicitReturnUrlRef.current || '/applications';
+                router.push(path);
+              })();
+            }}
+          />
+        )}
 
         <p className="mt-4 text-center text-sm">
           <Link href="/forgot-password" className="link-primary">
