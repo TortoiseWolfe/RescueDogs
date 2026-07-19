@@ -48,6 +48,59 @@ vi.mock('leaflet/dist/leaflet.css', () => ({}));
 vi.mock('prismjs/themes/prism-tomorrow.css', () => ({}));
 vi.mock('@/styles/prism-override.css', () => ({}));
 
+// Real Leaflet must NEVER load in the jsdom unit suite.
+//
+// Leaflet is browser-only: its module top-level reads `window.requestAnimationFrame`
+// (src/core/Util.js), so it throws `ReferenceError: window is not defined` if it
+// evaluates when no window exists. `map-utils.ts`'s `await import('leaflet')`
+// (called from MapContainer's mount effect) is async, so under full-suite timing it
+// can resolve AFTER a map test's jsdom window is torn down — an unhandled rejection
+// that fails the whole vitest run even when every test passed. Intermittent (~1 in 8)
+// on upstream; same MapContainer.accessibility.test path exists here. Map behaviour
+// is E2E-tested in tests/e2e/map.spec.ts, so the unit suite has no reason to load
+// real Leaflet. Mocking it here makes the async import resolve to a stub instantly,
+// with no window dependency, killing the race for every test at once. Local map
+// tests keep their own `vi.mock('leaflet', …)` (local mocks override this one); this
+// is the safety net for every un-mocked path (e.g. MapContainer.accessibility.test).
+// Port of ScriptHammer#300 / PR #314.
+const leafletStub = {
+  map: vi.fn(() => ({
+    addLayer: vi.fn(),
+    remove: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+    setView: vi.fn(),
+    getZoom: vi.fn(() => 13),
+    getCenter: vi.fn(() => ({ lat: 51.505, lng: -0.09 })),
+  })),
+  tileLayer: vi.fn(() => ({ addTo: vi.fn() })),
+  marker: vi.fn(() => ({
+    addTo: vi.fn(),
+    bindPopup: vi.fn(),
+    setLatLng: vi.fn(),
+    remove: vi.fn(),
+  })),
+  circle: vi.fn(() => ({
+    addTo: vi.fn(),
+    setLatLng: vi.fn(),
+    setRadius: vi.fn(),
+    remove: vi.fn(),
+  })),
+  divIcon: vi.fn(() => ({})),
+  // fixLeafletIconPaths() deletes prototype._getIconUrl then calls mergeOptions.
+  Icon: { Default: { prototype: {}, mergeOptions: vi.fn() } },
+};
+vi.mock('leaflet', () => ({ default: leafletStub, ...leafletStub }));
+vi.mock('react-leaflet', () => ({
+  MapContainer: ({ children, ...props }: Record<string, unknown>) => children,
+  TileLayer: () => null,
+  Marker: ({ children }: Record<string, unknown>) => children,
+  Popup: ({ children }: Record<string, unknown>) => children,
+  Circle: () => null,
+  useMap: () => leafletStub.map(),
+  useMapEvents: () => leafletStub.map(),
+}));
+
 // =============================================================================
 // Comprehensive Supabase Client Mock
 // Enables tests to run without Supabase environment variables
