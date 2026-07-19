@@ -41,6 +41,23 @@ describe('PortalChooser', () => {
     expect(screen.getByText('staff@demo.test')).toBeInTheDocument();
   });
 
+  it('adds demo=1 to sign-in door hrefs when demoPrefill is set (#59)', () => {
+    render(<PortalChooser demoPrefill />);
+    expect(
+      screen.getByRole('link', { name: /continue as adopter/i })
+    ).toHaveAttribute('href', expect.stringContaining('demo=1'));
+    expect(
+      screen.getByRole('link', { name: /continue as shelter/i })
+    ).toHaveAttribute('href', expect.stringContaining('demo=1'));
+  });
+
+  it('does not add demo=1 to sign-up door hrefs even with demoPrefill', () => {
+    render(<PortalChooser intent="sign-up" demoPrefill />);
+    expect(
+      screen.getByRole('link', { name: /create adopter account/i })
+    ).toHaveAttribute('href', expect.not.stringContaining('demo=1'));
+  });
+
   it('routes doors to sign-up when intent is sign-up', () => {
     render(<PortalChooser intent="sign-up" />);
     expect(

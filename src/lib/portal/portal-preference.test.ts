@@ -39,6 +39,15 @@ describe('portal-preference', () => {
     );
   });
 
+  it('builds sign-in href with demo=1 when requested (#59)', () => {
+    expect(buildSignInHref('adopter', null, { demo: true })).toBe(
+      '/sign-in?portal=adopter&returnUrl=%2Fapplications&demo=1'
+    );
+    expect(buildSignInHref('shelter', '/shelter', { demo: true })).toBe(
+      '/sign-in?portal=shelter&returnUrl=%2Fshelter&demo=1'
+    );
+  });
+
   it('builds sign-up href with portal defaults', () => {
     expect(buildSignUpHref('adopter')).toBe(
       '/sign-up?portal=adopter&returnUrl=%2Fapplications'

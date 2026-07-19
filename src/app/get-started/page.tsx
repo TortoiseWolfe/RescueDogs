@@ -92,6 +92,7 @@ export default function GetStartedPage() {
         returnUrl={returnUrl}
         intent={intent}
         showDemoHints={showDemoHints || intent === 'sign-in'}
+        demoPrefill={showDemoHints}
       />
 
       <p className="text-base-content/70 mt-8 text-center text-sm">
