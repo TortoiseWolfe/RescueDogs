@@ -101,12 +101,14 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
             </p>
             <ul className="text-base-content/80 list-disc space-y-1 pl-5 text-sm">
               <li>
-                Trying the demo? Sign in as{' '}
-                <code className="bg-base-200 rounded px-1">
-                  staff@demo.test
-                </code>{' '}
-                (password in the Live Demo section of the README / get-started
-                demo hints).
+                Trying the demo? Use{' '}
+                <Link
+                  href="/get-started?choose=1&demo=1"
+                  className="link link-primary"
+                >
+                  Try the Demo
+                </Link>{' '}
+                and pick the shelter door — sign-in prefills the staff account.
               </li>
               <li>
                 Adopting instead? Use the adopter door — membership for shelters
@@ -118,7 +120,7 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
                 href="/get-started?choose=1&demo=1"
                 className="btn btn-primary min-h-11"
               >
-                Choose portal again
+                Try the Demo
               </Link>
               <Link href="/" className="btn btn-ghost min-h-11">
                 Back home

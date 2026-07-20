@@ -24,7 +24,7 @@ bounces non-staff accounts back to the home page (that's the gate working).
 - Shelters: <https://raisedpaws.com/for-shelters/>
 - Log in (no portal required): <https://raisedpaws.com/sign-in/>
 - Browse pets (public): homepage “Say hello!” section
-- Demo tips: <https://raisedpaws.com/get-started/?demo=1&choose=1>
+- Try the demo: <https://raisedpaws.com/get-started/?demo=1&choose=1>
 
 | Role                | Email               | Password       |
 | ------------------- | ------------------- | -------------- |
