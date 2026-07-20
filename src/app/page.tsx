@@ -269,8 +269,8 @@ export default function Home() {
               Want to see the live rescue loop?
             </h2>
             <p className="mt-2 max-w-2xl text-lg font-bold text-white">
-              Sign in with the demo accounts to watch adopter and shelter
-              updates sync in real time.
+              Pick adopter or shelter — we&apos;ll fill in the demo login so you
+              can watch updates sync in real time.
             </p>
           </div>
           <div className="mt-6 flex flex-wrap gap-4 lg:mt-0 lg:shrink-0">
@@ -278,7 +278,7 @@ export default function Home() {
               href="/get-started?demo=1&choose=1"
               className="btn min-h-11 bg-white text-[#1e3a8a]"
             >
-              Demo Login Tips
+              Try the Demo
             </Link>
           </div>
         </div>

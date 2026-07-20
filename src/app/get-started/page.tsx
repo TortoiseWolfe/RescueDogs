@@ -23,20 +23,21 @@ function isSafeReturnUrl(url: string): boolean {
 }
 
 /**
- * Secondary portal switcher / demo tips (#48). Primary entry is homepage +
- * /for-adopters and /for-shelters.
+ * Secondary portal switcher / demo entry (#48, #62). Primary entry is
+ * homepage + /for-adopters and /for-shelters.
  */
 export default function GetStartedPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [returnUrl, setReturnUrl] = useState<string | null>(null);
-  const [showDemoHints, setShowDemoHints] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
   const [intent, setIntent] = useState<PortalAuthIntent>('sign-in');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const force = params.get('choose') === '1';
-    setShowDemoHints(params.get('demo') === '1');
+    const isDemo = params.get('demo') === '1';
+    setDemoMode(isDemo);
     const intentParam = params.get('intent');
     const nextIntent: PortalAuthIntent =
       intentParam === 'signup' || intentParam === 'sign-up'
@@ -50,8 +51,8 @@ export default function GetStartedPage() {
       if (isSafeReturnUrl(decoded)) setReturnUrl(decoded);
     }
 
-    // Only auto-skip when not forcing a choice and not showing demo tips.
-    if (!force && params.get('demo') !== '1') {
+    // Only auto-skip when not forcing a choice and not on the demo path.
+    if (!force && !isDemo) {
       const preferred = getPortalPreference();
       if (isPortalType(preferred)) {
         const dest = rawReturn
@@ -79,20 +80,26 @@ export default function GetStartedPage() {
     <main className="container mx-auto max-w-4xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <div className="mb-8 text-center">
         <h1 className="font-display text-3xl font-extrabold sm:text-4xl">
-          {intent === 'sign-up' ? 'Create an account' : 'Demo & door switcher'}
+          {intent === 'sign-up'
+            ? 'Create an account'
+            : demoMode
+              ? 'Try the Demo'
+              : 'Choose a portal'}
         </h1>
         <p className="text-base-content/80 mx-auto mt-3 max-w-2xl text-lg">
           {intent === 'sign-up'
             ? 'Pick adopter or shelter so we can send you to the right sign-up.'
-            : 'Use this page for demo credentials or to jump into a portal. Day-to-day, start from For Adopters / For Shelters on the homepage.'}
+            : demoMode
+              ? 'Pick a door. The next screen is prefilled with the shared demo login.'
+              : 'Jump into adopter or shelter. Day-to-day, start from For Adopters / For Shelters on the homepage.'}
         </p>
       </div>
 
       <PortalChooser
         returnUrl={returnUrl}
         intent={intent}
-        showDemoHints={showDemoHints || intent === 'sign-in'}
-        demoPrefill={showDemoHints}
+        showDemoHints={demoMode}
+        demoPrefill={demoMode}
       />
 
       <p className="text-base-content/70 mt-8 text-center text-sm">
