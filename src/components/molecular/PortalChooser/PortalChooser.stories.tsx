@@ -17,7 +17,7 @@ const meta: Meta<typeof PortalChooser> = {
   argTypes: {
     showDemoHints: {
       control: 'boolean',
-      description: 'Show public demo account hints',
+      description: 'Show short demo prefill hint (no credential list)',
     },
     className: {
       control: 'text',
