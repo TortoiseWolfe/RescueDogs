@@ -35,10 +35,13 @@ describe('PortalChooser', () => {
     expect(onSelect).toHaveBeenCalledWith('shelter');
   });
 
-  it('shows demo hints when requested', () => {
+  it('shows a short prefill hint without credential dump (#62)', () => {
     render(<PortalChooser showDemoHints />);
-    expect(screen.getByText(/try the live demo loop/i)).toBeInTheDocument();
-    expect(screen.getByText('staff@demo.test')).toBeInTheDocument();
+    expect(
+      screen.getByText(/we'll fill in the shared demo login/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText('staff@demo.test')).not.toBeInTheDocument();
+    expect(screen.queryByText('DemoPass123!')).not.toBeInTheDocument();
   });
 
   it('adds demo=1 to sign-in door hrefs when demoPrefill is set (#59)', () => {

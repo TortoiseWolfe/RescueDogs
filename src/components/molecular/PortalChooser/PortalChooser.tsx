@@ -14,7 +14,10 @@ export interface PortalChooserProps {
   returnUrl?: string | null;
   /** Route doors to sign-in or sign-up. */
   intent?: PortalAuthIntent;
-  /** Highlight demo credentials under the doors (public seed accounts). */
+  /**
+   * Short demo help under the doors (#62). No credential cheat sheet —
+   * prefill on sign-in (#59) is the source of truth.
+   */
   showDemoHints?: boolean;
   /**
    * When true (demo path), sign-in door links include demo=1 so credentials
@@ -104,38 +107,10 @@ export default function PortalChooser({
       </div>
 
       {showDemoHints ? (
-        <div className="bg-base-200 mt-8 rounded-2xl p-5 text-sm">
-          <p className="font-semibold">Try the live demo loop</p>
-          <p className="text-base-content/80 mt-1">
-            Demo-only accounts (password{' '}
-            <code className="bg-base-300 rounded px-1">DemoPass123!</code>
-            ):
-          </p>
-          <ul className="mt-3 space-y-2">
-            <li>
-              Adopter:{' '}
-              <code className="bg-base-300 rounded px-1">
-                adopter@demo.test
-              </code>
-            </li>
-            <li>
-              Shelter staff:{' '}
-              <code className="bg-base-300 rounded px-1">staff@demo.test</code>
-            </li>
-          </ul>
-          <p className="text-base-content/70 mt-3">
-            Pick a door above — sign-in will prefill the matching demo account
-            (editable). Then open{' '}
-            <Link href="/applications" className="link link-primary">
-              applications
-            </Link>{' '}
-            or{' '}
-            <Link href="/shelter" className="link link-primary">
-              shelter pipeline
-            </Link>
-            .
-          </p>
-        </div>
+        <p className="text-base-content/80 mt-8 text-center text-sm sm:text-base">
+          We&apos;ll fill in the shared demo login on the next screen — then
+          just Sign In.
+        </p>
       ) : null}
     </div>
   );
