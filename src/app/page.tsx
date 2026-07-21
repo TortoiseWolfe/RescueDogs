@@ -121,6 +121,12 @@ export default function Home() {
               >
                 For Shelters
               </Link>
+              <Link
+                href="/get-started?demo=1&choose=1"
+                className="btn btn-ghost btn-lg min-h-11 w-full border-white/40 px-8 text-lg text-white sm:w-auto"
+              >
+                Try the Demo
+              </Link>
             </div>
           </div>
 
