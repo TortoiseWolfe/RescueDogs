@@ -254,4 +254,27 @@ describe('ShelterApplicationService', () => {
       failure
     );
   });
+
+  it('getApplicantEmail returns email from staff-only RPC (#66)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: 'adopter@example.com',
+      error: null,
+    });
+
+    await expect(service.getApplicantEmail(APP_ID)).resolves.toBe(
+      'adopter@example.com'
+    );
+    expect(mock.rpc).toHaveBeenCalledWith('get_application_applicant_email', {
+      p_application_id: APP_ID,
+    });
+  });
+
+  it('getApplicantEmail returns null when RPC fails (#66)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: null,
+      error: { message: 'not authorized' },
+    });
+
+    await expect(service.getApplicantEmail(APP_ID)).resolves.toBeNull();
+  });
 });
