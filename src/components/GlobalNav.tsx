@@ -24,6 +24,10 @@ const navChromeBtn =
   'btn btn-sm min-h-11 border-0 bg-[#1e3a8a] text-white hover:bg-[#172554]';
 const navChromeIconBtn =
   'btn btn-circle min-h-11 min-w-11 border-0 bg-[#1e3a8a] text-white hover:bg-[#172554]';
+/** Demo entry stands out from navy chrome without redesigning the menu (#67). */
+const navDemoBtn =
+  'btn btn-sm min-h-11 border-0 bg-[#f97316] text-white hover:bg-[#ea580c]';
+const DEMO_ENTRY_HREF = '/get-started?demo=1&choose=1';
 
 export function GlobalNav() {
   const pathname = usePathname();
@@ -272,6 +276,12 @@ export function GlobalNav() {
             ) : (
               <>
                 <Link
+                  href={DEMO_ENTRY_HREF}
+                  className={`${navDemoBtn} hidden lg:inline-flex`}
+                >
+                  Try the Demo
+                </Link>
+                <Link
                   href="/sign-in"
                   className={`${navChromeBtn} hidden lg:inline-flex`}
                 >
@@ -369,6 +379,9 @@ export function GlobalNav() {
                   <>
                     <li className="menu-title mt-2">
                       <span>Account</span>
+                    </li>
+                    <li>
+                      <Link href={DEMO_ENTRY_HREF}>Try the Demo</Link>
                     </li>
                     <li>
                       <Link href="/sign-in">Log In</Link>

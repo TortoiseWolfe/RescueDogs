@@ -110,16 +110,16 @@ export default function Home() {
 
             <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <Link
-                href="/for-adopters"
-                className="btn btn-secondary btn-lg min-h-11 w-full px-8 text-lg sm:w-auto"
+                href="/get-started?choose=1&intent=signup"
+                className="btn btn-lg min-h-11 w-full border-0 bg-[#f97316] px-8 text-lg text-white hover:bg-[#ea580c] sm:w-auto"
               >
-                For Adopters
+                Create Account
               </Link>
               <Link
-                href="/for-shelters"
-                className="btn btn-accent btn-lg min-h-11 w-full px-8 text-lg sm:w-auto"
+                href="/get-started?demo=1&choose=1"
+                className="btn btn-lg min-h-11 w-full border-0 bg-[#f97316] px-8 text-lg text-white hover:bg-[#ea580c] sm:w-auto"
               >
-                For Shelters
+                Try the Demo
               </Link>
             </div>
           </div>

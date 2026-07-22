@@ -41,6 +41,12 @@ export default function ForAdoptersPage() {
               Create Account
             </Link>
             <Link
+              href="/get-started?demo=1&choose=1"
+              className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
+            >
+              Try the Demo
+            </Link>
+            <Link
               href="/#meet-pets-heading"
               className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
             >
