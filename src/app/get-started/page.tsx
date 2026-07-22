@@ -83,7 +83,7 @@ export default function GetStartedPage() {
           {intent === 'sign-up'
             ? 'Create an account'
             : demoMode
-              ? 'Try the Demo'
+              ? 'Try Demo'
               : 'Choose a portal'}
         </h1>
         <p className="text-base-content/80 mx-auto mt-3 max-w-2xl text-lg">

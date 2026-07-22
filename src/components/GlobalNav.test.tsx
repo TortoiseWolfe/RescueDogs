@@ -54,17 +54,17 @@ describe('GlobalNav demo visibility (#67)', () => {
     });
   });
 
-  it('shows Try the Demo links to the chooser for guests', () => {
+  it('shows Try Demo links to the chooser for guests', () => {
     render(<GlobalNav />);
 
-    const demoLinks = screen.getAllByRole('link', { name: /try the demo/i });
+    const demoLinks = screen.getAllByRole('link', { name: /^try demo$/i });
     expect(demoLinks.length).toBeGreaterThanOrEqual(2);
     for (const link of demoLinks) {
       expect(link).toHaveAttribute('href', DEMO_HREF);
     }
   });
 
-  it('does not show Try the Demo when signed in', () => {
+  it('does not show Try Demo when signed in', () => {
     mockUseAuth.mockReturnValue({
       user: {
         id: 'user-1',
@@ -79,7 +79,7 @@ describe('GlobalNav demo visibility (#67)', () => {
     render(<GlobalNav />);
 
     expect(
-      screen.queryByRole('link', { name: /try the demo/i })
+      screen.queryByRole('link', { name: /^try demo$/i })
     ).not.toBeInTheDocument();
   });
 });

@@ -10,7 +10,7 @@ export function Footer() {
         <p className="mt-1 text-xs text-white/90">
           Built by{' '}
           <a
-            href="https://github.com/TortoiseWolfe/RescueDogs"
+            href="https://www.techstackdevs.com"
             target="_blank"
             rel="noopener noreferrer"
             /* Persistent underline (not link-hover) so the link is
@@ -18,7 +18,7 @@ export function Footer() {
                alone — satisfies axe's link-in-text-block (WCAG 1.4.1). */
             className="link text-white underline"
           >
-            Raised Paws
+            Tech Stack Devs
           </a>
           , powered by Supabase.
         </p>

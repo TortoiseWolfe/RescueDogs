@@ -6,18 +6,18 @@ import ForSheltersPage from '@/app/for-shelters/page';
 
 const DEMO_HREF = '/get-started?demo=1&choose=1';
 
-describe('Demo visibility pages (#67)', () => {
+describe('Demo visibility pages (#67 / #74)', () => {
   it('homepage hero and lower CTA both link to the demo chooser', () => {
     render(<Home />);
 
-    const demoLinks = screen.getAllByRole('link', { name: /try the demo/i });
+    const demoLinks = screen.getAllByRole('link', { name: /^try demo$/i });
     expect(demoLinks.length).toBeGreaterThanOrEqual(2);
     for (const link of demoLinks) {
       expect(link).toHaveAttribute('href', DEMO_HREF);
     }
   });
 
-  it('homepage hero only has Create Account and Try the Demo', () => {
+  it('homepage hero has Create Account then Try Demo', () => {
     render(<Home />);
 
     expect(
@@ -31,19 +31,29 @@ describe('Demo visibility pages (#67)', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('for-adopters exposes Try the Demo', () => {
+  it('lower demo band keeps white heading and navy support line (#74)', () => {
+    render(<Home />);
+
+    expect(
+      screen.getByRole('heading', { name: /want to see the live rescue loop/i })
+    ).toBeInTheDocument();
+    const support = screen.getByText(/pick adopter or shelter/i);
+    expect(support.className).toMatch(/text-\[#1e3a8a\]/);
+  });
+
+  it('for-adopters exposes Try Demo', () => {
     render(<ForAdoptersPage />);
 
-    expect(screen.getByRole('link', { name: /try the demo/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /^try demo$/i })).toHaveAttribute(
       'href',
       DEMO_HREF
     );
   });
 
-  it('for-shelters exposes Try the Demo', () => {
+  it('for-shelters exposes Try Demo', () => {
     render(<ForSheltersPage />);
 
-    expect(screen.getByRole('link', { name: /try the demo/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /^try demo$/i })).toHaveAttribute(
       'href',
       DEMO_HREF
     );
