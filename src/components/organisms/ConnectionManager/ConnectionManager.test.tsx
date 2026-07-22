@@ -1,7 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ConnectionManager from './ConnectionManager';
+import { useAuth } from '@/contexts/AuthContext';
 import { useConnections } from '@/hooks/useConnections';
+
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: vi.fn(),
+}));
 
 vi.mock('@/hooks/useConnections');
 
@@ -36,8 +41,14 @@ const mockConnections = {
 };
 
 describe('ConnectionManager', () => {
+  const mockUseAuth = useAuth as ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: signed in as the requester in pending_sent fixtures
+    mockUseAuth.mockReturnValue({
+      user: { id: 'user1', email: 'user1@example.com' },
+    });
   });
 
   it('renders tabs', () => {
@@ -131,6 +142,10 @@ describe('ConnectionManager', () => {
   });
 
   it('calls acceptRequest when accept button clicked', async () => {
+    // Current user is the addressee for a received request
+    mockUseAuth.mockReturnValue({
+      user: { id: 'user2', email: 'user2@example.com' },
+    });
     const acceptRequest = vi.fn().mockResolvedValue(undefined);
     vi.mocked(useConnections).mockReturnValue({
       connections: {
@@ -147,6 +162,7 @@ describe('ConnectionManager', () => {
     });
 
     render(<ConnectionManager />);
+    expect(screen.getByText('Requester')).toBeInTheDocument();
     const acceptButton = screen.getByRole('button', { name: /accept/i });
     fireEvent.click(acceptButton);
 
@@ -156,6 +172,9 @@ describe('ConnectionManager', () => {
   });
 
   it('shows block confirmation modal', () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: 'user2', email: 'user2@example.com' },
+    });
     vi.mocked(useConnections).mockReturnValue({
       connections: {
         ...mockConnections,
@@ -178,7 +197,7 @@ describe('ConnectionManager', () => {
   });
 
   describe('Message button (Feature 037)', () => {
-    const acceptedConnection = {
+    const acceptedAsRequester = {
       connection: {
         id: 'conn-1',
         requester_id: 'current-user',
@@ -201,11 +220,41 @@ describe('ConnectionManager', () => {
       },
     };
 
+    /** Current user accepted someone else's request (#70 regression case). */
+    const acceptedAsAddressee = {
+      connection: {
+        id: 'conn-2',
+        requester_id: 'other-user',
+        addressee_id: 'current-user',
+        status: 'accepted' as const,
+        created_at: '',
+        updated_at: '',
+      },
+      requester: {
+        id: 'other-user',
+        username: 'friend',
+        display_name: 'My Friend',
+        avatar_url: null,
+      },
+      addressee: {
+        id: 'current-user',
+        username: 'me',
+        display_name: 'Me',
+        avatar_url: null,
+      },
+    };
+
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        user: { id: 'current-user', email: 'me@example.com' },
+      });
+    });
+
     it('renders Message button for accepted connections when onMessage prop provided', () => {
       vi.mocked(useConnections).mockReturnValue({
         connections: {
           ...mockConnections,
-          accepted: [acceptedConnection],
+          accepted: [acceptedAsRequester],
         },
         loading: false,
         error: null,
@@ -232,7 +281,7 @@ describe('ConnectionManager', () => {
       vi.mocked(useConnections).mockReturnValue({
         connections: {
           ...mockConnections,
-          accepted: [acceptedConnection],
+          accepted: [acceptedAsRequester],
         },
         loading: false,
         error: null,
@@ -255,7 +304,7 @@ describe('ConnectionManager', () => {
       vi.mocked(useConnections).mockReturnValue({
         connections: {
           ...mockConnections,
-          accepted: [acceptedConnection],
+          accepted: [acceptedAsRequester],
         },
         loading: false,
         error: null,
@@ -276,6 +325,33 @@ describe('ConnectionManager', () => {
       fireEvent.click(screen.getByTestId('message-button'));
 
       // Should call onMessage with the other user's ID (addressee since requester is current user)
+      expect(onMessage).toHaveBeenCalledWith('other-user');
+    });
+
+    it('shows peer (not self) when current user is the addressee (#70)', () => {
+      vi.mocked(useConnections).mockReturnValue({
+        connections: {
+          ...mockConnections,
+          accepted: [acceptedAsAddressee],
+        },
+        loading: false,
+        error: null,
+        acceptRequest: vi.fn(),
+        declineRequest: vi.fn(),
+        blockUser: vi.fn(),
+        removeConnection: vi.fn(),
+        refreshConnections: vi.fn(),
+      });
+
+      const onMessage = vi.fn();
+      render(<ConnectionManager onMessage={onMessage} />);
+
+      fireEvent.click(screen.getByRole('tab', { name: /accepted/i }));
+
+      expect(screen.getByText('My Friend')).toBeInTheDocument();
+      expect(screen.queryByText('Me')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('message-button'));
       expect(onMessage).toHaveBeenCalledWith('other-user');
     });
   });
