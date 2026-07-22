@@ -44,7 +44,7 @@ export default function ForSheltersPage() {
               href="/get-started?demo=1&choose=1"
               className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
             >
-              Try the Demo
+              Try Demo
             </Link>
           </div>
         </div>

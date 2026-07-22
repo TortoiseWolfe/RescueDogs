@@ -119,7 +119,7 @@ export default function Home() {
                 href="/get-started?demo=1&choose=1"
                 className="btn btn-lg min-h-11 w-full border-0 bg-[#f97316] px-8 text-lg text-white hover:bg-[#ea580c] sm:w-auto"
               >
-                Try the Demo
+                Try Demo
               </Link>
             </div>
           </div>
@@ -268,7 +268,7 @@ export default function Home() {
             <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
               Want to see the live rescue loop?
             </h2>
-            <p className="mt-2 max-w-2xl text-lg font-bold text-white">
+            <p className="mt-2 max-w-2xl text-lg font-bold text-[#1e3a8a]">
               Pick adopter or shelter — we&apos;ll fill in the demo login so you
               can watch updates sync in real time.
             </p>
@@ -278,7 +278,7 @@ export default function Home() {
               href="/get-started?demo=1&choose=1"
               className="btn min-h-11 bg-white text-[#1e3a8a]"
             >
-              Try the Demo
+              Try Demo
             </Link>
           </div>
         </div>
