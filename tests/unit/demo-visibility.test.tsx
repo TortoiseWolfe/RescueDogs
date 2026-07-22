@@ -17,6 +17,20 @@ describe('Demo visibility pages (#67)', () => {
     }
   });
 
+  it('homepage hero only has Create Account and Try the Demo', () => {
+    render(<Home />);
+
+    expect(
+      screen.getByRole('link', { name: /create account/i })
+    ).toHaveAttribute('href', '/get-started?choose=1&intent=signup');
+    expect(
+      screen.queryByRole('link', { name: /^for adopters$/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: /^for shelters$/i })
+    ).not.toBeInTheDocument();
+  });
+
   it('for-adopters exposes Try the Demo', () => {
     render(<ForAdoptersPage />);
 
