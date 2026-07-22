@@ -64,15 +64,35 @@ function MyApplicationsContent() {
 
       {applications.length === 0 && !error ? (
         <div className="card bg-base-200">
-          <div className="card-body items-center text-center">
-            <h2 className="card-title">No applications yet</h2>
-            <p>
-              When you apply to adopt, you can track every application here — no
-              more wondering what happened.
+          <div className="card-body items-center gap-4 text-center">
+            <h2 className="card-title text-2xl">
+              Welcome — let&apos;s get you started
+            </h2>
+            <p className="text-base-content/80 max-w-md">
+              You do not have any adoption applications yet. Browse pets, then
+              complete the reusable universal application so shelters can review
+              you without the silence.
             </p>
-            <Link href="/adopt" className="btn btn-primary">
-              Find your new best friend
-            </Link>
+            <p className="text-base-content/70 max-w-md text-sm">
+              Your legal name and contact details go in the application (private
+              to the shelter). A friendly{' '}
+              <Link href="/account" className="link link-primary">
+                display name
+              </Link>{' '}
+              in Account Settings is optional and used for messaging — it is
+              separate from your application full name.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
+              <Link
+                href="/#meet-pets-heading"
+                className="btn btn-primary min-h-11"
+              >
+                Browse Pets
+              </Link>
+              <Link href="/adopt" className="btn btn-secondary min-h-11">
+                Start an Application
+              </Link>
+            </div>
           </div>
         </div>
       ) : (
