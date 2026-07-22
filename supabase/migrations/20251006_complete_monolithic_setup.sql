@@ -2678,6 +2678,49 @@ AS $$
   );
 $$;
 
+COMMENT ON FUNCTION is_shelter_staff(UUID, UUID) IS
+  'True when check_user_id (default auth.uid()) is a member of p_shelter. SECURITY DEFINER to avoid recursive RLS.';
+
+-- ─── Staff-only applicant email (#66) ──────────────────────────────────────
+-- Returns auth.users.email for the application's adopter when the caller is
+-- staff of that shelter. Never exposed via public profiles or messaging search.
+
+CREATE OR REPLACE FUNCTION get_application_applicant_email(p_application_id UUID)
+RETURNS TEXT
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shelter_id UUID;
+  v_adopter_id UUID;
+  v_email TEXT;
+BEGIN
+  SELECT shelter_id, adopter_id
+  INTO v_shelter_id, v_adopter_id
+  FROM applications
+  WHERE id = p_application_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'application not found';
+  END IF;
+
+  IF NOT is_shelter_staff(v_shelter_id) THEN
+    RAISE EXCEPTION 'not authorized';
+  END IF;
+
+  SELECT email INTO v_email FROM auth.users WHERE id = v_adopter_id;
+  RETURN v_email;
+END;
+$$;
+
+COMMENT ON FUNCTION get_application_applicant_email(UUID) IS
+  'Staff-only: applicant auth email for a shelter application. Not for public search (#66).';
+
+REVOKE ALL ON FUNCTION get_application_applicant_email(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION get_application_applicant_email(UUID) TO authenticated;
+
 -- ─── Status transitions: SECURITY DEFINER RPCs (the only write path) ───────
 -- applications has NO client UPDATE/DELETE policies; with output:'export'
 -- there is no server runtime, so Postgres is the only trusted layer.

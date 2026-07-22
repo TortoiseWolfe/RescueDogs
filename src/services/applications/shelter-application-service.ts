@@ -96,6 +96,23 @@ export class ShelterApplicationService {
   }
 
   /**
+   * Applicant auth email for staff contact (#66). SECURITY DEFINER RPC —
+   * only succeeds when the caller is shelter staff for that application.
+   * Returns null if the RPC fails or email is missing (do not leak errors
+   * that distinguish not-found vs unauthorized in the UI).
+   */
+  async getApplicantEmail(applicationId: string): Promise<string | null> {
+    const { data, error } = await this.supabase.rpc(
+      'get_application_applicant_email',
+      { p_application_id: applicationId }
+    );
+    if (error || typeof data !== 'string' || data.trim() === '') {
+      return null;
+    }
+    return data;
+  }
+
+  /**
    * Advance an application along the pipeline. Postgres validates staff
    * membership and the transition; the optional note is shown to the
    * adopter on their tracker (Constitution Principle I).

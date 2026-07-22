@@ -208,10 +208,22 @@ describe('ApplicationDetail', () => {
         />
       );
       expect(getDefinition('Full name')).toHaveTextContent('Jane Renter');
+      expect(getDefinition('Email')).toHaveTextContent(EM_DASH);
       expect(getDefinition('Phone')).toHaveTextContent('555-0101');
       expect(getDefinition('Address')).toHaveTextContent(
         '12 Oak St, Portland, OR, 97201'
       );
+    });
+
+    it('renders staff-only applicant email when provided (#66)', () => {
+      render(
+        <ApplicationDetail
+          application={makeApplication()}
+          applicantEmail="jane@example.com"
+          onAdvance={vi.fn()}
+        />
+      );
+      expect(getDefinition('Email')).toHaveTextContent('jane@example.com');
     });
 
     it('renders Your Home fields with humanized housing and landlord rows when renting', () => {
