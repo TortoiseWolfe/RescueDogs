@@ -97,7 +97,9 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
             </h1>
             <p className="text-base-content/80">
               This login is not linked to a shelter membership. Shelter pipeline
-              pages are for staff who have been added to a rescue.
+              pages are for staff who have been added to a rescue. Creating an
+              account alone does not grant shelter access — ask your rescue to
+              add you as staff, or use the demo shelter door below.
             </p>
             <ul className="text-base-content/80 list-disc space-y-1 pl-5 text-sm">
               <li>
@@ -113,6 +115,10 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
               <li>
                 Adopting instead? Use the adopter door — membership for shelters
                 is separate from tracking an application.
+              </li>
+              <li>
+                Joining a real rescue? Contact them to be added as shelter staff
+                on Raised Paws; self-serve create/join is not available yet.
               </li>
             </ul>
             <div className="card-actions mt-2 flex flex-wrap gap-3">

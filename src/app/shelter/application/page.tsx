@@ -16,6 +16,7 @@ function ShelterApplicationContent() {
   const [initialized, setInitialized] = useState(false);
   const [application, setApplication] =
     useState<ApplicationWithPetAndHistory | null>(null);
+  const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [advancing, setAdvancing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +30,12 @@ function ShelterApplicationContent() {
     if (!applicationId) return;
     try {
       const service = new ShelterApplicationService(supabase);
-      setApplication(await service.getApplication(applicationId));
+      const [app, email] = await Promise.all([
+        service.getApplication(applicationId),
+        service.getApplicantEmail(applicationId),
+      ]);
+      setApplication(app);
+      setApplicantEmail(email);
       setError(null);
     } catch {
       setError('Could not load this application.');
@@ -96,6 +102,7 @@ function ShelterApplicationContent() {
           )}
           <ApplicationDetail
             application={application}
+            applicantEmail={applicantEmail}
             onAdvance={handleAdvance}
             advancing={advancing}
           />

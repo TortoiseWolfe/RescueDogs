@@ -15,6 +15,11 @@ import {
 export interface ApplicationDetailProps {
   /** Application with embedded pet and full status history. */
   application: ApplicationWithPetAndHistory;
+  /**
+   * Applicant auth email for shelter staff contact (#66).
+   * Loaded via staff-only RPC — never from public profiles.
+   */
+  applicantEmail?: string | null;
   /** Called when staff advances the application to a new status. */
   onAdvance: (
     toStatus: ApplicationStatus,
@@ -142,6 +147,7 @@ function SnapshotSection({
  */
 export default function ApplicationDetail({
   application,
+  applicantEmail = null,
   onAdvance,
   advancing = false,
   className = '',
@@ -237,6 +243,11 @@ export default function ApplicationDetail({
 
           <SnapshotSection id={`${uid}-about`} title="About You">
             <Field label="Full name" value={textOrDash(snapshot.full_name)} />
+            <Field
+              label="Email"
+              value={textOrDash(applicantEmail)}
+              wide={Boolean(applicantEmail)}
+            />
             <Field label="Phone" value={textOrDash(snapshot.phone)} />
             <Field label="Address" value={formatAddress(snapshot)} wide />
           </SnapshotSection>
