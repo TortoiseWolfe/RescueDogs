@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useConnections } from '@/hooks/useConnections';
 import UserSearch from '@/components/molecular/UserSearch';
 import type { ConnectionRequest } from '@/types/messaging';
@@ -20,6 +21,7 @@ export default function ConnectionManager({
   onMessage,
   onPendingConnectionCountChange,
 }: ConnectionManagerProps) {
+  const { user } = useAuth();
   const {
     connections,
     loading,
@@ -86,8 +88,9 @@ export default function ConnectionManager({
   };
 
   const renderConnectionItem = (item: ConnectionRequest, type: string) => {
+    // Peer relative to the signed-in user — never assume addressee (#70).
     const otherUser =
-      item.connection.requester_id === item.requester.id
+      item.connection.requester_id === user?.id
         ? item.addressee
         : item.requester;
 
