@@ -320,10 +320,48 @@ describe('useAuth', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
+      // Establish a signed-in user first — guests must not redirect (#76).
+      await authStateCallback('SIGNED_IN', {
+        user: { id: 'user-1', email: 'a@example.com' },
+        access_token: 'tok',
+      });
+      await waitFor(() => {
+        expect(result.current.user?.id).toBe('user-1');
+      });
+
       // No sb-*-auth-token in localStorage, so this SIGNED_OUT is "real"
       await authStateCallback('SIGNED_OUT', null);
 
       expect(loc.href).toBe('/RescueDogs/');
+    });
+
+    it('does not redirect anonymous SIGNED_OUT away from the current page (#76)', async () => {
+      const loc = stubLocation('/RescueDogs/for-adopters/');
+      const hrefBefore = loc.href;
+
+      let authStateCallback: any;
+      vi.mocked(supabase.auth.onAuthStateChange).mockImplementation(
+        (callback) => {
+          authStateCallback = callback;
+          return {
+            data: { subscription: { unsubscribe: vi.fn() } },
+          } as any;
+        }
+      );
+
+      const { result } = renderHook(() => useAuth(), {
+        wrapper: AuthProvider,
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.user).toBeNull();
+
+      await authStateCallback('SIGNED_OUT', null);
+
+      expect(loc.href).toBe(hrefBefore);
     });
 
     it('never redirects a SIGNED_OUT fired on the auth callback page', async () => {

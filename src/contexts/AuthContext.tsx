@@ -226,22 +226,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
+      // Capture before clearing — guests get SIGNED_OUT with no token too.
+      // Redirecting them to `/` full-reloads the app in a loop (#76).
+      const wasSignedIn = userRef.current != null;
+
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
 
       // FR-009: real cross-tab sign-out — redirect to home.
-      // Reaching this branch means: SIGNED_OUT fired AND it's not a local
-      // sign-out AND the auth-token is gone/expired (we cleared it in
-      // another tab, or the refresh token was revoked server-side).
+      // Only when this tab actually had a signed-in user. Anonymous
+      // SIGNED_OUT (no session) must not hard-navigate — that roasted
+      // production CPU for logged-out visitors on raisedpaws.com (#76).
       if (_event === 'SIGNED_OUT' && !isLocalSignOut.current) {
         // Never hijack the confirmation/OAuth landing page: during email
         // confirmation no auth-token exists yet, so a transient SIGNED_OUT
         // passes the validity guard above — and the callback page owns its
         // own error/redirect handling (issue #154).
-        if (!window.location.pathname.includes('/auth/callback')) {
-          logger.info('Cross-tab sign-out detected, redirecting to home');
-          window.location.href = getInternalUrl('/');
+        if (
+          wasSignedIn &&
+          !window.location.pathname.includes('/auth/callback')
+        ) {
+          const home = getInternalUrl('/');
+          const path = window.location.pathname.replace(/\/+$/, '') || '/';
+          const homePath = home.replace(/\/+$/, '') || '/';
+          // Already home — don't reload-loop.
+          if (path !== homePath) {
+            logger.info('Cross-tab sign-out detected, redirecting to home');
+            window.location.href = home;
+          }
         }
         return;
       }
