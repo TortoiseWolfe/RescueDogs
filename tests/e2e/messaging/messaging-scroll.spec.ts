@@ -113,7 +113,14 @@ async function clickFirstConversation(page: Page): Promise<void> {
 
   // Wait for the button to be visible (give it plenty of time)
   await conversationButton.waitFor({ state: 'visible', timeout: 45000 });
-  await conversationButton.click();
+  // Sticky footer can intercept pointer events on short mobile viewports
+  // (footer Blog pill / tagline). Scroll into view, then force if needed.
+  await conversationButton.scrollIntoViewIfNeeded();
+  try {
+    await conversationButton.click({ timeout: 5000 });
+  } catch {
+    await conversationButton.click({ force: true });
+  }
 
   // Wait for chat window to load after clicking
   await page.waitForSelector('[data-testid="chat-window"]', { timeout: 10000 });
