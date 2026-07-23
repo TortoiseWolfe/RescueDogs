@@ -268,7 +268,7 @@ export default function Home() {
             <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
               Want to see the live rescue loop?
             </h2>
-            <p className="mt-2 max-w-2xl text-lg font-bold text-[#1e3a8a]">
+            <p className="mt-2 max-w-2xl text-lg font-bold text-[#172554]">
               Pick adopter or shelter — we&apos;ll fill in the demo login so you
               can watch updates sync in real time.
             </p>
