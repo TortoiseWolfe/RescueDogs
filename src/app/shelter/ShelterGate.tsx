@@ -108,7 +108,7 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
                   href="/get-started?choose=1&demo=1"
                   className="link link-primary"
                 >
-                  Try the Demo
+                  Try Demo
                 </Link>{' '}
                 and pick the shelter door — sign-in prefills the staff account.
               </li>
@@ -126,7 +126,7 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
                 href="/get-started?choose=1&demo=1"
                 className="btn btn-primary min-h-11"
               >
-                Try the Demo
+                Try Demo
               </Link>
               <Link href="/" className="btn btn-ghost min-h-11">
                 Back home
