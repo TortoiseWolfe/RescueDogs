@@ -84,11 +84,18 @@ function blurActiveElement() {
   }
 }
 
+/**
+ * Resting role-prefix color on the orange header. Mid navy (#172554) is only
+ * ~5.2:1 on #f97316 — fails WCAG AAA (7:1) in color-contrast.spec. Near-black
+ * keeps the “For” darker than white “Adopters/Shelters” and passes AAA.
+ */
+const ROLE_FOR_REST = '#020617';
+
 function RoleDropdown({
   roleWord,
   links,
 }: {
-  /** “Adopters” or “Shelters” — paired with a navy “For ” prefix (#65). */
+  /** “Adopters” or “Shelters” — paired with a dark “For ” prefix (#65). */
   roleWord: string;
   links: NavLinkItem[];
 }) {
@@ -96,6 +103,9 @@ function RoleDropdown({
   const [hovered, setHovered] = useState(false);
   const [open, setOpen] = useState(false);
   const roleAccent = hovered || open;
+  const forStyle = {
+    color: roleAccent ? NAV_NAVY : ROLE_FOR_REST,
+  } as const;
   const accentStyle = { color: NAV_NAVY } as const;
 
   return (
@@ -119,7 +129,9 @@ function RoleDropdown({
         aria-label={accessibleName}
         onClick={() => setOpen((prev) => !prev)}
       >
-        <span style={accentStyle}>For&nbsp;</span>
+        <span className="transition-colors" style={forStyle}>
+          For&nbsp;
+        </span>
         <span
           className={
             roleAccent
