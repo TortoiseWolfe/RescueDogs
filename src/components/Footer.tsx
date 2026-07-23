@@ -15,6 +15,16 @@ export function Footer() {
   const blogSelected = Boolean(pathname?.startsWith('/blog'));
   const blogClass = `${footerBlogPill} ${blogSelected ? footerBlogPillSelected : ''}`;
 
+  // Full-viewport messaging UIs — site footer overlaps conversation list on
+  // short mobile viewports and intercepts clicks (E2E messaging-scroll T003).
+  const hideOnMessaging =
+    Boolean(pathname?.startsWith('/messages')) ||
+    Boolean(pathname?.startsWith('/conversations'));
+
+  if (hideOnMessaging) {
+    return null;
+  }
+
   return (
     <footer className="mt-auto bg-[#1e3a8a] py-5 text-white shadow-[0_-8px_24px_rgba(30,58,138,0.35)] sm:py-6">
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">

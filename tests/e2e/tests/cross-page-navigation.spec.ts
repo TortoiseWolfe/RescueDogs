@@ -311,11 +311,11 @@ test.describe('Cross-Page Navigation', () => {
       const menuItems = hamburgerDropdown.locator('.dropdown-content a');
       await expect(menuItems.first()).toBeVisible();
 
-      // #65: no Home text link — Browse Pets still reaches the homepage pets band
+      // #65: Browse Pets goes to /#meet-pets-heading (not bare /)
       const browseLink = menuItems.filter({ hasText: 'Browse Pets' }).first();
       if ((await browseLink.count()) > 0) {
         await browseLink.click();
-        await expect(page).toHaveURL(/\/$/);
+        await expect(page).toHaveURL(/\/#meet-pets-heading/);
       }
     }
   });
