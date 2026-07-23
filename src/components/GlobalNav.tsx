@@ -11,20 +11,157 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import AvatarDisplay from '@/components/atomic/AvatarDisplay';
 import { useUnreadCount } from '@/hooks/useUnreadCount';
 import { AdminAuthService } from '@/services/admin/admin-auth-service';
-import { ShelterApplicationService } from '@/services/applications';
 import { createClient } from '@/lib/supabase/client';
+import { buildSignInHref } from '@/lib/portal/portal-preference';
 import {
   DEFAULT_THEME_DARK,
   DEFAULT_THEME_LIGHT,
   normalizeThemeId,
 } from '@/config/themes';
 
-/** White chrome buttons on the orange site header (#74) — match lower Demo CTA. */
+/** White chrome pills — invert to navy/white on press and when current (#65). */
 const navChromeBtn =
-  'btn btn-sm min-h-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7]';
+  'btn btn-sm min-h-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
+const navChromeBtnSelected =
+  '!bg-[#172554] !text-white hover:!bg-[#1e3a8a] hover:!text-white active:!bg-[#172554] active:!text-white';
 const navChromeIconBtn =
-  'btn btn-circle min-h-11 min-w-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7]';
+  'btn btn-circle min-h-11 min-w-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
+
+/**
+ * Navy that meets contrast on the orange header (#74 used #172554 after
+ * #1e3a8a failed WCAG on primary). Used for role-dropdown “For” + hover/open.
+ */
+const NAV_NAVY = '#172554';
+
+/** Bright white matching brand title readability on orange. */
+const navBrightWhite = 'text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]';
+
+const navDivider = 'mx-2 h-6 w-px shrink-0 bg-white/40';
+
 const DEMO_ENTRY_HREF = '/get-started?demo=1&choose=1';
+const BROWSE_PETS_HREF = '/#meet-pets-heading';
+
+type NavLinkItem = { href: string; label: string };
+
+const adopterMenuLinks: NavLinkItem[] = [
+  { href: '/for-adopters', label: 'Overview' },
+  { href: buildSignInHref('adopter'), label: 'Log In' },
+  { href: BROWSE_PETS_HREF, label: 'Browse Pets' },
+  { href: DEMO_ENTRY_HREF, label: 'Try Demo' },
+  { href: '/adopt', label: 'Apply to Adopt' },
+  { href: '/applications', label: 'My Applications' },
+];
+
+const shelterMenuLinks: NavLinkItem[] = [
+  { href: '/for-shelters', label: 'Overview' },
+  { href: buildSignInHref('shelter'), label: 'Log In' },
+  { href: DEMO_ENTRY_HREF, label: 'Try Demo' },
+  { href: '/shelter', label: 'Shelter dashboard' },
+  { href: '/blog', label: 'Blog' },
+];
+
+function ChevronDown({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className={className ?? 'ml-1 h-4 w-4'}
+      aria-hidden="true"
+    >
+      <path
+        fillRule="evenodd"
+        d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function blurActiveElement() {
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+}
+
+function RoleDropdown({
+  roleWord,
+  links,
+}: {
+  /** “Adopters” or “Shelters” — paired with a navy “For ” prefix (#65). */
+  roleWord: string;
+  links: NavLinkItem[];
+}) {
+  const accessibleName = `For ${roleWord}`;
+  const [hovered, setHovered] = useState(false);
+  const [open, setOpen] = useState(false);
+  const roleAccent = hovered || open;
+  const accentStyle = { color: NAV_NAVY } as const;
+
+  return (
+    <div
+      className="dropdown"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+          setOpen(false);
+        }
+      }}
+    >
+      <button
+        type="button"
+        tabIndex={0}
+        className="inline-flex min-h-11 items-center px-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={accessibleName}
+        onClick={() => setOpen((prev) => !prev)}
+      >
+        <span style={accentStyle}>For&nbsp;</span>
+        <span
+          className={
+            roleAccent
+              ? 'transition-colors'
+              : `${navBrightWhite} transition-colors`
+          }
+          style={roleAccent ? accentStyle : undefined}
+        >
+          {roleWord}
+        </span>
+        <span
+          className={roleAccent ? undefined : navBrightWhite}
+          style={roleAccent ? accentStyle : undefined}
+        >
+          <ChevronDown className="ml-1 h-3.5 w-3.5" />
+        </span>
+      </button>
+      <ul
+        tabIndex={0}
+        role="menu"
+        aria-label={accessibleName}
+        className="menu dropdown-content bg-base-100 text-base-content rounded-box z-50 mt-3 w-56 p-2 text-sm font-medium shadow"
+      >
+        {links.map((item) => (
+          <li key={`${accessibleName}-${item.href}-${item.label}`} role="none">
+            <Link
+              href={item.href}
+              role="menuitem"
+              className="min-h-11 text-sm font-medium"
+              onClick={() => {
+                setOpen(false);
+                blurActiveElement();
+              }}
+            >
+              {item.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function GlobalNav() {
   const pathname = usePathname();
@@ -33,7 +170,7 @@ export function GlobalNav() {
   const unreadCount = useUnreadCount();
   const [theme, setTheme] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isShelterStaff, setIsShelterStaff] = useState(false);
+  const [onPetsSection, setOnPetsSection] = useState(false);
 
   useEffect(() => {
     if (!user?.id) {
@@ -45,21 +182,19 @@ export function GlobalNav() {
     service.checkIsAdmin(user.id).then(setIsAdmin);
   }, [user?.id]);
 
+  // Browse Pets hash target — keep pill selected while on that section.
   useEffect(() => {
-    if (!user?.id) {
-      setIsShelterStaff(false);
-      return;
-    }
-    const supabase = createClient();
-    const service = new ShelterApplicationService(supabase);
-    service
-      .getMyShelterMembership(user.id)
-      .then((membership) => setIsShelterStaff(membership !== null));
-  }, [user?.id]);
+    const syncPetsHash = () => {
+      setOnPetsSection(
+        pathname === '/' && window.location.hash === '#meet-pets-heading'
+      );
+    };
+    syncPetsHash();
+    window.addEventListener('hashchange', syncPetsHash);
+    return () => window.removeEventListener('hashchange', syncPetsHash);
+  }, [pathname]);
 
   // Theme management — read existing theme, don't overwrite ThemeScript's work.
-  // ThemeScript runs before hydration and sets data-theme from localStorage
-  // or system preference; we just sync React state to it here.
   useEffect(() => {
     const savedTheme = normalizeThemeId(
       localStorage.getItem('theme') ||
@@ -69,7 +204,6 @@ export function GlobalNav() {
     setTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
 
-    // Also set on body for consistency
     if (document.body) {
       document.body.setAttribute('data-theme', savedTheme);
     }
@@ -81,12 +215,10 @@ export function GlobalNav() {
     localStorage.setItem('theme', resolved);
     document.documentElement.setAttribute('data-theme', resolved);
 
-    // Also set on body for consistency
     if (document.body) {
       document.body.setAttribute('data-theme', resolved);
     }
 
-    // Dispatch custom event for other components to listen to
     window.dispatchEvent(
       new CustomEvent('themechange', {
         detail: { theme: resolved },
@@ -99,34 +231,34 @@ export function GlobalNav() {
     handleThemeChange(isDarkTheme ? DEFAULT_THEME_LIGHT : DEFAULT_THEME_DARK);
   };
 
-  const navItems = [
-    { href: '/', label: 'Home' },
-    ...(!user
-      ? [
-          { href: '/for-adopters', label: 'For Adopters' },
-          { href: '/for-shelters', label: 'For Shelters' },
-          { href: '/#meet-pets-heading', label: 'Browse Pets' },
-        ]
-      : [{ href: '/adopt', label: 'Apply To Adopt' }]),
-    ...(user ? [{ href: '/applications', label: 'My Applications' }] : []),
-    ...(isShelterStaff ? [{ href: '/shelter', label: 'Shelter' }] : []),
-    { href: '/blog', label: 'Blog' },
-    // { href: '/docs', label: 'Docs' },
-  ];
+  const guestAdopterLinks = adopterMenuLinks;
+  const guestShelterLinks = shelterMenuLinks;
+
+  /** Signed-in menus omit Log In / Try Demo (account chrome covers auth). */
+  const signedInAdopterLinks = adopterMenuLinks.filter(
+    (item) => item.label !== 'Log In' && item.label !== 'Try Demo'
+  );
+  const signedInShelterLinks = shelterMenuLinks.filter(
+    (item) => item.label !== 'Log In' && item.label !== 'Try Demo'
+  );
+
+  const desktopAdopterLinks = user ? signedInAdopterLinks : guestAdopterLinks;
+  const desktopShelterLinks = user ? signedInShelterLinks : guestShelterLinks;
+  const logInSelected = Boolean(pathname?.startsWith('/sign-in'));
 
   return (
     <header className="site-header bg-primary text-primary-content sticky top-0 z-50">
-      <nav className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-3">
+      <nav className="container mx-auto px-4" aria-label="Main">
+        <div className="flex h-16 items-center justify-between gap-2">
+          {/* Logo = home (left) */}
+          <div className="flex min-w-0 items-center gap-3">
             <Link
               href="/"
               className="flex min-h-11 items-center gap-2 transition-opacity hover:opacity-80"
             >
               <Image
                 src={`${projectConfig.basePath}/raised-paws-logo.png`}
-                alt="Raised Paws"
+                alt="Raised Paws home"
                 width={32}
                 height={32}
                 className="h-8 w-8 drop-shadow-sm"
@@ -142,29 +274,33 @@ export function GlobalNav() {
             </Link>
           </div>
 
-          {/* Main Navigation */}
-          <nav className="hidden items-center gap-1 lg:flex">
-            {navItems.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (pathname?.startsWith(item.href + '/') && item.href !== '/');
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={isActive ? 'page' : undefined}
-                  className={`${navChromeBtn} ${isActive ? 'bg-[#e8edf7] ring-2 ring-[#1e3a8a]/40' : ''}`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Right Section: Auth, Theme & PWA - Mobile-first spacing (PRP-017 T025) */}
-          {/* Use flex-shrink-0 to prevent items from shrinking, overflow-hidden to prevent horizontal scroll */}
+          {/* Right: role menus flush against pills */}
           <div className="flex flex-shrink-0 items-center gap-0.5 sm:gap-1 md:gap-2">
-            {/* Messages Icon (authenticated users only) */}
+            <div className="hidden items-center gap-1 lg:flex">
+              <RoleDropdown roleWord="Adopters" links={desktopAdopterLinks} />
+              <RoleDropdown roleWord="Shelters" links={desktopShelterLinks} />
+
+              <span className={navDivider} aria-hidden="true" />
+
+              <Link
+                href={BROWSE_PETS_HREF}
+                className={`${navChromeBtn} inline-flex ${onPetsSection ? navChromeBtnSelected : ''}`}
+                aria-current={onPetsSection ? 'location' : undefined}
+              >
+                Browse Pets
+              </Link>
+
+              {!user && (
+                <Link
+                  href="/sign-in"
+                  className={`${navChromeBtn} inline-flex ${logInSelected ? navChromeBtnSelected : ''}`}
+                  aria-current={logInSelected ? 'page' : undefined}
+                >
+                  Log In
+                </Link>
+              )}
+            </div>
+
             {user && (
               <Link
                 href="/messages"
@@ -194,9 +330,6 @@ export function GlobalNav() {
               </Link>
             )}
 
-            {/* Auth Buttons */}
-            {/* User account dropdown (logged in) or auth buttons (logged out) */}
-            {/* Auth buttons hidden on mobile - they're in the hamburger menu */}
             {user ? (
               <div className="dropdown dropdown-end">
                 <label
@@ -253,15 +386,7 @@ export function GlobalNav() {
                       type="button"
                       onClick={(e) => {
                         e.preventDefault();
-                        // Close dropdown
-                        if (document.activeElement instanceof HTMLElement) {
-                          document.activeElement.blur();
-                        }
-                        // signOut() handles the window.location.href='/'
-                        // redirect internally; setting it again here races
-                        // with the in-flight navigation on Firefox and
-                        // manifests as NS_BINDING_ABORTED in Playwright's
-                        // page.waitForURL.
+                        blurActiveElement();
                         void signOut();
                       }}
                     >
@@ -270,24 +395,9 @@ export function GlobalNav() {
                   </li>
                 </ul>
               </div>
-            ) : (
-              <>
-                <Link
-                  href={DEMO_ENTRY_HREF}
-                  className={`${navChromeBtn} hidden lg:inline-flex`}
-                >
-                  Try Demo
-                </Link>
-                <Link
-                  href="/sign-in"
-                  className={`${navChromeBtn} hidden lg:inline-flex`}
-                >
-                  Log In
-                </Link>
-              </>
-            )}
+            ) : null}
 
-            {/* Mobile/tablet menu (visible below lg) - 44px touch target */}
+            {/* Mobile/tablet menu — same destinations, nested by role (#65) */}
             <div className="dropdown dropdown-end lg:hidden">
               <label
                 tabIndex={0}
@@ -311,33 +421,74 @@ export function GlobalNav() {
               </label>
               <ul
                 tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-100 text-base-content rounded-box -right-2 z-50 mt-3 w-40 max-w-[calc(100vw-4rem)] p-2 shadow sm:w-44"
+                className="menu dropdown-content bg-base-100 text-base-content rounded-box -right-2 z-50 mt-3 w-60 max-w-[calc(100vw-2rem)] p-2 text-base shadow"
               >
-                {navItems.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className={pathname === item.href ? 'active' : ''}
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
+                <li className="menu-title">
+                  <span>For Adopters</span>
+                </li>
+                {(user ? signedInAdopterLinks : guestAdopterLinks).map(
+                  (item) => (
+                    <li key={`m-adopter-${item.href}-${item.label}`}>
+                      <Link
+                        href={item.href}
+                        className="min-h-11"
+                        onClick={blurActiveElement}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  )
+                )}
+
+                <li className="menu-title mt-2">
+                  <span>For Shelters</span>
+                </li>
+                {(user ? signedInShelterLinks : guestShelterLinks).map(
+                  (item) => (
+                    <li key={`m-shelter-${item.href}-${item.label}`}>
+                      <Link
+                        href={item.href}
+                        className="min-h-11"
+                        onClick={blurActiveElement}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  )
+                )}
+
+                <li className="menu-title mt-2">
+                  <span>Explore</span>
+                </li>
+                <li>
+                  <Link
+                    href={BROWSE_PETS_HREF}
+                    className="min-h-11"
+                    onClick={blurActiveElement}
+                  >
+                    Browse Pets
+                  </Link>
+                </li>
+
                 {user ? (
                   <>
                     <li className="menu-title mt-2">
                       <span>Account</span>
                     </li>
                     <li>
-                      <Link href="/profile">Profile</Link>
+                      <Link href="/profile" className="min-h-11">
+                        Profile
+                      </Link>
                     </li>
                     <li>
-                      <Link href="/account">Settings</Link>
+                      <Link href="/account" className="min-h-11">
+                        Settings
+                      </Link>
                     </li>
                     <li>
                       <Link
                         href="/messages"
-                        className="flex items-center justify-between"
+                        className="flex min-h-11 items-center justify-between"
                       >
                         <span>Messages</span>
                         {unreadCount > 0 && (
@@ -348,23 +499,27 @@ export function GlobalNav() {
                       </Link>
                     </li>
                     <li>
-                      <Link href="/messages?tab=connections">Connections</Link>
+                      <Link
+                        href="/messages?tab=connections"
+                        className="min-h-11"
+                      >
+                        Connections
+                      </Link>
                     </li>
                     {isAdmin && (
                       <li>
-                        <Link href="/admin">Admin Dashboard</Link>
+                        <Link href="/admin" className="min-h-11">
+                          Admin Dashboard
+                        </Link>
                       </li>
                     )}
                     <li>
                       <button
                         type="button"
+                        className="min-h-11"
                         onClick={(e) => {
                           e.preventDefault();
-                          // Close dropdown
-                          if (document.activeElement instanceof HTMLElement) {
-                            document.activeElement.blur();
-                          }
-                          // signOut() handles the redirect internally.
+                          blurActiveElement();
                           void signOut();
                         }}
                       >
@@ -378,17 +533,28 @@ export function GlobalNav() {
                       <span>Account</span>
                     </li>
                     <li>
-                      <Link href={DEMO_ENTRY_HREF}>Try Demo</Link>
+                      <Link
+                        href={DEMO_ENTRY_HREF}
+                        className="min-h-11"
+                        onClick={blurActiveElement}
+                      >
+                        Try Demo
+                      </Link>
                     </li>
                     <li>
-                      <Link href="/sign-in">Log In</Link>
+                      <Link
+                        href="/sign-in"
+                        className="min-h-11"
+                        onClick={blurActiveElement}
+                      >
+                        Log In
+                      </Link>
                     </li>
                   </>
                 )}
               </ul>
             </div>
 
-            {/* Light / dark toggle — shows current mode (moon = dark, sun = light) */}
             <button
               type="button"
               onClick={handleThemeToggle}
