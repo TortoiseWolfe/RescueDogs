@@ -50,15 +50,15 @@ describe('GlobalNav Accessibility (#67)', () => {
   it('Demo links are named and meet 44px touch-target classes', () => {
     render(<GlobalNav />);
 
-    const demoLinks = screen.getAllByRole('link', { name: /^try demo$/i });
+    const demoLinks = screen.getAllByRole('link', {
+      name: /^try demo$/i,
+      hidden: true,
+    });
     expect(demoLinks.length).toBeGreaterThanOrEqual(2);
 
     for (const link of demoLinks) {
       expect(link).toHaveAccessibleName(/^try demo$/i);
-      // Desktop chrome uses min-h-11; mobile menu items inherit menu touch sizing.
-      if (link.className.includes('btn')) {
-        expect(link.className).toMatch(/min-h-11/);
-      }
+      expect(link.className).toMatch(/min-h-11/);
     }
   });
 });

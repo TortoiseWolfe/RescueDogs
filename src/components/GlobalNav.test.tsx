@@ -25,12 +25,6 @@ vi.mock('@/services/admin/admin-auth-service', () => ({
   },
 }));
 
-vi.mock('@/services/applications', () => ({
-  ShelterApplicationService: class {
-    getMyShelterMembership = vi.fn().mockResolvedValue(null);
-  },
-}));
-
 vi.mock('@/components/atomic/AnimatedLogo', () => ({
   AnimatedLogo: ({ text }: { text: string }) => <span>{text}</span>,
 }));
@@ -54,13 +48,18 @@ describe('GlobalNav demo visibility (#67)', () => {
     });
   });
 
-  it('shows Try Demo links to the chooser for guests', () => {
+  it('shows Try Demo in menus for guests (not as a header pill)', () => {
     render(<GlobalNav />);
 
-    const demoLinks = screen.getAllByRole('link', { name: /^try demo$/i });
+    const demoLinks = screen.getAllByRole('link', {
+      name: /^try demo$/i,
+      hidden: true,
+    });
     expect(demoLinks.length).toBeGreaterThanOrEqual(2);
     for (const link of demoLinks) {
       expect(link).toHaveAttribute('href', DEMO_HREF);
+      // Header pill removed — menu entries are not btn chrome
+      expect(link.className.includes('btn')).toBe(false);
     }
   });
 
@@ -80,6 +79,131 @@ describe('GlobalNav demo visibility (#67)', () => {
 
     expect(
       screen.queryByRole('link', { name: /^try demo$/i })
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe('GlobalNav role menus (#65)', () => {
+  const mockUseAuth = useAuth as ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseAuth.mockReturnValue({
+      user: null,
+      signOut: vi.fn(),
+      isLoading: false,
+      isAuthenticated: false,
+    });
+  });
+
+  it('exposes For Adopters and For Shelters menu triggers', () => {
+    render(<GlobalNav />);
+
+    expect(
+      screen.getByRole('button', { name: /for adopters/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /for shelters/i })
+    ).toBeInTheDocument();
+  });
+
+  it('does not show a Home text link (logo is home)', () => {
+    render(<GlobalNav />);
+
+    expect(
+      screen.queryByRole('link', { name: /^home$/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /raised paws home/i })
+    ).toHaveAttribute('href', '/');
+  });
+
+  it('shows Browse Pets pill and does not show Blog as a header pill', () => {
+    render(<GlobalNav />);
+
+    const browse = screen.getAllByRole('link', { name: /^browse pets$/i });
+    expect(browse.length).toBeGreaterThanOrEqual(1);
+    expect(browse[0]).toHaveAttribute('href', '/#meet-pets-heading');
+    expect(browse[0].className).toMatch(/bg-white/);
+
+    const blogPills = screen
+      .getAllByRole('link', { name: /^blog$/i, hidden: true })
+      .filter((el) => el.className.includes('btn'));
+    expect(blogPills).toHaveLength(0);
+  });
+
+  it('adopter menu includes Apply to Adopt and My Applications', () => {
+    render(<GlobalNav />);
+
+    const apply = screen.getAllByRole('link', { name: /^apply to adopt$/i });
+    expect(apply[0]).toHaveAttribute('href', '/adopt');
+
+    const apps = screen.getAllByRole('link', { name: /^my applications$/i });
+    expect(apps[0]).toHaveAttribute('href', '/applications');
+  });
+
+  it('shelter menu includes Shelter dashboard, Blog, and omits Browse Pets', () => {
+    render(<GlobalNav />);
+
+    const shelterTrigger = screen.getByRole('button', {
+      name: /for shelters/i,
+    });
+    const list = shelterTrigger.parentElement?.querySelector('ul');
+    expect(list).toBeTruthy();
+
+    const labels = [...list!.querySelectorAll('a')].map(
+      (a) => a.textContent?.trim() || ''
+    );
+    expect(labels).toContain('Shelter dashboard');
+    expect(labels).toContain('Blog');
+    expect(labels).not.toContain('Browse Pets');
+    expect(
+      [...list!.querySelectorAll('a')].some(
+        (a) => a.getAttribute('href') === '/shelter'
+      )
+    ).toBe(true);
+  });
+
+  it('does not put Blog in the Adopters dropdown', () => {
+    render(<GlobalNav />);
+
+    const adopterTrigger = screen.getByRole('button', {
+      name: /for adopters/i,
+    });
+    const list = adopterTrigger.parentElement?.querySelector('ul');
+    expect(list).toBeTruthy();
+    const labels = [...list!.querySelectorAll('a')].map(
+      (a) => a.textContent?.trim() || ''
+    );
+    expect(labels).not.toContain('Blog');
+  });
+
+  it('keeps pill chrome on Browse Pets and Log In (not on Try Demo)', () => {
+    render(<GlobalNav />);
+
+    const browsePills = screen
+      .getAllByRole('link', { name: /^browse pets$/i })
+      .filter((el) => el.className.includes('btn'));
+    expect(browsePills.length).toBeGreaterThanOrEqual(1);
+    expect(browsePills[0].className).toMatch(/bg-white/);
+
+    const loginPills = screen
+      .getAllByRole('link', { name: /^log in$/i })
+      .filter((el) => el.className.includes('btn'));
+    expect(loginPills.length).toBeGreaterThanOrEqual(1);
+    expect(loginPills[0].className).toMatch(/bg-white/);
+
+    const demoPills = screen
+      .getAllByRole('link', { name: /^try demo$/i, hidden: true })
+      .filter((el) => el.className.includes('btn'));
+    expect(demoPills).toHaveLength(0);
+  });
+
+  it('does not offer Create Account in role menus (sign-in page covers signup)', () => {
+    render(<GlobalNav />);
+
+    expect(
+      screen.queryByRole('link', { name: /^create account$/i })
     ).not.toBeInTheDocument();
   });
 });
