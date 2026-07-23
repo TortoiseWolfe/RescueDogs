@@ -22,8 +22,8 @@ test.describe('Cross-Page Navigation', () => {
       page.locator('h1').filter({ hasText: /Theme/i })
     ).toBeVisible();
 
-    // Navigate to Blog via nav
-    await page.click('a:has-text("Blog")');
+    // Navigate to Blog via footer pill (#65 moved Blog out of header chrome)
+    await page.locator('footer a[href*="blog"]').first().click();
     await dismissCookieBanner(page);
     await expect(page).toHaveURL(/\/blog/);
 
@@ -33,8 +33,8 @@ test.describe('Cross-Page Navigation', () => {
     await dismissCookieBanner(page);
     await expect(page).toHaveURL(/\/docs/);
 
-    // Navigate back to Home
-    await page.locator('a:has-text("Home")').first().click();
+    // Navigate back to Home via logo (#65 dropped Home text link)
+    await page.getByRole('link', { name: /Raised Paws home/i }).click();
     await dismissCookieBanner(page);
     await expect(page).toHaveURL(/\/$/);
   });
@@ -51,8 +51,8 @@ test.describe('Cross-Page Navigation', () => {
     await page.goto('/themes', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/themes/);
 
-    // Navigate to blog and wait for URL
-    await page.click('a:has-text("Blog")');
+    // Navigate to blog via footer (#65) and wait for URL
+    await page.locator('footer a[href*="blog"]').first().click();
     await expect(page).toHaveURL(/\/blog/);
 
     // Go back to themes
@@ -83,10 +83,8 @@ test.describe('Cross-Page Navigation', () => {
       const nav = page.locator('nav, [role="navigation"]').first();
       await expect(nav).toBeVisible();
 
-      // Check key navigation links are present
-      const homeLink = page
-        .locator('a:has-text("Home"), a:has-text("RescueDogs")')
-        .first();
+      // Check key navigation links are present — logo is home (#65)
+      const homeLink = page.getByRole('link', { name: /Raised Paws home/i });
       await expect(homeLink).toBeVisible();
 
       // Check footer links are consistent
@@ -299,25 +297,25 @@ test.describe('Cross-Page Navigation', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
 
-    // Look for mobile menu button (hamburger) - use aria-label pattern
-    const menuButton = page.locator('button[aria-label="Navigation menu"]');
-    const hasMenuButton = (await menuButton.count()) > 0;
+    const menuLabel = page.getByLabel('Navigation menu').first();
+    const hasMenuButton = (await menuLabel.count()) > 0;
 
     if (hasMenuButton) {
-      // Open mobile menu
-      await menuButton.click();
+      const hamburgerDropdown = page
+        .locator('.dropdown', { has: menuLabel })
+        .first();
+      await hamburgerDropdown.evaluate((el) => {
+        el.classList.add('dropdown-open');
+      });
 
-      // The menu is a dropdown, so look for menu items
-      const menuItems = page.locator('.dropdown-content a');
+      const menuItems = hamburgerDropdown.locator('.dropdown-content a');
       await expect(menuItems.first()).toBeVisible();
 
-      // Click Home link
-      const homeLink = menuItems.filter({ hasText: 'Home' }).first();
-      if ((await homeLink.count()) > 0) {
-        await homeLink.click();
-
-        // Check navigation occurred (back to home)
-        await expect(page).toHaveURL(/\/$/);
+      // #65: Browse Pets goes to /#meet-pets-heading (not bare /)
+      const browseLink = menuItems.filter({ hasText: 'Browse Pets' }).first();
+      if ((await browseLink.count()) > 0) {
+        await browseLink.click();
+        await expect(page).toHaveURL(/\/#meet-pets-heading/);
       }
     }
   });
@@ -364,16 +362,11 @@ test.describe('Cross-Page Navigation', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
 
-    // Click Blog to navigate there
-    await page.click('a:has-text("Blog")');
+    // Blog is a footer pill (#65), not a header chrome link
+    await page.locator('footer a[href*="blog"]').first().click();
     await expect(page).toHaveURL(/\/blog/);
 
-    // Check the Blog nav link marks itself as the current page. The nav uses
-    // aria-current="page" (the semantic a11y standard) on the active item.
-    const blogLink = page.locator('nav a:has-text("Blog")').first();
-
-    if ((await blogLink.count()) > 0) {
-      await expect(blogLink).toHaveAttribute('aria-current', 'page');
-    }
+    const blogLink = page.locator('footer a[href*="blog"]').first();
+    await expect(blogLink).toHaveAttribute('aria-current', 'page');
   });
 });
