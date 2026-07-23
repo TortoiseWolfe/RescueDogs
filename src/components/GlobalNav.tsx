@@ -19,14 +19,11 @@ import {
   normalizeThemeId,
 } from '@/config/themes';
 
-/** Navy chrome buttons on the orange site header (#53). */
+/** White chrome buttons on the orange site header (#74) — match lower Demo CTA. */
 const navChromeBtn =
-  'btn btn-sm min-h-11 border-0 bg-[#1e3a8a] text-white hover:bg-[#172554]';
+  'btn btn-sm min-h-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7]';
 const navChromeIconBtn =
-  'btn btn-circle min-h-11 min-w-11 border-0 bg-[#1e3a8a] text-white hover:bg-[#172554]';
-/** Demo entry stands out from navy chrome without redesigning the menu (#67). */
-const navDemoBtn =
-  'btn btn-sm min-h-11 border-0 bg-[#f97316] text-white hover:bg-[#ea580c]';
+  'btn btn-circle min-h-11 min-w-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7]';
 const DEMO_ENTRY_HREF = '/get-started?demo=1&choose=1';
 
 export function GlobalNav() {
@@ -156,7 +153,7 @@ export function GlobalNav() {
                   key={item.href}
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`${navChromeBtn} ${isActive ? 'bg-[#172554] ring-2 ring-white/40' : ''}`}
+                  className={`${navChromeBtn} ${isActive ? 'bg-[#e8edf7] ring-2 ring-[#1e3a8a]/40' : ''}`}
                 >
                   {item.label}
                 </Link>
@@ -277,9 +274,9 @@ export function GlobalNav() {
               <>
                 <Link
                   href={DEMO_ENTRY_HREF}
-                  className={`${navDemoBtn} hidden lg:inline-flex`}
+                  className={`${navChromeBtn} hidden lg:inline-flex`}
                 >
-                  Try the Demo
+                  Try Demo
                 </Link>
                 <Link
                   href="/sign-in"
@@ -381,7 +378,7 @@ export function GlobalNav() {
                       <span>Account</span>
                     </li>
                     <li>
-                      <Link href={DEMO_ENTRY_HREF}>Try the Demo</Link>
+                      <Link href={DEMO_ENTRY_HREF}>Try Demo</Link>
                     </li>
                     <li>
                       <Link href="/sign-in">Log In</Link>
