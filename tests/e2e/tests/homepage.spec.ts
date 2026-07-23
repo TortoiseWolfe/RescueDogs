@@ -17,8 +17,11 @@ test.describe('Homepage Navigation', () => {
   });
 
   test('navigate to the adopt page', async ({ page }) => {
-    // The rescue homepage leads with adoption — the pet-card CTAs link to /adopt.
-    await page.locator('a[href*="/adopt"]').first().click();
+    // Prefer visible pet-card CTAs — #65 hid Apply to Adopt inside For Adopters.
+    await page
+      .getByRole('link', { name: /Meet (Biscuit|Pepper|Tank)/i })
+      .first()
+      .click();
 
     await expect(page).toHaveURL(/.*adopt/);
   });
