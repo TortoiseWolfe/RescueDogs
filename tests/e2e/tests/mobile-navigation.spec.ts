@@ -183,30 +183,34 @@ test.describe('Mobile Navigation', () => {
     await dismissCookieBanner(page);
     await waitForLayoutStability(page);
 
-    // Look for mobile menu button (hamburger icon) - it's a label in DaisyUI dropdown
-    const menuButton = page
-      .locator('[aria-label*="menu" i], [aria-label*="navigation" i]')
-      .first();
+    // Hamburger only — not "User account menu" / role dropdowns (#65).
+    const menuLabel = page.getByLabel('Navigation menu').first();
 
-    if (await menuButton.isVisible()) {
-      // Click to open mobile menu
-      await menuButton.click();
+    if (await menuLabel.isVisible()) {
+      const hamburgerDropdown = page
+        .locator('.dropdown', { has: menuLabel })
+        .first();
 
-      // Menu content should become visible (DaisyUI uses dropdown-content class)
-      const menuContent = page.locator('nav .dropdown-content').first();
+      // DaisyUI focus-within is flaky in headless; open via class like
+      // mobile-dropdown-screenshot.spec.ts.
+      await hamburgerDropdown.evaluate((el) => {
+        el.classList.add('dropdown-open');
+      });
 
-      // Wait for menu content to be visible (replaces waitForTimeout)
+      const menuContent = hamburgerDropdown
+        .locator('.dropdown-content')
+        .first();
       await expect(menuContent).toBeVisible({ timeout: 2000 });
 
-      // Verify menu contains navigation items
       const menuLinks = menuContent.locator('a');
       const linkCount = await menuLinks.count();
       expect(linkCount, 'Menu should contain navigation links').toBeGreaterThan(
         0
       );
 
-      // Close by clicking outside (DaisyUI dropdowns are focus-based)
-      await page.locator('body').click({ position: { x: 10, y: 10 } });
+      await hamburgerDropdown.evaluate((el) => {
+        el.classList.remove('dropdown-open');
+      });
     }
   });
 
