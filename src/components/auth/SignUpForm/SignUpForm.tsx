@@ -6,6 +6,8 @@ import {
   checkRateLimit,
   recordFailedAttempt,
   formatLockoutTime,
+  isAuthRequestRateLimited,
+  AUTH_SIGN_UP_RATE_LIMIT_MESSAGE,
 } from '@/lib/auth/rate-limit-check';
 import { validateEmail } from '@/lib/auth/email-validator';
 import { logAuthEvent } from '@/lib/auth/audit-logger';
@@ -88,6 +90,21 @@ export default function SignUpForm({
     setLoading(false);
 
     if (signUpError) {
+      if (isAuthRequestRateLimited(signUpError)) {
+        await logAuthEvent({
+          event_type: 'sign_up',
+          event_data: {
+            email,
+            provider: 'email',
+            reason: 'request_rate_limit',
+          },
+          success: false,
+          error_message: signUpError.message,
+        });
+        setError(AUTH_SIGN_UP_RATE_LIMIT_MESSAGE);
+        return;
+      }
+
       // Record failed attempt on server
       await recordFailedAttempt(email, 'sign_up');
 

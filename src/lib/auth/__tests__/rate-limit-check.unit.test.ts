@@ -2,8 +2,12 @@
 // Feature 017 - Task T009 (Refactored for proper unit testing)
 // Purpose: Test rate limiting business logic without database dependency
 
-import { describe, it, expect, vi } from 'vitest';
-import { formatLockoutTime } from '../rate-limit-check';
+import { describe, it, expect } from 'vitest';
+import {
+  formatLockoutTime,
+  isAuthRequestRateLimited,
+  AUTH_REQUEST_RATE_LIMIT_MESSAGE,
+} from '../rate-limit-check';
 
 describe('Rate Limiting - Unit Tests', () => {
   describe('formatLockoutTime', () => {
@@ -31,6 +35,47 @@ describe('Rate Limiting - Unit Tests', () => {
 
       const ninetySeconds = new Date(Date.now() + 90 * 1000).toISOString();
       expect(formatLockoutTime(ninetySeconds)).toBe('2 minutes'); // Rounds up
+    });
+  });
+
+  describe('isAuthRequestRateLimited (#81)', () => {
+    it('detects HTTP 429 status', () => {
+      expect(isAuthRequestRateLimited({ status: 429, message: 'x' })).toBe(
+        true
+      );
+    });
+
+    it('detects over_request_rate_limit code', () => {
+      expect(
+        isAuthRequestRateLimited({
+          code: 'over_request_rate_limit',
+          message: 'Request rate limit reached',
+        })
+      ).toBe(true);
+    });
+
+    it('detects Request rate limit reached message', () => {
+      expect(
+        isAuthRequestRateLimited({
+          message: 'Request rate limit reached',
+        })
+      ).toBe(true);
+    });
+
+    it('does not treat wrong password as request rate limit', () => {
+      expect(
+        isAuthRequestRateLimited({
+          message: 'Invalid login credentials',
+          status: 400,
+        })
+      ).toBe(false);
+    });
+
+    it('exposes a clear user-facing message constant', () => {
+      expect(AUTH_REQUEST_RATE_LIMIT_MESSAGE).toMatch(/wait a few minutes/i);
+      expect(AUTH_REQUEST_RATE_LIMIT_MESSAGE).not.toMatch(
+        /attempts remaining/i
+      );
     });
   });
 });

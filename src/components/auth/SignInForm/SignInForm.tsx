@@ -6,6 +6,8 @@ import {
   checkRateLimit,
   recordFailedAttempt,
   formatLockoutTime,
+  isAuthRequestRateLimited,
+  AUTH_REQUEST_RATE_LIMIT_MESSAGE,
 } from '@/lib/auth/rate-limit-check';
 import { validateEmail } from '@/lib/auth/email-validator';
 import { logAuthEvent } from '@/lib/auth/audit-logger';
@@ -102,6 +104,24 @@ export default function SignInForm({
       // Check if email needs verification
       if (signInError.message.toLowerCase().includes('email not confirmed')) {
         window.location.href = getInternalUrl('/verify-email');
+        return;
+      }
+
+      // Supabase IP/request bucket (429) — not a bad password. Do not burn our
+      // per-email fail counter or append "attempts remaining" (#81).
+      if (isAuthRequestRateLimited(signInError)) {
+        await logAuthEvent({
+          event_type: 'sign_in',
+          event_data: {
+            email,
+            provider: 'email',
+            reason: 'request_rate_limit',
+          },
+          success: false,
+          error_message: signInError.message,
+        });
+        setRemainingAttempts(null);
+        setError(AUTH_REQUEST_RATE_LIMIT_MESSAGE);
         return;
       }
 
