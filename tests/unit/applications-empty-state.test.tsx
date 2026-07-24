@@ -37,9 +37,13 @@ describe('My Applications empty state (#66)', () => {
         name: /welcome — let's get you started/i,
       })
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /browse pets/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /browse dogs/i })).toHaveAttribute(
       'href',
-      '/#meet-pets-heading'
+      '/dogs'
+    );
+    expect(screen.getByRole('link', { name: /browse cats/i })).toHaveAttribute(
+      'href',
+      '/cats'
     );
     expect(
       screen.getByRole('link', { name: /start an application/i })
