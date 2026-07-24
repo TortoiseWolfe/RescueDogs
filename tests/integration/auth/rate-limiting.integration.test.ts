@@ -70,15 +70,15 @@ describe('Rate Limiting - Integration Tests (Real Database)', () => {
 
       expect(result).toEqual({
         allowed: true,
-        remaining: 5,
+        remaining: 15,
         locked_until: null,
       });
     });
 
     it('should decrement remaining attempts after failed attempt', async () => {
-      // First check - should have 5 remaining
+      // First check - should have 15 remaining
       const before = await checkRateLimit(testEmail, 'sign_in', testIP);
-      expect(before.remaining).toBe(5);
+      expect(before.remaining).toBe(15);
 
       // Record failure
       await recordFailedAttempt(testEmail, 'sign_in', testIP);
@@ -86,20 +86,20 @@ describe('Rate Limiting - Integration Tests (Real Database)', () => {
       // Wait for database write
       await new Promise((r) => setTimeout(r, 100));
 
-      // Second check - should have 4 remaining
+      // Second check - should have 14 remaining
       const after = await checkRateLimit(testEmail, 'sign_in', testIP);
-      expect(after.remaining).toBe(4);
+      expect(after.remaining).toBe(14);
     });
 
-    it('should block attempts after 5 failures', async () => {
-      // Simulate 5 failed attempts
-      for (let i = 0; i < 5; i++) {
+    it('should block attempts after 15 failures', async () => {
+      // Simulate 15 failed attempts
+      for (let i = 0; i < 15; i++) {
         await checkRateLimit(testEmail, 'sign_in', testIP);
         await recordFailedAttempt(testEmail, 'sign_in', testIP);
         await new Promise((r) => setTimeout(r, 50));
       }
 
-      // 6th attempt should be blocked
+      // Next attempt should be blocked
       const result = await checkRateLimit(testEmail, 'sign_in', testIP);
 
       expect(result.allowed).toBe(false);
@@ -117,18 +117,18 @@ describe('Rate Limiting - Integration Tests (Real Database)', () => {
 
       await new Promise((r) => setTimeout(r, 100));
 
-      // sign_up should still have 5 remaining
+      // sign_up should still have 15 remaining
       const signUpResult = await checkRateLimit(testEmail, 'sign_up', testIP);
-      expect(signUpResult.remaining).toBe(5);
+      expect(signUpResult.remaining).toBe(15);
 
-      // sign_in should have 2 remaining
+      // sign_in should have 12 remaining
       const signInResult = await checkRateLimit(testEmail, 'sign_in', testIP);
-      expect(signInResult.remaining).toBe(2);
+      expect(signInResult.remaining).toBe(12);
     });
 
     it('should return lockout time approximately 15 minutes in future', async () => {
       // Trigger lockout
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 15; i++) {
         await checkRateLimit(testEmail, 'sign_in', testIP);
         await recordFailedAttempt(testEmail, 'sign_in', testIP);
       }
@@ -156,8 +156,8 @@ describe('Rate Limiting - Integration Tests (Real Database)', () => {
       const email2 = `user2-${Date.now()}@example.com`;
 
       try {
-        // Fail 5 attempts for user1
-        for (let i = 0; i < 5; i++) {
+        // Fail 15 attempts for user1
+        for (let i = 0; i < 15; i++) {
           await checkRateLimit(email1, 'sign_in', testIP);
           await recordFailedAttempt(email1, 'sign_in', testIP);
         }
@@ -171,7 +171,7 @@ describe('Rate Limiting - Integration Tests (Real Database)', () => {
         // User2 should still be allowed
         const result2 = await checkRateLimit(email2, 'sign_in', testIP);
         expect(result2.allowed).toBe(true);
-        expect(result2.remaining).toBe(5);
+        expect(result2.remaining).toBe(15);
       } finally {
         // Cleanup
         await supabaseAdmin

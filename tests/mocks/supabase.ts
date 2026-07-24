@@ -202,7 +202,7 @@ export function createRateLimitMockResponse(
  */
 export function createMockRateLimitClient(
   attempts: number = 0,
-  maxAttempts: number = 5
+  maxAttempts: number = 15
 ) {
   const remaining = Math.max(0, maxAttempts - attempts);
   const allowed = remaining > 0;
