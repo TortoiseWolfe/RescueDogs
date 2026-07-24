@@ -106,6 +106,27 @@ Shelters drown in "what's my status?" email. Silence is the default failure mode
 
 ---
 
+## Demo vs first real shelter
+
+The seeded **Second Chance Rescue** demo exists so anyone can walk the
+anti-ghosting loop without a partner. It is not the long-term product surface.
+
+| Stage                        | Pets / apps                             | Demo role                                     |
+| ---------------------------- | --------------------------------------- | --------------------------------------------- |
+| **Now**                      | Seeded demo data                        | Sales, CI/E2E, UI honesty                     |
+| **First partner shelter**    | Real shelter + currently available pets | Prove apply → pipeline → tracker once         |
+| **After the loop is proven** | Demo optional                           | Marketing walkthrough; not a parallel product |
+
+Constitution **Principle V** still applies: one real shelter before the next
+pillar. Schema for pets and applications is already in place; the remaining
+work is onboarding ops (shelter row, staff, import or enter available pets),
+not inventing the core tables.
+
+**First-partner apply rule:** the Apply CTA for animals listed on Raised Paws
+submits **in-app**. External forms are supplementary (export / packet / link as
+a pipeline step). Linking out as the primary application abandons status
+control and reintroduces ghosting.
+
 ## Shelter onboarding and application strategy
 
 One of the hardest adoption problems is not building the loop — it is getting
@@ -387,6 +408,7 @@ and must restate Principle V.
 
 | Date       | Change                                                                                                 |
 | ---------- | ------------------------------------------------------------------------------------------------------ |
+| 2026-07-23 | Demo vs first real shelter; first-partner in-app Apply rule; README vision summary                     |
 | 2026-07-13 | Added “How we refer to Raised Paws” (tracker vs rescue-app naming)                                     |
 | 2026-07-12 | Added data-integration guardrails under shelter onboarding; clarified no universal DB extractor        |
 | 2026-07-12 | Added shelter onboarding and application strategy for pillar 3 pilots                                  |

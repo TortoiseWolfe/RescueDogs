@@ -12,6 +12,30 @@ applicant watches update live.** Built on the ScriptHammer template
 Constitution: [`.specify/memory/constitution.md`](.specify/memory/constitution.md)
 — Principle I: _No One Gets Ghosted._
 
+## 🎯 Product vision (decisions)
+
+Raised Paws is an **anti-ghosting adoption tracker**, not another Petfinder.
+The founding loop is: **universal application → shelter pipeline → live status**.
+Full pillars, pilots, and deferred work live in
+[docs/product/VISION.md](./docs/product/VISION.md).
+
+**Demo vs real.** The seeded demo (Second Chance Rescue) is how we sell and
+test the loop before a partner shelter is live. It is scaffolding, not a second
+product. Once one real shelter runs apply → status → tracker end-to-end, demo
+becomes optional walkthrough chrome.
+
+**Real pets.** Schema for shelters, pets, applications, and status history
+already exists. Getting real animals in is mostly ops: claim a shelter, add
+staff, insert currently available pets (manual or one-time import), then run
+one real application. Browse polish and Petfinder-class sync come later.
+
+**Where applications live.** For partner shelters, **Raised Paws is the system
+of record** for intake, pipeline, and status — not a link-out to their Google
+Form / Shelterluv app as the primary Apply button (that breaks the tracker).
+Shelters may still keep a required PDF or packet as a pipeline checklist step;
+status stays here. “Apply at the shelter, only track here” is a last resort
+that burns staff time and is not the founding bet.
+
 ## 🚀 Live Demo — Try the Loop
 
 Everything runs against a seeded demo shelter (**Second Chance Rescue**) with
