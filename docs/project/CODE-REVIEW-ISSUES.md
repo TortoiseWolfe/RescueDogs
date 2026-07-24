@@ -110,14 +110,13 @@ return () => {
 
 ### Memoization Review
 
-| Component              | Size (LOC) | Memoization | Notes                                 |
-| ---------------------- | ---------- | ----------- | ------------------------------------- |
-| status/page.tsx        | 2562       | N/A         | Dashboard - frequent updates expected |
-| CaptainShipCrewWithNPC | 901        | N/A         | Game - state changes expected         |
-| messages/page.tsx      | 557        | useCallback | Already optimized                     |
-| MessageBubble          | 408        | React.memo  | Already optimized                     |
-| AccountSettings        | 476        | N/A         | Form - memoization counterproductive  |
-| ChatWindow             | 200        | N/A         | Moderate size, no issues              |
+| Component         | Size (LOC) | Memoization | Notes                                 |
+| ----------------- | ---------- | ----------- | ------------------------------------- |
+| status/page.tsx   | 2562       | N/A         | Dashboard - frequent updates expected |
+| messages/page.tsx | 557        | useCallback | Already optimized                     |
+| MessageBubble     | 408        | React.memo  | Already optimized                     |
+| AccountSettings   | 476        | N/A         | Form - memoization counterproductive  |
+| ChatWindow        | 200        | N/A         | Moderate size, no issues              |
 
 ## Code Quality
 

@@ -58,14 +58,16 @@ const phaseCompletionChecks = {
   T024: () => fs.existsSync('CONTRIBUTING.md'),
 
   // Phase 3: First Simple Feature - Dice (T025-T036)
-  T025: () => fs.existsSync('src/components/atomic/Dice'),
-  T026: () => fs.existsSync('src/components/atomic/Dice/types.ts'),
-  T027: () => fs.existsSync('src/components/atomic/Dice/Dice.tsx'),
+  // Dice / CaptainShipCrew stack removed in #83 (unused ScriptHammer carryover).
+  // Keep these markers true so historical SpecKit task tracking stays green.
+  T025: () => true,
+  T026: () => true,
+  T027: () => true,
   T028: () => true, // Styling implemented
   T029: () => true, // ARIA attributes
   T030: () => true, // Animation
-  T031: () => fs.existsSync('src/components/atomic/Dice/Dice.test.tsx'),
-  T032: () => fs.existsSync('src/components/atomic/Dice/Dice.stories.tsx'),
+  T031: () => true,
+  T032: () => true,
   T033: () => true, // Documentation
   T034: () => true, // Added to app
   T035: () => true, // Test coverage
@@ -230,7 +232,7 @@ function updateTasksFile() {
   if (phase3Complete) {
     content = content.replace(
       /- \*\*Phase 3\*\*: .*$/m,
-      '- **Phase 3**: ✅ Complete (First Simple Feature - Dice components and Captain Ship & Crew game! 🎲)'
+      '- **Phase 3**: ✅ Complete historically (Dice / CaptainShipCrew later removed in #83 as unused template carryover)'
     );
   }
   if (phase4Complete) {
