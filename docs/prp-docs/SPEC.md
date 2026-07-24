@@ -124,8 +124,6 @@ Learn from these implementations, improve upon them:
 
 #### Features
 
-- Dice components (Dice, DraggableDice, DiceTray)
-- Captain Ship & Crew game with NPC support
 - Form validation with Zod schemas
 - Comprehensive Storybook stories
 

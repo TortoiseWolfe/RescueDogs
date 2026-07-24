@@ -51,7 +51,7 @@ Stories follow a consistent functional organization structure:
 **Components/** — Design hierarchy categories
 
 - `Components/Molecular/` — Multi-primitive compositions (TagCloud, CodeBlock, FontSwitcher, etc.)
-- `Components/Organisms/` — Full interactive interfaces (DiceTray, CaptainShipCrew, etc.)
+- `Components/Organisms/` — Full interactive interfaces (pipeline tables, messaging, admin panels, etc.)
 
 **Atomic Design/** — Single-purpose primitives
 
