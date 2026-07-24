@@ -43,6 +43,13 @@ export const AUTH_PASSWORD_RESET_RATE_LIMIT_MESSAGE =
   'Too many password-reset requests from this network. Wait a few minutes and try again.';
 
 /**
+ * Per-email failed-attempt cap in `check_rate_limit` (monolithic SQL).
+ * Keep E2E/integration expectations in sync with this value — not with
+ * Supabase Auth's separate IP request bucket.
+ */
+export const AUTH_RATE_LIMIT_MAX_ATTEMPTS = 15;
+
+/**
  * True when Supabase Auth rejected the call for IP/project request rate limiting
  * (`over_request_rate_limit` / HTTP 429) — not a wrong password.
  */

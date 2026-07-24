@@ -77,5 +77,12 @@ describe('Rate Limiting - Unit Tests', () => {
         /attempts remaining/i
       );
     });
+
+    it('documents the per-email max attempts constant', async () => {
+      const { AUTH_RATE_LIMIT_MAX_ATTEMPTS } = await import(
+        '../rate-limit-check'
+      );
+      expect(AUTH_RATE_LIMIT_MAX_ATTEMPTS).toBe(15);
+    });
   });
 });

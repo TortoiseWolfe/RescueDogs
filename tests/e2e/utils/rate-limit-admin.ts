@@ -138,6 +138,58 @@ export async function getRateLimitState(identifier: string): Promise<{
 }
 
 /**
+ * Seed failed attempts so the next UI failure can tip into lockout without
+ * clicking Sign In 15 times (and without burning Supabase IP quota).
+ *
+ * `attempt_count` should typically be AUTH_RATE_LIMIT_MAX_ATTEMPTS - 1
+ * (one more failed sign-in → lockout) or AUTH_RATE_LIMIT_MAX_ATTEMPTS
+ * (already at cap; next check_rate_limit locks).
+ */
+export async function seedFailedAttempts(
+  identifier: string,
+  attemptType: 'sign_in' | 'sign_up' | 'password_reset',
+  attemptCount: number
+): Promise<boolean> {
+  const client = getAdminClient();
+
+  if (!client) {
+    console.warn(
+      '⚠️ SUPABASE_SERVICE_ROLE_KEY not set - skipping rate limit seed'
+    );
+    return false;
+  }
+
+  try {
+    const { error } = await client.from('rate_limit_attempts').upsert(
+      {
+        identifier,
+        attempt_type: attemptType,
+        attempt_count: attemptCount,
+        window_start: new Date().toISOString(),
+        locked_until: null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'identifier,attempt_type' }
+    );
+
+    if (error) {
+      console.warn(
+        `⚠️ Could not seed rate limits for ${identifier}: ${error.message}`
+      );
+      return false;
+    }
+
+    console.log(
+      `✅ Seeded ${attemptCount} ${attemptType} attempts for: ${identifier}`
+    );
+    return true;
+  } catch (err) {
+    console.warn(`⚠️ Error seeding rate limits for ${identifier}:`, err);
+    return false;
+  }
+}
+
+/**
  * Check if rate limit admin utilities are available.
  * Use to skip tests when service role key is not configured.
  */
