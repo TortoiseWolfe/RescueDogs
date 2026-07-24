@@ -8,16 +8,14 @@
  *      (see src/contexts/AccessibilityContext.tsx:104-109)
  *
  * Disable the loud Tailwind keyframe animations everywhere they show up
- * (game dice, loading spinners, attention-grabbing buttons). We do NOT
- * disable `transition-*` because those are generally short, semantically
- * useful state-change cues that don't trigger vestibular issues.
+ * (loading spinners, attention-grabbing buttons). We do NOT disable
+ * `transition-*` because those are generally short, semantically useful
+ * state-change cues that don't trigger vestibular issues.
  *
  * The `!important` is intentional and necessary — Tailwind's animation
  * utilities apply via inline classes (specificity 0,1,0), so a non-!important
  * override would have to win a specificity arms race. WCAG 2.3.3 puts
  * vestibular safety above style purity.
- *
- * Spec: features/testing/037-game-a11y-tests/spec.md FR-022
  */
 
 @media (prefers-reduced-motion: reduce) {

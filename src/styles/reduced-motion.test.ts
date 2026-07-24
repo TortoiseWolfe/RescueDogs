@@ -8,11 +8,9 @@
  * prefers-reduced-motion media query AND the AccessibilityContext-driven
  * data-reduce-motion="true" attribute on <html>).
  *
- * If a Dice / DraggableDice / loading-spinner test starts failing because
+ * If a loading-spinner (or other animate-*) test starts failing because
  * the animation class name changed, update both the component AND the CSS
  * rule below — the assertions here will catch a mismatch.
- *
- * Spec: features/testing/037-game-a11y-tests/spec.md FR-022.
  */
 
 import { describe, it, expect } from 'vitest';
