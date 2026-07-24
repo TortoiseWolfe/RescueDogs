@@ -6,6 +6,8 @@ import {
   checkRateLimit,
   recordFailedAttempt,
   formatLockoutTime,
+  isAuthRequestRateLimited,
+  AUTH_PASSWORD_RESET_RATE_LIMIT_MESSAGE,
 } from '@/lib/auth/rate-limit-check';
 import { validateEmail } from '@/lib/auth/email-validator';
 import { logAuthEvent } from '@/lib/auth/audit-logger';
@@ -71,6 +73,17 @@ export default function ForgotPasswordForm({
     setLoading(false);
 
     if (resetError) {
+      if (isAuthRequestRateLimited(resetError)) {
+        await logAuthEvent({
+          event_type: 'password_reset_request',
+          event_data: { email, reason: 'request_rate_limit' },
+          success: false,
+          error_message: resetError.message,
+        });
+        setError(AUTH_PASSWORD_RESET_RATE_LIMIT_MESSAGE);
+        return;
+      }
+
       // Record failed attempt
       await recordFailedAttempt(email, 'password_reset');
 

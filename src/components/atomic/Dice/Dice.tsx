@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export interface DiceProps {
   sides?: 6 | 20;
@@ -10,8 +10,23 @@ export interface DiceProps {
 export default function Dice({ sides = 6, className = '' }: DiceProps) {
   const [value, setValue] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
 
   const roll = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
     setIsRolling(true);
     setValue(null);
 
@@ -20,12 +35,15 @@ export default function Dice({ sides = 6, className = '' }: DiceProps) {
     const rollInterval = 100;
     let elapsed = 0;
 
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       elapsed += rollInterval;
       setValue(Math.floor(Math.random() * sides) + 1);
 
       if (elapsed >= rollDuration) {
-        clearInterval(interval);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
         setIsRolling(false);
         setValue(Math.floor(Math.random() * sides) + 1);
       }

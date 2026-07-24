@@ -445,7 +445,7 @@ SET search_path = public
 AS $$
 DECLARE
   v_record rate_limit_attempts%ROWTYPE;
-  v_max_attempts INTEGER := 5;
+  v_max_attempts INTEGER := 15;
   v_window_minutes INTEGER := 15;
   v_now TIMESTAMPTZ := now();
 BEGIN
