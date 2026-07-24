@@ -269,7 +269,7 @@ export function GlobalNav() {
               className="flex min-h-11 items-center gap-2 transition-opacity hover:opacity-80"
             >
               <Image
-                src={`${projectConfig.basePath}/raised-paws-logo.png`}
+                src={`${projectConfig.basePath}/raised-paws-logo-64.webp`}
                 alt="Raised Paws home"
                 width={32}
                 height={32}
