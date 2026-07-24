@@ -80,16 +80,6 @@
       "description": "Error boundaries and centralized error handling"
     },
     {
-      "name": "Dice Components",
-      "completed": true,
-      "description": "Interactive dice with drag-and-drop functionality"
-    },
-    {
-      "name": "Captain Ship & Crew Game",
-      "completed": true,
-      "description": "Full dice game with NPC support and tournaments"
-    },
-    {
       "name": "Pa11y Accessibility Testing",
       "completed": true,
       "description": "WCAG compliance testing in CI pipeline"

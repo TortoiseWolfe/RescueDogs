@@ -482,7 +482,7 @@ Run these specs in order (041 → 064). Copy a command to start the full SpecKit
 ### Priority 6: Code Quality
 
 ```
-/speckit.workflow SPEC-059: Large Component Refactoring - Refactor 4 oversized components: CaptainShipCrew.tsx (560 lines, no memoization), GlobalNav.tsx (482 lines), AccountSettings.tsx (476 lines), MessageBubble.tsx (411 lines). Add React.memo/useMemo where appropriate. Effort: 2-3 days.
+/speckit.workflow SPEC-059: Large Component Refactoring - Refactor oversized components: GlobalNav.tsx, AccountSettings.tsx, MessageBubble.tsx. Add React.memo/useMemo where appropriate. Effort: 2-3 days. (CaptainShipCrew removed in #83 — unused ScriptHammer game UI.)
 ```
 
 ```
@@ -504,7 +504,7 @@ Run these specs in order (041 → 064). Copy a command to start the full SpecKit
 ```
 
 ```
-/speckit.workflow SPEC-064: Game Component A11y Tests - Expand 5 game component accessibility tests: CaptainShipCrewWithNPC, CaptainShipCrew, Dice, DraggableDice, DiceTray. Add keyboard navigation, ARIA verification, focus management tests. Effort: 4-6 hours.
+~~SPEC-064: Game Component A11y Tests~~ — **Obsolete (#83)**. Dice / DiceTray / CaptainShipCrew stack deleted; unused ScriptHammer carryover.
 ```
 
 ## 🎯 Project Status
