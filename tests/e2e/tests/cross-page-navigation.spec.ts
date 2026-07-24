@@ -311,11 +311,11 @@ test.describe('Cross-Page Navigation', () => {
       const menuItems = hamburgerDropdown.locator('.dropdown-content a');
       await expect(menuItems.first()).toBeVisible();
 
-      // #65: Browse Pets goes to /#meet-pets-heading (not bare /)
-      const browseLink = menuItems.filter({ hasText: 'Browse Pets' }).first();
-      if ((await browseLink.count()) > 0) {
-        await browseLink.click();
-        await expect(page).toHaveURL(/\/#meet-pets-heading/);
+      // #91: mobile Browse Pets links go to /dogs and /cats
+      const browseDogs = menuItems.filter({ hasText: 'Dogs' }).first();
+      if ((await browseDogs.count()) > 0) {
+        await browseDogs.click();
+        await expect(page).toHaveURL(/\/dogs\/?$/);
       }
     }
   });
