@@ -32,6 +32,48 @@ export interface RateLimitResult {
   reason?: string;
 }
 
+/** Clear copy for Supabase IP token-bucket 429 (not our per-email fail counter). */
+export const AUTH_REQUEST_RATE_LIMIT_MESSAGE =
+  'Too many login requests from this network. Wait a few minutes and try again.';
+
+export const AUTH_SIGN_UP_RATE_LIMIT_MESSAGE =
+  'Too many sign-up requests from this network. Wait a few minutes and try again.';
+
+export const AUTH_PASSWORD_RESET_RATE_LIMIT_MESSAGE =
+  'Too many password-reset requests from this network. Wait a few minutes and try again.';
+
+/**
+ * True when Supabase Auth rejected the call for IP/project request rate limiting
+ * (`over_request_rate_limit` / HTTP 429) — not a wrong password.
+ */
+export function isAuthRequestRateLimited(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const err = error as {
+    message?: string;
+    status?: number;
+    code?: string;
+    error_code?: string;
+  };
+
+  if (err.status === 429) {
+    return true;
+  }
+
+  const code = (err.code || err.error_code || '').toLowerCase();
+  if (code === 'over_request_rate_limit') {
+    return true;
+  }
+
+  const message = (err.message || '').toLowerCase();
+  return (
+    message.includes('over_request_rate_limit') ||
+    message.includes('request rate limit')
+  );
+}
+
 /**
  * Check if an authentication attempt is allowed (server-side enforcement)
  *
