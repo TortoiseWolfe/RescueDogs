@@ -53,11 +53,13 @@ test.describe('Payment System Performance', () => {
   }) => {
     // storage-state-auth.json already carries a valid Supabase session;
     // measure cold navigation to /payment-demo directly.
+    // Use domcontentloaded — networkidle hangs when Stripe/analytics keep
+    // the network busy (chromium-gen 4/6 flake on PR #94).
     const startTime = Date.now();
-    await page.goto('/payment-demo', { waitUntil: 'networkidle' });
+    await page.goto('/payment-demo', { waitUntil: 'domcontentloaded' });
     if (page.url().includes('/sign-in')) {
       await page.waitForTimeout(3000);
-      await page.goto('/payment-demo', { waitUntil: 'networkidle' });
+      await page.goto('/payment-demo', { waitUntil: 'domcontentloaded' });
     }
     await dismissCookieBanner(page);
 
@@ -80,10 +82,10 @@ test.describe('Payment System Performance', () => {
 
   test('should grant consent within reasonable time', async ({ page }) => {
     // storage-state-auth.json already carries a valid Supabase session.
-    await page.goto('/payment-demo', { waitUntil: 'networkidle' });
+    await page.goto('/payment-demo', { waitUntil: 'domcontentloaded' });
     if (page.url().includes('/sign-in')) {
       await page.waitForTimeout(3000);
-      await page.goto('/payment-demo', { waitUntil: 'networkidle' });
+      await page.goto('/payment-demo', { waitUntil: 'domcontentloaded' });
     }
     await dismissCookieBanner(page);
 
