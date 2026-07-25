@@ -5,7 +5,6 @@ import ThemeScript from '@/components/ThemeScript';
 import { GlobalNav } from '@/components/GlobalNav';
 import { Footer } from '@/components/Footer';
 import { AccessibilityProvider } from '@/contexts/AccessibilityContext';
-import { ColorblindFilters } from '@/components/atomic/ColorblindFilters';
 import { ConsentProvider } from '@/contexts/ConsentContext';
 import { CookieConsent } from '@/components/privacy/CookieConsent';
 import { ConsentModal } from '@/components/privacy/ConsentModal';
@@ -157,7 +156,6 @@ export default function RootLayout({
       >
         <ThemeScript />
         <JsonLdScript data={generateJsonLd()} />
-        <ColorblindFilters />
         <ConsentProvider>
           <GoogleAnalytics />
           <SentryMonitor />
