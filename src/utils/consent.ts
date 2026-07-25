@@ -324,7 +324,6 @@ const COOKIE_REGISTRY: Record<string, CookieCategory> = {
   'font-family': CookieCategory.FUNCTIONAL,
   'font-size': CookieCategory.FUNCTIONAL,
   'line-height': CookieCategory.FUNCTIONAL,
-  'colorblind-mode': CookieCategory.FUNCTIONAL,
 
   // Analytics cookies
   _ga: CookieCategory.ANALYTICS,

@@ -120,11 +120,6 @@
       "description": "25% minimum coverage (58% actual)"
     },
     {
-      "name": "Colorblind Assistance Mode",
-      "completed": true,
-      "description": "Color vision correction filters with Daltonization"
-    },
-    {
       "name": "Font Switcher",
       "completed": true,
       "description": "6 fonts including dyslexia-friendly and high-readability options"
