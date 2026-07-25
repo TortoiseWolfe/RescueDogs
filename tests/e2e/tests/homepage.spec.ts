@@ -40,18 +40,17 @@ test.describe('Homepage Navigation', () => {
     await expect(stats.first()).toBeVisible();
   });
 
-  test('navigate to sign-in from the homepage', async ({ page }) => {
-    // chromium-gen uses authenticated storageState, so GlobalNav may show the
-    // account menu instead of Log in. Prefer the nav link when present; otherwise
-    // open /sign-in directly (still reachable from homepage chrome / deep link).
-    const login = page.getByRole('link', { name: /^(Sign In|Log in)$/i });
-    if (await login.isVisible().catch(() => false)) {
-      await login.click();
-    } else {
-      await page.goto('/sign-in');
-    }
+  test('navigate to the get-started flow from the homepage CTA', async ({
+    page,
+  }) => {
+    // The homepage is a static page whose primary CTAs ("Create Account" and
+    // "Try Demo") link to /get-started and render regardless of auth. Click the
+    // real CTA — no page.goto fallback — so a removed/broken CTA fails this test.
+    const cta = page.getByRole('link', { name: /try demo/i }).first();
+    await expect(cta).toBeVisible();
+    await cta.click();
 
-    await expect(page).toHaveURL(/.*sign-in/);
+    await expect(page).toHaveURL(/\/get-started/);
   });
 
   test('skip to main content link works', async ({ page }) => {
