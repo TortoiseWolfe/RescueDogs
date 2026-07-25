@@ -39,14 +39,19 @@ const navBrightWhite = 'text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]';
 const navDivider = 'mx-2 h-6 w-px shrink-0 bg-white/40';
 
 const DEMO_ENTRY_HREF = '/get-started?demo=1&choose=1';
-const BROWSE_PETS_HREF = '/#meet-pets-heading';
+const BROWSE_DOGS_HREF = '/dogs';
+const BROWSE_CATS_HREF = '/cats';
 
 type NavLinkItem = { href: string; label: string };
+
+const browseMenuLinks: NavLinkItem[] = [
+  { href: BROWSE_DOGS_HREF, label: 'Dogs' },
+  { href: BROWSE_CATS_HREF, label: 'Cats' },
+];
 
 const adopterMenuLinks: NavLinkItem[] = [
   { href: '/for-adopters', label: 'Overview' },
   { href: buildSignInHref('adopter'), label: 'Log In' },
-  { href: BROWSE_PETS_HREF, label: 'Browse Pets' },
   { href: DEMO_ENTRY_HREF, label: 'Try Demo' },
   { href: '/adopt', label: 'Apply to Adopt' },
   { href: '/applications', label: 'My Applications' },
@@ -85,21 +90,25 @@ function blurActiveElement() {
 }
 
 /**
- * Resting role-prefix color on the orange header. Mid navy (#172554) is only
- * ~5.2:1 on #f97316 — fails WCAG AAA (7:1) in color-contrast.spec. Near-black
- * keeps the “For” darker than white “Adopters/Shelters” and passes AAA.
+ * Resting split-label prefix on the orange header (“For”, “Browse”). Mid navy
+ * (#172554) is only ~5.2:1 on #f97316 — fails WCAG AAA (7:1) in
+ * color-contrast.spec. Near-black keeps the prefix darker than the white
+ * accent word and passes AAA.
  */
 const ROLE_FOR_REST = '#020617';
 
 function RoleDropdown({
-  roleWord,
+  prefixWord,
+  accentWord,
   links,
 }: {
-  /** “Adopters” or “Shelters” — paired with a dark “For ” prefix (#65). */
-  roleWord: string;
+  /** Dark prefix — “For” or “Browse” (#65 / #91). */
+  prefixWord: string;
+  /** White accent — “Adopters”, “Shelters”, or “Pets”. */
+  accentWord: string;
   links: NavLinkItem[];
 }) {
-  const accessibleName = `For ${roleWord}`;
+  const accessibleName = `${prefixWord} ${accentWord}`;
   const [hovered, setHovered] = useState(false);
   const [open, setOpen] = useState(false);
   const roleAccent = hovered || open;
@@ -123,14 +132,14 @@ function RoleDropdown({
       <button
         type="button"
         tabIndex={0}
-        className="inline-flex min-h-11 items-center px-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        className="inline-flex min-h-11 items-center px-2 text-xs font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={accessibleName}
         onClick={() => setOpen((prev) => !prev)}
       >
         <span className="transition-colors" style={forStyle}>
-          For&nbsp;
+          {prefixWord}&nbsp;
         </span>
         <span
           className={
@@ -140,7 +149,7 @@ function RoleDropdown({
           }
           style={roleAccent ? accentStyle : undefined}
         >
-          {roleWord}
+          {accentWord}
         </span>
         <span
           className={roleAccent ? undefined : navBrightWhite}
@@ -182,7 +191,6 @@ export function GlobalNav() {
   const unreadCount = useUnreadCount();
   const [theme, setTheme] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState(false);
-  const [onPetsSection, setOnPetsSection] = useState(false);
 
   useEffect(() => {
     if (!user?.id) {
@@ -193,18 +201,6 @@ export function GlobalNav() {
     const service = new AdminAuthService(supabase);
     service.checkIsAdmin(user.id).then(setIsAdmin);
   }, [user?.id]);
-
-  // Browse Pets hash target — keep pill selected while on that section.
-  useEffect(() => {
-    const syncPetsHash = () => {
-      setOnPetsSection(
-        pathname === '/' && window.location.hash === '#meet-pets-heading'
-      );
-    };
-    syncPetsHash();
-    window.addEventListener('hashchange', syncPetsHash);
-    return () => window.removeEventListener('hashchange', syncPetsHash);
-  }, [pathname]);
 
   // Theme management — read existing theme, don't overwrite ThemeScript's work.
   useEffect(() => {
@@ -289,18 +285,23 @@ export function GlobalNav() {
           {/* Right: role menus flush against pills */}
           <div className="flex flex-shrink-0 items-center gap-0.5 sm:gap-1 md:gap-2">
             <div className="hidden items-center gap-1 lg:flex">
-              <RoleDropdown roleWord="Adopters" links={desktopAdopterLinks} />
-              <RoleDropdown roleWord="Shelters" links={desktopShelterLinks} />
+              <RoleDropdown
+                prefixWord="Browse"
+                accentWord="Pets"
+                links={browseMenuLinks}
+              />
+              <RoleDropdown
+                prefixWord="For"
+                accentWord="Adopters"
+                links={desktopAdopterLinks}
+              />
+              <RoleDropdown
+                prefixWord="For"
+                accentWord="Shelters"
+                links={desktopShelterLinks}
+              />
 
               <span className={navDivider} aria-hidden="true" />
-
-              <Link
-                href={BROWSE_PETS_HREF}
-                className={`${navChromeBtn} inline-flex ${onPetsSection ? navChromeBtnSelected : ''}`}
-                aria-current={onPetsSection ? 'location' : undefined}
-              >
-                Browse Pets
-              </Link>
 
               {!user && (
                 <Link
@@ -470,17 +471,19 @@ export function GlobalNav() {
                 )}
 
                 <li className="menu-title mt-2">
-                  <span>Explore</span>
+                  <span>Browse Pets</span>
                 </li>
-                <li>
-                  <Link
-                    href={BROWSE_PETS_HREF}
-                    className="min-h-11"
-                    onClick={blurActiveElement}
-                  >
-                    Browse Pets
-                  </Link>
-                </li>
+                {browseMenuLinks.map((item) => (
+                  <li key={`m-browse-${item.href}-${item.label}`}>
+                    <Link
+                      href={item.href}
+                      className="min-h-11"
+                      onClick={blurActiveElement}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
 
                 {user ? (
                   <>

@@ -92,8 +92,23 @@ export default function Home() {
       >
         <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
           <div className="w-full min-w-0 flex-1 text-center lg:-translate-y-4 lg:text-left">
-            <div className="font-friendly bg-accent text-accent-content mb-4 inline-flex items-center rounded-full px-5 py-2 text-sm font-bold shadow-lg sm:text-base">
-              🐾 Dogs and Cats
+            <div className="mb-6 flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
+              <Link
+                href="/dogs"
+                aria-label="Browse dogs"
+                className="font-friendly bg-accent text-accent-content inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-bold shadow-lg transition-opacity hover:opacity-90 sm:w-auto sm:text-base"
+              >
+                <span aria-hidden="true">🐾</span>
+                Dogs
+              </Link>
+              <Link
+                href="/cats"
+                aria-label="Browse cats"
+                className="font-friendly bg-accent text-accent-content inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-bold shadow-lg transition-opacity hover:opacity-90 sm:w-auto sm:text-base"
+              >
+                <span aria-hidden="true">🐾</span>
+                Cats
+              </Link>
             </div>
 
             <h1
@@ -111,13 +126,13 @@ export default function Home() {
             <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <Link
                 href="/get-started?choose=1&intent=signup"
-                className="btn btn-lg min-h-11 w-full border-0 bg-[#f97316] px-8 text-lg text-white hover:bg-[#ea580c] sm:w-auto"
+                className="btn btn-lg min-h-11 w-full border-0 bg-white px-8 text-lg font-bold text-[#1e3a8a] hover:bg-[#e8edf7] sm:w-auto"
               >
                 Create Account
               </Link>
               <Link
                 href="/get-started?demo=1&choose=1"
-                className="btn btn-lg min-h-11 w-full border-0 bg-[#f97316] px-8 text-lg text-white hover:bg-[#ea580c] sm:w-auto"
+                className="btn btn-lg min-h-11 w-full border-0 bg-white px-8 text-lg font-bold text-[#1e3a8a] hover:bg-[#e8edf7] sm:w-auto"
               >
                 Try Demo
               </Link>
