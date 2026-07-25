@@ -162,7 +162,6 @@ export interface UserDataExport {
     fontSize?: string;
     lineHeight?: string;
     fontFamily?: string;
-    colorblindMode?: string;
   };
 
   // Analytics data (if consented)
