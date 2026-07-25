@@ -14,8 +14,7 @@
       },
       "accessibility": {
         "screenReader": false,
-        "keyboardOnly": false,
-        "colorblindMode": "none"
+        "keyboardOnly": false
       }
     },
     {
@@ -32,8 +31,7 @@
       },
       "accessibility": {
         "screenReader": false,
-        "keyboardOnly": false,
-        "colorblindMode": "none"
+        "keyboardOnly": false
       }
     },
     {
@@ -50,8 +48,7 @@
       },
       "accessibility": {
         "screenReader": true,
-        "keyboardOnly": true,
-        "colorblindMode": "deuteranopia"
+        "keyboardOnly": true
       }
     },
     {
@@ -69,8 +66,7 @@
       },
       "accessibility": {
         "screenReader": false,
-        "keyboardOnly": false,
-        "colorblindMode": "none"
+        "keyboardOnly": false
       }
     },
     {
@@ -87,8 +83,7 @@
       },
       "accessibility": {
         "screenReader": false,
-        "keyboardOnly": false,
-        "colorblindMode": "none"
+        "keyboardOnly": false
       }
     }
   ],
