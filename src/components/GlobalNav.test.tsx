@@ -96,18 +96,29 @@ describe('GlobalNav role menus (#65)', () => {
     });
   });
 
-  it('exposes Browse Pets, For Adopters, and For Shelters menu triggers', () => {
+  it('wraps desktop role menus in a white band (#79)', () => {
     render(<GlobalNav />);
 
+    const browseTrigger = screen.getByRole('button', {
+      name: /browse pets/i,
+    });
+    const strip = browseTrigger.closest('div[class*="bg-white"]');
+    expect(strip).toBeTruthy();
+    expect(strip?.className).toMatch(/h-full|self-stretch/);
+    expect(strip?.className).toMatch(/bg-white/);
+    expect(strip?.className).not.toMatch(/rounded-full/);
+
     expect(
-      screen.getByRole('button', { name: /browse pets/i })
-    ).toBeInTheDocument();
+      strip?.contains(screen.getByRole('button', { name: /for adopters/i }))
+    ).toBe(true);
     expect(
-      screen.getByRole('button', { name: /for adopters/i })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /for shelters/i })
-    ).toBeInTheDocument();
+      strip?.contains(screen.getByRole('button', { name: /for shelters/i }))
+    ).toBe(true);
+
+    const login = screen
+      .getAllByRole('link', { name: /^log in$/i })
+      .find((el) => el.className.includes('btn'));
+    expect(login && strip?.contains(login)).toBe(false);
   });
 
   it('does not show a Home text link (logo is home)', () => {

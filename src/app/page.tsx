@@ -2,29 +2,36 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { detectedConfig } from '@/config/project-detected';
 
+/** Early-stage placeholders (#79) — not live shelter counts. */
 const STATS = [
   {
-    value: '3,200+',
+    value: '16',
     label: 'pets rescued',
     tone: 'text-primary',
   },
   {
-    value: '2,850',
+    value: '9',
     label: 'happy families',
     tone: 'text-secondary',
   },
   {
-    value: '140',
-    label: 'volunteers',
+    value: '4',
+    label: 'shelters',
     tone: 'text-[#5da8e0]',
   },
 ];
 
+/**
+ * Demo Meet-the-Pets cards (#79). Portrait SVGs are temporary cartoons —
+ * replace with real shelter photos when partner media is available.
+ */
 const PETS = [
   {
     name: 'Biscuit',
-    emoji: '🐶',
-    detail: '2 yrs · loves belly rubs & long walks',
+    portrait: '/demo-pets/biscuit.png',
+    portraitAlt:
+      'Cartoon portrait of Biscuit, a white Chihuahua with black markings',
+    detail: '2 yrs · Chihuahua · loves belly rubs & long walks',
     bg: 'bg-[#e8edf7]',
     border: 'border-[#a8b8d8]',
     image: 'from-[#7a94c4] to-[#e8edf7]',
@@ -33,8 +40,9 @@ const PETS = [
   },
   {
     name: 'Pepper',
-    emoji: '🐾',
-    detail: '4 yrs · smart, loyal, and treat motivated',
+    portrait: '/demo-pets/pepper.png',
+    portraitAlt: 'Cartoon portrait of Pepper, a pepper-colored cat',
+    detail: '4 yrs · cat · curious, cuddly, and treat motivated',
     bg: 'bg-[#fff7ed]',
     border: 'border-[#fed7aa]',
     image: 'from-[#ffedd5] to-[#fff7ed]',
@@ -43,8 +51,10 @@ const PETS = [
   },
   {
     name: 'Tank',
-    emoji: '🦴',
-    detail: '6 yrs · gentle giant with couch-potato energy',
+    portrait: '/demo-pets/tank.png',
+    portraitAlt:
+      'Cartoon portrait of Tank, a black Great Dane with gray muzzle',
+    detail: '6 yrs · Great Dane · gentle giant',
     bg: 'bg-[#f1f6ff]',
     border: 'border-[#cfe0ff]',
     image: 'from-[#d7e6ff] to-[#e9f1ff]',
@@ -126,13 +136,13 @@ export default function Home() {
             <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <Link
                 href="/get-started?choose=1&intent=signup"
-                className="btn btn-lg min-h-11 w-full border-0 bg-white px-8 text-lg font-bold text-[#1e3a8a] hover:bg-[#e8edf7] sm:w-auto"
+                className="btn btn-lg min-h-11 w-full border-0 bg-white px-8 text-lg font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto"
               >
                 Create Account
               </Link>
               <Link
                 href="/get-started?demo=1&choose=1"
-                className="btn btn-lg min-h-11 w-full border-0 bg-white px-8 text-lg font-bold text-[#1e3a8a] hover:bg-[#e8edf7] sm:w-auto"
+                className="btn btn-lg min-h-11 w-full border-0 bg-white px-8 text-lg font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto"
               >
                 Try Demo
               </Link>
@@ -229,15 +239,15 @@ export default function Home() {
               >
                 <div className="card-body gap-4 p-4">
                   <div
-                    className={`grid h-52 place-items-center rounded-2xl bg-gradient-to-br ${pet.image}`}
+                    className={`relative grid h-52 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br ${pet.image}`}
                   >
-                    <span
-                      className="text-7xl drop-shadow-lg"
-                      role="img"
-                      aria-label={`${pet.name} pet icon`}
-                    >
-                      {pet.emoji}
-                    </span>
+                    <Image
+                      src={`${detectedConfig.basePath}${pet.portrait}`}
+                      alt={pet.portraitAlt}
+                      width={180}
+                      height={180}
+                      className="h-44 w-44 object-contain drop-shadow-lg"
+                    />
                   </div>
                   <div className="px-2">
                     <h3
@@ -275,6 +285,9 @@ export default function Home() {
             </div>
           ))}
         </div>
+        <p className="text-base-content/70 mx-auto mt-6 max-w-xl text-center text-sm font-medium">
+          Demo / early numbers — growing with our shelters.
+        </p>
       </section>
 
       <section className="bg-base-100 px-4 pb-12 sm:px-6 lg:px-8">
@@ -291,7 +304,7 @@ export default function Home() {
           <div className="mt-6 flex flex-wrap gap-4 lg:mt-0 lg:shrink-0">
             <Link
               href="/get-started?demo=1&choose=1"
-              className="btn min-h-11 bg-white text-[#1e3a8a]"
+              className="btn btn-lg min-h-12 bg-white px-10 text-lg font-bold text-[#1e3a8a] hover:bg-[#e8edf7]"
             >
               Try Demo
             </Link>
