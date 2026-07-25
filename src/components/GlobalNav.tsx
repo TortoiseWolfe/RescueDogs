@@ -28,15 +28,11 @@ const navChromeIconBtn =
   'btn btn-circle min-h-11 min-w-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
 
 /**
- * Navy that meets contrast on the orange header (#74 used #172554 after
- * #1e3a8a failed WCAG on primary). Used for role-dropdown “For” + hover/open.
+ * Role-menu colors on the white desktop strip (#79).
+ * Prefix (Browse/For) = brand navy → orange on hover; accent stays orange.
  */
-const NAV_NAVY = '#172554';
-
-/** Bright white matching brand title readability on orange. */
-const navBrightWhite = 'text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]';
-
-const navDivider = 'mx-2 h-6 w-px shrink-0 bg-white/40';
+const NAV_NAVY = '#1e3a8a';
+const NAV_ACCENT = '#c2410c';
 
 const DEMO_ENTRY_HREF = '/get-started?demo=1&choose=1';
 const BROWSE_DOGS_HREF = '/dogs';
@@ -90,21 +86,16 @@ function blurActiveElement() {
 }
 
 /**
- * Resting split-label prefix on the orange header (“For”, “Browse”). Mid navy
- * (#172554) is only ~5.2:1 on #f97316 — fails WCAG AAA (7:1) in
- * color-contrast.spec. Near-black keeps the prefix darker than the white
- * accent word and passes AAA.
+ * Split-label role menus on the white strip (#79): navy prefix + orange accent.
  */
-const ROLE_FOR_REST = '#020617';
-
 function RoleDropdown({
   prefixWord,
   accentWord,
   links,
 }: {
-  /** Dark prefix — “For” or “Browse” (#65 / #91). */
+  /** Prefix — “For” or “Browse” (#65 / #91). */
   prefixWord: string;
-  /** White accent — “Adopters”, “Shelters”, or “Pets”. */
+  /** Accent — “Adopters”, “Shelters”, or “Pets”. */
   accentWord: string;
   links: NavLinkItem[];
 }) {
@@ -112,10 +103,12 @@ function RoleDropdown({
   const [hovered, setHovered] = useState(false);
   const [open, setOpen] = useState(false);
   const roleAccent = hovered || open;
-  const forStyle = {
-    color: roleAccent ? NAV_NAVY : ROLE_FOR_REST,
+  const prefixStyle = {
+    color: roleAccent ? NAV_ACCENT : NAV_NAVY,
   } as const;
-  const accentStyle = { color: NAV_NAVY } as const;
+  const accentStyle = {
+    color: NAV_ACCENT,
+  } as const;
 
   return (
     <div
@@ -132,29 +125,19 @@ function RoleDropdown({
       <button
         type="button"
         tabIndex={0}
-        className="inline-flex min-h-11 items-center px-2 text-xs font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        className="inline-flex min-h-11 items-center px-2 text-xs font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e3a8a]"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={accessibleName}
         onClick={() => setOpen((prev) => !prev)}
       >
-        <span className="transition-colors" style={forStyle}>
+        <span className="transition-colors" style={prefixStyle}>
           {prefixWord}&nbsp;
         </span>
-        <span
-          className={
-            roleAccent
-              ? 'transition-colors'
-              : `${navBrightWhite} transition-colors`
-          }
-          style={roleAccent ? accentStyle : undefined}
-        >
+        <span className="transition-colors" style={accentStyle}>
           {accentWord}
         </span>
-        <span
-          className={roleAccent ? undefined : navBrightWhite}
-          style={roleAccent ? accentStyle : undefined}
-        >
+        <span className="transition-colors" style={accentStyle}>
           <ChevronDown className="ml-1 h-3.5 w-3.5" />
         </span>
       </button>
@@ -256,10 +239,10 @@ export function GlobalNav() {
 
   return (
     <header className="site-header bg-primary text-primary-content sticky top-0 z-50">
-      <nav className="container mx-auto px-4" aria-label="Main">
-        <div className="flex h-16 items-center justify-between gap-2">
+      <nav className="container mx-auto px-4 pr-2 sm:pr-3" aria-label="Main">
+        <div className="flex h-16 items-center gap-2">
           {/* Logo = home (left) */}
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 shrink-0 items-center gap-3">
             <Link
               href="/"
               className="flex min-h-11 items-center gap-2 transition-opacity hover:opacity-80"
@@ -282,9 +265,13 @@ export function GlobalNav() {
             </Link>
           </div>
 
-          {/* Right: role menus flush against pills */}
-          <div className="flex flex-shrink-0 items-center gap-0.5 sm:gap-1 md:gap-2">
-            <div className="hidden items-center gap-1 lg:flex">
+          {/* White role band — sit right beside orange chrome / hero (#79). */}
+          <div
+            className="hidden min-w-0 flex-1 self-stretch lg:block"
+            aria-hidden="true"
+          />
+          <div className="hidden self-stretch lg:flex lg:items-center lg:pr-3">
+            <div className="flex h-full items-center gap-0.5 bg-white px-2">
               <RoleDropdown
                 prefixWord="Browse"
                 accentWord="Pets"
@@ -300,20 +287,11 @@ export function GlobalNav() {
                 accentWord="Shelters"
                 links={desktopShelterLinks}
               />
-
-              <span className={navDivider} aria-hidden="true" />
-
-              {!user && (
-                <Link
-                  href="/sign-in"
-                  className={`${navChromeBtn} inline-flex ${logInSelected ? navChromeBtnSelected : ''}`}
-                  aria-current={logInSelected ? 'page' : undefined}
-                >
-                  Log In
-                </Link>
-              )}
             </div>
+          </div>
 
+          {/* Orange chrome — nudge right to center in the orange pocket (#79). */}
+          <div className="ml-auto flex h-full shrink-0 items-center justify-end gap-2 pr-1 pl-5 sm:gap-2.5 sm:pr-2 sm:pl-6">
             {user && (
               <Link
                 href="/messages"
@@ -340,6 +318,16 @@ export function GlobalNav() {
                     d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
                   />
                 </svg>
+              </Link>
+            )}
+
+            {!user && (
+              <Link
+                href="/sign-in"
+                className={`${navChromeBtn} hidden lg:inline-flex ${logInSelected ? navChromeBtnSelected : ''}`}
+                aria-current={logInSelected ? 'page' : undefined}
+              >
+                Log In
               </Link>
             )}
 
@@ -409,6 +397,56 @@ export function GlobalNav() {
                 </ul>
               </div>
             ) : null}
+
+            <button
+              type="button"
+              onClick={handleThemeToggle}
+              className={
+                isDarkTheme
+                  ? 'btn btn-circle min-h-11 min-w-11 border-0 !bg-[#1e3a8a] !text-white hover:!bg-[#172554] hover:!text-white active:!bg-[#172554] active:!text-white'
+                  : navChromeIconBtn
+              }
+              title={
+                isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'
+              }
+              aria-label={
+                isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'
+              }
+            >
+              {isDarkTheme ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 sm:h-5 sm:w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 sm:h-5 sm:w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                  />
+                </svg>
+              )}
+            </button>
 
             {/* Mobile/tablet menu — same destinations, nested by role (#65) */}
             <div className="dropdown dropdown-end lg:hidden">
@@ -569,52 +607,6 @@ export function GlobalNav() {
                 )}
               </ul>
             </div>
-
-            <button
-              type="button"
-              onClick={handleThemeToggle}
-              className={navChromeIconBtn}
-              title={
-                isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'
-              }
-              aria-label={
-                isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'
-              }
-            >
-              {isDarkTheme ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 sm:h-5 sm:w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 sm:h-5 sm:w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-              )}
-            </button>
           </div>
         </div>
       </nav>
