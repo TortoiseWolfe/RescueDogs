@@ -30,9 +30,10 @@ const navChromeIconBtn =
 /**
  * Role-menu colors on the white desktop strip (#79).
  * Prefix (Browse/For) = brand navy → orange on hover; accent stays orange.
+ * Accent must be ≥7:1 on white (WCAG AAA) — #c2410c was 5.17:1.
  */
 const NAV_NAVY = '#1e3a8a';
-const NAV_ACCENT = '#c2410c';
+const NAV_ACCENT = '#9a3412';
 
 const DEMO_ENTRY_HREF = '/get-started?demo=1&choose=1';
 const BROWSE_DOGS_HREF = '/dogs';
