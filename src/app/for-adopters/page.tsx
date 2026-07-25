@@ -47,10 +47,16 @@ export default function ForAdoptersPage() {
               Try Demo
             </Link>
             <Link
-              href="/#meet-pets-heading"
+              href="/dogs"
               className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
             >
-              Browse Pets
+              Browse Dogs
+            </Link>
+            <Link
+              href="/cats"
+              className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
+            >
+              Browse Cats
             </Link>
           </div>
         </div>

@@ -96,9 +96,12 @@ describe('GlobalNav role menus (#65)', () => {
     });
   });
 
-  it('exposes For Adopters and For Shelters menu triggers', () => {
+  it('exposes Browse Pets, For Adopters, and For Shelters menu triggers', () => {
     render(<GlobalNav />);
 
+    expect(
+      screen.getByRole('button', { name: /browse pets/i })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /for adopters/i })
     ).toBeInTheDocument();
@@ -118,13 +121,46 @@ describe('GlobalNav role menus (#65)', () => {
     ).toHaveAttribute('href', '/');
   });
 
-  it('shows Browse Pets pill and does not show Blog as a header pill', () => {
+  it('shows Browse Pets dropdown with Dogs and Cats; no chrome Browse Pets pill', () => {
     render(<GlobalNav />);
 
-    const browse = screen.getAllByRole('link', { name: /^browse pets$/i });
-    expect(browse.length).toBeGreaterThanOrEqual(1);
-    expect(browse[0]).toHaveAttribute('href', '/#meet-pets-heading');
-    expect(browse[0].className).toMatch(/bg-white/);
+    const browsePetsPills = screen
+      .queryAllByRole('link', { name: /^browse pets$/i })
+      .filter((el) => el.className.includes('btn'));
+    expect(browsePetsPills).toHaveLength(0);
+
+    const browseTrigger = screen.getByRole('button', {
+      name: /browse pets/i,
+    });
+    const browseList = browseTrigger.parentElement?.querySelector('ul');
+    expect(browseList).toBeTruthy();
+    const browseLabels = [...browseList!.querySelectorAll('a')].map(
+      (a) => a.textContent?.trim() || ''
+    );
+    expect(browseLabels).toEqual(['Dogs', 'Cats']);
+    expect(
+      [...browseList!.querySelectorAll('a')].some(
+        (a) => a.getAttribute('href') === '/dogs'
+      )
+    ).toBe(true);
+    expect(
+      [...browseList!.querySelectorAll('a')].some(
+        (a) => a.getAttribute('href') === '/cats'
+      )
+    ).toBe(true);
+
+    const adopterTrigger = screen.getByRole('button', {
+      name: /for adopters/i,
+    });
+    const adopterList = adopterTrigger.parentElement?.querySelector('ul');
+    expect(adopterList).toBeTruthy();
+    const adopterLabels = [...adopterList!.querySelectorAll('a')].map(
+      (a) => a.textContent?.trim() || ''
+    );
+    expect(adopterLabels).not.toContain('Browse dogs');
+    expect(adopterLabels).not.toContain('Browse cats');
+    expect(adopterLabels).not.toContain('Dogs');
+    expect(adopterLabels).not.toContain('Cats');
 
     const blogPills = screen
       .getAllByRole('link', { name: /^blog$/i, hidden: true })
@@ -142,7 +178,7 @@ describe('GlobalNav role menus (#65)', () => {
     expect(apps[0]).toHaveAttribute('href', '/applications');
   });
 
-  it('shelter menu includes Shelter dashboard, Blog, and omits Browse Pets', () => {
+  it('shelter menu includes Shelter dashboard, Blog, and omits dog/cat browse', () => {
     render(<GlobalNav />);
 
     const shelterTrigger = screen.getByRole('button', {
@@ -157,6 +193,10 @@ describe('GlobalNav role menus (#65)', () => {
     expect(labels).toContain('Shelter dashboard');
     expect(labels).toContain('Blog');
     expect(labels).not.toContain('Browse Pets');
+    expect(labels).not.toContain('Browse dogs');
+    expect(labels).not.toContain('Browse cats');
+    expect(labels).not.toContain('Dogs');
+    expect(labels).not.toContain('Cats');
     expect(
       [...list!.querySelectorAll('a')].some(
         (a) => a.getAttribute('href') === '/shelter'
@@ -178,14 +218,8 @@ describe('GlobalNav role menus (#65)', () => {
     expect(labels).not.toContain('Blog');
   });
 
-  it('keeps pill chrome on Browse Pets and Log In (not on Try Demo)', () => {
+  it('keeps pill chrome on Log In (not on Try Demo or Dogs/Cats browse)', () => {
     render(<GlobalNav />);
-
-    const browsePills = screen
-      .getAllByRole('link', { name: /^browse pets$/i })
-      .filter((el) => el.className.includes('btn'));
-    expect(browsePills.length).toBeGreaterThanOrEqual(1);
-    expect(browsePills[0].className).toMatch(/bg-white/);
 
     const loginPills = screen
       .getAllByRole('link', { name: /^log in$/i })
@@ -197,6 +231,14 @@ describe('GlobalNav role menus (#65)', () => {
       .getAllByRole('link', { name: /^try demo$/i, hidden: true })
       .filter((el) => el.className.includes('btn'));
     expect(demoPills).toHaveLength(0);
+
+    const dogPills = screen
+      .getAllByRole('link', { name: /^dogs$/i, hidden: true })
+      .filter(
+        (el) =>
+          el.className.includes('btn') && el.className.includes('bg-white')
+      );
+    expect(dogPills).toHaveLength(0);
   });
 
   it('does not offer Create Account in role menus (sign-in page covers signup)', () => {

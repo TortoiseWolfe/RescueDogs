@@ -83,11 +83,11 @@ function MyApplicationsContent() {
               separate from your application full name.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-              <Link
-                href="/#meet-pets-heading"
-                className="btn btn-primary min-h-11"
-              >
-                Browse Pets
+              <Link href="/dogs" className="btn btn-primary min-h-11">
+                Browse Dogs
+              </Link>
+              <Link href="/cats" className="btn btn-primary min-h-11">
+                Browse Cats
               </Link>
               <Link href="/adopt" className="btn btn-secondary min-h-11">
                 Start an Application
