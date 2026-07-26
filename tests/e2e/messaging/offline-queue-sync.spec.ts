@@ -69,6 +69,19 @@ test.describe('Offline Queue Sync E2E', () => {
       });
       await expect(messageInput).toBeVisible({ timeout: 45000 });
 
+      const sendButton = viewer.page.getByRole('button', { name: /send/i });
+
+      // Warm the peer public-key cache while online. After #60, device-key
+      // bootstrap may skip decrypting seeded history, so the first encrypt
+      // would otherwise need a network fetch that fails once we go offline.
+      const warmup = `Offline warmup ${Date.now()}`;
+      await fillMessageInput(viewer.page, warmup);
+      await sendButton.click();
+      await scrollThreadToBottom(viewer.page);
+      await expect(viewer.page.getByText(warmup)).toBeVisible({
+        timeout: 30000,
+      });
+
       // ===== Go offline =====
       await viewer.context.setOffline(true);
       const isOffline = await viewer.page.evaluate(() => !navigator.onLine);
@@ -77,8 +90,6 @@ test.describe('Offline Queue Sync E2E', () => {
       // ===== Send message while offline =====
       const testMessage = `Offline sync test ${Date.now()}`;
       await fillMessageInput(viewer.page, testMessage);
-
-      const sendButton = viewer.page.getByRole('button', { name: /send/i });
       await sendButton.click();
 
       // Message should appear in UI (queued state).
