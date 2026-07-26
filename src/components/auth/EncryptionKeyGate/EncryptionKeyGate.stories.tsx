@@ -11,7 +11,7 @@ const meta: Meta<typeof EncryptionKeyGate> = {
     docs: {
       description: {
         component:
-          'Render-gate for E2E encryption keys. Three states: no keys → redirect to /messages/setup; keys in DB but not memory → ReAuthModal; keys in memory → render children. Extracted from the messages page.',
+          'Render-gate for messaging ECDH keys (#60). Silently bootstraps device/session keys after normal login — no messaging-password modal or /messages/setup.',
       },
     },
     nextjs: {

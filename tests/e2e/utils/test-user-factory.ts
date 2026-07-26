@@ -564,16 +564,16 @@ export async function dismissCookieBanner(
 }
 
 /**
- * Handle ReAuthModal that appears when accessing /messages after session restore.
- * Enters the messaging password to unlock encryption keys.
+ * Wait for messaging to become ready after normal login (#60).
  *
- * The ReAuthModal appears when:
- * - User navigates to /messages after session restore
- * - Session is valid but encryption keys are not in memory
+ * Historically this filled ReAuthModal / /messages/setup with a second
+ * messaging password. Device keys now bootstrap silently in
+ * EncryptionKeyGate — this helper waits for that gate and only signs in
+ * again if the auth session is missing.
  *
  * @param page - Playwright page object
- * @param password - Password to enter (defaults to TEST_USER_PRIMARY_PASSWORD)
- * @returns true if modal was handled, false if modal was not present
+ * @param password - Account password for fresh sign-in fallback only
+ * @returns true if messaging is ready without a messaging-password UI
  *
  * @example
  * await page.goto('/messages');
@@ -735,234 +735,93 @@ export async function handleReAuthModal(
 
   console.log(`[handleReAuthModal] URL after gate: ${page.url()}`);
 
+  // #60: no messaging-password UI. Setup redirects to /messages; gate
+  // bootstraps device keys. Wait until we're on messages without the gate
+  // spinner, then treat unlock as done.
   if (page.url().includes('/messages/setup')) {
-    // Path 2: Full setup page — fill form and submit
-    const setupPassword = page.locator('#setup-password');
-    const setupVisible = await setupPassword
-      .isVisible({ timeout: 5000 })
-      .catch(() => false);
-    if (setupVisible) {
-      await setupPassword.fill(testPassword);
-      await page.locator('#setup-confirm').fill(testPassword);
-      const setupBtn = page.getByRole('button', {
-        name: /Set Up Encrypted Messaging/i,
-      });
-      await setupBtn.click();
-      await page.waitForURL(/\/messages(?!\/setup)/, { timeout: 60000 });
-      await page.waitForLoadState('domcontentloaded');
-      return true;
-    }
+    await page
+      .waitForURL(/\/messages(?!\/setup)/, { timeout: 30000 })
+      .catch(() => {});
+    await loadingOverlay
+      .waitFor({ state: 'hidden', timeout: 60000 })
+      .catch(() => {});
   }
 
-  // Path 1: ReAuthModal overlay on /messages page
-  const modal = page.locator('[role="dialog"]').first();
-
-  // Wait for the modal to appear. The gate loading overlay already
-  // finished above, so if the modal is going to appear, it shows within
-  // 3s (React re-render after checkKeys resolves). 15s was too long and
-  // wasted time in tests where keys are already unlocked.
-  try {
-    await modal.waitFor({ state: 'visible', timeout: 3000 });
-    console.log(`[handleReAuthModal] Modal found at URL: ${page.url()}`);
-  } catch {
-    // Modal didn't appear — either keys unlocked OR user not authenticated.
-    // Check localStorage for a valid auth token rather than DOM text, which
-    // flashes "Sign in" during the multi-second auth hydration.
-    const hasAuthToken = await page.evaluate(() => {
-      const key = Object.keys(localStorage).find(
-        (k) => k.startsWith('sb-') && k.endsWith('-auth-token')
-      );
-      if (!key) return false;
-      try {
-        const session = JSON.parse(localStorage.getItem(key) || '{}');
-        return !!session?.access_token;
-      } catch {
-        return false;
-      }
-    });
-
-    if (hasAuthToken) {
-      // Auth token exists — the "Sign in" text is a transient flash during
-      // auth hydration. Wait for auth to resolve (up to 10s).
-      console.log(
-        `[handleReAuthModal] Auth token in localStorage, waiting for hydration. URL: ${page.url()}`
-      );
-      try {
-        await page.waitForFunction(
-          () => {
-            // Wait until the "Sign in" / "You must be logged in" text disappears
-            const el = document.querySelector(
-              '[data-testid="message-thread"], [data-testid="encryption-key-gate-loading"]'
-            );
-            return el !== null;
-          },
-          { timeout: 10000 }
-        );
-        console.log('[handleReAuthModal] Auth hydrated — no modal needed');
-        return false;
-      } catch {
-        // Hydration timed out — fall through to sign-in
-        console.log(
-          '[handleReAuthModal] Auth hydration timeout — falling through to sign-in'
-        );
-      }
-    }
-
-    // Check if actually not authenticated (no token in localStorage)
-    const notAuthed = !hasAuthToken;
-    if (notAuthed) {
-      console.log(
-        `[handleReAuthModal] Session expired — no auth token. URL: ${page.url()}`
-      );
-      // Sign in fresh via the UI (performSignIn handles the /sign-in form)
-      await page.goto('/sign-in', { waitUntil: 'domcontentloaded' });
-      const result = await performSignIn(
-        page,
-        process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
-        testPassword
-      );
-      if (!result.success) {
-        console.error(
-          `[handleReAuthModal] Fresh sign-in failed: ${result.error}`
-        );
-        return false;
-      }
-      console.log(
-        '[handleReAuthModal] Fresh sign-in succeeded — returning to messages'
-      );
-      // Navigate back to where we were
-      const returnUrl = page.url().includes('/messages')
-        ? page.url()
-        : '/messages';
-      await page.goto(returnUrl, { waitUntil: 'domcontentloaded' });
-      // Recursively handle the modal now that we're authenticated
-      return handleReAuthModal(page, password);
-    }
-    console.log(`[handleReAuthModal] No modal needed. URL: ${page.url()}`);
-    return false;
-  }
-
-  // Verify it's the ReAuthModal by checking content
-  const modalText = await modal.textContent();
-  if (
-    !modalText?.toLowerCase().includes('password') &&
-    !modalText?.toLowerCase().includes('encryption') &&
-    !modalText?.toLowerCase().includes('messaging')
-  ) {
-    return false;
-  }
-
-  // Fill password and submit. Allow up to 3 attempts to handle the
-  // documented WebKit-on-Linux flake: Argon2id key derivation is slow
-  // enough on webkit-msg that the ReAuthModal can briefly transition to
-  // `hidden` (Playwright's `waitFor({state:'hidden'})` resolves) and then
-  // re-appear when the underlying unlock actually fails or retries.
-  // We treat "hidden then back" as a transient failure and re-submit the
-  // password. This caught a deterministic 3/3-retry failure mode in
-  // 26105491210 webkit-msg 1/1 (PR #95 rebased run, 2026-05-19) where the
-  // failure-time screenshot showed the modal still visible despite the
-  // helper having "succeeded".
-  const MAX_ATTEMPTS = 3;
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
-    const passwordInput = modal.locator('input[type="password"]').first();
-    await passwordInput.fill(testPassword);
-
-    const submitBtn = modal.locator('button[type="submit"]').first();
-    await submitBtn.click();
-
-    // Wait for modal to close. Argon2id key derivation is CPU-intensive
-    // and under 24-shard CI load with WebCrypto thread contention can take
-    // 60+ seconds. Generous timeout prevents flaky failures.
-    try {
-      await modal.waitFor({ state: 'hidden', timeout: 90000 });
-    } catch {
-      console.log(
-        `[handleReAuthModal] ✗ Modal never hidden on attempt ${attempt}/${MAX_ATTEMPTS}.`
-      );
-      if (attempt === MAX_ATTEMPTS) return false;
-      continue;
-    }
-
-    // Verify the hidden state is SUSTAINED — poll for an extra 2 seconds
-    // to confirm the modal doesn't pop back. Under WebKit + slow Argon2id
-    // we sometimes see a brief hide transition before the dialog re-opens
-    // because the actual unlock failed.
-    const sustainedHidden = await modal
-      .waitFor({ state: 'hidden', timeout: 2000 })
-      .then(async () => {
-        // Sleep + recheck. If still hidden, we're good.
-        await new Promise<void>((resolve) => setTimeout(resolve, 2000));
-        return (await modal.count()) === 0 || !(await modal.isVisible());
-      })
-      .catch(() => false);
-
-    if (sustainedHidden) {
-      console.log(
-        `[handleReAuthModal] ✓ Modal closed (attempt ${attempt}/${MAX_ATTEMPTS}). URL: ${page.url()}`
-      );
-      return true;
-    }
-
-    console.log(
-      `[handleReAuthModal] ⚠ Modal re-appeared after attempt ${attempt}/${MAX_ATTEMPTS}; retrying...`
+  const legacyModal = page.locator('[role="dialog"]').filter({
+    hasText: /messaging password|encrypted messaging/i,
+  });
+  if (await legacyModal.isVisible().catch(() => false)) {
+    console.warn(
+      '[handleReAuthModal] Unexpected messaging-password modal after #60 — failing closed'
     );
+    return false;
+  }
+
+  const hasAuthToken = await page.evaluate(() => {
+    const key = Object.keys(localStorage).find(
+      (k) => k.startsWith('sb-') && k.endsWith('-auth-token')
+    );
+    if (!key) return false;
+    try {
+      const session = JSON.parse(localStorage.getItem(key) || '{}');
+      return !!session?.access_token;
+    } catch {
+      return false;
+    }
+  });
+
+  if (!hasAuthToken) {
+    console.log(
+      `[handleReAuthModal] Session expired — no auth token. URL: ${page.url()}`
+    );
+    await page.goto('/sign-in', { waitUntil: 'domcontentloaded' });
+    const result = await performSignIn(
+      page,
+      process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
+      testPassword
+    );
+    if (!result.success) {
+      console.error(
+        `[handleReAuthModal] Fresh sign-in failed: ${result.error}`
+      );
+      return false;
+    }
+    const returnUrl = page.url().includes('/messages')
+      ? page.url()
+      : '/messages';
+    await page.goto(returnUrl, { waitUntil: 'domcontentloaded' });
+    return handleReAuthModal(page, password);
   }
 
   console.log(
-    `[handleReAuthModal] ✗ Modal persisted after ${MAX_ATTEMPTS} unlock attempts. URL: ${page.url()}`
+    `[handleReAuthModal] ✓ Session ready without messaging-password UI. URL: ${page.url()}`
   );
-  return false;
+  page.off('console', consoleHandler);
+  return true;
 }
 
 /**
- * Handle the initial Encrypted Messaging Setup page.
- *
- * When a user navigates to /messages without encryption keys,
- * they are redirected to /messages/setup. This helper fills in
- * the messaging password and submits the form.
- *
- * @param page - Playwright page object
- * @param messagingPassword - Password for messaging encryption (min 8 chars)
- * @returns true if setup was handled, false if not on setup page
+ * Legacy helper: /messages/setup now redirects to /messages (#60).
+ * Waits for the redirect + EncryptionKeyGate bootstrap instead of filling
+ * a messaging-password form.
  */
 export async function handleEncryptionSetup(
   page: Page,
-  messagingPassword = 'TestMessaging123!'
+  _messagingPassword = 'TestMessaging123!'
 ): Promise<boolean> {
-  // Check if we're on the setup page
-  const url = page.url();
-  if (!url.includes('/messages/setup')) {
-    // Also check if the setup page heading is visible (in case URL check is too early)
-    const heading = page.getByRole('heading', {
-      name: /Set Up Encrypted Messaging/i,
-    });
-    const isSetupVisible = await heading
-      .isVisible({ timeout: 3000 })
-      .catch(() => false);
-    if (!isSetupVisible) {
-      return false;
-    }
+  if (page.url().includes('/messages/setup')) {
+    await page.waitForURL(/\/messages(?!\/setup)/, { timeout: 30000 });
   }
-
-  // Wait for the form to be ready
-  const passwordInput = page.locator('#setup-password');
-  await passwordInput.waitFor({ state: 'visible', timeout: 10000 });
-
-  // Fill password fields
-  await passwordInput.fill(messagingPassword);
-  await page.locator('#setup-confirm').fill(messagingPassword);
-
-  // Submit the form
-  const submitBtn = page.getByRole('button', {
-    name: /Set Up Encrypted Messaging/i,
-  });
-  await submitBtn.click();
-
-  // Wait for redirect to /messages (setup complete)
-  await page.waitForURL(/\/messages(?!\/setup)/, { timeout: 15000 });
-  await page.waitForLoadState('networkidle');
-
-  return true;
+  const loadingOverlay = page.locator(
+    '[data-testid="encryption-key-gate-loading"]'
+  );
+  await loadingOverlay
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .catch(() => {});
+  await loadingOverlay
+    .waitFor({ state: 'hidden', timeout: 60000 })
+    .catch(() => {});
+  return page.url().includes('/messages');
 }
 
 /**

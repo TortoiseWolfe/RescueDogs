@@ -164,10 +164,9 @@ setup('authenticate shared test user', async ({ page, browser }) => {
   await page.evaluate(() => localStorage.setItem('playwright_e2e', 'true'));
 
   // Save authenticated browser state (localStorage + cookies).
-  // Encryption keys live in IndexedDB as non-extractable CryptoKeys post-7c
-  // and are NOT in storageState (Playwright cannot serialize CryptoKey).
-  // Each messaging spec triggers ReAuthModal on first navigation, which
-  // derives the keys from password via Argon2id (~2-3s) and persists them.
+  // Encryption keys live in IndexedDB as non-extractable CryptoKeys and are
+  // NOT in storageState. EncryptionKeyGate.ensureKeysForSession (#60)
+  // bootstraps device keys on first /messages visit without a password UI.
   await page.context().storageState({ path: AUTH_FILE });
   console.log(`✓ Auth state saved to ${AUTH_FILE}`);
 
