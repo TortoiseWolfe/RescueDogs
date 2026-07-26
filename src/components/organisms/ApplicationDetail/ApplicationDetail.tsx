@@ -27,6 +27,13 @@ export interface ApplicationDetailProps {
   ) => void | Promise<void>;
   /** Disables status controls while a transition is in flight. */
   advancing?: boolean;
+  /**
+   * Opens (or creates) a 1:1 message thread with the applicant (#72).
+   * When omitted, the Message CTA is hidden.
+   */
+  onMessage?: () => void | Promise<void>;
+  /** Disables the Message CTA while a thread is opening. */
+  messaging?: boolean;
   /** Additional CSS classes */
   className?: string;
 }
@@ -150,6 +157,8 @@ export default function ApplicationDetail({
   applicantEmail = null,
   onAdvance,
   advancing = false,
+  onMessage,
+  messaging = false,
   className = '',
 }: ApplicationDetailProps) {
   const uid = React.useId();
@@ -163,6 +172,7 @@ export default function ApplicationDetail({
   // Defensive: a malformed row must render dashes, never crash.
   const snapshot = (application.profile_snapshot ??
     {}) as Partial<ProfileSnapshot>;
+  const applicantLabel = textOrDash(snapshot.full_name);
   const renting =
     snapshot.housing_type != null && isRenting(snapshot.housing_type);
 
@@ -196,16 +206,36 @@ export default function ApplicationDetail({
               className="h-24 w-24 rounded-xl object-cover"
             />
           )}
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h2 id={petHeadingId} className="card-title">
               {pet?.name ?? EM_DASH}
             </h2>
             {petSubtitle && <p className="text-sm opacity-70">{petSubtitle}</p>}
+            {applicantLabel !== EM_DASH && (
+              <p className="mt-1 text-sm">
+                Applicant: <span className="font-medium">{applicantLabel}</span>
+              </p>
+            )}
           </div>
-          <StatusBadge
-            status={application.status}
-            className="badge-lg sm:ml-auto"
-          />
+          <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+            {onMessage && (
+              <button
+                type="button"
+                className="btn btn-secondary min-h-11 min-w-11"
+                onClick={() => void onMessage()}
+                disabled={messaging}
+                data-testid="message-applicant"
+                aria-label={
+                  applicantLabel !== EM_DASH
+                    ? `Message ${applicantLabel}`
+                    : 'Message applicant'
+                }
+              >
+                {messaging ? 'Opening…' : 'Message'}
+              </button>
+            )}
+            <StatusBadge status={application.status} className="badge-lg" />
+          </div>
         </div>
       </header>
 

@@ -181,6 +181,14 @@ const meta = {
       control: 'boolean',
       description: 'Disables status controls while a transition is in flight',
     },
+    onMessage: {
+      action: 'message',
+      description: 'Opens a 1:1 message thread with the applicant (#72)',
+    },
+    messaging: {
+      control: 'boolean',
+      description: 'Disables the Message CTA while a thread is opening',
+    },
     className: {
       control: 'text',
       description: 'Additional CSS classes',
@@ -189,6 +197,8 @@ const meta = {
   args: {
     onAdvance: () => {},
     advancing: false,
+    onMessage: () => {},
+    messaging: false,
   },
 } satisfies Meta<typeof ApplicationDetail>;
 

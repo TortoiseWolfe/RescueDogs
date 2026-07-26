@@ -173,6 +173,47 @@ describe('ApplicationDetail', () => {
         'Under Review'
       );
     });
+
+    it('shows applicant name and Message CTA when onMessage is provided (#72)', () => {
+      const onMessage = vi.fn();
+      render(
+        <ApplicationDetail
+          application={makeApplication()}
+          onAdvance={vi.fn()}
+          onMessage={onMessage}
+        />
+      );
+      expect(screen.getByText(/Applicant:/)).toHaveTextContent('Jane Renter');
+      const messageBtn = screen.getByTestId('message-applicant');
+      expect(messageBtn).toHaveAccessibleName('Message Jane Renter');
+      fireEvent.click(messageBtn);
+      expect(onMessage).toHaveBeenCalledTimes(1);
+    });
+
+    it('hides Message CTA when onMessage is omitted', () => {
+      render(
+        <ApplicationDetail
+          application={makeApplication()}
+          onAdvance={vi.fn()}
+        />
+      );
+      expect(screen.queryByTestId('message-applicant')).not.toBeInTheDocument();
+    });
+
+    it('disables Message CTA while messaging is in flight', () => {
+      render(
+        <ApplicationDetail
+          application={makeApplication()}
+          onAdvance={vi.fn()}
+          onMessage={vi.fn()}
+          messaging
+        />
+      );
+      expect(screen.getByTestId('message-applicant')).toBeDisabled();
+      expect(screen.getByTestId('message-applicant')).toHaveTextContent(
+        'Opening…'
+      );
+    });
   });
 
   describe('why this pet', () => {

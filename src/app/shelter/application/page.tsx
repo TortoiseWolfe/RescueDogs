@@ -2,8 +2,10 @@
 
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { ShelterApplicationService } from '@/services/applications';
+import { connectionService } from '@/services/messaging/connection-service';
 import ApplicationDetail from '@/components/organisms/ApplicationDetail';
 import type {
   ApplicationStatus,
@@ -12,6 +14,7 @@ import type {
 import SearchParamsReader from './SearchParamsReader';
 
 function ShelterApplicationContent() {
+  const router = useRouter();
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [application, setApplication] =
@@ -19,6 +22,7 @@ function ShelterApplicationContent() {
   const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [advancing, setAdvancing] = useState(false);
+  const [messaging, setMessaging] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleParams = useCallback((id: string | null) => {
@@ -74,6 +78,24 @@ function ShelterApplicationContent() {
     [applicationId, fetchApplication]
   );
 
+  const handleMessage = useCallback(async () => {
+    if (!application?.adopter_id) return;
+    setMessaging(true);
+    try {
+      const conversationId = await connectionService.startConversationWithUser(
+        application.adopter_id
+      );
+      setError(null);
+      router.push(`/messages?conversation=${conversationId}&tab=chats`);
+    } catch {
+      setError(
+        'Could not open a message thread with this applicant. Try again, or message them from Connections.'
+      );
+    } finally {
+      setMessaging(false);
+    }
+  }, [application?.adopter_id, router]);
+
   return (
     <>
       <SearchParamsReader onParams={handleParams} />
@@ -105,6 +127,8 @@ function ShelterApplicationContent() {
             applicantEmail={applicantEmail}
             onAdvance={handleAdvance}
             advancing={advancing}
+            onMessage={handleMessage}
+            messaging={messaging}
           />
         </>
       )}
