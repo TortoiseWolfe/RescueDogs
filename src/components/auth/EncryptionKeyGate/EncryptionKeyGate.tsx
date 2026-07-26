@@ -1,17 +1,8 @@
 'use client';
 
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  type ReactNode,
-} from 'react';
-import { useRouter } from 'next/navigation';
-import { ReAuthModal } from '@/components/auth/ReAuthModal';
+import React, { useState, useEffect, useRef, type ReactNode } from 'react';
 import { keyManagementService } from '@/services/messaging/key-service';
 import { useAuth } from '@/contexts/AuthContext';
-import { isOAuthUser } from '@/lib/auth/oauth-utils';
 
 export interface EncryptionKeyGateProps {
   /** Child content — rendered once keys are confirmed in memory */
@@ -19,29 +10,22 @@ export interface EncryptionKeyGateProps {
 }
 
 /**
- * EncryptionKeyGate — blocks children until E2E encryption keys are usable.
+ * EncryptionKeyGate — blocks interaction until E2E keys are usable (#60).
  *
- * Three possible states on mount:
- *  1. No keys in database → redirect to /messages/setup (full-page form so
- *     password manager can fill). Children never render.
- *  2. Keys in database but not in memory → show ReAuthModal to unlock.
- *     Children render behind the modal (they'll fail to decrypt until unlock
- *     but the layout mounts — avoids re-mount flash on success).
- *  3. Keys in memory → children render immediately.
+ * After normal account login, silently ensures device/session keys via
+ * `ensureKeysForSession` — no messaging-password modal and no redirect to
+ * `/messages/setup`.
  *
  * Waits for the auth session to be restored before checking keys.
- * Without this, getUser() returns "Auth session missing!" on static
- * exports where localStorage session restoration is asynchronous.
  *
  * @category auth
  */
 export default function EncryptionKeyGate({
   children,
 }: EncryptionKeyGateProps) {
-  const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [checkingKeys, setCheckingKeys] = useState(true);
-  const [needsReAuth, setNeedsReAuth] = useState(false);
+  const [bootstrapError, setBootstrapError] = useState<string | null>(null);
 
   // Track if user was ever authenticated. Supabase token refresh briefly
   // sets user=null and removes the auth token from localStorage. Without
@@ -55,65 +39,38 @@ export default function EncryptionKeyGate({
     if (authLoading) return;
 
     if (!user) {
-      // No user after auth finished loading — let ProtectedRoute handle
-      // the redirect. Clear checkingKeys so the loading overlay disappears
-      // and the page can render (ProtectedRoute wraps this component).
-      // Previously this returned early without clearing checkingKeys,
-      // causing the loading overlay to stay forever — blocking all
-      // messaging E2E tests that waited for it to dismiss.
       setCheckingKeys(false);
       return;
     }
 
-    const checkKeys = async () => {
-      // Pass user.id directly — avoids getSession()/getUser() race condition.
-      // The auth context already confirmed the user exists (isLoading=false,
-      // user≠null), so we can skip the auth check inside hasKeys().
-      let hasStoredKeys = false;
+    let cancelled = false;
+
+    const bootstrap = async () => {
+      setBootstrapError(null);
       try {
-        hasStoredKeys = await keyManagementService.hasKeysForUser(user!.id);
-      } catch (err) {
-        console.error('[EncryptionKeyGate] hasKeysForUser() threw:', err);
-      }
-
-      if (!hasStoredKeys) {
-        // No keys at all — first-run setup.
-        //
-        // OAuth users (Google/GitHub) get the in-modal setup flow per
-        // Feature 013 (FR-021). The /messages/setup page is preserved as
-        // a deep-link fallback (FR-022) but is no longer the primary path
-        // from /messages.
-        //
-        // Email users still get the full-page redirect because their auth
-        // password and messaging password are typically the same — the
-        // browser's password manager benefits from a real <form> context
-        // to offer auto-fill.
-        if (isOAuthUser(user)) {
-          setNeedsReAuth(true);
+        await keyManagementService.ensureKeysForSession(user.id);
+        if (!cancelled) {
           setCheckingKeys(false);
-          return;
         }
-        router.push('/messages/setup');
-        return;
+      } catch (err) {
+        console.error(
+          '[EncryptionKeyGate] ensureKeysForSession() failed:',
+          err
+        );
+        if (!cancelled) {
+          setBootstrapError(
+            'Could not prepare secure messaging for this session. Try refreshing the page.'
+          );
+          setCheckingKeys(false);
+        }
       }
-
-      // Keys exist in DB. Are they in memory or localStorage cache?
-      // Try restoring from localStorage first (covers page reload / storageState).
-      // Pass user.id to only restore keys belonging to THIS user — prevents
-      // User B from accidentally restoring User A's cached keys.
-      await keyManagementService.restoreKeysFromCache(user!.id);
-      const keys = keyManagementService.getCurrentKeys();
-      if (!keys) {
-        setNeedsReAuth(true);
-      }
-      setCheckingKeys(false);
     };
-    checkKeys();
-  }, [router, authLoading, user]);
 
-  const handleReAuthSuccess = useCallback(() => {
-    setNeedsReAuth(false);
-  }, []);
+    bootstrap();
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user]);
 
   // Always render children — blocking them behind a spinner prevented
   // the sidebar tabs from mounting, which broke E2E tests that wait for
@@ -133,7 +90,15 @@ export default function EncryptionKeyGate({
           ></span>
         </div>
       )}
-      <ReAuthModal isOpen={needsReAuth} onSuccess={handleReAuthSuccess} />
+      {bootstrapError && (
+        <div
+          role="alert"
+          className="alert alert-error mx-4 mt-4"
+          data-testid="encryption-key-gate-error"
+        >
+          <span>{bootstrapError}</span>
+        </div>
+      )}
       {children}
     </>
   );
