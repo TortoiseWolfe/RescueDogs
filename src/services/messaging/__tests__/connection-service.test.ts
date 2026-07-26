@@ -307,4 +307,171 @@ describe('ConnectionService', () => {
       expect(result).toBe(CONVERSATION_ID);
     });
   });
+
+  describe('ensureAcceptedConnection / startConversationWithUser', () => {
+    const CONVERSATION_ID = '00000000-0000-0000-0000-000000000100';
+
+    it('should no-op when an accepted connection already exists', async () => {
+      const connectionBuilder = createMockQueryBuilder(
+        [{ status: 'accepted', id: CONN_1_ID }],
+        null
+      );
+      // Override then for array result from limit()
+      connectionBuilder.then = vi.fn((resolve) =>
+        resolve({
+          data: [
+            {
+              id: CONN_1_ID,
+              requester_id: CURRENT_USER_ID,
+              addressee_id: USER_2_ID,
+              status: 'accepted',
+            },
+          ],
+          error: null,
+        })
+      );
+      vi.mocked(mockSupabase.from).mockReturnValue(connectionBuilder as any);
+
+      await expect(
+        connectionService.ensureAcceptedConnection(USER_2_ID)
+      ).resolves.toBeUndefined();
+    });
+
+    it('should insert an accepted connection when none exists', async () => {
+      const emptyBuilder = createMockQueryBuilder([], null);
+      emptyBuilder.then = vi.fn((resolve) =>
+        resolve({ data: [], error: null })
+      );
+      const insertBuilder = createMockQueryBuilder(null, null);
+      insertBuilder.insert = vi
+        .fn()
+        .mockResolvedValue({ data: null, error: null });
+
+      let callCount = 0;
+      vi.mocked(mockSupabase.from).mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) return emptyBuilder as any;
+        return insertBuilder as any;
+      });
+
+      await connectionService.ensureAcceptedConnection(USER_2_ID);
+      expect(insertBuilder.insert).toHaveBeenCalledWith({
+        requester_id: CURRENT_USER_ID,
+        addressee_id: USER_2_ID,
+        status: 'accepted',
+      });
+    });
+
+    it('should accept a pending request when current user is addressee', async () => {
+      const pendingBuilder = createMockQueryBuilder(null, null);
+      pendingBuilder.then = vi.fn((resolve) =>
+        resolve({
+          data: [
+            {
+              id: CONN_1_ID,
+              requester_id: USER_2_ID,
+              addressee_id: CURRENT_USER_ID,
+              status: 'pending',
+            },
+          ],
+          error: null,
+        })
+      );
+
+      // respondToRequest: fetch connection then update
+      const fetchBuilder = createMockQueryBuilder(
+        {
+          id: CONN_1_ID,
+          requester_id: USER_2_ID,
+          addressee_id: CURRENT_USER_ID,
+          status: 'pending',
+        },
+        null
+      );
+      const updateBuilder = createMockQueryBuilder(
+        {
+          id: CONN_1_ID,
+          requester_id: USER_2_ID,
+          addressee_id: CURRENT_USER_ID,
+          status: 'accepted',
+        },
+        null
+      );
+
+      let callCount = 0;
+      vi.mocked(mockSupabase.from).mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) return pendingBuilder as any;
+        if (callCount === 2) return fetchBuilder as any;
+        return updateBuilder as any;
+      });
+
+      await expect(
+        connectionService.ensureAcceptedConnection(USER_2_ID)
+      ).resolves.toBeUndefined();
+    });
+
+    it('should reject blocked connections', async () => {
+      const blockedBuilder = createMockQueryBuilder(null, null);
+      blockedBuilder.then = vi.fn((resolve) =>
+        resolve({
+          data: [
+            {
+              id: CONN_1_ID,
+              requester_id: CURRENT_USER_ID,
+              addressee_id: USER_2_ID,
+              status: 'blocked',
+            },
+          ],
+          error: null,
+        })
+      );
+      vi.mocked(mockSupabase.from).mockReturnValue(blockedBuilder as any);
+
+      await expect(
+        connectionService.ensureAcceptedConnection(USER_2_ID)
+      ).rejects.toThrow('Cannot message this user');
+    });
+
+    it('should startConversationWithUser after ensuring connection', async () => {
+      // ensureAcceptedConnection: already accepted
+      const acceptedListBuilder = createMockQueryBuilder(null, null);
+      acceptedListBuilder.then = vi.fn((resolve) =>
+        resolve({
+          data: [
+            {
+              id: CONN_1_ID,
+              requester_id: CURRENT_USER_ID,
+              addressee_id: USER_2_ID,
+              status: 'accepted',
+            },
+          ],
+          error: null,
+        })
+      );
+      // getOrCreateConversation: accepted + existing conversation
+      const statusBuilder = createMockQueryBuilder(
+        { status: 'accepted' },
+        null
+      );
+      const conversationBuilder = createMockQueryBuilder(
+        { id: CONVERSATION_ID },
+        null
+      );
+
+      let connCalls = 0;
+      vi.mocked(mockSupabase.from).mockImplementation((table: string) => {
+        if (table === 'user_connections') {
+          connCalls++;
+          if (connCalls === 1) return acceptedListBuilder as any;
+          return statusBuilder as any;
+        }
+        return conversationBuilder as any;
+      });
+
+      const result =
+        await connectionService.startConversationWithUser(USER_2_ID);
+      expect(result).toBe(CONVERSATION_ID);
+    });
+  });
 });

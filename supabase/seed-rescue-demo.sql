@@ -66,6 +66,18 @@ INSERT INTO shelter_members (shelter_id, user_id, role) VALUES
    '33333333-3333-3333-3333-333333333302', 'manager')
 ON CONFLICT (shelter_id, user_id) DO NOTHING;
 
+-- Demo messaging link: Sam Shelterworker ↔ Dana Adopter (#72)
+-- Lets staff↔adopter chat without hunting Connections by display_name.
+INSERT INTO user_connections (id, requester_id, addressee_id, status, created_at)
+VALUES (
+  '77777777-7777-7777-7777-7777777777d1',
+  '33333333-3333-3333-3333-333333333302', -- Sam (staff)
+  '33333333-3333-3333-3333-333333333301', -- Dana (adopter)
+  'accepted',
+  now()
+)
+ON CONFLICT (id) DO NOTHING;
+
 -- ============================================================================
 -- 3. PETS (five dogs + one cat; one already adopted to prove the
 --    available-only dropdown filter)
