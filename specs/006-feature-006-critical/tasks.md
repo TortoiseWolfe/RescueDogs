@@ -140,7 +140,7 @@
 
 **Goal**: Show actual participant name instead of "Unknown"
 
-**Independent Test**: Open conversation with user "jonpohlner". Header should show "jonpohlner" (or their display_name), not "Unknown".
+**Independent Test**: Open conversation with user "testuser". Header should show "testuser" (or their display_name), not "Unknown".
 
 ### Implementation for User Story 5
 

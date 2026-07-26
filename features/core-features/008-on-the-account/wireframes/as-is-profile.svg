@@ -24,7 +24,7 @@
     <circle cx="420" cy="252" r="48" fill="#f5f0e6" stroke="#b8a080"/>
     <text x="420" y="262" text-anchor="middle" font-family="system-ui, sans-serif" font-size="32" font-weight="700" fill="#8b5cf6">TW</text>
     <text x="500" y="228" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#1f2937">TurtleWolfe</text>
-    <text x="500" y="252" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">jonpohlner@gmail.com</text>
+    <text x="500" y="252" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">you@example.com</text>
     <text x="500" y="276" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">Verified · joined Feb 2025</text>
 
     <line x1="360" y1="320" x2="920" y2="320" stroke="#b8a080"/>
@@ -58,7 +58,7 @@
     <circle cx="180" cy="204" r="40" fill="#f5f0e6" stroke="#b8a080"/>
     <text x="180" y="214" text-anchor="middle" font-family="system-ui, sans-serif" font-size="26" font-weight="700" fill="#8b5cf6">TW</text>
     <text x="180" y="276" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#1f2937">TurtleWolfe</text>
-    <text x="180" y="298" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">jonpohlner@gmail.com</text>
+    <text x="180" y="298" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#4b5563">you@example.com</text>
 
     <line x1="40" y1="324" x2="320" y2="324" stroke="#b8a080"/>
     <text x="32" y="350" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">Email verified</text>
