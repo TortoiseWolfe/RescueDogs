@@ -11,6 +11,13 @@ vi.mock('next/navigation', () => ({
   usePathname: vi.fn(() => '/applications'),
 }));
 
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({
+    signOut: vi.fn(),
+    user: { id: 'demo-user' },
+  }),
+}));
+
 describe('DemoTour', () => {
   beforeEach(() => {
     window.sessionStorage.clear();
@@ -33,10 +40,13 @@ describe('DemoTour', () => {
       />
     );
     expect(screen.getByTestId('demo-tour')).toBeInTheDocument();
-    expect(screen.getByText('Your applications')).toBeInTheDocument();
+    expect(screen.getByText('Start as the adopter')).toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: /Open Biscuit/i })
     ).toBeInTheDocument();
+    expect(screen.getByTestId('demo-tour-switch-role')).toHaveTextContent(
+      /shelter demo/i
+    );
   });
 
   it('advances to the next step on Next', () => {
@@ -49,11 +59,11 @@ describe('DemoTour', () => {
     );
     expect(screen.getByText('Status tracker')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('demo-tour-next'));
-    expect(screen.getByText('Live updates')).toBeInTheDocument();
+    expect(screen.getByText('Then switch to the shelter')).toBeInTheDocument();
   });
 
-  it('hides after Skip tour and persists dismissal', () => {
-    const { container, rerender } = render(
+  it('keeps the switch control after Skip tour', () => {
+    render(
       <DemoTour
         forceDemoMode
         forceRole="adopter"
@@ -61,36 +71,37 @@ describe('DemoTour', () => {
       />
     );
     fireEvent.click(screen.getByTestId('demo-tour-skip'));
-    expect(container.firstChild).toBeNull();
+    expect(screen.queryByText('Start as the adopter')).not.toBeInTheDocument();
+    expect(screen.getByTestId('demo-tour-switch-role')).toBeInTheDocument();
     expect(window.localStorage.getItem(DEMO_TOUR_DISMISS_KEY)).toContain(
       'adopter'
     );
-    rerender(
+  });
+
+  it('shows switch-only chrome when previously dismissed', () => {
+    setTourDismissed('shelter', true);
+    render(
+      <DemoTour forceDemoMode forceRole="shelter" forcePathname="/shelter" />
+    );
+    expect(
+      screen.queryByText('Shelter side of the demo')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('demo-tour-switch-role')).toHaveTextContent(
+      /adopter demo/i
+    );
+  });
+
+  it('invokes onSwitchRole when the switch button is clicked', async () => {
+    const onSwitchRole = vi.fn();
+    render(
       <DemoTour
         forceDemoMode
         forceRole="adopter"
         forcePathname="/applications"
+        onSwitchRole={onSwitchRole}
       />
     );
-    expect(container.firstChild).toBeNull();
-  });
-
-  it('stays hidden when previously dismissed', () => {
-    setTourDismissed('shelter', true);
-    const { container } = render(
-      <DemoTour forceDemoMode forceRole="shelter" forcePathname="/shelter" />
-    );
-    expect(container.firstChild).toBeNull();
-  });
-
-  it('shows shelter pipeline step', () => {
-    render(
-      <DemoTour forceDemoMode forceRole="shelter" forcePathname="/shelter" />
-    );
-    expect(screen.getByTestId('demo-tour')).toHaveAttribute(
-      'data-tour-role',
-      'shelter'
-    );
-    expect(screen.getByText('Shelter pipeline')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('demo-tour-switch-role'));
+    expect(onSwitchRole).toHaveBeenCalledTimes(1);
   });
 });

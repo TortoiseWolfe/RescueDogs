@@ -3,16 +3,20 @@
 import React, { useCallback, useEffect, useId, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import type { PortalType } from '@/lib/portal/portal-preference';
 import {
   DEMO_BISCUIT_APPLICATION_ID,
   DEMO_TOUR_RESTART_EVENT,
+  enterDemoMode,
   getTourStep,
   isDemoMode,
   isTourDismissed,
+  oppositePortal,
   resolveTourRoleFromPath,
   setTourDismissed,
   setTourStep,
+  switchDemoRoleHref,
 } from '@/lib/demo/demo-session';
 
 export interface DemoTourProps {
@@ -26,6 +30,8 @@ export interface DemoTourProps {
   forceRole?: PortalType;
   /** Override pathname matching (Storybook / tests). */
   forcePathname?: string;
+  /** Test hook — replaces the real sign-out redirect switch. */
+  onSwitchRole?: () => void | Promise<void>;
 }
 
 type TourStep = {
@@ -41,8 +47,8 @@ type TourStep = {
 const ADOPTER_STEPS: TourStep[] = [
   {
     id: 'apps',
-    title: 'Your applications',
-    body: 'Biscuit, Pepper, and Tank sit at different stages. Open one to see where you stand — no chasing the shelter.',
+    title: 'Start as the adopter',
+    body: 'This demo uses two logins. First, look at My Applications (Biscuit, Pepper, Tank). Next you’ll switch to the shelter to change a status — then come back here and you’ll see that shelter update appear on the adopter pages in real time.',
     cta: {
       href: `/applications/status?id=${DEMO_BISCUIT_APPLICATION_ID}`,
       label: "Open Biscuit's tracker",
@@ -52,13 +58,13 @@ const ADOPTER_STEPS: TourStep[] = [
   {
     id: 'tracker',
     title: 'Status tracker',
-    body: 'This timeline and any shelter notes are what the adopter sees. Status should never be a mystery.',
+    body: 'This timeline is what the adopter sees — current status and any notes from the shelter. Remember where Biscuit stands now so you can compare after the shelter makes a change.',
     match: (path) => path.startsWith('/applications/status'),
   },
   {
     id: 'live',
-    title: 'Live updates',
-    body: 'When shelter staff advance a status or leave a note, it shows up here without you refreshing endlessly. Optional: open the shelter demo in another window and advance Biscuit to feel the “aha.”',
+    title: 'Then switch to the shelter',
+    body: 'Use Switch to shelter demo below. As staff, advance Biscuit’s status and add a note. Switch back to the adopter demo and reopen this tracker — the shelter’s update shows up here in real time.',
     match: (path) => path.startsWith('/applications/status'),
   },
 ];
@@ -66,8 +72,8 @@ const ADOPTER_STEPS: TourStep[] = [
 const SHELTER_STEPS: TourStep[] = [
   {
     id: 'pipeline',
-    title: 'Shelter pipeline',
-    body: 'Submitted, in-progress, and closed applications live here. Pick an applicant to review without leaving the loop.',
+    title: 'Shelter side of the demo',
+    body: 'You’re signed in as shelter staff. Advance an application here; the adopter sees that status change on their tracker in real time. Start with Biscuit in the pipeline.',
     cta: {
       href: `/shelter/application?id=${DEMO_BISCUIT_APPLICATION_ID}`,
       label: 'Review Biscuit',
@@ -77,20 +83,19 @@ const SHELTER_STEPS: TourStep[] = [
   {
     id: 'review',
     title: 'Review the snapshot',
-    body: 'You’re seeing the frozen application answers — not a live profile edit. Scroll the snapshot, then advance status when ready.',
+    body: "You're seeing the frozen application answers — not a live profile edit. Scroll the snapshot, then advance status when ready.",
     match: (path) => path.startsWith('/shelter/application'),
   },
   {
     id: 'advance',
-    title: 'Advance + note',
-    body: 'Change status and add an adopter-visible note. That’s the anti-ghosting moment — the adopter’s tracker updates live.',
+    title: 'Change status, then switch back',
+    body: 'Advance Biscuit’s status and add an adopter-visible note. Then use Switch to adopter demo, open Biscuit’s tracker again, and confirm the new status and note appear in real time.',
     match: (path) => path.startsWith('/shelter/application'),
   },
 ];
 
 function normalizePath(pathname: string): string {
   if (!pathname) return '/';
-  // Strip trailing slash except root
   if (pathname.length > 1 && pathname.endsWith('/')) {
     return pathname.slice(0, -1);
   }
@@ -104,6 +109,7 @@ function stepsFor(role: PortalType): TourStep[] {
 /**
  * Compact DaisyUI callout for demo sessions (#68).
  * Path-aware, max 3 steps per role, dismissible / restartable.
+ * Always shows an obvious Switch role control on demo pages.
  *
  * @category organisms
  */
@@ -112,16 +118,19 @@ export default function DemoTour({
   forceDemoMode = false,
   forceRole,
   forcePathname,
+  onSwitchRole,
 }: DemoTourProps) {
   const reactId = useId();
   const titleId = `${reactId}-title`;
   const pathnameFromRouter = usePathname() ?? '/';
   const pathname = normalizePath(forcePathname ?? pathnameFromRouter);
+  const { signOut } = useAuth();
 
   const [active, setActive] = useState(false);
   const [role, setRole] = useState<PortalType | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [dismissed, setDismissed] = useState(true);
+  const [switching, setSwitching] = useState(false);
 
   const refresh = useCallback(() => {
     const demo = forceDemoMode || isDemoMode();
@@ -132,12 +141,10 @@ export default function DemoTour({
       setDismissed(isTourDismissed(nextRole));
       let step = getTourStep(nextRole);
       const steps = stepsFor(nextRole);
-      // Snap to a step that matches this page when possible
       const matchingIndexes = steps
         .map((s, i) => (s.match(pathname) ? i : -1))
         .filter((i) => i >= 0);
       if (matchingIndexes.length > 0 && !matchingIndexes.includes(step)) {
-        // Prefer the furthest matching step already reached, else first match
         const preferred =
           matchingIndexes.find((i) => i >= step) ?? matchingIndexes[0];
         step = preferred;
@@ -154,19 +161,36 @@ export default function DemoTour({
     return () => window.removeEventListener(DEMO_TOUR_RESTART_EVENT, onRestart);
   }, [refresh]);
 
-  if (!active || !role || dismissed) {
+  const handleSwitchRole = async () => {
+    if (!role || switching) return;
+    setSwitching(true);
+    try {
+      if (onSwitchRole) {
+        await onSwitchRole();
+        return;
+      }
+      const next = oppositePortal(role);
+      const href = switchDemoRoleHref(role);
+      enterDemoMode(next);
+      await signOut({ redirectTo: href });
+    } finally {
+      setSwitching(false);
+    }
+  };
+
+  if (!active || !role) {
     return null;
   }
 
   const steps = stepsFor(role);
   const clampedIndex = Math.min(stepIndex, steps.length - 1);
   const step = steps[clampedIndex];
-  if (!step.match(pathname)) {
-    return null;
-  }
-
-  const isLast = clampedIndex >= steps.length - 1;
-  const roleLabel = role === 'shelter' ? 'Shelter' : 'Adopter';
+  const showSteps = !dismissed && step.match(pathname);
+  const opposite = oppositePortal(role);
+  const switchLabel =
+    opposite === 'shelter'
+      ? 'Switch to shelter demo'
+      : 'Switch to adopter demo';
 
   const handleDismiss = () => {
     setTourDismissed(role, true);
@@ -174,7 +198,7 @@ export default function DemoTour({
   };
 
   const handleNext = () => {
-    if (isLast) {
+    if (clampedIndex >= steps.length - 1) {
       handleDismiss();
       return;
     }
@@ -190,65 +214,90 @@ export default function DemoTour({
     setStepIndex(prev);
   };
 
+  const roleLabel = role === 'shelter' ? 'Shelter' : 'Adopter';
+  const isLast = clampedIndex >= steps.length - 1;
+
   return (
     <aside
       className={`border-secondary/30 bg-base-100 text-base-content mx-auto w-full max-w-5xl border-b px-4 py-3 sm:px-6 ${className}`.trim()}
       data-testid="demo-tour"
       data-tour-role={role}
-      data-tour-step={step.id}
-      aria-labelledby={titleId}
+      data-tour-step={showSteps ? step.id : 'switch-only'}
+      aria-label="Demo controls"
     >
-      <div className="card bg-secondary/10 border-secondary/20 border shadow-none">
-        <div className="card-body gap-3 p-4 sm:flex-row sm:items-start sm:gap-4">
-          <div className="min-w-0 flex-1">
-            <p className="text-secondary text-xs font-semibold tracking-wide uppercase">
-              Demo tour · {roleLabel} · Step {clampedIndex + 1} of{' '}
-              {steps.length}
-            </p>
-            <h2 id={titleId} className="mt-1 text-base font-bold sm:text-lg">
-              {step.title}
-            </h2>
-            <p className="text-base-content/80 mt-1 text-sm motion-safe:transition-opacity">
-              {step.body}
-            </p>
-            {step.cta && (
-              <Link
-                href={step.cta.href}
-                className="btn btn-secondary btn-sm mt-3 min-h-11"
+      {showSteps && (
+        <div
+          className="card bg-secondary/10 border-secondary/20 mb-3 border shadow-none"
+          aria-labelledby={titleId}
+        >
+          <div className="card-body gap-3 p-4 sm:flex-row sm:items-start sm:gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-secondary text-xs font-semibold tracking-wide uppercase">
+                Demo tour · {roleLabel} · Step {clampedIndex + 1} of{' '}
+                {steps.length}
+              </p>
+              <h2 id={titleId} className="mt-1 text-base font-bold sm:text-lg">
+                {step.title}
+              </h2>
+              <p className="text-base-content/80 mt-1 text-sm motion-safe:transition-opacity">
+                {step.body}
+              </p>
+              {step.cta && (
+                <Link
+                  href={step.cta.href}
+                  className="btn btn-secondary btn-sm mt-3 min-h-11"
+                >
+                  {step.cta.label}
+                </Link>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:flex-col sm:items-stretch">
+              {clampedIndex > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm min-h-11"
+                  onClick={handleBack}
+                >
+                  Back
+                </button>
+              )}
+              <button
+                type="button"
+                className="btn btn-primary btn-sm min-h-11"
+                onClick={handleNext}
+                data-testid="demo-tour-next"
               >
-                {step.cta.label}
-              </Link>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:flex-col sm:items-stretch">
-            {clampedIndex > 0 && (
+                {isLast ? 'Done' : 'Next'}
+              </button>
               <button
                 type="button"
                 className="btn btn-ghost btn-sm min-h-11"
-                onClick={handleBack}
+                onClick={handleDismiss}
+                data-testid="demo-tour-skip"
+                aria-label="Skip demo tour"
               >
-                Back
+                Skip tour
               </button>
-            )}
-            <button
-              type="button"
-              className="btn btn-primary btn-sm min-h-11"
-              onClick={handleNext}
-              data-testid="demo-tour-next"
-            >
-              {isLast ? 'Done' : 'Next'}
-            </button>
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm min-h-11"
-              onClick={handleDismiss}
-              data-testid="demo-tour-skip"
-              aria-label="Skip demo tour"
-            >
-              Skip tour
-            </button>
+            </div>
           </div>
         </div>
+      )}
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-base-content/70 text-sm">
+          {role === 'adopter'
+            ? 'Next: switch to the shelter demo, change Biscuit’s status, then switch back — you’ll see that update on the adopter pages in real time.'
+            : 'After you change a status, switch back to the adopter demo and open the same application — the new status appears on the adopter tracker in real time.'}
+        </p>
+        <button
+          type="button"
+          className="btn btn-outline btn-secondary min-h-11 shrink-0"
+          data-testid="demo-tour-switch-role"
+          disabled={switching}
+          onClick={() => void handleSwitchRole()}
+        >
+          {switching ? 'Switching…' : switchLabel}
+        </button>
       </div>
     </aside>
   );

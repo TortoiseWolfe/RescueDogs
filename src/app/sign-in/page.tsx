@@ -37,6 +37,8 @@ export default function SignInPage() {
   );
   const [portal, setPortal] = useState<PortalType | null>(null);
   const [demoPrefill, setDemoPrefill] = useState(false);
+  const [demoSwitch, setDemoSwitch] = useState(false);
+  const [switchFrom, setSwitchFrom] = useState<PortalType | null>(null);
   // Block onSuccess navigation until the returnUrl effect has run. On a
   // fast network or already-authenticated user, sign-in can resolve before
   // the URL-parsing effect finishes, sending the user to the default
@@ -65,6 +67,10 @@ export default function SignInPage() {
     if (isDemo) {
       enterDemoMode(isPortalType(portalParam) ? portalParam : undefined);
     }
+    const isSwitch = params.get('switch') === '1';
+    setDemoSwitch(isSwitch);
+    const fromParam = params.get('from');
+    setSwitchFrom(isPortalType(fromParam) ? fromParam : null);
     setMounted(true);
   }, []);
 
@@ -78,13 +84,28 @@ export default function SignInPage() {
         ? 'Adopter Sign In'
         : 'Log In';
 
+  const switchMessage =
+    demoSwitch && portal
+      ? portal === 'shelter'
+        ? 'Switching to the shelter demo (Sam). Credentials are prefilled — sign in, change an application status, then switch back to the adopter to see that update on the tracker in real time.'
+        : 'Switching to the adopter demo (Dana). Credentials are prefilled — sign in and open the application tracker to see the shelter’s status updates in real time.'
+      : null;
+
   return (
     <main className="container mx-auto px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <div className="mx-auto max-w-md">
         <h1 className="mb-2 text-center text-3xl font-bold sm:mb-3">
           {heading}
         </h1>
-        {portal ? (
+        {switchMessage ? (
+          <div
+            className="alert alert-info mb-6 text-sm"
+            role="status"
+            data-testid="demo-switch-banner"
+          >
+            <span>{switchMessage}</span>
+          </div>
+        ) : portal ? (
           <p className="text-base-content/70 mb-6 text-center text-sm sm:mb-8">
             Exploring the other side?{' '}
             <Link href="/for-adopters" className="link link-primary">
@@ -109,6 +130,11 @@ export default function SignInPage() {
             .
           </p>
         )}
+        {switchFrom && demoSwitch && portal ? (
+          <p className="text-base-content/60 mb-4 text-center text-xs">
+            Coming from the {switchFrom} demo session.
+          </p>
+        ) : null}
 
         {!mounted ? (
           <div className="flex min-h-40 items-center justify-center">

@@ -132,9 +132,17 @@ export function restartDemoTour(role?: PortalType): void {
   );
 }
 
+/**
+ * Portal-scoped demo sign-in for the opposite role.
+ * Includes demo=1 (prefill), switch=1 (explain banner), and from= (copy).
+ */
 export function switchDemoRoleHref(current: PortalType): string {
-  const next: PortalType = current === 'adopter' ? 'shelter' : 'adopter';
-  return buildSignInHref(next, undefined, { demo: true });
+  const next = oppositePortal(current);
+  const base = buildSignInHref(next, undefined, { demo: true });
+  const params = new URLSearchParams();
+  params.set('switch', '1');
+  params.set('from', current);
+  return `${base}&${params.toString()}`;
 }
 
 export function oppositePortal(current: PortalType): PortalType {

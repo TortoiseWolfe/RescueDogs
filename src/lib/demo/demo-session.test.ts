@@ -70,9 +70,9 @@ describe('demo-session', () => {
     window.removeEventListener(DEMO_TOUR_RESTART_EVENT, handler);
   });
 
-  it('builds switch-role sign-in href with demo=1', () => {
+  it('builds switch-role sign-in href with demo=1 and switch banner params', () => {
     expect(switchDemoRoleHref('adopter')).toBe(
-      '/sign-in?portal=shelter&returnUrl=%2Fshelter&demo=1'
+      '/sign-in?portal=shelter&returnUrl=%2Fshelter&demo=1&switch=1&from=adopter'
     );
     expect(oppositePortal('shelter')).toBe('adopter');
   });
