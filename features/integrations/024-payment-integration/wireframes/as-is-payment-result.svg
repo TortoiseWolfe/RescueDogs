@@ -39,7 +39,7 @@
     <text x="556" y="392" text-anchor="end" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">Demo Product - $20.00</text>
 
     <text x="64" y="424" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#4b5563" letter-spacing="1">RECEIPT</text>
-    <text x="556" y="424" text-anchor="end" font-family="system-ui, sans-serif" font-size="14" fill="#8b5cf6">Emailed to jonpohlner@gmail.com</text>
+    <text x="556" y="424" text-anchor="end" font-family="system-ui, sans-serif" font-size="14" fill="#8b5cf6">Emailed to you@example.com</text>
 
     <line x1="64" y1="446" x2="556" y2="446" stroke="#b8a080"/>
     <text x="64" y="476" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Sent via Supabase realtime · updates automatically</text>

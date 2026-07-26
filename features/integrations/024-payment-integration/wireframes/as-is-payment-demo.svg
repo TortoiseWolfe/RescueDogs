@@ -17,7 +17,7 @@
 
     <!-- Alert banner: logged in as -->
     <rect x="40" y="148" width="1200" height="40" rx="6" fill="#c7ddf5" stroke="#3b82f6"/>
-    <text x="56" y="172" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">ℹ Logged in as: jonpohlner@gmail.com · User ID: abc123…</text>
+    <text x="56" y="172" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">ℹ Logged in as: you@example.com · User ID: abc123…</text>
 
     <!-- Step 1: GDPR -->
     <rect x="40" y="208" width="590" height="220" rx="12" fill="#dcc8a8" stroke="#b8a080"/>
