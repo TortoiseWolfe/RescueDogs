@@ -20,7 +20,7 @@ Examples:
 - `/blog/[slug]` → `as-is-blog-slug.svg`
 - `/admin/payments` → `as-is-admin-payments.svg`
 
-## The four rules
+## The five rules
 
 1. **Never invent UI.** Read the route's `page.tsx` (and 1–2 key imported
    components) before authoring. Quote real labels, real button copy, real
@@ -53,6 +53,20 @@ Examples:
    `999:<idx> | <route-title> (as-is /<route>) | RescueDogs`
    Where `<idx>` is the zero-padded route index from `scripts/route-feature-map.json`.
    `999` is outside the 000–046 feature range so it reads as the as-is namespace.
+
+5. **Never copy real account data.** Rule 1 says quote real labels — that
+   covers chrome and copy, **not** whichever account you happened to be
+   signed in as while tracing. Email addresses, usernames, display names,
+   and user IDs must be placeholders even when the screenshot in front of
+   you shows the real thing. This repo is public. Use the placeholders
+   already established across `features/**/wireframes`:
+   - Signed-in user's own address → `you@example.com`
+   - Other participants → `alice@example.com`, `ben@company.co`
+   - A bare username → `testuser`
+
+   This is not hypothetical: a maintainer's personal Gmail address reached
+   8 wireframes and 3 spec docs this way before anyone noticed, and had to
+   be scrubbed after the fact.
 
 ## Canvas layout
 
