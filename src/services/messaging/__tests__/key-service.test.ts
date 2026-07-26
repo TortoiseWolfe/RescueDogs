@@ -339,7 +339,7 @@ describe('KeyManagementService', () => {
   });
 
   describe('clearKeys', () => {
-    it('clears in-memory keys and wipes the IndexedDB table', async () => {
+    it('clears in-memory keys but retains IndexedDB (#60)', async () => {
       mockMessagingFrom.mockReturnValue(createMockQueryBuilder(null, null));
       await keyManagementService.initializeKeys('password');
       expect(keyManagementService.getCurrentKeys()).not.toBeNull();
@@ -347,7 +347,7 @@ describe('KeyManagementService', () => {
       keyManagementService.clearKeys();
 
       expect(keyManagementService.getCurrentKeys()).toBeNull();
-      expect(mockPrivateKeysClear).toHaveBeenCalled();
+      expect(mockPrivateKeysClear).not.toHaveBeenCalled();
     });
   });
 

@@ -23,7 +23,6 @@ import {
   type UserEncryptionKeyRow,
 } from '@/lib/supabase/messaging-client';
 import { encryptionService } from '@/lib/messaging/encryption';
-import { db } from '@/lib/messaging/database';
 import { KeyDerivationService } from '@/lib/messaging/key-derivation';
 import { createLogger } from '@/lib/logger';
 import type { DerivedKeyPair } from '@/types/messaging';
@@ -36,6 +35,12 @@ import {
 } from '@/types/messaging';
 
 const logger = createLogger('messaging:keys');
+
+/**
+ * Sentinel salt for passwordless device keys (#60).
+ * Distinguishes session/device ECDH keys from Argon2id-derived salts.
+ */
+export const DEVICE_KEY_SALT_MARKER = 'rp-device-key-v1';
 
 // Note: previously this module had an asNonExtractablePrivate() helper that
 // re-imported the in-memory private CryptoKey as non-extractable before
@@ -343,20 +348,155 @@ export class KeyManagementService {
   }
 
   /**
-   * Clear keys from memory and IndexedDB (call on logout). Also wipes the
-   * persisted private key so the device can no longer decrypt without the
-   * user re-deriving from password.
+   * Clear in-memory keys (call on logout). IndexedDB private keys are kept
+   * so the same browser can restore messaging without a second password (#60).
+   * Cross-device recovery remains a follow-up.
    */
   clearKeys(): void {
     this.derivedKeys = null;
-    // Fire-and-forget — caller doesn't need to await IDB clear.
-    void db.messaging_private_keys.clear().catch((err) => {
-      logger.warn('Failed to clear messaging_private_keys on logout', {
-        error: err,
-      });
-    });
     this.publicKeyCache.clear();
-    logger.debug('Keys cleared from memory and IndexedDB');
+    logger.debug('Keys cleared from memory (IndexedDB retained for #60)');
+  }
+
+  /**
+   * Ensure messaging ECDH keys are ready for this authenticated session (#60).
+   * No user-facing messaging password:
+   * 1. In-memory keys → done
+   * 2. Restore from IndexedDB → done
+   * 3. Else bootstrap passwordless device keys (revokes prior DB keys if any)
+   *
+   * Revoking when IndexedDB is empty means ciphertext from a previous device
+   * or Argon2-derived key may not decrypt — accepted for Raised Paws UX.
+   */
+  async ensureKeysForSession(userId: string): Promise<DerivedKeyPair> {
+    if (this.derivedKeys) {
+      return this.derivedKeys;
+    }
+
+    const restored = await this.restoreKeysFromCache(userId);
+    if (restored && this.derivedKeys) {
+      return this.derivedKeys;
+    }
+
+    const hasStored = await this.hasKeysForUser(userId);
+    if (hasStored) {
+      logger.info(
+        'ensureKeysForSession: DB keys exist but IndexedDB miss — rotating to device keys',
+        { userId }
+      );
+      await this.revokeKeysForUser(userId);
+    }
+
+    return this.initializeDeviceKeys(userId);
+  }
+
+  /**
+   * Passwordless ECDH key bootstrap for the current device (#60).
+   */
+  async initializeDeviceKeys(userId: string): Promise<DerivedKeyPair> {
+    const supabase = createClient();
+    const msgClient = createMessagingClient(supabase);
+
+    try {
+      const generated = await crypto.subtle.generateKey(
+        { name: 'ECDH', namedCurve: 'P-256' },
+        true,
+        ['deriveBits', 'deriveKey']
+      );
+
+      const publicKeyJwk = (await crypto.subtle.exportKey(
+        'jwk',
+        generated.publicKey
+      )) as JsonWebKey;
+      const privateJwk = (await crypto.subtle.exportKey(
+        'jwk',
+        generated.privateKey
+      )) as JsonWebKey;
+
+      const privateKey = await crypto.subtle.importKey(
+        'jwk',
+        privateJwk,
+        { name: 'ECDH', namedCurve: 'P-256' },
+        false,
+        ['deriveBits', 'deriveKey']
+      );
+      const publicKey = await crypto.subtle.importKey(
+        'jwk',
+        publicKeyJwk,
+        { name: 'ECDH', namedCurve: 'P-256' },
+        true,
+        []
+      );
+
+      const keyPair: DerivedKeyPair = {
+        privateKey,
+        publicKey,
+        publicKeyJwk,
+        salt: DEVICE_KEY_SALT_MARKER,
+      };
+
+      const { error: uploadError } = await msgClient
+        .from('user_encryption_keys')
+        .insert({
+          user_id: userId,
+          public_key:
+            keyPair.publicKeyJwk as unknown as import('@/lib/supabase/types').Json,
+          encryption_salt: keyPair.salt,
+          device_id: null,
+          expires_at: null,
+          revoked: false,
+        });
+
+      if (uploadError) {
+        throw new ConnectionError(
+          'Failed to upload device public key: ' + uploadError.message
+        );
+      }
+
+      this.derivedKeys = keyPair;
+      try {
+        await encryptionService.storePrivateKey(userId, keyPair.privateKey);
+      } catch (err) {
+        logger.warn(
+          'Could not populate IndexedDB after initializeDeviceKeys()',
+          {
+            error: err,
+          }
+        );
+      }
+
+      logger.info('Device keys initialized for user', { userId });
+      return keyPair;
+    } catch (error) {
+      if (
+        error instanceof ConnectionError ||
+        error instanceof KeyDerivationError
+      ) {
+        throw error;
+      }
+      throw new KeyDerivationError(
+        'Failed to initialize device encryption keys',
+        error
+      );
+    }
+  }
+
+  /** Revoke all active keys for a known user id (no getUser round-trip). */
+  private async revokeKeysForUser(userId: string): Promise<void> {
+    const supabase = createClient();
+    const msgClient = createMessagingClient(supabase);
+    const { error: revokeError } = await msgClient
+      .from('user_encryption_keys')
+      .update({ revoked: true })
+      .eq('user_id', userId)
+      .eq('revoked', false);
+
+    if (revokeError) {
+      throw new ConnectionError(
+        'Failed to revoke old keys: ' + revokeError.message
+      );
+    }
+    this.clearPublicKeyCache();
   }
 
   /**
