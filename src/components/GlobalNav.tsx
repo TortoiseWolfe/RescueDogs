@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { AnimatedLogo } from '@/components/atomic/AnimatedLogo';
 import { projectConfig } from '@/config/project.config';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,7 +12,21 @@ import AvatarDisplay from '@/components/atomic/AvatarDisplay';
 import { useUnreadCount } from '@/hooks/useUnreadCount';
 import { AdminAuthService } from '@/services/admin/admin-auth-service';
 import { createClient } from '@/lib/supabase/client';
-import { buildSignInHref } from '@/lib/portal/portal-preference';
+import {
+  buildSignInHref,
+  getPortalPreference,
+  setPortalPreference,
+  type PortalType,
+} from '@/lib/portal/portal-preference';
+import {
+  clearDemoMode,
+  enterDemoMode,
+  getDemoModePortal,
+  isDemoMode,
+  oppositePortal,
+  restartDemoTour,
+  switchDemoRoleHref,
+} from '@/lib/demo/demo-session';
 import {
   DEFAULT_THEME_DARK,
   DEFAULT_THEME_LIGHT,
@@ -170,11 +184,51 @@ function RoleDropdown({
 
 export function GlobalNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, signOut } = useAuth();
   const { profile } = useUserProfile();
   const unreadCount = useUnreadCount();
   const [theme, setTheme] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [demoSession, setDemoSession] = useState(false);
+
+  useEffect(() => {
+    setDemoSession(isDemoMode());
+  }, [user?.id, pathname]);
+
+  const resolveDemoPortal = (): PortalType => {
+    const fromDemo = getDemoModePortal();
+    if (fromDemo) return fromDemo;
+    const preferred = getPortalPreference();
+    if (preferred) return preferred;
+    if (pathname?.startsWith('/shelter')) return 'shelter';
+    return 'adopter';
+  };
+
+  const handleSwitchDemoRole = async () => {
+    const current = resolveDemoPortal();
+    const next = oppositePortal(current);
+    blurActiveElement();
+    enterDemoMode(next);
+    await signOut();
+    setPortalPreference(next);
+    enterDemoMode(next);
+    setDemoSession(true);
+    router.push(switchDemoRoleHref(current));
+  };
+
+  const handleRestartDemoTour = () => {
+    blurActiveElement();
+    restartDemoTour();
+    setDemoSession(true);
+  };
+
+  const handleSignOut = () => {
+    blurActiveElement();
+    clearDemoMode();
+    setDemoSession(false);
+    void signOut();
+  };
 
   useEffect(() => {
     if (!user?.id) {
@@ -383,13 +437,44 @@ export function GlobalNav() {
                       <Link href="/admin">Admin Dashboard</Link>
                     </li>
                   )}
+                  {demoSession && (
+                    <>
+                      <li>
+                        <button
+                          type="button"
+                          data-testid="switch-demo-role"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            void handleSwitchDemoRole();
+                          }}
+                        >
+                          Switch to{' '}
+                          {oppositePortal(resolveDemoPortal()) === 'shelter'
+                            ? 'shelter'
+                            : 'adopter'}{' '}
+                          demo
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          type="button"
+                          data-testid="restart-demo-tour"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleRestartDemoTour();
+                          }}
+                        >
+                          Restart demo tour
+                        </button>
+                      </li>
+                    </>
+                  )}
                   <li>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.preventDefault();
-                        blurActiveElement();
-                        void signOut();
+                        handleSignOut();
                       }}
                     >
                       Sign Out
@@ -567,14 +652,47 @@ export function GlobalNav() {
                         </Link>
                       </li>
                     )}
+                    {demoSession && (
+                      <>
+                        <li>
+                          <button
+                            type="button"
+                            className="min-h-11"
+                            data-testid="switch-demo-role-mobile"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              void handleSwitchDemoRole();
+                            }}
+                          >
+                            Switch to{' '}
+                            {oppositePortal(resolveDemoPortal()) === 'shelter'
+                              ? 'shelter'
+                              : 'adopter'}{' '}
+                            demo
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            type="button"
+                            className="min-h-11"
+                            data-testid="restart-demo-tour-mobile"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleRestartDemoTour();
+                            }}
+                          >
+                            Restart demo tour
+                          </button>
+                        </li>
+                      </>
+                    )}
                     <li>
                       <button
                         type="button"
                         className="min-h-11"
                         onClick={(e) => {
                           e.preventDefault();
-                          blurActiveElement();
-                          void signOut();
+                          handleSignOut();
                         }}
                       >
                         Sign Out
