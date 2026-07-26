@@ -16,6 +16,7 @@ import {
   type PortalType,
 } from '@/lib/portal/portal-preference';
 import { resolvePostLoginPath } from '@/lib/portal/resolve-post-login-path';
+import { enterDemoMode } from '@/lib/demo/demo-session';
 
 function isSafeRedirectUrl(url: string): boolean {
   if (!url || !url.startsWith('/')) return false;
@@ -59,7 +60,11 @@ export default function SignInPage() {
       portalRef.current = portalParam;
       setPortalPreference(portalParam);
     }
-    setDemoPrefill(params.get('demo') === '1');
+    const isDemo = params.get('demo') === '1';
+    setDemoPrefill(isDemo);
+    if (isDemo) {
+      enterDemoMode(isPortalType(portalParam) ? portalParam : undefined);
+    }
     setMounted(true);
   }, []);
 

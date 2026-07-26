@@ -10,6 +10,7 @@ import {
   isPortalType,
   type PortalAuthIntent,
 } from '@/lib/portal/portal-preference';
+import { enterDemoMode } from '@/lib/demo/demo-session';
 
 function isSafeReturnUrl(url: string): boolean {
   if (!url || !url.startsWith('/')) return false;
@@ -38,6 +39,9 @@ export default function GetStartedPage() {
     const force = params.get('choose') === '1';
     const isDemo = params.get('demo') === '1';
     setDemoMode(isDemo);
+    if (isDemo) {
+      enterDemoMode();
+    }
     const intentParam = params.get('intent');
     const nextIntent: PortalAuthIntent =
       intentParam === 'signup' || intentParam === 'sign-up'
