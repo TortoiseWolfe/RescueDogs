@@ -526,6 +526,126 @@ export class ConnectionService {
   }
 
   /**
+   * Ensure an accepted connection exists with another user (issue #72).
+   *
+   * Used when shelter staff message an applicant from the pipeline: RLS requires
+   * an accepted `user_connections` row before conversations can be created, but
+   * staff should not hunt by display_name or send a friend request.
+   *
+   * - Already accepted → no-op
+   * - Pending where current user is addressee → accept
+   * - Pending where current user is requester → cancel and insert accepted
+   * - Blocked / declined → ConnectionError (cannot auto-link)
+   * - None → insert accepted as requester
+   */
+  async ensureAcceptedConnection(otherUserId: string): Promise<void> {
+    const supabase = createClient();
+    const msgClient = createMessagingClient(supabase);
+
+    validateUUID(otherUserId, 'otherUserId');
+
+    const { user, error: authError } =
+      await this.getAuthenticatedUser(supabase);
+
+    if (authError || !user) {
+      throw new AuthenticationError(
+        'You must be signed in to start a conversation'
+      );
+    }
+
+    if (otherUserId === user.id) {
+      throw new ValidationError(
+        'You cannot start a conversation with yourself',
+        'otherUserId'
+      );
+    }
+
+    const { data: existingRows } = await msgClient
+      .from('user_connections')
+      .select('*')
+      .or(
+        `and(requester_id.eq.${user.id},addressee_id.eq.${otherUserId}),and(requester_id.eq.${otherUserId},addressee_id.eq.${user.id})`
+      )
+      .limit(1);
+
+    const existing = (existingRows as UserConnectionRow[] | null)?.[0];
+
+    if (existing?.status === 'accepted') {
+      return;
+    }
+
+    if (existing?.status === 'pending') {
+      if (existing.addressee_id === user.id) {
+        await this.respondToRequest({
+          connection_id: existing.id,
+          action: 'accept',
+        });
+        return;
+      }
+      // Requester cannot UPDATE status (addressee-only RLS) — cancel pending
+      // then insert an accepted link.
+      if (existing.requester_id === user.id) {
+        const { error: deleteError } = await msgClient
+          .from('user_connections')
+          .delete()
+          .eq('id', existing.id);
+        if (deleteError) {
+          throw new ConnectionError(
+            'Failed to replace pending connection: ' + deleteError.message
+          );
+        }
+      }
+    } else if (
+      existing?.status === 'blocked' ||
+      existing?.status === 'declined'
+    ) {
+      throw new ConnectionError('Cannot message this user');
+    }
+
+    const insertData: UserConnectionInsert = {
+      requester_id: user.id,
+      addressee_id: otherUserId,
+      status: 'accepted',
+    };
+
+    const { error: insertError } = await (msgClient as any)
+      .from('user_connections')
+      .insert(insertData);
+
+    if (insertError) {
+      // Race: peer may have accepted/created in parallel — verify accepted exists
+      const { data: retryRows } = await msgClient
+        .from('user_connections')
+        .select('status')
+        .or(
+          `and(requester_id.eq.${user.id},addressee_id.eq.${otherUserId}),and(requester_id.eq.${otherUserId},addressee_id.eq.${user.id})`
+        )
+        .eq('status', 'accepted')
+        .limit(1);
+
+      if (
+        retryRows &&
+        (retryRows as Pick<UserConnectionRow, 'status'>[]).length > 0
+      ) {
+        return;
+      }
+
+      throw new ConnectionError(
+        'Failed to create connection: ' + insertError.message
+      );
+    }
+  }
+
+  /**
+   * Auto-link (accepted connection) then get or create a 1:1 conversation.
+   * Primary path for shelter staff → applicant Message CTA (#72).
+   */
+  async startConversationWithUser(otherUserId: string): Promise<string> {
+    await this.ensureAcceptedConnection(otherUserId);
+    return this.getOrCreateConversation(otherUserId);
+  }
+
+  /**
    * Get existing conversation or create a new one between current user and another user.
    * Task: T003 - Feature 037 Unified Messaging Sidebar
    *
