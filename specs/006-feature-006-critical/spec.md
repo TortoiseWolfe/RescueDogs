@@ -103,7 +103,7 @@ As a user viewing a conversation, I need to see the other participant's username
 
 **Acceptance Scenarios**:
 
-1. **Given** a conversation with user "jonpohlner", **When** viewing the conversation, **Then** the header shows "jonpohlner" (or their display_name), not "Unknown"
+1. **Given** a conversation with user "testuser", **When** viewing the conversation, **Then** the header shows "testuser" (or their display_name), not "Unknown"
 2. **Given** the other participant has a display_name set, **When** viewing conversation, **Then** display_name is shown (preferred over username)
 3. **Given** the other participant's account was deleted (profile query returns null AND user exists in auth.users with deleted_at set), **When** viewing conversation, **Then** show "Deleted User" (explicit, not "Unknown")
 

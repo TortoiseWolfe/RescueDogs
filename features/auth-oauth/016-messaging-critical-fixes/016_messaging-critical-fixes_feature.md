@@ -77,7 +77,7 @@ As a user viewing a conversation, I need to see the participant's actual name, n
 
 **Acceptance Criteria**:
 
-1. Given a conversation with user "jonpohlner", when viewing, then header shows "jonpohlner", not "Unknown"
+1. Given a conversation with user "testuser", when viewing, then header shows "testuser", not "Unknown"
 2. Given participant has display_name set, when viewing, then display_name is shown (preferred over username)
 3. Given participant's account was deleted, when viewing, then show "Deleted User" (explicit, not "Unknown")
 

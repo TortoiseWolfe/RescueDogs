@@ -31,7 +31,7 @@
 
     <text x="200" y="276" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#4b5563" letter-spacing="1">EMAIL</text>
     <rect x="200" y="288" width="900" height="48" rx="4" fill="#f5f0e6" stroke="#b8a080"/>
-    <text x="216" y="316" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">jonpohlner@gmail.com  <tspan fill="#22c55e">● verified</tspan></text>
+    <text x="216" y="316" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">you@example.com  <tspan fill="#22c55e">● verified</tspan></text>
     <rect x="980" y="296" width="104" height="32" rx="4" fill="#f5f0e6" stroke="#8b5cf6"/>
     <text x="1032" y="316" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#8b5cf6" font-weight="600">Change</text>
 
@@ -70,7 +70,7 @@
 
     <text x="20" y="232" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#4b5563" letter-spacing="1">EMAIL</text>
     <rect x="16" y="242" width="328" height="40" rx="4" fill="#f5f0e6" stroke="#b8a080"/>
-    <text x="28" y="267" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">jonpohlner@gmail.com ✓</text>
+    <text x="28" y="267" font-family="system-ui, sans-serif" font-size="14" fill="#1f2937">you@example.com ✓</text>
 
     <text x="20" y="304" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#4b5563" letter-spacing="1">PASSWORD</text>
     <rect x="16" y="314" width="328" height="40" rx="4" fill="#f5f0e6" stroke="#b8a080"/>

@@ -28,7 +28,7 @@
     <!-- Hidden username (shown for password managers) -->
     <text x="408" y="276" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#4b5563" letter-spacing="1">ACCOUNT</text>
     <rect x="408" y="286" width="464" height="40" rx="4" fill="#f5f0e6" stroke="#b8a080"/>
-    <text x="424" y="311" font-family="system-ui, sans-serif" font-size="14" fill="#374151">jonpohlner@gmail.com</text>
+    <text x="424" y="311" font-family="system-ui, sans-serif" font-size="14" fill="#374151">you@example.com</text>
 
     <!-- Password -->
     <text x="408" y="346" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#4b5563" letter-spacing="1">MESSAGING PASSWORD</text>
@@ -70,7 +70,7 @@
 
     <text x="16" y="258" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#4b5563" letter-spacing="1">ACCOUNT</text>
     <rect x="16" y="266" width="328" height="40" rx="4" fill="#f5f0e6" stroke="#b8a080"/>
-    <text x="28" y="291" font-family="system-ui, sans-serif" font-size="14" fill="#374151">jonpohlner@gmail.com</text>
+    <text x="28" y="291" font-family="system-ui, sans-serif" font-size="14" fill="#374151">you@example.com</text>
 
     <text x="16" y="328" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#4b5563" letter-spacing="1">MSG PASSWORD</text>
     <rect x="16" y="336" width="328" height="40" rx="4" fill="#f5f0e6" stroke="#b8a080"/>
