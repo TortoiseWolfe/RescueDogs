@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { AnimatedLogo } from '@/components/atomic/AnimatedLogo';
 import { projectConfig } from '@/config/project.config';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +15,6 @@ import { createClient } from '@/lib/supabase/client';
 import {
   buildSignInHref,
   getPortalPreference,
-  setPortalPreference,
   type PortalType,
 } from '@/lib/portal/portal-preference';
 import {
@@ -184,7 +183,6 @@ function RoleDropdown({
 
 export function GlobalNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const { user, signOut } = useAuth();
   const { profile } = useUserProfile();
   const unreadCount = useUnreadCount();
@@ -208,13 +206,12 @@ export function GlobalNav() {
   const handleSwitchDemoRole = async () => {
     const current = resolveDemoPortal();
     const next = oppositePortal(current);
+    const href = switchDemoRoleHref(current);
     blurActiveElement();
+    // Keep demo mode across hard redirect; signOut clears portal preference
+    // but the destination URL carries portal= + demo=1 + switch=1.
     enterDemoMode(next);
-    await signOut();
-    setPortalPreference(next);
-    enterDemoMode(next);
-    setDemoSession(true);
-    router.push(switchDemoRoleHref(current));
+    await signOut({ redirectTo: href });
   };
 
   const handleRestartDemoTour = () => {

@@ -1,8 +1,19 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import DemoTour from './DemoTour';
 import { enterDemoMode } from '@/lib/demo/demo-session';
+
+vi.mock('next/navigation', () => ({
+  usePathname: vi.fn(() => '/applications'),
+}));
+
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({
+    signOut: vi.fn(),
+    user: { id: 'demo-user' },
+  }),
+}));
 
 expect.extend(toHaveNoViolations);
 
@@ -34,7 +45,7 @@ describe('DemoTour Accessibility', () => {
       />
     );
     const region = container.querySelector('[data-testid="demo-tour"]');
-    expect(region).toHaveAttribute('aria-labelledby');
+    expect(region).toHaveAttribute('aria-label');
 
     const focusableElements = container.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'

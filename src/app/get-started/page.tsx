@@ -94,7 +94,7 @@ export default function GetStartedPage() {
           {intent === 'sign-up'
             ? 'Pick adopter or shelter so we can send you to the right sign-up.'
             : demoMode
-              ? 'Pick a door. The next screen is prefilled with the shared demo login.'
+              ? 'Two shared logins, one story: sign in as the adopter and open an application tracker, switch to the shelter and change that status, then switch back — you’ll see the shelter’s update on the adopter pages in real time. Pick a door; credentials are prefilled on the next screen.'
               : 'Jump into adopter or shelter. Day-to-day, start from For Adopters / For Shelters on the homepage.'}
         </p>
       </div>

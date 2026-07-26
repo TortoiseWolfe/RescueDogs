@@ -108,8 +108,9 @@ export default function PortalChooser({
 
       {showDemoHints ? (
         <p className="text-base-content/80 mt-8 text-center text-sm sm:text-base">
-          We&apos;ll fill in the shared demo login on the next screen — then
-          just Sign In.
+          We&apos;ll fill in the shared demo login on the next screen. Try
+          adopter first, then switch to shelter to change a status, then back to
+          adopter — shelter updates show on the adopter pages in real time.
         </p>
       ) : null}
     </div>
