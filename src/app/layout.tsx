@@ -21,6 +21,7 @@ import {
 import PWAInstall from '@/components/PWAInstall';
 import { CountdownBanner } from '@/components/atomic/CountdownBanner';
 import { SetupBanner } from '@/components/SetupBanner';
+import DemoTour from '@/components/organisms/DemoTour';
 import A11yDevOverlay from '@/components/organisms/A11yDevOverlay';
 
 const nunito = Nunito({
@@ -162,6 +163,7 @@ export default function RootLayout({
           <AuthProvider>
             <AccessibilityProvider>
               <GlobalNav />
+              <DemoTour />
               <CountdownBanner />
               <SetupBanner />
               <ErrorBoundary level="page">

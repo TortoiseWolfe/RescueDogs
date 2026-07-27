@@ -40,6 +40,7 @@ describe('PortalChooser', () => {
     expect(
       screen.getByText(/we'll fill in the shared demo login/i)
     ).toBeInTheDocument();
+    expect(screen.getByText(/in real time/i)).toBeInTheDocument();
     expect(screen.queryByText('staff@demo.test')).not.toBeInTheDocument();
     expect(screen.queryByText('DemoPass123!')).not.toBeInTheDocument();
   });

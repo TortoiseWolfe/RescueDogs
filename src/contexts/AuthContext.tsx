@@ -98,7 +98,11 @@ export interface AuthState {
 export interface AuthContextType extends AuthState {
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signOut: () => Promise<void>;
+  /**
+   * Sign out and hard-navigate. Pass `redirectTo` (same-origin path) to land
+   * somewhere other than `/` — used by demo role switch (#68).
+   */
+  signOut: (options?: { redirectTo?: string }) => Promise<void>;
   refreshSession: () => Promise<void>;
   retry: () => Promise<void>;
   clearError: () => void;
@@ -309,7 +313,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const signOut = useCallback(async () => {
+  const signOut = useCallback(async (options?: { redirectTo?: string }) => {
     // Mark as local sign-out to prevent double redirect from onAuthStateChange
     isLocalSignOut.current = true;
 
@@ -336,8 +340,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAllowAuthTokenRemoval(false);
     }
 
-    // FR-005: Force page reload to clear any stale React state
-    window.location.href = getInternalUrl('/');
+    // FR-005: Force page reload to clear any stale React state.
+    // Optional redirectTo keeps demo role-switch on the prefilled portal
+    // sign-in (#68) instead of dumping visitors on the generic homepage.
+    const raw = options?.redirectTo;
+    const redirectTo =
+      raw &&
+      raw.startsWith('/') &&
+      !raw.startsWith('//') &&
+      !raw.startsWith('/\\')
+        ? raw
+        : '/';
+    window.location.href = getInternalUrl(redirectTo);
   }, []);
 
   const refreshSession = useCallback(async () => {
