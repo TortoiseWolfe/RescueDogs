@@ -79,6 +79,8 @@ export interface Shelter {
   name: string;
   city: string | null;
   state: string | null;
+  /** Postal code for browse location filters (#110/#111). */
+  zip: string | null;
   contact_email: string | null;
   created_at: string;
 }

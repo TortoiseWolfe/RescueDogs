@@ -183,6 +183,30 @@ Paws is the system of record for new intake and live status; we do not pull old
 applications out of their existing systems. Supplemental shelter PDFs or forms
 can remain, but status tracking lives in our pipeline.
 
+### Pet photos & location
+
+**Storage (locked for v1):** Supabase Storage bucket `pet-photos` — public read,
+shelter-staff write under `{shelter_id}/…`. Do **not** introduce UploadThing,
+AWS S3, Uploadcare, GitHub LFS, or Nextcloud as the primary store while we are
+on static GitHub Pages + one Supabase project. Uppy (or similar) as a client
+widget that still uploads to Supabase is fine later if staff need a richer
+uploader.
+
+**Tie photo ↔ pet:** `pets.photo_url` holds the public URL. The pet row is the
+source of truth — not a separate gallery table in v1. Multi-photo can add a
+`pet_photos` table later without changing this primary URL.
+
+**Location for browse filters:** on **`shelters`** (`city`, `state`, `zip`).
+Pets inherit location via `shelter_id`. Do **not** denormalize state/zip onto
+every pet unless we later need foster-home overrides. Exact zip / state filters
+join `pets` → `shelters` (#111). Radius / map search is deferred.
+
+**Near-term tickets:** staff add/edit + photo (#110) → public `/dogs` `/cats`
+listings (#112) → state/zip filters (#111).
+
+**Deferred (no tickets yet):** bulk spreadsheet / Petfinder import, multi-photo
+galleries, foster zip overrides, geo/radius, migrating storage vendors.
+
 ### Universal application vs shelter-specific forms
 
 Shelters often already have their own applications. That is expected. RescueDogs
