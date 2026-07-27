@@ -2881,10 +2881,14 @@ ALTER TABLE adopter_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE application_status_history ENABLE ROW LEVEL SECURITY;
 
--- shelters: read-only reference data (seeded via service role)
+-- shelters: reference data — authenticated full read; public for browse location (#112)
 DROP POLICY IF EXISTS "Authenticated users can view shelters" ON shelters;
 CREATE POLICY "Authenticated users can view shelters" ON shelters
   FOR SELECT TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "Public can view shelters" ON shelters;
+CREATE POLICY "Public can view shelters" ON shelters
+  FOR SELECT TO anon USING (true);
 
 -- shelter_members: users see own memberships (powers ShelterGate)
 DROP POLICY IF EXISTS "Users can view own shelter memberships" ON shelter_members;
@@ -2895,6 +2899,13 @@ CREATE POLICY "Users can view own shelter memberships" ON shelter_members
 DROP POLICY IF EXISTS "Authenticated users can view pets" ON pets;
 CREATE POLICY "Authenticated users can view pets" ON pets
   FOR SELECT TO authenticated USING (true);
+
+-- pets: public browse of available animals only (#112)
+DROP POLICY IF EXISTS "Public can view available pets" ON pets;
+CREATE POLICY "Public can view available pets" ON pets
+  FOR SELECT TO anon
+  USING (status = 'available');
+
 
 -- pets: shelter staff manage their shelter's animals (#110)
 DROP POLICY IF EXISTS "Shelter staff insert pets" ON pets;

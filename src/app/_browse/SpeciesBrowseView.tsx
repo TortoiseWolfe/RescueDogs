@@ -1,6 +1,18 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase/client';
+import { ApplicationService } from '@/services/applications';
+import type { BrowsePet, PetSpecies } from '@/types/applications';
+import { basicsLabel, locationLabel } from './browse-labels';
 
 export type SpeciesBrowseKind = 'dogs' | 'cats';
+
+const SPECIES_DB: Record<SpeciesBrowseKind, PetSpecies> = {
+  dogs: 'dog',
+  cats: 'cat',
+};
 
 const COPY: Record<
   SpeciesBrowseKind,
@@ -12,35 +24,38 @@ const COPY: Record<
     emptyBody: string;
     otherHref: string;
     otherLabel: string;
+    listHeading: string;
   }
 > = {
   dogs: {
     title: 'Browse dogs',
     emoji: '🐶',
     description:
-      'Meet dogs available for adoption. Real shelter listings will show up here as partners join Raised Paws.',
+      'Meet dogs available for adoption from partner shelters on Raised Paws.',
     emptyHeading: 'No dogs listed yet',
     emptyBody:
-      'We are building the browse experience first. When shelters add dogs, you will find them on this page — with filters coming later.',
+      'When shelters add available dogs, you will find them here. Filters for location and traits are coming later.',
     otherHref: '/cats',
     otherLabel: 'Browse cats',
+    listHeading: 'Dogs available now',
   },
   cats: {
     title: 'Browse cats',
     emoji: '🐱',
     description:
-      'Meet cats available for adoption. Real shelter listings will show up here as partners join Raised Paws.',
+      'Meet cats available for adoption from partner shelters on Raised Paws.',
     emptyHeading: 'No cats listed yet',
     emptyBody:
-      'We are building the browse experience first. When shelters add cats, you will find them on this page — with filters coming later.',
+      'When shelters add available cats, you will find them here. Filters for location and traits are coming later.',
     otherHref: '/dogs',
     otherLabel: 'Browse dogs',
+    listHeading: 'Cats available now',
   },
 };
 
 /**
- * Shared empty-state browse chrome for /dogs and /cats (#91).
- * Not a Storybook component — app-local presentational helper.
+ * Shared browse chrome for /dogs and /cats (#112).
+ * Lists available pets from Supabase; empty state when none.
  */
 export default function SpeciesBrowseView({
   species,
@@ -48,6 +63,32 @@ export default function SpeciesBrowseView({
   species: SpeciesBrowseKind;
 }) {
   const copy = COPY[species];
+  const [pets, setPets] = useState<BrowsePet[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const service = new ApplicationService(supabase);
+        const rows = await service.getBrowsePets(SPECIES_DB[species]);
+        if (cancelled) return;
+        setPets(rows);
+        setError(null);
+      } catch {
+        if (!cancelled) {
+          setError('Could not load pets. Please try again.');
+          setPets([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [species]);
 
   return (
     <main className="bg-base-100 min-h-full">
@@ -82,33 +123,98 @@ export default function SpeciesBrowseView({
 
       <section
         className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"
-        aria-labelledby="species-empty-heading"
+        aria-labelledby="species-browse-heading"
       >
-        <div className="card bg-base-200">
-          <div className="card-body items-center gap-4 text-center">
-            <h2
-              id="species-empty-heading"
-              className="font-display card-title text-2xl"
-            >
-              {copy.emptyHeading}
-            </h2>
-            <p className="text-base-content/80 max-w-md">{copy.emptyBody}</p>
-            <p className="text-base-content/70 max-w-md text-sm">
-              Prefer a guided tour with demo data?{' '}
-              <Link
-                href="/get-started?demo=1&choose=1"
-                className="link link-primary"
-              >
-                Try the demo
-              </Link>{' '}
-              or meet a few sample pets on the{' '}
-              <Link href="/#meet-pets-heading" className="link link-primary">
-                homepage
-              </Link>
-              .
-            </p>
+        <h2 id="species-browse-heading" className="sr-only">
+          {copy.listHeading}
+        </h2>
+
+        {loading && (
+          <div className="flex min-h-[30vh] items-center justify-center">
+            <span className="loading loading-spinner loading-lg" />
           </div>
-        </div>
+        )}
+
+        {!loading && error && (
+          <div role="alert" className="alert alert-error">
+            <span>{error}</span>
+          </div>
+        )}
+
+        {!loading && !error && pets.length === 0 && (
+          <div className="card bg-base-200">
+            <div className="card-body items-center gap-4 text-center">
+              <h2 className="font-display card-title text-2xl">
+                {copy.emptyHeading}
+              </h2>
+              <p className="text-base-content/80 max-w-md">{copy.emptyBody}</p>
+              <p className="text-base-content/70 max-w-md text-sm">
+                Prefer a guided tour with demo data?{' '}
+                <Link
+                  href="/get-started?demo=1&choose=1"
+                  className="link link-primary"
+                >
+                  Try the demo
+                </Link>{' '}
+                or meet a few sample pets on the{' '}
+                <Link href="/#meet-pets-heading" className="link link-primary">
+                  homepage
+                </Link>
+                .
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && pets.length > 0 && (
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {pets.map((pet) => {
+              const place = locationLabel(pet);
+              return (
+                <li key={pet.id}>
+                  <article className="card bg-base-200 h-full shadow-sm">
+                    <figure className="bg-base-300 aspect-[4/3] overflow-hidden">
+                      {pet.photo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={pet.photo_url}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className="text-base-content/40 flex h-full w-full items-center justify-center text-sm"
+                          aria-hidden
+                        >
+                          No photo yet
+                        </div>
+                      )}
+                    </figure>
+                    <div className="card-body gap-3">
+                      <h3 className="card-title font-display text-xl">
+                        {pet.name}
+                      </h3>
+                      <p className="text-base-content/80 text-sm">
+                        {basicsLabel(pet)}
+                      </p>
+                      {place && (
+                        <p className="text-base-content/60 text-sm">{place}</p>
+                      )}
+                      <div className="card-actions mt-auto">
+                        <Link
+                          href={`/adopt?pet=${pet.id}`}
+                          className="btn btn-primary min-h-11 w-full sm:w-auto"
+                        >
+                          Apply for {pet.name}
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
     </main>
   );
