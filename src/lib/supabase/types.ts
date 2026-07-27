@@ -822,6 +822,7 @@ export type Database = {
           id: string;
           name: string;
           state: string | null;
+          zip: string | null;
         };
         Insert: {
           city?: string | null;
@@ -830,6 +831,7 @@ export type Database = {
           id?: string;
           name: string;
           state?: string | null;
+          zip?: string | null;
         };
         Update: {
           city?: string | null;
@@ -838,6 +840,7 @@ export type Database = {
           id?: string;
           name?: string;
           state?: string | null;
+          zip?: string | null;
         };
         Relationships: [];
       };
