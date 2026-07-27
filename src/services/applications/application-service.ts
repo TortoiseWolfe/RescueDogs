@@ -6,7 +6,9 @@ import type {
   Application,
   ApplicationWithPet,
   ApplicationWithPetAndHistory,
+  BrowsePet,
   Pet,
+  PetSpecies,
   ProfileSnapshot,
 } from '@/types/applications';
 
@@ -34,15 +36,39 @@ export class ApplicationService {
   }
 
   /** Pets that can be applied for (status = 'available'). */
-  async getAvailablePets(): Promise<Pet[]> {
-    const { data, error } = await this.supabase
+  async getAvailablePets(species?: PetSpecies): Promise<Pet[]> {
+    let query = this.supabase
       .from('pets')
       .select('*')
-      .eq('status', 'available')
-      .order('name');
+      .eq('status', 'available');
+
+    if (species) {
+      query = query.eq('species', species);
+    }
+
+    const { data, error } = await query.order('name');
 
     if (error) throw error;
     return (data ?? []) as Pet[];
+  }
+
+  /**
+   * Public browse list (#112): available pets for one species, with shelter
+   * city/state when the embed is allowed by RLS.
+   */
+  async getBrowsePets(species: PetSpecies): Promise<BrowsePet[]> {
+    const { data, error } = await this.supabase
+      .from('pets')
+      .select(
+        'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, created_at, shelters(name, city, state)'
+      )
+      .eq('status', 'available')
+      .eq('species', species)
+      .order('name');
+
+    if (error) throw error;
+    // Generated Database types treat FK embeds as arrays; PostgREST returns an object.
+    return (data ?? []) as unknown as BrowsePet[];
   }
 
   /** The user's saved universal-application answers, if any. */
