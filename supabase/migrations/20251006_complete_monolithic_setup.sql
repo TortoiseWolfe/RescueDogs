@@ -564,6 +564,24 @@ VALUES (
 )
 ON CONFLICT (id) DO NOTHING;                         -- Idempotent
 
+-- Pet photos bucket (#110) — public read; staff write policies live with
+-- rescue RLS (after is_shelter_staff exists) so initdb ordering stays safe.
+INSERT INTO storage.buckets (
+  id,
+  name,
+  public,
+  file_size_limit,
+  allowed_mime_types
+)
+VALUES (
+  'pet-photos',
+  'pet-photos',
+  true,
+  5242880,
+  ARRAY['image/jpeg', 'image/png', 'image/webp']
+)
+ON CONFLICT (id) DO NOTHING;
+
 -- Drop existing avatar policies (for clean re-run)
 DROP POLICY IF EXISTS "Users can upload own avatar" ON storage.objects;
 DROP POLICY IF EXISTS "Users can update own avatar" ON storage.objects;
@@ -2557,11 +2575,23 @@ CREATE TABLE IF NOT EXISTS shelters (
   name TEXT NOT NULL CHECK (length(name) >= 2 AND length(name) <= 120),
   city TEXT CHECK (length(city) <= 100),
   state TEXT CHECK (length(state) <= 50),
+  zip TEXT CHECK (length(zip) <= 20),
   contact_email TEXT CHECK (length(contact_email) <= 255),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Idempotent for databases created before zip existed (#110)
+ALTER TABLE shelters ADD COLUMN IF NOT EXISTS zip TEXT;
+DO $$
+BEGIN
+  ALTER TABLE shelters ADD CONSTRAINT shelters_zip_length
+    CHECK (zip IS NULL OR length(zip) <= 20);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
 COMMENT ON TABLE shelters IS 'Rescue organizations; MVP seeds exactly one (Second Chance Rescue)';
+COMMENT ON COLUMN shelters.zip IS 'Postal code for browse location filters; pets inherit via shelter_id (#110/#111)';
 
 CREATE TABLE IF NOT EXISTS shelter_members (
   shelter_id UUID NOT NULL REFERENCES shelters(id) ON DELETE CASCADE,
@@ -2865,6 +2895,53 @@ CREATE POLICY "Users can view own shelter memberships" ON shelter_members
 DROP POLICY IF EXISTS "Authenticated users can view pets" ON pets;
 CREATE POLICY "Authenticated users can view pets" ON pets
   FOR SELECT TO authenticated USING (true);
+
+-- pets: shelter staff manage their shelter's animals (#110)
+DROP POLICY IF EXISTS "Shelter staff insert pets" ON pets;
+CREATE POLICY "Shelter staff insert pets" ON pets
+  FOR INSERT TO authenticated
+  WITH CHECK (is_shelter_staff(shelter_id));
+
+DROP POLICY IF EXISTS "Shelter staff update pets" ON pets;
+CREATE POLICY "Shelter staff update pets" ON pets
+  FOR UPDATE TO authenticated
+  USING (is_shelter_staff(shelter_id))
+  WITH CHECK (is_shelter_staff(shelter_id));
+
+-- pet-photos storage: first path segment = shelter_id (#110)
+-- Uses split_part (not storage.foldername) — same rationale as avatars.
+DROP POLICY IF EXISTS "Shelter staff upload pet photos" ON storage.objects;
+CREATE POLICY "Shelter staff upload pet photos"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+  bucket_id = 'pet-photos' AND
+  is_shelter_staff(split_part(name, '/', 1)::uuid)
+);
+
+DROP POLICY IF EXISTS "Shelter staff update pet photos" ON storage.objects;
+CREATE POLICY "Shelter staff update pet photos"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+  bucket_id = 'pet-photos' AND
+  is_shelter_staff(split_part(name, '/', 1)::uuid)
+);
+
+DROP POLICY IF EXISTS "Shelter staff delete pet photos" ON storage.objects;
+CREATE POLICY "Shelter staff delete pet photos"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'pet-photos' AND
+  is_shelter_staff(split_part(name, '/', 1)::uuid)
+);
+
+DROP POLICY IF EXISTS "Anyone can view pet photos" ON storage.objects;
+CREATE POLICY "Anyone can view pet photos"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'pet-photos');
 
 -- adopter_profiles: strictly own-row; shelter staff never read it
 -- (they see applications.profile_snapshot instead — Principle III)
