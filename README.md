@@ -25,9 +25,12 @@ product. Once one real shelter runs apply → status → tracker end-to-end, dem
 becomes optional walkthrough chrome.
 
 **Real pets.** Schema for shelters, pets, applications, and status history
-already exists. Getting real animals in is mostly ops: claim a shelter, add
-staff, insert currently available pets (manual or one-time import), then run
-one real application. Browse polish and Petfinder-class sync come later.
+already exists. Near-term: staff add/edit pets with one photo in Supabase
+Storage (`pet-photos`), and location for filters on the shelter (`state` +
+`zip`) — see [Pet photos & location](./docs/product/VISION.md#pet-photos--location)
+in VISION. Browse listing (#112) and state/zip filters (#111) follow. Bulk
+import / Petfinder sync come later and reuse the same pet row + photo URL
+pattern.
 
 **Where applications live.** For partner shelters, **Raised Paws is the system
 of record** for intake, pipeline, and status — not a link-out to their Google

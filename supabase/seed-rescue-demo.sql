@@ -18,10 +18,11 @@ BEGIN;
 -- 1. SHELTER
 -- ============================================================================
 
-INSERT INTO shelters (id, name, city, state, contact_email) VALUES
+INSERT INTO shelters (id, name, city, state, zip, contact_email) VALUES
   ('22222222-2222-2222-2222-222222222201',
-   'Second Chance Rescue', 'Asheville', 'NC', 'hello@secondchance.demo')
-ON CONFLICT (id) DO NOTHING;
+   'Second Chance Rescue', 'Asheville', 'NC', '28801', 'hello@secondchance.demo')
+ON CONFLICT (id) DO UPDATE
+  SET zip = COALESCE(shelters.zip, EXCLUDED.zip);
 
 -- ============================================================================
 -- 2. DEMO USERS (same auth.users INSERT pattern as seed-admin-demo.sql)

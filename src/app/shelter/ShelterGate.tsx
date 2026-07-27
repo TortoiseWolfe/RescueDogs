@@ -146,9 +146,22 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
             {effectiveMembership.shelterName}
           </h1>
           <p className="text-sm opacity-70">
-            Application pipeline — signed in as shelter{' '}
-            {effectiveMembership.role}
+            Signed in as shelter {effectiveMembership.role}
           </p>
+          <nav
+            className="mt-4 flex flex-wrap gap-2"
+            aria-label="Shelter sections"
+          >
+            <Link href="/shelter" className="btn btn-sm btn-ghost min-h-11">
+              Applications
+            </Link>
+            <Link
+              href="/shelter/pets"
+              className="btn btn-sm btn-ghost min-h-11"
+            >
+              Pets
+            </Link>
+          </nav>
         </header>
         {children}
       </div>
