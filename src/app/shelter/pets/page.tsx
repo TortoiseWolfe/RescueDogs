@@ -91,7 +91,7 @@ export default function ShelterPetsPage() {
                 </p>
               </div>
               <Link
-                href={`/shelter/pets/${pet.id}/edit`}
+                href={`/shelter/pets/edit?id=${pet.id}`}
                 className="btn btn-sm btn-ghost min-h-11"
               >
                 Edit

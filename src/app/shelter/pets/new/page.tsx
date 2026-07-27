@@ -58,7 +58,7 @@ export default function NewShelterPetPage() {
             `Pet saved, but photo failed: ${uploaded.error}. You can edit to retry.`
           );
           setSaving(false);
-          router.push(`/shelter/pets/${pet.id}/edit`);
+          router.push(`/shelter/pets/edit?id=${pet.id}`);
           return;
         }
         await service.updatePet(pet.id, { photo_url: uploaded.url });
