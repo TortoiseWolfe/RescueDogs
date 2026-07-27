@@ -113,6 +113,15 @@ export interface Pet {
   created_at: string;
 }
 
+/** Available pet row for public /dogs and /cats browse (#112). */
+export interface BrowsePet extends Pet {
+  shelters: {
+    name: string;
+    city: string | null;
+    state: string | null;
+  } | null;
+}
+
 export type HousingType =
   | 'own_house'
   | 'own_condo'

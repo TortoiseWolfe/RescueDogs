@@ -69,6 +69,40 @@ describe('ApplicationService', () => {
     expect(result).toEqual(pets);
   });
 
+  it('getAvailablePets can filter by species', async () => {
+    const builder = createQueryBuilder({ data: [], error: null });
+    mock.from.mockReturnValue(builder);
+
+    await service.getAvailablePets('cat');
+
+    expect(builder.eq).toHaveBeenCalledWith('status', 'available');
+    expect(builder.eq).toHaveBeenCalledWith('species', 'cat');
+  });
+
+  it('getBrowsePets filters available pets by species with shelter embed', async () => {
+    const pets = [
+      {
+        id: PET_ID,
+        name: 'Miso',
+        species: 'cat',
+        status: 'available',
+        shelters: { name: 'Second Chance', city: 'Asheville', state: 'NC' },
+      },
+    ];
+    const builder = createQueryBuilder({ data: pets, error: null });
+    mock.from.mockReturnValue(builder);
+
+    const result = await service.getBrowsePets('cat');
+
+    expect(mock.from).toHaveBeenCalledWith('pets');
+    expect(builder.select).toHaveBeenCalledWith(
+      expect.stringContaining('shelters(name, city, state)')
+    );
+    expect(builder.eq).toHaveBeenCalledWith('status', 'available');
+    expect(builder.eq).toHaveBeenCalledWith('species', 'cat');
+    expect(result).toEqual(pets);
+  });
+
   it('getAdopterProfile returns null when no profile exists', async () => {
     const builder = createQueryBuilder({ data: null, error: null });
     mock.from.mockReturnValue(builder);
