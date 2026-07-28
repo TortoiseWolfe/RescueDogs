@@ -37,7 +37,7 @@ describe('Demo visibility pages (#67 / #74)', () => {
     expect(
       screen.getByRole('heading', { name: /want to see the live rescue loop/i })
     ).toBeInTheDocument();
-    const support = screen.getByText(/pick adopter or shelter/i);
+    const support = screen.getByText(/choose the adopter or shelter door/i);
     expect(support.className).toMatch(/text-\[#172554\]/);
   });
 
