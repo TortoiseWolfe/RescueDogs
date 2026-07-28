@@ -41,9 +41,10 @@ const navChromeIconBtn =
   'btn btn-circle min-h-11 min-w-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
 
 /**
- * Role-menu colors on the white desktop strip (#79).
- * Prefix (Browse/For) = brand navy → orange on hover; accent stays orange.
- * Accent must be ≥7:1 on white (WCAG AAA) — #c2410c was 5.17:1.
+ * Role-menu colors on the white desktop strip (#79 / #115).
+ * Prefix (Browse/For) = orange; accent (Pets/Adopters/Shelters) = navy →
+ * orange on hover/open. Accent orange must be ≥7:1 on white (WCAG AAA) —
+ * #c2410c was 5.17:1, so we keep #9a3412.
  */
 const NAV_NAVY = '#1e3a8a';
 const NAV_ACCENT = '#9a3412';
@@ -100,7 +101,8 @@ function blurActiveElement() {
 }
 
 /**
- * Split-label role menus on the white strip (#79): navy prefix + orange accent.
+ * Split-label role menus on the white strip (#79 / #115):
+ * orange prefix (Browse/For) + navy accent → orange on hover/open.
  */
 function RoleDropdown({
   prefixWord,
@@ -118,10 +120,10 @@ function RoleDropdown({
   const [open, setOpen] = useState(false);
   const roleAccent = hovered || open;
   const prefixStyle = {
-    color: roleAccent ? NAV_ACCENT : NAV_NAVY,
+    color: NAV_ACCENT,
   } as const;
   const accentStyle = {
-    color: NAV_ACCENT,
+    color: roleAccent ? NAV_ACCENT : NAV_NAVY,
   } as const;
 
   return (
@@ -293,7 +295,7 @@ export function GlobalNav() {
     <header className="site-header bg-primary text-primary-content sticky top-0 z-50">
       <nav className="container mx-auto px-4 pr-2 sm:pr-3" aria-label="Main">
         <div className="flex h-16 items-center gap-2">
-          {/* Logo = home (left) */}
+          {/* Logo = home (left). Wordmark hidden on mobile — no room (#115). */}
           <div className="flex min-w-0 shrink-0 items-center gap-3">
             <Link
               href="/"
@@ -302,9 +304,9 @@ export function GlobalNav() {
               <Image
                 src={`${projectConfig.basePath}/raised-paws-logo-64.webp`}
                 alt="Raised Paws home"
-                width={32}
-                height={32}
-                className="h-8 w-8 drop-shadow-sm"
+                width={44}
+                height={44}
+                className="h-11 w-11 shrink-0 drop-shadow-sm"
                 priority
               />
               <span className="hidden sm:block">
@@ -342,7 +344,7 @@ export function GlobalNav() {
             </div>
           </div>
 
-          {/* Orange chrome — nudge right to center in the orange pocket (#79). */}
+          {/* Orange chrome - hamburger rightmost so dropdown stays on-screen (#115). */}
           <div className="ml-auto flex h-full shrink-0 items-center justify-end gap-2 pr-1 pl-5 sm:gap-2.5 sm:pr-2 sm:pl-6">
             {user && (
               <Link
