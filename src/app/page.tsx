@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { detectedConfig } from '@/config/project-detected';
+import { projectConfig } from '@/config/project.config';
 
 /** Early-stage placeholders (#79) — not live shelter counts. */
 const STATS = [
@@ -102,11 +103,26 @@ export default function Home() {
       >
         <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
           <div className="w-full min-w-0 flex-1 text-center lg:-translate-y-4 lg:text-left">
+            {/* Mobile-only brand lockup — header hides wordmark below sm (#115). */}
+            <div className="mb-5 flex items-center justify-center gap-3 sm:hidden">
+              <Image
+                src={`${detectedConfig.basePath}/raised-paws-logo-64.webp`}
+                alt=""
+                width={48}
+                height={48}
+                className="h-12 w-12 drop-shadow-sm"
+                aria-hidden
+              />
+              <p className="font-display text-3xl font-extrabold tracking-tight text-white">
+                {projectConfig.projectDisplayName}
+              </p>
+            </div>
+
             <div className="mb-6 flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <Link
                 href="/dogs"
                 aria-label="Browse dogs"
-                className="font-friendly bg-accent text-accent-content inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-bold shadow-lg transition-opacity hover:opacity-90 sm:w-auto sm:text-base"
+                className="font-friendly bg-accent inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90 sm:w-auto sm:text-base"
               >
                 <span aria-hidden="true">🐾</span>
                 Dogs
@@ -114,7 +130,7 @@ export default function Home() {
               <Link
                 href="/cats"
                 aria-label="Browse cats"
-                className="font-friendly bg-accent text-accent-content inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-bold shadow-lg transition-opacity hover:opacity-90 sm:w-auto sm:text-base"
+                className="font-friendly bg-accent inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90 sm:w-auto sm:text-base"
               >
                 <span aria-hidden="true">🐾</span>
                 Cats
@@ -123,12 +139,12 @@ export default function Home() {
 
             <h1
               id="hero-heading"
-              className="font-display mb-5 text-5xl leading-none font-extrabold tracking-tight break-words text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl lg:text-7xl"
+              className="font-display mb-5 text-4xl leading-tight font-extrabold tracking-tight break-normal text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl sm:leading-none lg:text-7xl"
             >
               Track your pet adoption applications.
             </h1>
 
-            <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold text-[#f97316] sm:text-xl lg:mx-0">
+            <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold break-normal text-[#f97316] sm:text-xl lg:mx-0">
               Apply once, watch every status update live, and give shelters a
               simple pipeline.
             </p>
@@ -136,13 +152,13 @@ export default function Home() {
             <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <Link
                 href="/get-started?choose=1&intent=signup"
-                className="btn btn-lg min-h-11 w-full border-0 bg-white px-8 text-lg font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto"
+                className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto sm:text-base"
               >
                 Create Account
               </Link>
               <Link
                 href="/get-started?demo=1&choose=1"
-                className="btn btn-lg min-h-11 w-full border-0 bg-white px-8 text-lg font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto"
+                className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto sm:text-base"
               >
                 Try Demo
               </Link>
@@ -296,9 +312,12 @@ export default function Home() {
             <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
               Want to see the live rescue loop?
             </h2>
-            <p className="mt-2 max-w-2xl text-lg font-bold text-[#172554]">
-              Pick adopter or shelter — we&apos;ll fill in the demo login so you
-              can watch updates sync in real time.
+            <p className="mt-2 max-w-2xl text-base font-bold text-[#172554] sm:text-lg">
+              Choose the adopter or shelter door, sign in with a prefilled demo
+              account, then walk the real loop: submit or review an application,
+              move statuses in the shelter pipeline, and watch updates sync live
+              on the other side. You can switch demo roles anytime from the
+              account menu.
             </p>
           </div>
           <div className="mt-6 flex flex-wrap gap-4 lg:mt-0 lg:shrink-0">
