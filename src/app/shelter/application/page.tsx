@@ -66,9 +66,15 @@ function ShelterApplicationContent() {
         await service.advanceStatus(applicationId, toStatus, note);
         await fetchApplication();
         setError(null);
-      } catch {
+      } catch (err) {
+        const message =
+          err && typeof err === 'object' && 'message' in err
+            ? String((err as { message: unknown }).message)
+            : '';
         setError(
-          'Could not update the status — it may have changed in another tab. Refreshing.'
+          message.includes('already has an approved')
+            ? 'This pet already has an approved application. Another approval is not allowed.'
+            : 'Could not update the status — it may have changed in another tab. Refreshing.'
         );
         await fetchApplication();
       } finally {
