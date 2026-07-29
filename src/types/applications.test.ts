@@ -12,10 +12,16 @@ import {
 const ALL_STATUSES = Object.keys(STATUS_TRANSITIONS) as ApplicationStatus[];
 
 describe('STATUS_TRANSITIONS', () => {
-  it('terminal statuses have no exits', () => {
-    for (const status of TERMINAL_STATUSES) {
-      expect(STATUS_TRANSITIONS[status]).toEqual([]);
-    }
+  it('closed outcomes have no exits (not_selected, withdrawn)', () => {
+    expect(STATUS_TRANSITIONS.not_selected).toEqual([]);
+    expect(STATUS_TRANSITIONS.withdrawn).toEqual([]);
+  });
+
+  it('approved can reopen or fall through (#35)', () => {
+    expect(STATUS_TRANSITIONS.approved).toEqual([
+      'under_review',
+      'not_selected',
+    ]);
   });
 
   it('withdrawn is never reachable via staff transitions', () => {
@@ -24,9 +30,10 @@ describe('STATUS_TRANSITIONS', () => {
     }
   });
 
-  it('every active status can reach not_selected (honest rejection, Principle I)', () => {
-    const active = ALL_STATUSES.filter((s) => !isTerminalStatus(s));
-    for (const status of active) {
+  it('every non-closed status can reach not_selected (honest rejection, Principle I)', () => {
+    const closed = new Set<ApplicationStatus>(['not_selected', 'withdrawn']);
+    for (const status of ALL_STATUSES) {
+      if (closed.has(status)) continue;
       expect(STATUS_TRANSITIONS[status]).toContain('not_selected');
     }
   });
@@ -45,16 +52,18 @@ describe('STATUS_TRANSITIONS', () => {
     }
   });
 
-  it('pipeline only moves forward along STATUS_ORDER', () => {
+  it('pipeline moves forward along STATUS_ORDER except approved reopen (#35)', () => {
     for (let i = 0; i < STATUS_ORDER.length; i++) {
-      const targets = STATUS_TRANSITIONS[STATUS_ORDER[i]];
+      const from = STATUS_ORDER[i];
+      const targets = STATUS_TRANSITIONS[from];
       for (const target of targets) {
         const targetIndex = STATUS_ORDER.indexOf(
           target as (typeof STATUS_ORDER)[number]
         );
-        if (targetIndex !== -1) {
-          expect(targetIndex).toBeGreaterThan(i);
-        }
+        if (targetIndex === -1) continue;
+        // Staff may reopen under_review after approved (#35).
+        if (from === 'approved' && target === 'under_review') continue;
+        expect(targetIndex).toBeGreaterThan(i);
       }
     }
   });
