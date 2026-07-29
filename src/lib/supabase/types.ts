@@ -1205,6 +1205,28 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      finalize_adoption: {
+        Args: { p_application_id: string };
+        Returns: {
+          age_years: number | null;
+          breed: string | null;
+          created_at: string;
+          id: string;
+          name: string;
+          photo_url: string | null;
+          sex: string | null;
+          shelter_id: string;
+          size: string | null;
+          species: string;
+          status: string;
+        };
+        SetofOptions: {
+          from: '*';
+          to: 'pets';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       check_rate_limit: {
         Args: {
           p_attempt_type: string;

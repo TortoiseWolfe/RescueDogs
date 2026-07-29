@@ -300,6 +300,28 @@ describe('ShelterApplicationService', () => {
     );
   });
 
+  it('finalizeAdoption calls the finalize_adoption RPC (#35)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: { id: PET_ID, status: 'adopted' },
+      error: null,
+    });
+
+    await service.finalizeAdoption(APP_ID);
+
+    expect(mock.rpc).toHaveBeenCalledWith('finalize_adoption', {
+      p_application_id: APP_ID,
+    });
+  });
+
+  it('finalizeAdoption surfaces RPC errors (#35)', async () => {
+    const failure = {
+      message: 'only approved applications can be finalized',
+    };
+    mock.rpc.mockResolvedValue({ data: null, error: failure });
+
+    await expect(service.finalizeAdoption(APP_ID)).rejects.toEqual(failure);
+  });
+
   it('getApplicantEmail returns email from staff-only RPC (#66)', async () => {
     mock.rpc.mockResolvedValue({
       data: 'adopter@example.com',

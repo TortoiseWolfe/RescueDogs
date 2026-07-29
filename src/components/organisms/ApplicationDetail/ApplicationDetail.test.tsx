@@ -147,7 +147,9 @@ describe('ApplicationDetail', () => {
       expect(
         screen.getByRole('heading', { name: 'Bella' })
       ).toBeInTheDocument();
-      expect(screen.getByText('Border Collie · Dog')).toBeInTheDocument();
+      expect(
+        screen.getByText('Border Collie · Dog · Pet: available')
+      ).toBeInTheDocument();
       const photo = screen.getByRole('img', { name: 'Photo of Bella' });
       expect(photo).toHaveAttribute('src', 'https://example.com/bella.jpg');
     });
@@ -430,5 +432,37 @@ describe('ApplicationDetail', () => {
     expect(screen.getByTestId('application-detail')).toHaveClass(
       'custom-test-class'
     );
+  });
+
+  it('shows Mark pet adopted for approved apps when pet is not adopted (#35)', () => {
+    const onFinalizeAdoption = vi.fn();
+    render(
+      <ApplicationDetail
+        application={makeApplication({
+          status: 'approved',
+          pets: { ...pet, status: 'pending' },
+        })}
+        onAdvance={vi.fn()}
+        onFinalizeAdoption={onFinalizeAdoption}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('finalize-adoption'));
+    expect(onFinalizeAdoption).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides Mark pet adopted when the pet is already adopted (#35)', () => {
+    render(
+      <ApplicationDetail
+        application={makeApplication({
+          status: 'approved',
+          pets: { ...pet, status: 'adopted' },
+        })}
+        onAdvance={vi.fn()}
+        onFinalizeAdoption={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId('finalize-adoption')).not.toBeInTheDocument();
   });
 });

@@ -84,6 +84,22 @@ function ShelterApplicationContent() {
     [applicationId, fetchApplication]
   );
 
+  const handleFinalizeAdoption = useCallback(async () => {
+    if (!applicationId) return;
+    setAdvancing(true);
+    try {
+      const service = new ShelterApplicationService(supabase);
+      await service.finalizeAdoption(applicationId);
+      await fetchApplication();
+      setError(null);
+    } catch {
+      setError('Could not mark this pet adopted. Refreshing.');
+      await fetchApplication();
+    } finally {
+      setAdvancing(false);
+    }
+  }, [applicationId, fetchApplication]);
+
   const handleMessage = useCallback(async () => {
     if (!application?.adopter_id) return;
     setMessaging(true);
@@ -133,6 +149,7 @@ function ShelterApplicationContent() {
             applicantEmail={applicantEmail}
             onAdvance={handleAdvance}
             advancing={advancing}
+            onFinalizeAdoption={handleFinalizeAdoption}
             onMessage={handleMessage}
             messaging={messaging}
           />

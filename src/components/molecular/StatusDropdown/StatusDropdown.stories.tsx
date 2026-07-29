@@ -66,8 +66,16 @@ export const UnderReview: Story = {
   },
 };
 
-/** Terminal status: no select, just the quiet "No further actions" state. */
+/** Closed outcome: no select, just the quiet "No further actions" state. */
 export const Terminal: Story = {
+  args: {
+    currentStatus: 'not_selected',
+    onAdvance: fn(),
+  },
+};
+
+/** Approved can still reopen or fall through (#35). */
+export const ApprovedReversible: Story = {
   args: {
     currentStatus: 'approved',
     onAdvance: fn(),

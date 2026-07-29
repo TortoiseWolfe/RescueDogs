@@ -15,9 +15,17 @@ describe('StatusDropdown Accessibility', () => {
     expect(results).toHaveNoViolations();
   });
 
-  it('should have no accessibility violations in the terminal state', async () => {
+  it('should have no accessibility violations when approved (reversible #35)', async () => {
     const { container } = render(
       <StatusDropdown currentStatus="approved" onAdvance={vi.fn()} />
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it('should have no accessibility violations when no further actions', async () => {
+    const { container } = render(
+      <StatusDropdown currentStatus="not_selected" onAdvance={vi.fn()} />
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
