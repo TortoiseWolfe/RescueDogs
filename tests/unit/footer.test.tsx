@@ -51,4 +51,27 @@ describe('Footer (#74 / #65)', () => {
     const { container } = render(<Footer />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('links to Raised Paws social profiles (#118)', () => {
+    render(<Footer />);
+
+    expect(
+      screen.getByRole('link', { name: /raised paws on instagram/i })
+    ).toHaveAttribute('href', 'https://www.instagram.com/raised_paws/');
+    expect(
+      screen.getByRole('link', { name: /raised paws on tiktok/i })
+    ).toHaveAttribute('href', 'https://www.tiktok.com/@raisedpaws');
+    expect(
+      screen.getByRole('link', { name: /raised paws on x/i })
+    ).toHaveAttribute('href', 'https://x.com/Raised_Paws');
+
+    const instagram = screen.getByRole('link', {
+      name: /raised paws on instagram/i,
+    });
+    expect(instagram).toHaveAttribute('target', '_blank');
+    expect(instagram).toHaveAttribute(
+      'rel',
+      expect.stringContaining('noopener')
+    );
+  });
 });

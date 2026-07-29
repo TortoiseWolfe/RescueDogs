@@ -26,4 +26,11 @@ describe('SocialIcon', () => {
     const svg = document.querySelector('svg');
     expect(svg).toBeInTheDocument();
   });
+
+  it('renders tiktok icon (#118)', () => {
+    render(<SocialIcon platform="tiktok" />);
+    const svg = document.querySelector('svg');
+    expect(svg).toBeInTheDocument();
+    expect(svg).toHaveAttribute('aria-hidden', 'true');
+  });
 });
