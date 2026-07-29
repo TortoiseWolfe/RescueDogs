@@ -29,6 +29,7 @@ echo "🔒 Pre-push secret scanning..."
 
 if [ -d "/app" ] && [ "$PWD" = "/app" ]; then
   # Inside Docker
+  export GIT_CONFIG_PARAMETERS="'safe.directory=/app'"
   run_gitleaks_full
   GITLEAKS_EXIT=$?
 elif command -v docker >/dev/null 2>&1 && docker compose ps 2>/dev/null | grep -q rescuedogs; then
