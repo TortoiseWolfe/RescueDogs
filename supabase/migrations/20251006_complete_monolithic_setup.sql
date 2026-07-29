@@ -2675,6 +2675,12 @@ CREATE INDEX IF NOT EXISTS idx_applications_adopter
 CREATE INDEX IF NOT EXISTS idx_applications_shelter_status
   ON applications(shelter_id, status, status_changed_at DESC);
 
+-- One home per pet: at most one approved application per pet_id (#34).
+-- Complements the EXISTS guard in advance_application_status (race-safe).
+CREATE UNIQUE INDEX IF NOT EXISTS idx_applications_one_approved_per_pet
+  ON applications (pet_id)
+  WHERE status = 'approved';
+
 COMMENT ON TABLE applications IS 'profile_snapshot freezes the adopter profile at submit time — staff review what was actually submitted; later profile edits never mutate in-flight applications.';
 
 CREATE TABLE IF NOT EXISTS application_status_history (
@@ -2789,6 +2795,21 @@ BEGIN
     ELSE FALSE  -- approved / not_selected / withdrawn are terminal
   END) THEN
     RAISE EXCEPTION 'illegal transition % -> %', v_from_status, p_to_status;
+  END IF;
+
+  -- One approved application per pet (#34). Lock the pet row so two
+  -- concurrent approvals cannot both pass the EXISTS check; the unique
+  -- partial index idx_applications_one_approved_per_pet is the backstop.
+  IF p_to_status = 'approved' THEN
+    PERFORM 1 FROM pets WHERE id = v_app.pet_id FOR UPDATE;
+    IF EXISTS (
+      SELECT 1 FROM applications
+      WHERE pet_id = v_app.pet_id
+        AND status = 'approved'
+        AND id IS DISTINCT FROM p_application_id
+    ) THEN
+      RAISE EXCEPTION 'pet already has an approved application';
+    END IF;
   END IF;
 
   UPDATE applications

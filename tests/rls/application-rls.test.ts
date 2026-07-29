@@ -281,3 +281,152 @@ describe.skipIf(!hasRlsTestEnvironment())(
     });
   }
 );
+
+/**
+ * #34 — two different adopters cannot both be approved for the same pet.
+ * Uses a dedicated pet so it does not disturb the sequential Biscuit suite.
+ */
+describe.skipIf(!hasRlsTestEnvironment())(
+  `RLS: One approved application per pet (#34) [${RLS_SKIP_REASON}]`,
+  () => {
+    const PET_COMPETE = '44444444-4444-4444-4444-4444444444a1';
+    let adopterA: TestUser;
+    let adopterB: TestUser;
+    let staff: TestUser;
+    let appAId: string;
+    let appBId: string;
+
+    beforeAll(async () => {
+      adopterA = await createTestUser(
+        'rls-34-adopter-a@example.com',
+        'RlsTestPassword123!'
+      );
+      adopterB = await createTestUser(
+        'rls-34-adopter-b@example.com',
+        'RlsTestPassword123!'
+      );
+      staff = await createTestUser(
+        'rls-34-staff@example.com',
+        'RlsTestPassword123!'
+      );
+
+      const service = createServiceClient();
+      await service.from('shelter_members').insert({
+        shelter_id: SHELTER_ID,
+        user_id: staff.id,
+        role: 'staff',
+      });
+      await service.from('pets').upsert({
+        id: PET_COMPETE,
+        shelter_id: SHELTER_ID,
+        name: 'Compete',
+        species: 'dog',
+        status: 'available',
+      });
+    }, 60000);
+
+    afterAll(async () => {
+      const service = createServiceClient();
+      if (appAId) await service.from('applications').delete().eq('id', appAId);
+      if (appBId) await service.from('applications').delete().eq('id', appBId);
+      await service.from('pets').delete().eq('id', PET_COMPETE);
+      await service.from('shelter_members').delete().eq('user_id', staff.id);
+      await deleteTestUser(adopterA.id);
+      await deleteTestUser(adopterB.id);
+      await deleteTestUser(staff.id);
+    }, 60000);
+
+    it('rejects a second approval when another adopter is already approved', async () => {
+      const clientA = await createAuthenticatedClient(
+        'rls-34-adopter-a@example.com',
+        'RlsTestPassword123!'
+      );
+      const clientB = await createAuthenticatedClient(
+        'rls-34-adopter-b@example.com',
+        'RlsTestPassword123!'
+      );
+      const staffClient = await createAuthenticatedClient(
+        'rls-34-staff@example.com',
+        'RlsTestPassword123!'
+      );
+
+      const { data: appA, error: errA } = await clientA
+        .from('applications')
+        .insert({
+          adopter_id: adopterA.id,
+          pet_id: PET_COMPETE,
+          shelter_id: SHELTER_ID,
+          profile_snapshot: SNAPSHOT,
+        })
+        .select('id')
+        .single();
+      expect(errA).toBeNull();
+      appAId = appA!.id;
+
+      const { data: appB, error: errB } = await clientB
+        .from('applications')
+        .insert({
+          adopter_id: adopterB.id,
+          pet_id: PET_COMPETE,
+          shelter_id: SHELTER_ID,
+          profile_snapshot: SNAPSHOT,
+        })
+        .select('id')
+        .single();
+      expect(errB).toBeNull();
+      appBId = appB!.id;
+
+      // Legal path: submitted → under_review → approved
+      expect(
+        (
+          await staffClient.rpc('advance_application_status', {
+            p_application_id: appAId,
+            p_to_status: 'under_review',
+          })
+        ).error
+      ).toBeNull();
+      expect(
+        (
+          await staffClient.rpc('advance_application_status', {
+            p_application_id: appAId,
+            p_to_status: 'approved',
+          })
+        ).error
+      ).toBeNull();
+
+      expect(
+        (
+          await staffClient.rpc('advance_application_status', {
+            p_application_id: appBId,
+            p_to_status: 'under_review',
+          })
+        ).error
+      ).toBeNull();
+
+      const { error: secondApprove } = await staffClient.rpc(
+        'advance_application_status',
+        {
+          p_application_id: appBId,
+          p_to_status: 'approved',
+        }
+      );
+
+      expect(secondApprove).not.toBeNull();
+      expect(secondApprove!.message).toContain(
+        'pet already has an approved application'
+      );
+
+      const service = createServiceClient();
+      const { data: statuses } = await service
+        .from('applications')
+        .select('id, status')
+        .in('id', [appAId, appBId]);
+
+      const byId = Object.fromEntries(
+        (statuses ?? []).map((row) => [row.id, row.status])
+      );
+      expect(byId[appAId]).toBe('approved');
+      expect(byId[appBId]).toBe('under_review');
+    });
+  }
+);

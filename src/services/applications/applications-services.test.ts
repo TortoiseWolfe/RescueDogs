@@ -289,6 +289,17 @@ describe('ShelterApplicationService', () => {
     );
   });
 
+  it('advanceStatus surfaces pet-already-approved errors (#34)', async () => {
+    const failure = {
+      message: 'pet already has an approved application',
+    };
+    mock.rpc.mockResolvedValue({ data: null, error: failure });
+
+    await expect(service.advanceStatus(APP_ID, 'approved')).rejects.toEqual(
+      failure
+    );
+  });
+
   it('getApplicantEmail returns email from staff-only RPC (#66)', async () => {
     mock.rpc.mockResolvedValue({
       data: 'adopter@example.com',

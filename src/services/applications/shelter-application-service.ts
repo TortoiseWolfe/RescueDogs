@@ -114,8 +114,9 @@ export class ShelterApplicationService {
 
   /**
    * Advance an application along the pipeline. Postgres validates staff
-   * membership and the transition; the optional note is shown to the
-   * adopter on their tracker (Constitution Principle I).
+   * membership, the transition map, and one-approved-per-pet (#34); the
+   * optional note is shown to the adopter on their tracker
+   * (Constitution Principle I).
    */
   async advanceStatus(
     applicationId: string,
