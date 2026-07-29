@@ -40,7 +40,9 @@ elif command -v docker >/dev/null 2>&1 && docker compose ps 2>/dev/null | grep -
 
   # Run gitleaks via Docker
   echo "🔐 Scanning staged files for secrets..."
-  docker compose exec -T rescuedogs pnpm run gitleaks:staged
+  docker compose exec -T \
+    -e GIT_CONFIG_GLOBAL=/tmp/rescuedogs-gitconfig \
+    rescuedogs sh -c 'printf "%s\n" "[safe]" "	directory = /app" > /tmp/rescuedogs-gitconfig && pnpm run gitleaks:staged'
   GITLEAKS_EXIT=$?
   if [ $GITLEAKS_EXIT -ne 0 ]; then
     echo "❌ Secrets detected! Commit blocked."
@@ -49,7 +51,9 @@ elif command -v docker >/dev/null 2>&1 && docker compose ps 2>/dev/null | grep -
 
   # Run lint-staged via Docker
   echo "🔍 Running lint-staged..."
-  docker compose exec -T rescuedogs pnpm exec lint-staged --no-stash
+  docker compose exec -T \
+    -e GIT_CONFIG_GLOBAL=/tmp/rescuedogs-gitconfig \
+    rescuedogs sh -c 'printf "%s\n" "[safe]" "	directory = /app" > /tmp/rescuedogs-gitconfig && pnpm exec lint-staged --no-stash'
 else
   # We're on the host without Docker or Docker isn't running
   echo "💻 Running locally..."
