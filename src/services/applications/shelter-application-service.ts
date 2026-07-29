@@ -116,7 +116,8 @@ export class ShelterApplicationService {
    * Advance an application along the pipeline. Postgres validates staff
    * membership, the transition map, and one-approved-per-pet (#34); the
    * optional note is shown to the adopter on their tracker
-   * (Constitution Principle I).
+   * (Constitution Principle I). Leaving approved syncs pet availability
+   * (#35).
    */
   async advanceStatus(
     applicationId: string,
@@ -134,5 +135,16 @@ export class ShelterApplicationService {
 
     if (error) throw error;
     return data as Application;
+  }
+
+  /**
+   * Mark the pet adopted for an approved application (#35). Staff-only
+   * SECURITY DEFINER RPC. Fall-through uses advanceStatus → not_selected.
+   */
+  async finalizeAdoption(applicationId: string): Promise<void> {
+    const { error } = await this.supabase.rpc('finalize_adoption', {
+      p_application_id: applicationId,
+    });
+    if (error) throw error;
   }
 }

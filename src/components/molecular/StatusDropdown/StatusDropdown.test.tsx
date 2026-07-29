@@ -72,7 +72,7 @@ describe('StatusDropdown', () => {
   });
 
   describe('terminal current status', () => {
-    it.each(['approved', 'not_selected', 'withdrawn'] as const)(
+    it.each(['not_selected', 'withdrawn'] as const)(
       'renders "No further actions" instead of a select for %s',
       (status) => {
         render(<StatusDropdown currentStatus={status} onAdvance={vi.fn()} />);
@@ -84,6 +84,18 @@ describe('StatusDropdown', () => {
         expect(screen.getByText(/no further actions/i)).toBeInTheDocument();
       }
     );
+
+    it('offers reopen and fall-through when current status is approved (#35)', () => {
+      render(<StatusDropdown currentStatus="approved" onAdvance={vi.fn()} />);
+
+      const select = screen.getByLabelText(/new status/i);
+      const options = within(select).getAllByRole('option');
+      expect(options.map((o) => o.textContent)).toEqual([
+        'Select new status…',
+        'Under Review',
+        'Not Selected',
+      ]);
+    });
   });
 
   describe('non-terminal advance', () => {

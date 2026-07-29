@@ -430,3 +430,140 @@ describe.skipIf(!hasRlsTestEnvironment())(
     });
   }
 );
+
+/**
+ * #35 — pet returns to available after fall-through; finalize marks adopted.
+ */
+describe.skipIf(!hasRlsTestEnvironment())(
+  `RLS: Pet lifecycle after approval (#35) [${RLS_SKIP_REASON}]`,
+  () => {
+    const PET_LIFE = '44444444-4444-4444-4444-4444444444b1';
+    let adopter: TestUser;
+    let staff: TestUser;
+    let applicationId: string;
+
+    beforeAll(async () => {
+      adopter = await createTestUser(
+        'rls-35-adopter@example.com',
+        'RlsTestPassword123!'
+      );
+      staff = await createTestUser(
+        'rls-35-staff@example.com',
+        'RlsTestPassword123!'
+      );
+
+      const service = createServiceClient();
+      await service.from('shelter_members').insert({
+        shelter_id: SHELTER_ID,
+        user_id: staff.id,
+        role: 'staff',
+      });
+      await service.from('pets').upsert({
+        id: PET_LIFE,
+        shelter_id: SHELTER_ID,
+        name: 'Lifecycle',
+        species: 'dog',
+        status: 'available',
+      });
+    }, 60000);
+
+    afterAll(async () => {
+      const service = createServiceClient();
+      if (applicationId) {
+        await service.from('applications').delete().eq('id', applicationId);
+      }
+      await service.from('pets').delete().eq('id', PET_LIFE);
+      await service.from('shelter_members').delete().eq('user_id', staff.id);
+      await deleteTestUser(adopter.id);
+      await deleteTestUser(staff.id);
+    }, 60000);
+
+    it('fall-through after approval returns the pet to available', async () => {
+      const adopterClient = await createAuthenticatedClient(
+        'rls-35-adopter@example.com',
+        'RlsTestPassword123!'
+      );
+      const staffClient = await createAuthenticatedClient(
+        'rls-35-staff@example.com',
+        'RlsTestPassword123!'
+      );
+      const service = createServiceClient();
+
+      const { data: app, error: insertError } = await adopterClient
+        .from('applications')
+        .insert({
+          adopter_id: adopter.id,
+          pet_id: PET_LIFE,
+          shelter_id: SHELTER_ID,
+          profile_snapshot: SNAPSHOT,
+        })
+        .select('id')
+        .single();
+      expect(insertError).toBeNull();
+      applicationId = app!.id;
+
+      expect(
+        (
+          await staffClient.rpc('advance_application_status', {
+            p_application_id: applicationId,
+            p_to_status: 'under_review',
+          })
+        ).error
+      ).toBeNull();
+      expect(
+        (
+          await staffClient.rpc('advance_application_status', {
+            p_application_id: applicationId,
+            p_to_status: 'approved',
+          })
+        ).error
+      ).toBeNull();
+
+      const { data: pendingPet } = await service
+        .from('pets')
+        .select('status')
+        .eq('id', PET_LIFE)
+        .single();
+      expect(pendingPet!.status).toBe('pending');
+
+      expect(
+        (
+          await staffClient.rpc('finalize_adoption', {
+            p_application_id: applicationId,
+          })
+        ).error
+      ).toBeNull();
+
+      const { data: adoptedPet } = await service
+        .from('pets')
+        .select('status')
+        .eq('id', PET_LIFE)
+        .single();
+      expect(adoptedPet!.status).toBe('adopted');
+
+      expect(
+        (
+          await staffClient.rpc('advance_application_status', {
+            p_application_id: applicationId,
+            p_to_status: 'not_selected',
+            p_note: 'Adoption fell through',
+          })
+        ).error
+      ).toBeNull();
+
+      const { data: freedPet } = await service
+        .from('pets')
+        .select('status')
+        .eq('id', PET_LIFE)
+        .single();
+      expect(freedPet!.status).toBe('available');
+
+      const { data: appRow } = await service
+        .from('applications')
+        .select('status')
+        .eq('id', applicationId)
+        .single();
+      expect(appRow!.status).toBe('not_selected');
+    });
+  }
+);
