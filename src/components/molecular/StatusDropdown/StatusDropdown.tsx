@@ -30,9 +30,9 @@ export interface StatusDropdownProps {
  * application through the status pipeline.
  *
  * Only the legal transitions from the current status (STATUS_TRANSITIONS)
- * are offered. Terminal targets (approved / not_selected) require an
- * inline confirmation step before onAdvance is called, because they are
- * final and immediately visible on the adopter's tracker.
+ * are offered. Targets in TERMINAL_STATUSES (approved / not_selected)
+ * require an inline confirmation step before onAdvance is called.
+ * Staff may leave approved (#35) via under_review or not_selected.
  *
  * Presentational: props in, callbacks out — no data fetching.
  *
