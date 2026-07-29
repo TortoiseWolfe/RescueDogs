@@ -33,12 +33,11 @@ if [ -d "/app" ] && [ "$PWD" = "/app" ]; then
   GITLEAKS_EXIT=$?
 elif command -v docker >/dev/null 2>&1 && docker compose ps 2>/dev/null | grep -q rescuedogs; then
   # Host with Docker running. Mounted repo ownership often differs from the
-  # container user (Windows/Docker Desktop) — pass a container-only
-  # GIT_CONFIG_GLOBAL so gitleaks can read git history without writing the
-  # host user's git config.
+  # container user (Windows/Docker Desktop). Pass GIT_CONFIG_PARAMETERS so
+  # git/gitleaks accept /app without writing the host user's git config.
   docker compose exec -T \
-    -e GIT_CONFIG_GLOBAL=/tmp/rescuedogs-gitconfig \
-    rescuedogs sh -c 'printf "%s\n" "[safe]" "	directory = /app" > /tmp/rescuedogs-gitconfig && pnpm run gitleaks'
+    -e GIT_CONFIG_PARAMETERS="'safe.directory=/app'" \
+    rescuedogs pnpm run gitleaks
   GITLEAKS_EXIT=$?
 else
   # Host without Docker
