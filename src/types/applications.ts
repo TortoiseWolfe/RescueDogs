@@ -36,6 +36,8 @@ export const STATUS_ORDER = [
  * (StatusDropdown options). 'withdrawn' is intentionally absent: it is
  * adopter-only, via the separate withdraw_application() RPC.
  * Approving also enforces one approved application per pet (#34).
+ * Staff may leave approved → under_review (reopen) or not_selected
+ * (fall-through); that syncs pet availability (#35).
  */
 export const STATUS_TRANSITIONS: Record<
   ApplicationStatus,
@@ -45,11 +47,16 @@ export const STATUS_TRANSITIONS: Record<
   under_review: ['reference_check', 'home_visit', 'approved', 'not_selected'],
   reference_check: ['home_visit', 'approved', 'not_selected'],
   home_visit: ['approved', 'not_selected'],
-  approved: [],
+  approved: ['under_review', 'not_selected'],
   not_selected: [],
   withdrawn: [],
 } as const;
 
+/**
+ * Outcomes that need an inline confirm when staff selects them as the
+ * *target*. `approved` remains here for the confirm UX even though staff
+ * can later leave approved via STATUS_TRANSITIONS (#35).
+ */
 export const TERMINAL_STATUSES = [
   'approved',
   'not_selected',

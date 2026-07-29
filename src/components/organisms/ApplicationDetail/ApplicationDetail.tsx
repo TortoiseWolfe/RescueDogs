@@ -28,6 +28,11 @@ export interface ApplicationDetailProps {
   /** Disables status controls while a transition is in flight. */
   advancing?: boolean;
   /**
+   * Mark the pet adopted for an approved application (#35).
+   * When omitted, the Mark adopted CTA is hidden.
+   */
+  onFinalizeAdoption?: () => void | Promise<void>;
+  /**
    * Opens (or creates) a 1:1 message thread with the applicant (#72).
    * When omitted, the Message CTA is hidden.
    */
@@ -157,6 +162,7 @@ export default function ApplicationDetail({
   applicantEmail = null,
   onAdvance,
   advancing = false,
+  onFinalizeAdoption,
   onMessage,
   messaging = false,
   className = '',
@@ -184,9 +190,15 @@ export default function ApplicationDetail({
   const petSubtitle = [
     pet?.breed,
     pet?.species ? (SPECIES_LABELS[pet.species] ?? pet.species) : null,
+    pet?.status ? `Pet: ${pet.status}` : null,
   ]
     .filter(Boolean)
     .join(' · ');
+
+  const canFinalize =
+    Boolean(onFinalizeAdoption) &&
+    application.status === 'approved' &&
+    pet?.status !== 'adopted';
 
   return (
     <article
@@ -348,6 +360,23 @@ export default function ApplicationDetail({
           <h2 id={updateHeadingId} className="card-title text-lg">
             Update status
           </h2>
+          {canFinalize && (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                className="btn btn-accent min-h-11"
+                disabled={advancing}
+                onClick={() => void onFinalizeAdoption?.()}
+                data-testid="finalize-adoption"
+              >
+                Mark pet adopted
+              </button>
+              <p className="text-sm opacity-70">
+                Finalizes the pet as adopted. To free the pet again, set this
+                application to Not Selected (or reopen Under Review).
+              </p>
+            </div>
+          )}
           <StatusDropdown
             currentStatus={application.status}
             onAdvance={onAdvance}

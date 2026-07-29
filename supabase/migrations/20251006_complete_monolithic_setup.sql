@@ -2792,7 +2792,10 @@ BEGIN
     WHEN 'under_review'    THEN p_to_status IN ('reference_check', 'home_visit', 'approved', 'not_selected')
     WHEN 'reference_check' THEN p_to_status IN ('home_visit', 'approved', 'not_selected')
     WHEN 'home_visit'      THEN p_to_status IN ('approved', 'not_selected')
-    ELSE FALSE  -- approved / not_selected / withdrawn are terminal
+    -- Staff may leave approved (#35): reopen review or mark fall-through.
+    -- not_selected / withdrawn stay terminal for applications.
+    WHEN 'approved'        THEN p_to_status IN ('under_review', 'not_selected')
+    ELSE FALSE
   END) THEN
     RAISE EXCEPTION 'illegal transition % -> %', v_from_status, p_to_status;
   END IF;
@@ -2822,14 +2825,65 @@ BEGIN
   VALUES
     (p_application_id, v_from_status, p_to_status, auth.uid(), p_note);
 
-  -- Approval marks the pet pending so the dropdown stops offering it
+  -- Pet lifecycle (#35): approval → pending; fall-through → available;
+  -- reopen after approval → pending (still spoken for by this applicant).
   IF p_to_status = 'approved' THEN
+    UPDATE pets SET status = 'pending' WHERE id = v_app.pet_id;
+  ELSIF v_from_status = 'approved' AND p_to_status = 'not_selected' THEN
+    UPDATE pets SET status = 'available' WHERE id = v_app.pet_id;
+  ELSIF v_from_status = 'approved' AND p_to_status = 'under_review' THEN
     UPDATE pets SET status = 'pending' WHERE id = v_app.pet_id;
   END IF;
 
   RETURN v_app;
 END;
 $$;
+
+COMMENT ON FUNCTION advance_application_status(UUID, TEXT, TEXT) IS
+  'Staff-only status transitions. Enforces one approved app per pet (#34). '
+  'Leaving approved to not_selected frees the pet; reopen to under_review keeps it pending (#35).';
+
+-- Finalize: approved application → pet adopted (#35)
+CREATE OR REPLACE FUNCTION finalize_adoption(p_application_id UUID)
+RETURNS pets
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_app applications;
+  v_pet pets;
+BEGIN
+  SELECT * INTO v_app FROM applications WHERE id = p_application_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'application not found';
+  END IF;
+
+  IF NOT is_shelter_staff(v_app.shelter_id) THEN
+    RAISE EXCEPTION 'not authorized';
+  END IF;
+
+  IF v_app.status IS DISTINCT FROM 'approved' THEN
+    RAISE EXCEPTION 'only approved applications can be finalized';
+  END IF;
+
+  PERFORM 1 FROM pets WHERE id = v_app.pet_id FOR UPDATE;
+
+  UPDATE pets
+  SET status = 'adopted'
+  WHERE id = v_app.pet_id
+  RETURNING * INTO v_pet;
+
+  RETURN v_pet;
+END;
+$$;
+
+COMMENT ON FUNCTION finalize_adoption(UUID) IS
+  'Staff-only: mark the pet adopted after an approved application (#35). '
+  'Fall-through still uses advance_application_status(approved → not_selected).';
+
+REVOKE ALL ON FUNCTION finalize_adoption(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION finalize_adoption(UUID) TO authenticated;
 
 CREATE OR REPLACE FUNCTION withdraw_application(p_application_id UUID)
 RETURNS applications
