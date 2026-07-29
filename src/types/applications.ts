@@ -35,6 +35,7 @@ export const STATUS_ORDER = [
  * Postgres. The database is authoritative — this map only drives UI
  * (StatusDropdown options). 'withdrawn' is intentionally absent: it is
  * adopter-only, via the separate withdraw_application() RPC.
+ * Approving also enforces one approved application per pet (#34).
  */
 export const STATUS_TRANSITIONS: Record<
   ApplicationStatus,
