@@ -135,6 +135,12 @@ have. This section captures the go-to-market strategy for pillar 3: what we ask
 shelters to change, what we do not ask, and how pet data and applications fit
 together.
 
+**First-partner packet:** partner-facing pilot agreement outline + ops
+onboarding checklist live in
+[PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md) (email/Doc/PDF to the shelter — not
+a public site page). Copy fill-ins per partner; formal legal review if their
+board or municipality requires it.
+
 ### What we are not trying to do
 
 - **Not Petfinder.** We do not need to become the national pet photo directory
@@ -246,6 +252,9 @@ external web forms, and integrations with shelter management tools.
 2. Send applicants to the **RescueDogs apply link** for those pets.
 3. Staff run **status updates in the pipeline** — even if they still file a
    separate county PDF offline.
+
+Expand this ask into a fill-in agreement and ops checklist:
+[PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md).
 
 **What we sell:** fewer "what's my status?" emails, one dashboard to advance
 applications, adopters who stay engaged because updates are visible.
@@ -432,6 +441,7 @@ and must restate Principle V.
 
 | Date       | Change                                                                                                 |
 | ---------- | ------------------------------------------------------------------------------------------------------ |
+| 2026-07-28 | Link first-partner pilot packet ([PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md); #117)                     |
 | 2026-07-23 | Demo vs first real shelter; first-partner in-app Apply rule; README vision summary                     |
 | 2026-07-13 | Added “How we refer to Raised Paws” (tracker vs rescue-app naming)                                     |
 | 2026-07-12 | Added data-integration guardrails under shelter onboarding; clarified no universal DB extractor        |
