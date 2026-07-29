@@ -28,10 +28,10 @@ const STATS = [
  */
 const PETS = [
   {
-    name: 'Biscuit',
+    name: 'Lola',
     portrait: '/demo-pets/biscuit.png',
     portraitAlt:
-      'Cartoon portrait of Biscuit, a white Chihuahua with black markings',
+      'Cartoon portrait of Lola, a white Chihuahua with black markings',
     detail: '2 yrs · Chihuahua · loves belly rubs & long walks',
     bg: 'bg-[#e8edf7]',
     border: 'border-[#a8b8d8]',
@@ -51,10 +51,10 @@ const PETS = [
     cta: 'btn-secondary',
   },
   {
-    name: 'Tank',
+    name: 'Zeus',
     portrait: '/demo-pets/tank.png',
     portraitAlt:
-      'Cartoon portrait of Tank, a black Great Dane with gray muzzle',
+      'Cartoon portrait of Zeus, a black Great Dane with gray muzzle',
     detail: '6 yrs · Great Dane · gentle giant',
     bg: 'bg-[#f1f6ff]',
     border: 'border-[#cfe0ff]',
@@ -103,20 +103,10 @@ export default function Home() {
       >
         <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
           <div className="w-full min-w-0 flex-1 text-center lg:-translate-y-4 lg:text-left">
-            {/* Mobile-only brand lockup — header hides wordmark below sm (#115). */}
-            <div className="mb-5 flex items-center justify-center gap-3 sm:hidden">
-              <Image
-                src={`${detectedConfig.basePath}/raised-paws-logo-64.webp`}
-                alt=""
-                width={48}
-                height={48}
-                className="h-12 w-12 drop-shadow-sm"
-                aria-hidden
-              />
-              <p className="font-display text-3xl font-extrabold tracking-tight text-white">
-                {projectConfig.projectDisplayName}
-              </p>
-            </div>
+            {/* Mobile-only wordmark — header keeps the logo; no second logo here (#118). */}
+            <p className="font-display mb-5 text-3xl font-extrabold tracking-tight text-white sm:hidden">
+              {projectConfig.projectDisplayName}
+            </p>
 
             <div className="mb-6 flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <Link
@@ -171,8 +161,8 @@ export default function Home() {
               - Photo up/down: `lg:-mt-*` on the image wrapper
               - Photo size: `max-w-md` / `lg:max-w-[640px]` on the column
           */}
-          <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 lg:-mt-16 lg:max-w-[640px] lg:items-stretch">
-            <div className="relative aspect-[4/3] w-full animate-[floaty_5s_ease-in-out_infinite] lg:-mt-4">
+          <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 lg:-mt-8 lg:max-w-[640px] lg:items-stretch">
+            <div className="relative aspect-[4/3] w-full animate-[floaty_5s_ease-in-out_infinite] lg:mt-2">
               <div className="absolute inset-0 rotate-1 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl sm:rotate-3" />
               <div className="absolute inset-2 rotate-1 overflow-hidden rounded-[1.625rem] sm:rotate-3">
                 <Image

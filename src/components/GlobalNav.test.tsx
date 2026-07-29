@@ -83,6 +83,55 @@ describe('GlobalNav demo visibility (#67)', () => {
   });
 });
 
+describe('GlobalNav guest Messages (#118)', () => {
+  const mockUseAuth = useAuth as ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseAuth.mockReturnValue({
+      user: null,
+      signOut: vi.fn(),
+      isLoading: false,
+      isAuthenticated: false,
+    });
+  });
+
+  it('shows Messages for guests and opens a sign-in prompt', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    render(<GlobalNav />);
+
+    await userEvent.click(screen.getByRole('button', { name: /^messages$/i }));
+
+    expect(
+      screen.getByRole('heading', { name: /log in first to message/i })
+    ).toBeInTheDocument();
+    const logIns = screen.getAllByRole('link', { name: /^log in$/i });
+    expect(
+      logIns.some((el) => el.getAttribute('href')?.includes('/sign-in'))
+    ).toBe(true);
+  });
+
+  it('links Messages to /messages when signed in', () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        id: 'user-1',
+        email: 'test@example.com',
+        user_metadata: {},
+      },
+      signOut: vi.fn(),
+      isLoading: false,
+      isAuthenticated: true,
+    });
+
+    render(<GlobalNav />);
+
+    const messagesLinks = screen.getAllByRole('link', { name: /^messages$/i });
+    expect(
+      messagesLinks.some((el) => el.getAttribute('href') === '/messages')
+    ).toBe(true);
+  });
+});
+
 describe('GlobalNav role menus (#65)', () => {
   const mockUseAuth = useAuth as ReturnType<typeof vi.fn>;
 
