@@ -11,6 +11,10 @@ import type {
   PetSpecies,
   ProfileSnapshot,
 } from '@/types/applications';
+import {
+  normalizeBrowseLocationFilters,
+  type BrowseLocationFilters,
+} from '@/lib/browse/location-filters';
 
 /** Embedded-pet columns selected with every application row. */
 const PET_EMBED = 'pets(id, name, species, breed, photo_url, status)';
@@ -21,6 +25,8 @@ export interface ApplicationSubmitInput {
   profile: ProfileSnapshot;
   whyThisPet?: string;
 }
+
+export type { BrowseLocationFilters };
 
 /**
  * Adopter-side data access for the anti-ghosting MVP.
@@ -53,18 +59,36 @@ export class ApplicationService {
   }
 
   /**
-   * Public browse list (#112): available pets for one species, with shelter
-   * city/state when the embed is allowed by RLS.
+   * Public browse list (#112 / #111): available pets for one species, with
+   * shelter city/state/zip. Optional filters join shelters and match exact
+   * state and/or zip (no radius).
    */
-  async getBrowsePets(species: PetSpecies): Promise<BrowsePet[]> {
-    const { data, error } = await this.supabase
+  async getBrowsePets(
+    species: PetSpecies,
+    filters: BrowseLocationFilters = {}
+  ): Promise<BrowsePet[]> {
+    const { state, zip } = normalizeBrowseLocationFilters(filters);
+    const hasLocation = Boolean(state || zip);
+    const shelterEmbed = hasLocation
+      ? 'shelters!inner(name, city, state, zip)'
+      : 'shelters(name, city, state, zip)';
+
+    let query = this.supabase
       .from('pets')
       .select(
-        'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, created_at, shelters(name, city, state)'
+        `id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, created_at, ${shelterEmbed}`
       )
       .eq('status', 'available')
-      .eq('species', species)
-      .order('name');
+      .eq('species', species);
+
+    if (state) {
+      query = query.eq('shelters.state', state);
+    }
+    if (zip) {
+      query = query.eq('shelters.zip', zip);
+    }
+
+    const { data, error } = await query.order('name');
 
     if (error) throw error;
     // Generated Database types treat FK embeds as arrays; PostgREST returns an object.
