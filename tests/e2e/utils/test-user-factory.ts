@@ -13,6 +13,7 @@
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { expect, type Page, type Browser } from '@playwright/test';
 import { KeyDerivationService } from '@/lib/messaging/key-derivation';
+import { findAuthUserByEmail } from './find-auth-user';
 
 /**
  * Email domain for test users.
@@ -140,8 +141,7 @@ export async function createTestUser(
   }
 
   // Check if user already exists
-  const { data: existingUsers } = await client.auth.admin.listUsers();
-  const existingUser = existingUsers?.users?.find((u) => u.email === email);
+  const existingUser = await findAuthUserByEmail(client, email);
 
   if (existingUser) {
     console.log(`createTestUser: User ${email} already exists, deleting first`);
@@ -284,8 +284,7 @@ export async function deleteTestUserByEmail(email: string): Promise<boolean> {
   const client = getAdminClient();
   if (!client) return false;
 
-  const { data: users } = await client.auth.admin.listUsers();
-  const user = users?.users?.find((u) => u.email === email);
+  const user = await findAuthUserByEmail(client, email);
 
   if (!user) {
     console.log(`deleteTestUserByEmail: User ${email} not found`);
@@ -302,8 +301,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   const client = getAdminClient();
   if (!client) return null;
 
-  const { data: users } = await client.auth.admin.listUsers();
-  return users?.users?.find((u) => u.email === email) || null;
+  return findAuthUserByEmail(client, email);
 }
 
 /**
