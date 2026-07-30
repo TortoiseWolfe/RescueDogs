@@ -11,6 +11,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { findAuthUserByEmail } from './utils/find-auth-user';
 
 interface PrerequisiteError {
   category: string;
@@ -102,12 +103,10 @@ async function globalSetup(): Promise<void> {
     const testUsers = [
       { email: process.env.TEST_USER_PRIMARY_EMAIL!, name: 'PRIMARY' },
       { email: process.env.TEST_USER_TERTIARY_EMAIL, name: 'TERTIARY' },
-    ].filter((u) => u.email); // Only check users that are configured
-
-    const { data: users } = await adminClient.auth.admin.listUsers();
+    ].filter((u): u is { email: string; name: string } => !!u.email); // Only check users that are configured
 
     for (const { email, name } of testUsers) {
-      const exists = users?.users?.some((u) => u.email === email);
+      const exists = (await findAuthUserByEmail(adminClient, email)) !== null;
       if (exists) {
         console.log(`✓ Test user ${name} exists: ${email}`);
       } else {
