@@ -14,7 +14,12 @@ const basePet: BrowsePet = {
   photo_url: null,
   status: 'available',
   created_at: '2026-01-01T00:00:00Z',
-  shelters: { name: 'Second Chance Rescue', city: 'Asheville', state: 'NC' },
+  shelters: {
+    name: 'Second Chance Rescue',
+    city: 'Asheville',
+    state: 'NC',
+    zip: '28801',
+  },
 };
 
 describe('browse pet labels (#112)', () => {
@@ -26,7 +31,12 @@ describe('browse pet labels (#112)', () => {
     expect(
       locationLabel({
         ...basePet,
-        shelters: { name: 'Second Chance Rescue', city: null, state: null },
+        shelters: {
+          name: 'Second Chance Rescue',
+          city: null,
+          state: null,
+          zip: null,
+        },
       })
     ).toBe('Second Chance Rescue');
   });
