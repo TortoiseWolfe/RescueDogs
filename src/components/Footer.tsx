@@ -3,12 +3,18 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import SocialIcon from '@/components/atomic/SocialIcon';
+import { RAISED_PAWS_SOCIALS } from '@/config/raised-paws-socials';
 
 /** Same white/navy pill chrome as the header — invert when pressed / current. */
 const footerBlogPill =
-  'btn btn-sm min-h-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
+  'btn btn-sm border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
 const footerBlogPillSelected =
   '!bg-[#172554] !text-white hover:!bg-[#1e3a8a] hover:!text-white active:!bg-[#172554] active:!text-white';
+
+/** 44px AAA touch target at every width; the row wraps rather than shrinking. */
+const footerSocialBtn =
+  'btn btn-circle shrink-0 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white h-11 w-11 min-h-11 min-w-11';
 
 export function Footer() {
   const pathname = usePathname();
@@ -27,8 +33,10 @@ export function Footer() {
 
   return (
     <footer className="mt-auto bg-[#1e3a8a] py-5 text-white shadow-[0_-8px_24px_rgba(30,58,138,0.35)] sm:py-6">
-      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Primary copy stays centered; Blog pill sits to the side without shifting it. */}
+      {/* Phones use the full viewport: `container` caps at the xs breakpoint
+          (320px), which cannot hold six 44px socials plus the Blog pill. */}
+      <div className="relative mx-auto w-full px-2 sm:container sm:px-6 lg:px-8">
+        {/* Copy stays truly centered; chrome is out of flow on sm+ (#118). */}
         <div className="text-center">
           <p className="font-friendly text-sm leading-relaxed font-bold">
             🐾 Raised Paws · Every pet deserves a happy tail.
@@ -49,23 +57,36 @@ export function Footer() {
             , powered by Supabase.
           </p>
         </div>
-        <Link
-          href="/blog"
-          className={`${blogClass} absolute top-1/2 right-4 hidden -translate-y-1/2 sm:right-6 sm:inline-flex lg:right-8`}
-          aria-current={blogSelected ? 'page' : undefined}
-        >
-          Blog
-        </Link>
-        {/* Mobile: keep Blog reachable without breaking centered layout */}
-        <p className="mt-3 text-center sm:hidden">
+
+        {/* Mobile: one centered row (6 socials + Blog) down to 375px, wrapping on
+            narrower phones. sm+: socials left, Blog right. */}
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-1 sm:mt-0 sm:contents">
+          <ul
+            className="m-0 flex list-none flex-wrap items-center justify-center gap-0.5 p-0 sm:absolute sm:top-1/2 sm:left-6 sm:max-w-[42%] sm:-translate-y-1/2 sm:gap-2 lg:left-8"
+            aria-label="Raised Paws on social media"
+          >
+            {RAISED_PAWS_SOCIALS.map((social) => (
+              <li key={social.platform} className="shrink-0">
+                <a
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Raised Paws on ${social.label}`}
+                  className={footerSocialBtn}
+                >
+                  <SocialIcon platform={social.platform} className="h-5 w-5" />
+                </a>
+              </li>
+            ))}
+          </ul>
           <Link
             href="/blog"
-            className={`${blogClass} inline-flex`}
+            className={`${blogClass} inline-flex h-11 min-h-11 shrink-0 items-center px-2.5 text-xs sm:absolute sm:top-1/2 sm:right-6 sm:-translate-y-1/2 sm:px-3 sm:text-sm lg:right-8`}
             aria-current={blogSelected ? 'page' : undefined}
           >
             Blog
           </Link>
-        </p>
+        </div>
       </div>
     </footer>
   );
