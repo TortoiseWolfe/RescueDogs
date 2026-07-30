@@ -16,7 +16,7 @@ const defaultConfig = {
   // drives the GitHub repo URL and basePath (github.com/<owner>/RescueDogs) and
   // must not change, while the displayed brand can be rebranded freely.
   projectDisplayName: 'Raised Paws',
-  projectTagline: 'Pet Adoption Tracker',
+  projectTagline: 'Pet Adoption Application Tracker',
   projectOwner: 'TortoiseWolfe',
   projectDescription:
     'Pet adoption application tracker for shelters, adopters, and live status updates',

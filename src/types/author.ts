@@ -10,6 +10,7 @@ export type SocialPlatform =
   | 'bluesky'
   | 'threads'
   | 'twitch'
+  | 'tiktok'
   | 'website';
 
 export interface Author {
