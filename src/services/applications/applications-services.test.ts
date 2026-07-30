@@ -86,7 +86,12 @@ describe('ApplicationService', () => {
         name: 'Miso',
         species: 'cat',
         status: 'available',
-        shelters: { name: 'Second Chance', city: 'Asheville', state: 'NC' },
+        shelters: {
+          name: 'Second Chance',
+          city: 'Asheville',
+          state: 'NC',
+          zip: '28801',
+        },
       },
     ];
     const builder = createQueryBuilder({ data: pets, error: null });
@@ -96,11 +101,24 @@ describe('ApplicationService', () => {
 
     expect(mock.from).toHaveBeenCalledWith('pets');
     expect(builder.select).toHaveBeenCalledWith(
-      expect.stringContaining('shelters(name, city, state)')
+      expect.stringContaining('shelters(name, city, state, zip)')
     );
     expect(builder.eq).toHaveBeenCalledWith('status', 'available');
     expect(builder.eq).toHaveBeenCalledWith('species', 'cat');
     expect(result).toEqual(pets);
+  });
+
+  it('getBrowsePets joins shelters and filters by state and ZIP (#111)', async () => {
+    const builder = createQueryBuilder({ data: [], error: null });
+    mock.from.mockReturnValue(builder);
+
+    await service.getBrowsePets('dog', { state: ' nc ', zip: ' 28801 ' });
+
+    expect(builder.select).toHaveBeenCalledWith(
+      expect.stringContaining('shelters!inner(name, city, state, zip)')
+    );
+    expect(builder.eq).toHaveBeenCalledWith('shelters.state', 'NC');
+    expect(builder.eq).toHaveBeenCalledWith('shelters.zip', '28801');
   });
 
   it('getAdopterProfile returns null when no profile exists', async () => {
