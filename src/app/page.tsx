@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { detectedConfig } from '@/config/project-detected';
-import { projectConfig } from '@/config/project.config';
 
 /** Early-stage placeholders (#79) — not live shelter counts. */
 const STATS = [
@@ -103,12 +102,6 @@ export default function Home() {
       >
         <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
           <div className="w-full min-w-0 flex-1 text-center lg:-translate-y-4 lg:text-left">
-            {/* Brand in hero whenever header has no wordmark (phones + tablets;
-                Lumia ~480px is ≥ sm so sm:hidden hid it — use lg:hidden) (#127). */}
-            <p className="font-display mb-5 text-3xl font-extrabold tracking-tight text-white lg:hidden">
-              {projectConfig.projectDisplayName}
-            </p>
-
             <div className="mb-6 flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
               <Link
                 href="/dogs"
