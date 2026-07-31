@@ -21,6 +21,8 @@ const defaultConfig = {
   projectDescription:
     'Pet adoption application tracker for shelters, adopters, and live status updates',
   basePath: '',
+  /** Public contact address — empty until ops configures an inbox (#128). */
+  contactEmail: '',
 };
 
 /**
@@ -43,6 +45,9 @@ export function getProjectConfig() {
       process.env.NEXT_PUBLIC_PROJECT_OWNER || defaultConfig.projectOwner,
     projectDescription: defaultConfig.projectDescription,
     basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? defaultConfig.basePath,
+    contactEmail: (
+      process.env.NEXT_PUBLIC_CONTACT_EMAIL || defaultConfig.contactEmail
+    ).trim(),
   };
 
   // Computed values
