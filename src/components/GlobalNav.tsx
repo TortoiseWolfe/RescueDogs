@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -39,6 +39,8 @@ const navChromeBtnSelected =
   '!bg-[#172554] !text-white hover:!bg-[#1e3a8a] hover:!text-white active:!bg-[#172554] active:!text-white';
 const navChromeIconBtn =
   'btn btn-circle min-h-11 min-w-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
+/** Only when brand+chrome would collide (e.g. S9+ ~360px, Lumia ~320px) (#132). */
+const navChromeIconBtnCompact = 'min-h-10 min-w-10 h-10 w-10';
 
 /**
  * Role-menu colors on the white desktop strip (#79 / #115).
@@ -192,10 +194,55 @@ export function GlobalNav() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [demoSession, setDemoSession] = useState(false);
   const [messagesSignInOpen, setMessagesSignInOpen] = useState(false);
+  /** Shrink chrome only when wordmark + icons would collide (#132). */
+  const [chromeCompact, setChromeCompact] = useState(false);
+  const navRowRef = useRef<HTMLDivElement>(null);
+  const brandRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setDemoSession(isDemoMode());
   }, [user?.id, pathname]);
+
+  // Measure brand vs row — compact only on phones where S9+/Lumia-class widths
+  // collide (~320–360px). Wider phones keep full 44px targets (#132).
+  useLayoutEffect(() => {
+    const row = navRowRef.current;
+    const brand = brandRef.current;
+    if (!row || !brand) return;
+
+    const measure = () => {
+      if (typeof window === 'undefined') return;
+      if (window.matchMedia('(min-width: 1024px)').matches) {
+        setChromeCompact(false);
+        return;
+      }
+      // Guest: Messages + hamburger + theme. Signed-in adds avatar.
+      const iconCount = user ? 4 : 3;
+      const fullIcon = 44;
+      const gap = 4;
+      const fullChrome = fullIcon * iconCount + gap * (iconCount - 1);
+      const padding = 12;
+      const needed = brand.scrollWidth + fullChrome + padding;
+      setChromeCompact(needed > row.clientWidth);
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(row);
+    ro.observe(brand);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [user]);
+
+  const chromeIconClass = chromeCompact
+    ? `${navChromeIconBtn} ${navChromeIconBtnCompact}`
+    : navChromeIconBtn;
+  const themeDarkClass = chromeCompact
+    ? 'btn btn-circle min-h-10 min-w-10 h-10 w-10 border-0 !bg-[#1e3a8a] !text-white hover:!bg-[#172554] hover:!text-white active:!bg-[#172554] active:!text-white'
+    : 'btn btn-circle min-h-11 min-w-11 border-0 !bg-[#1e3a8a] !text-white hover:!bg-[#172554] hover:!text-white active:!bg-[#172554] active:!text-white';
 
   const messagesSignInHref = buildSignInHref(
     getPortalPreference() ?? 'adopter'
@@ -317,32 +364,46 @@ export function GlobalNav() {
   return (
     <>
       <header className="site-header bg-primary text-primary-content sticky top-0 z-50">
-        {/* Below lg (phones + tablets / iPad / Surface): five centered controls —
-            logo, Messages, Log In, hamburger, theme. No header wordmark (brand
-            lives in the homepage hero). lg+: wordmark + three role menus (#127). */}
+        {/* Below lg: logo + Raised Paws left; Messages / hamburger / theme right.
+            No chrome Log In (hamburger Account). lg+: role band unchanged (#132). */}
         <nav
           className="mx-auto w-full px-2 max-lg:pr-1 lg:container lg:px-4 lg:pr-3"
           aria-label="Main"
         >
-          <div className="flex h-16 w-full items-center max-lg:justify-center max-lg:gap-1.5 lg:gap-2">
-            {/* Logo = home. Wordmark only with the desktop role band. */}
-            <div className="flex min-w-0 shrink-0 items-center gap-3">
+          <div
+            ref={navRowRef}
+            className="flex h-16 w-full items-center gap-1.5 sm:gap-2"
+            data-chrome-compact={chromeCompact ? 'true' : 'false'}
+          >
+            {/* Logo + wordmark — always in header (#132). */}
+            <div
+              ref={brandRef}
+              className="flex min-w-0 shrink items-center gap-2 sm:gap-3"
+            >
               <Link
                 href="/"
-                className="flex min-h-11 items-center gap-2 transition-opacity hover:opacity-80"
+                className="flex min-h-11 min-w-0 items-center gap-1.5 transition-opacity hover:opacity-80 sm:gap-2"
               >
                 <Image
                   src={`${projectConfig.basePath}/raised-paws-logo-64.webp`}
                   alt="Raised Paws home"
                   width={44}
                   height={44}
-                  className="h-11 w-11 shrink-0 drop-shadow-sm"
+                  className={
+                    chromeCompact
+                      ? 'h-9 w-9 shrink-0 drop-shadow-sm'
+                      : 'h-10 w-10 shrink-0 drop-shadow-sm sm:h-11 sm:w-11'
+                  }
                   priority
                 />
-                <span className="hidden lg:block">
+                <span className="min-w-0">
                   <AnimatedLogo
                     text={projectConfig.projectDisplayName}
-                    className="brand-logo !text-xl font-bold"
+                    className={
+                      chromeCompact
+                        ? 'brand-logo !text-base font-bold'
+                        : 'brand-logo !text-lg font-bold sm:!text-xl'
+                    }
                     animationSpeed="normal"
                   />
                 </span>
@@ -374,12 +435,12 @@ export function GlobalNav() {
               </div>
             </div>
 
-            {/* Orange chrome. Centered below lg; hamburger left of theme. */}
-            <div className="flex h-full shrink-0 items-center justify-end gap-1.5 lg:ml-auto lg:gap-2.5 lg:pr-2 lg:pl-6">
+            {/* Orange chrome — flush right; hamburger left of theme (#132). */}
+            <div className="ml-auto flex h-full shrink-0 items-center justify-end gap-1 sm:gap-1.5 lg:gap-2.5 lg:pr-2 lg:pl-6">
               {user ? (
                 <Link
                   href="/messages"
-                  className={`${navChromeIconBtn} indicator`}
+                  className={`${chromeIconClass} indicator`}
                   title="Messages"
                   aria-label="Messages"
                 >
@@ -393,7 +454,7 @@ export function GlobalNav() {
               ) : (
                 <button
                   type="button"
-                  className={navChromeIconBtn}
+                  className={chromeIconClass}
                   title="Messages"
                   aria-label="Messages"
                   aria-haspopup="dialog"
@@ -406,7 +467,7 @@ export function GlobalNav() {
               {!user && (
                 <Link
                   href="/sign-in"
-                  className={`${navChromeBtn} inline-flex max-lg:px-2.5 max-lg:text-base ${logInSelected ? navChromeBtnSelected : ''}`}
+                  className={`${navChromeBtn} hidden lg:inline-flex ${logInSelected ? navChromeBtnSelected : ''}`}
                   aria-current={logInSelected ? 'page' : undefined}
                 >
                   Log In
@@ -417,7 +478,7 @@ export function GlobalNav() {
                 <div className="dropdown dropdown-end">
                   <label
                     tabIndex={0}
-                    className={navChromeIconBtn}
+                    className={chromeIconClass}
                     aria-label="User account menu"
                   >
                     <AvatarDisplay
@@ -513,12 +574,12 @@ export function GlobalNav() {
                 </div>
               ) : null}
 
-              {/* Mobile/tablet menu — one column + scroll (#127). Wrapper scrolls
-                  so DaisyUI menu layout cannot force a multi-column look. */}
+              {/* Mobile/tablet menu — one column + scroll. Titles orange, items
+                  navy (#132). Hamburger left of theme so panel isn’t clipped. */}
               <div className="dropdown dropdown-end lg:hidden">
                 <label
                   tabIndex={0}
-                  className={navChromeIconBtn}
+                  className={chromeIconClass}
                   aria-label="Navigation menu"
                 >
                   <svg
@@ -542,14 +603,14 @@ export function GlobalNav() {
                 >
                   <ul className="menu menu-vertical w-full p-2 text-base">
                     <li className="menu-title">
-                      <span>For Adopters</span>
+                      <span className="!text-[#f97316]">For Adopters</span>
                     </li>
                     {(user ? signedInAdopterLinks : guestAdopterLinks).map(
                       (item) => (
                         <li key={`m-adopter-${item.href}-${item.label}`}>
                           <Link
                             href={item.href}
-                            className="min-h-11"
+                            className="min-h-11 !text-[#1e3a8a]"
                             onClick={blurActiveElement}
                           >
                             {item.label}
@@ -558,14 +619,14 @@ export function GlobalNav() {
                       )
                     )}
                     <li className="menu-title mt-2">
-                      <span>For Shelters</span>
+                      <span className="!text-[#f97316]">For Shelters</span>
                     </li>
                     {(user ? signedInShelterLinks : guestShelterLinks).map(
                       (item) => (
                         <li key={`m-shelter-${item.href}-${item.label}`}>
                           <Link
                             href={item.href}
-                            className="min-h-11"
+                            className="min-h-11 !text-[#1e3a8a]"
                             onClick={blurActiveElement}
                           >
                             {item.label}
@@ -576,12 +637,12 @@ export function GlobalNav() {
                     {user ? (
                       <>
                         <li className="menu-title mt-2">
-                          <span>Account</span>
+                          <span className="!text-[#f97316]">Account</span>
                         </li>
                         <li>
                           <Link
                             href="/profile"
-                            className="min-h-11"
+                            className="min-h-11 !text-[#1e3a8a]"
                             onClick={blurActiveElement}
                           >
                             Profile
@@ -590,7 +651,7 @@ export function GlobalNav() {
                         <li>
                           <Link
                             href="/account"
-                            className="min-h-11"
+                            className="min-h-11 !text-[#1e3a8a]"
                             onClick={blurActiveElement}
                           >
                             Account Settings
@@ -600,7 +661,7 @@ export function GlobalNav() {
                           <li>
                             <Link
                               href="/admin"
-                              className="min-h-11"
+                              className="min-h-11 !text-[#1e3a8a]"
                               onClick={blurActiveElement}
                             >
                               Admin Dashboard
@@ -612,7 +673,7 @@ export function GlobalNav() {
                             <li>
                               <button
                                 type="button"
-                                className="min-h-11"
+                                className="min-h-11 !text-[#1e3a8a]"
                                 data-testid="switch-demo-role-mobile"
                                 onClick={(e) => {
                                   e.preventDefault();
@@ -631,7 +692,7 @@ export function GlobalNav() {
                             <li>
                               <button
                                 type="button"
-                                className="min-h-11"
+                                className="min-h-11 !text-[#1e3a8a]"
                                 data-testid="restart-demo-tour-mobile"
                                 onClick={(e) => {
                                   e.preventDefault();
@@ -647,7 +708,7 @@ export function GlobalNav() {
                         <li>
                           <button
                             type="button"
-                            className="min-h-11"
+                            className="min-h-11 !text-[#1e3a8a]"
                             onClick={(e) => {
                               e.preventDefault();
                               blurActiveElement();
@@ -661,12 +722,12 @@ export function GlobalNav() {
                     ) : (
                       <>
                         <li className="menu-title mt-2">
-                          <span>Account</span>
+                          <span className="!text-[#f97316]">Account</span>
                         </li>
                         <li>
                           <Link
                             href={DEMO_ENTRY_HREF}
-                            className="min-h-11"
+                            className="min-h-11 !text-[#1e3a8a]"
                             onClick={blurActiveElement}
                           >
                             Try Demo
@@ -675,7 +736,7 @@ export function GlobalNav() {
                         <li>
                           <Link
                             href="/sign-in"
-                            className="min-h-11"
+                            className="min-h-11 !text-[#1e3a8a]"
                             onClick={blurActiveElement}
                           >
                             Log In
@@ -690,11 +751,7 @@ export function GlobalNav() {
               <button
                 type="button"
                 onClick={handleThemeToggle}
-                className={
-                  isDarkTheme
-                    ? 'btn btn-circle min-h-11 min-w-11 border-0 !bg-[#1e3a8a] !text-white hover:!bg-[#172554] hover:!text-white active:!bg-[#172554] active:!text-white'
-                    : navChromeIconBtn
-                }
+                className={isDarkTheme ? themeDarkClass : chromeIconClass}
                 title={
                   isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'
                 }
