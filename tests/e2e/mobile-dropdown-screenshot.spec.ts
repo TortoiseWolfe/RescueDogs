@@ -51,9 +51,10 @@ test.describe('Mobile Dropdown Menu Screenshots', () => {
       fullPage: false,
     });
 
-    // Verify the hamburger's dropdown-content is visible (scoped to the
-    // hamburger parent, not the user account dropdown).
-    const dropdownMenu = hamburgerDropdown.locator('.dropdown-content.menu');
+    // Verify the hamburger panel is visible (scoped to the hamburger parent).
+    // Panel is a .dropdown-content wrapper; menu list is nested inside (#127).
+    const dropdownMenu = hamburgerDropdown.locator('.dropdown-content');
     await expect(dropdownMenu).toBeVisible();
+    await expect(dropdownMenu.locator('ul.menu')).toBeVisible();
   });
 });
