@@ -7,7 +7,7 @@ import { dismissCookieBanner } from '../utils/test-user-factory';
  * Moved from unit tests (ContactForm.test.tsx:309) because focus tracking
  * requires real browser DOM, not jsdom simulation.
  *
- * Tests keyboard navigation through form fields with proper tab order.
+ * Tab order (#128): name → email → role → subject → message → submit
  */
 test.describe('Contact Form - Keyboard Navigation', () => {
   test.beforeEach(async ({ page }) => {
@@ -28,6 +28,11 @@ test.describe('Contact Form - Keyboard Navigation', () => {
     await page.keyboard.press('Tab');
     const emailField = page.getByLabel('Email Address');
     await expect(emailField).toBeFocused();
+
+    // Tab to role select (#128)
+    await page.keyboard.press('Tab');
+    const roleField = page.getByLabel(/i am a/i);
+    await expect(roleField).toBeFocused();
 
     // Tab to subject field
     await page.keyboard.press('Tab');
@@ -55,6 +60,9 @@ test.describe('Contact Form - Keyboard Navigation', () => {
 
     await page.keyboard.press('Tab');
     await page.keyboard.type('john@example.com');
+
+    await page.keyboard.press('Tab');
+    await page.locator('#role').selectOption('adopter');
 
     await page.keyboard.press('Tab');
     await page.keyboard.type('Test Subject');
@@ -91,7 +99,9 @@ test.describe('Contact Form - Keyboard Navigation', () => {
         return el?.tagName?.toLowerCase();
       });
       // Active element should be a form element (focused on first error)
-      expect(['input', 'textarea', 'button']).toContain(activeElement);
+      expect(['input', 'textarea', 'select', 'button']).toContain(
+        activeElement
+      );
     }).toPass({ timeout: 3000 });
   });
 
@@ -107,6 +117,11 @@ test.describe('Contact Form - Keyboard Navigation', () => {
     await page.keyboard.press('Shift+Tab');
     const subjectField = page.getByLabel('Subject');
     await expect(subjectField).toBeFocused();
+
+    // Shift+Tab backwards to role (#128)
+    await page.keyboard.press('Shift+Tab');
+    const roleField = page.getByLabel(/i am a/i);
+    await expect(roleField).toBeFocused();
 
     // Shift+Tab backwards to email
     await page.keyboard.press('Shift+Tab');

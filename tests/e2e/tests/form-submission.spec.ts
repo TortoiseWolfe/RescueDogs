@@ -55,8 +55,8 @@ test.describe('Form Submission', () => {
     // Check that asterisks are visible next to required field labels
     const requiredIndicators = page.locator('.label-text-alt.text-error');
 
-    // Contact form has 4 required fields: name, email, subject, message
-    await expect(requiredIndicators).toHaveCount(4);
+    // Contact form has 5 required fields: name, email, role, subject, message (#128)
+    await expect(requiredIndicators).toHaveCount(5);
 
     // Verify at least one indicator contains the asterisk
     await expect(requiredIndicators.first()).toContainText('*');
@@ -199,9 +199,12 @@ test.describe('Form Submission', () => {
     await nameInput.focus();
     await expect(nameInput).toBeFocused();
 
-    // Tab through the form fields in order: name -> email -> subject -> message -> submit
+    // name → email → role → subject → message → submit (#128)
     await page.keyboard.press('Tab');
     await expect(page.locator('#email')).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#role')).toBeFocused();
 
     await page.keyboard.press('Tab');
     await expect(page.locator('#subject')).toBeFocused();
