@@ -317,9 +317,15 @@ export function GlobalNav() {
   return (
     <>
       <header className="site-header bg-primary text-primary-content sticky top-0 z-50">
-        <nav className="container mx-auto px-4 pr-2 sm:pr-3" aria-label="Main">
-          <div className="flex h-16 items-center gap-2">
-            {/* Logo = home (left). Wordmark hidden on mobile — no room (#115). */}
+        {/* Below lg (phones + tablets / iPad / Surface): five centered controls —
+            logo, Messages, Log In, hamburger, theme. No header wordmark (brand
+            lives in the homepage hero). lg+: wordmark + three role menus (#127). */}
+        <nav
+          className="mx-auto w-full px-2 max-lg:pr-1 lg:container lg:px-4 lg:pr-3"
+          aria-label="Main"
+        >
+          <div className="flex h-16 w-full items-center max-lg:justify-center max-lg:gap-1.5 lg:gap-2">
+            {/* Logo = home. Wordmark only with the desktop role band. */}
             <div className="flex min-w-0 shrink-0 items-center gap-3">
               <Link
                 href="/"
@@ -333,7 +339,7 @@ export function GlobalNav() {
                   className="h-11 w-11 shrink-0 drop-shadow-sm"
                   priority
                 />
-                <span className="hidden sm:block">
+                <span className="hidden lg:block">
                   <AnimatedLogo
                     text={projectConfig.projectDisplayName}
                     className="brand-logo !text-xl font-bold"
@@ -343,7 +349,7 @@ export function GlobalNav() {
               </Link>
             </div>
 
-            {/* White role band — sit right beside orange chrome / hero (#79). */}
+            {/* White role band — desktop only (#79 / #127). */}
             <div
               className="hidden min-w-0 flex-1 self-stretch lg:block"
               aria-hidden="true"
@@ -368,8 +374,8 @@ export function GlobalNav() {
               </div>
             </div>
 
-            {/* Orange chrome - hamburger rightmost so dropdown stays on-screen (#115). */}
-            <div className="ml-auto flex h-full shrink-0 items-center justify-end gap-2 pr-1 pl-5 sm:gap-2.5 sm:pr-2 sm:pl-6">
+            {/* Orange chrome. Centered below lg; hamburger left of theme. */}
+            <div className="flex h-full shrink-0 items-center justify-end gap-1.5 lg:ml-auto lg:gap-2.5 lg:pr-2 lg:pl-6">
               {user ? (
                 <Link
                   href="/messages"
@@ -400,7 +406,7 @@ export function GlobalNav() {
               {!user && (
                 <Link
                   href="/sign-in"
-                  className={`${navChromeBtn} hidden lg:inline-flex ${logInSelected ? navChromeBtnSelected : ''}`}
+                  className={`${navChromeBtn} inline-flex max-lg:px-2.5 max-lg:text-base ${logInSelected ? navChromeBtnSelected : ''}`}
                   aria-current={logInSelected ? 'page' : undefined}
                 >
                   Log In
@@ -507,6 +513,180 @@ export function GlobalNav() {
                 </div>
               ) : null}
 
+              {/* Mobile/tablet menu — one column + scroll (#127). Wrapper scrolls
+                  so DaisyUI menu layout cannot force a multi-column look. */}
+              <div className="dropdown dropdown-end lg:hidden">
+                <label
+                  tabIndex={0}
+                  className={navChromeIconBtn}
+                  aria-label="Navigation menu"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                </label>
+                <div
+                  tabIndex={0}
+                  className="dropdown-content bg-base-100 text-base-content rounded-box z-50 mt-3 max-h-[min(60vh,calc(100vh-5rem))] w-60 max-w-[calc(100vw-1.5rem)] overflow-y-auto overscroll-contain shadow"
+                >
+                  <ul className="menu menu-vertical w-full p-2 text-base">
+                    <li className="menu-title">
+                      <span>For Adopters</span>
+                    </li>
+                    {(user ? signedInAdopterLinks : guestAdopterLinks).map(
+                      (item) => (
+                        <li key={`m-adopter-${item.href}-${item.label}`}>
+                          <Link
+                            href={item.href}
+                            className="min-h-11"
+                            onClick={blurActiveElement}
+                          >
+                            {item.label}
+                          </Link>
+                        </li>
+                      )
+                    )}
+                    <li className="menu-title mt-2">
+                      <span>For Shelters</span>
+                    </li>
+                    {(user ? signedInShelterLinks : guestShelterLinks).map(
+                      (item) => (
+                        <li key={`m-shelter-${item.href}-${item.label}`}>
+                          <Link
+                            href={item.href}
+                            className="min-h-11"
+                            onClick={blurActiveElement}
+                          >
+                            {item.label}
+                          </Link>
+                        </li>
+                      )
+                    )}
+                    {user ? (
+                      <>
+                        <li className="menu-title mt-2">
+                          <span>Account</span>
+                        </li>
+                        <li>
+                          <Link
+                            href="/profile"
+                            className="min-h-11"
+                            onClick={blurActiveElement}
+                          >
+                            Profile
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            href="/account"
+                            className="min-h-11"
+                            onClick={blurActiveElement}
+                          >
+                            Account Settings
+                          </Link>
+                        </li>
+                        {isAdmin && (
+                          <li>
+                            <Link
+                              href="/admin"
+                              className="min-h-11"
+                              onClick={blurActiveElement}
+                            >
+                              Admin Dashboard
+                            </Link>
+                          </li>
+                        )}
+                        {demoSession && (
+                          <>
+                            <li>
+                              <button
+                                type="button"
+                                className="min-h-11"
+                                data-testid="switch-demo-role-mobile"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  blurActiveElement();
+                                  void handleSwitchDemoRole();
+                                }}
+                              >
+                                Switch to{' '}
+                                {oppositePortal(resolveDemoPortal()) ===
+                                'shelter'
+                                  ? 'shelter'
+                                  : 'adopter'}{' '}
+                                demo
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                type="button"
+                                className="min-h-11"
+                                data-testid="restart-demo-tour-mobile"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  blurActiveElement();
+                                  handleRestartDemoTour();
+                                }}
+                              >
+                                Restart demo tour
+                              </button>
+                            </li>
+                          </>
+                        )}
+                        <li>
+                          <button
+                            type="button"
+                            className="min-h-11"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              blurActiveElement();
+                              handleSignOut();
+                            }}
+                          >
+                            Sign Out
+                          </button>
+                        </li>
+                      </>
+                    ) : (
+                      <>
+                        <li className="menu-title mt-2">
+                          <span>Account</span>
+                        </li>
+                        <li>
+                          <Link
+                            href={DEMO_ENTRY_HREF}
+                            className="min-h-11"
+                            onClick={blurActiveElement}
+                          >
+                            Try Demo
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            href="/sign-in"
+                            className="min-h-11"
+                            onClick={blurActiveElement}
+                          >
+                            Log In
+                          </Link>
+                        </li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+              </div>
+
               <button
                 type="button"
                 onClick={handleThemeToggle}
@@ -556,199 +736,6 @@ export function GlobalNav() {
                   </svg>
                 )}
               </button>
-
-              {/* Mobile/tablet menu — same destinations, nested by role (#65) */}
-              <div className="dropdown dropdown-end lg:hidden">
-                <label
-                  tabIndex={0}
-                  className={navChromeIconBtn}
-                  aria-label="Navigation menu"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                </label>
-                <ul
-                  tabIndex={0}
-                  className="menu dropdown-content bg-base-100 text-base-content rounded-box -right-2 z-50 mt-3 w-60 max-w-[calc(100vw-2rem)] p-2 text-base shadow"
-                >
-                  <li className="menu-title">
-                    <span>For Adopters</span>
-                  </li>
-                  {(user ? signedInAdopterLinks : guestAdopterLinks).map(
-                    (item) => (
-                      <li key={`m-adopter-${item.href}-${item.label}`}>
-                        <Link
-                          href={item.href}
-                          className="min-h-11"
-                          onClick={blurActiveElement}
-                        >
-                          {item.label}
-                        </Link>
-                      </li>
-                    )
-                  )}
-
-                  <li className="menu-title mt-2">
-                    <span>For Shelters</span>
-                  </li>
-                  {(user ? signedInShelterLinks : guestShelterLinks).map(
-                    (item) => (
-                      <li key={`m-shelter-${item.href}-${item.label}`}>
-                        <Link
-                          href={item.href}
-                          className="min-h-11"
-                          onClick={blurActiveElement}
-                        >
-                          {item.label}
-                        </Link>
-                      </li>
-                    )
-                  )}
-
-                  <li className="menu-title mt-2">
-                    <span>Browse Pets</span>
-                  </li>
-                  {browseMenuLinks.map((item) => (
-                    <li key={`m-browse-${item.href}-${item.label}`}>
-                      <Link
-                        href={item.href}
-                        className="min-h-11"
-                        onClick={blurActiveElement}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-
-                  {user ? (
-                    <>
-                      <li className="menu-title mt-2">
-                        <span>Account</span>
-                      </li>
-                      <li>
-                        <Link href="/profile" className="min-h-11">
-                          Profile
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/account" className="min-h-11">
-                          Settings
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/messages"
-                          className="flex min-h-11 items-center justify-between"
-                        >
-                          <span>Messages</span>
-                          {unreadCount > 0 && (
-                            <span className="badge badge-primary badge-sm">
-                              {unreadCount}
-                            </span>
-                          )}
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/messages?tab=connections"
-                          className="min-h-11"
-                        >
-                          Connections
-                        </Link>
-                      </li>
-                      {isAdmin && (
-                        <li>
-                          <Link href="/admin" className="min-h-11">
-                            Admin Dashboard
-                          </Link>
-                        </li>
-                      )}
-                      {demoSession && (
-                        <>
-                          <li>
-                            <button
-                              type="button"
-                              className="min-h-11"
-                              data-testid="switch-demo-role-mobile"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                void handleSwitchDemoRole();
-                              }}
-                            >
-                              Switch to{' '}
-                              {oppositePortal(resolveDemoPortal()) === 'shelter'
-                                ? 'shelter'
-                                : 'adopter'}{' '}
-                              demo
-                            </button>
-                          </li>
-                          <li>
-                            <button
-                              type="button"
-                              className="min-h-11"
-                              data-testid="restart-demo-tour-mobile"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handleRestartDemoTour();
-                              }}
-                            >
-                              Restart demo tour
-                            </button>
-                          </li>
-                        </>
-                      )}
-                      <li>
-                        <button
-                          type="button"
-                          className="min-h-11"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleSignOut();
-                          }}
-                        >
-                          Sign Out
-                        </button>
-                      </li>
-                    </>
-                  ) : (
-                    <>
-                      <li className="menu-title mt-2">
-                        <span>Account</span>
-                      </li>
-                      <li>
-                        <Link
-                          href={DEMO_ENTRY_HREF}
-                          className="min-h-11"
-                          onClick={blurActiveElement}
-                        >
-                          Try Demo
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/sign-in"
-                          className="min-h-11"
-                          onClick={blurActiveElement}
-                        >
-                          Log In
-                        </Link>
-                      </li>
-                    </>
-                  )}
-                </ul>
-              </div>
             </div>
           </div>
         </nav>
