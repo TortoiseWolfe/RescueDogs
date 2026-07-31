@@ -46,6 +46,23 @@ describe('Footer (#74 / #65)', () => {
     expect(blogs[0].className).toMatch(/bg-white/);
   });
 
+  it('links to Contact beside Blog in the footer (#128)', () => {
+    render(<Footer />);
+
+    const contacts = screen.getAllByRole('link', { name: /^contact$/i });
+    expect(contacts.length).toBeGreaterThanOrEqual(1);
+    expect(contacts[0]).toHaveAttribute('href', '/contact');
+    expect(contacts[0].className).toMatch(/bg-white/);
+  });
+
+  it('marks Contact as current on /contact (#128)', () => {
+    mockUsePathname.mockReturnValue('/contact');
+    render(<Footer />);
+
+    const contact = screen.getByRole('link', { name: /^contact$/i });
+    expect(contact).toHaveAttribute('aria-current', 'page');
+  });
+
   it('hides the site footer on messaging routes', () => {
     mockUsePathname.mockReturnValue('/messages');
     const { container } = render(<Footer />);

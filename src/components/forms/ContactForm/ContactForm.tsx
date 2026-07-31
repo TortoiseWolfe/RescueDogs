@@ -1,23 +1,55 @@
 'use client';
 
+import { Suspense, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useSearchParams } from 'next/navigation';
 import { useWeb3Forms } from '@/hooks/useWeb3Forms';
 import { type Web3FormsResponse } from '@/utils/web3forms';
-import { contactSchema, type ContactFormData } from '@/schemas/contact.schema';
-import { useEffect } from 'react';
+import {
+  contactSchema,
+  type ContactFormData,
+  type ContactRole,
+  CONTACT_ROLE_LABELS,
+  CONTACT_ROLES,
+  isContactRole,
+} from '@/schemas/contact.schema';
 
 export interface ContactFormProps {
   className?: string;
+  /** Preselect role (also reads ?role= from the URL on the client) (#128). */
+  defaultRole?: ContactRole;
   onSuccess?: (response: Web3FormsResponse) => void;
   onError?: (error: Error) => void;
 }
 
-export const ContactForm: React.FC<ContactFormProps> = ({
+/** Suspense boundary required for useSearchParams under static export. */
+export const ContactForm: React.FC<ContactFormProps> = (props) => {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto w-full max-w-2xl" aria-busy="true">
+          <h2 className="mb-6 text-3xl font-bold">Contact Us</h2>
+          <p className="text-base-content/70">Loading form…</p>
+        </div>
+      }
+    >
+      <ContactFormInner {...props} />
+    </Suspense>
+  );
+};
+
+const ContactFormInner: React.FC<ContactFormProps> = ({
   className = '',
+  defaultRole,
   onSuccess,
   onError,
 }) => {
+  const searchParams = useSearchParams();
+  const roleParam = searchParams.get('role');
+  const roleFromQuery = isContactRole(roleParam) ? roleParam : undefined;
+  const initialRole = defaultRole ?? roleFromQuery;
+
   const {
     register,
     handleSubmit,
@@ -25,6 +57,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     reset,
     watch,
     setFocus,
+    setValue,
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
     mode: 'onSubmit',
@@ -32,11 +65,18 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     defaultValues: {
       name: '',
       email: '',
+      ...(initialRole ? { role: initialRole } : {}),
       subject: '',
       message: '',
       _gotcha: '',
     },
   });
+
+  useEffect(() => {
+    if (initialRole) {
+      setValue('role', initialRole);
+    }
+  }, [initialRole, setValue]);
 
   const {
     submitForm,
@@ -260,6 +300,43 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                 aria-live="polite"
               >
                 {errors.email.message}
+              </span>
+            </label>
+          )}
+        </div>
+
+        {/* Audience / role (#128) */}
+        <div className="form-control">
+          <label htmlFor="role" className="label">
+            <span className="label-text">I am a…</span>
+            <span className="label-text-alt text-error">*</span>
+          </label>
+          <select
+            {...register('role')}
+            id="role"
+            className={`select select-bordered ${errors.role ? 'select-error' : ''}`}
+            aria-required="true"
+            aria-invalid={!!errors.role}
+            aria-describedby={errors.role ? 'role-error' : undefined}
+            required
+          >
+            <option value="" disabled>
+              Select one
+            </option>
+            {CONTACT_ROLES.map((role) => (
+              <option key={role} value={role}>
+                {CONTACT_ROLE_LABELS[role]}
+              </option>
+            ))}
+          </select>
+          {errors.role && (
+            <label className="label" id="role-error">
+              <span
+                className="label-text-alt text-error"
+                role="alert"
+                aria-live="polite"
+              >
+                {errors.role.message}
               </span>
             </label>
           )}

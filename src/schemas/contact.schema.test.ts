@@ -7,6 +7,7 @@ describe('Contact Schema', () => {
       const validData = {
         name: 'John Doe',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test Subject',
         message: 'This is a test message with more than 10 characters',
       };
@@ -16,14 +17,41 @@ describe('Contact Schema', () => {
       if (result.success) {
         expect(result.data.name).toBe('John Doe');
         expect(result.data.email).toBe('john@example.com');
+        expect(result.data.role).toBe('adopter');
         expect(result.data.subject).toBe('Test Subject');
       }
+    });
+
+    it('should reject missing role (#128)', () => {
+      const invalidData = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        subject: 'Test Subject',
+        message: 'This is a test message with more than 10 characters',
+      };
+
+      const result = contactSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject invalid role (#128)', () => {
+      const invalidData = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        role: 'volunteer',
+        subject: 'Test Subject',
+        message: 'This is a test message with more than 10 characters',
+      };
+
+      const result = contactSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
     });
 
     it('should reject invalid name', () => {
       const invalidData = {
         name: 'J', // Too short
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test Subject',
         message: 'This is a test message',
       };
@@ -41,6 +69,7 @@ describe('Contact Schema', () => {
       const invalidData = {
         name: 'John Doe',
         email: 'invalid-email',
+        role: 'adopter',
         subject: 'Test Subject',
         message: 'This is a test message',
       };
@@ -56,6 +85,7 @@ describe('Contact Schema', () => {
       const invalidData = {
         name: 'John Doe',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test', // Too short
         message: 'This is a test message',
       };
@@ -73,6 +103,7 @@ describe('Contact Schema', () => {
       const invalidData = {
         name: 'John Doe',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test Subject',
         message: 'Too short', // Less than 10 characters
       };
@@ -90,6 +121,7 @@ describe('Contact Schema', () => {
       const invalidData = {
         name: 'John@123',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test Subject',
         message: 'This is a test message',
       };
@@ -105,6 +137,7 @@ describe('Contact Schema', () => {
       const validData = {
         name: "Jean-Pierre O'Connor Jr.",
         email: 'jean@example.com',
+        role: 'adopter',
         subject: 'Test Subject',
         message: 'This is a test message',
       };
@@ -119,6 +152,7 @@ describe('Contact Schema', () => {
       const dataWithWhitespace = {
         name: '  John Doe  ',
         email: '  john@example.com  ',
+        role: 'adopter',
         subject: '  Test Subject  ',
         message: '  This is a test message  ',
       };
@@ -137,6 +171,7 @@ describe('Contact Schema', () => {
       const dataWithUppercaseEmail = {
         name: 'John Doe',
         email: 'JOHN@EXAMPLE.COM',
+        role: 'adopter',
         subject: 'Test Subject',
         message: 'This is a test message',
       };
@@ -154,6 +189,7 @@ describe('Contact Schema', () => {
       const dataWithEmptyHoneypot = {
         name: 'John Doe',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test Subject',
         message: 'This is a test message',
         _gotcha: '',
@@ -167,6 +203,7 @@ describe('Contact Schema', () => {
       const dataWithFilledHoneypot = {
         name: 'John Doe',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test Subject',
         message: 'This is a test message',
         _gotcha: 'bot filled this',
@@ -183,6 +220,7 @@ describe('Contact Schema', () => {
       const dataWithoutHoneypot = {
         name: 'John Doe',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test Subject',
         message: 'This is a test message',
       };
@@ -198,6 +236,7 @@ describe('Contact Schema', () => {
       const invalidData = {
         name: longName,
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test Subject',
         message: 'This is a test message',
       };
@@ -232,6 +271,7 @@ describe('Contact Schema', () => {
       const invalidData = {
         name: 'John Doe',
         email: 'john@example.com',
+        role: 'adopter',
         subject: longSubject,
         message: 'This is a test message',
       };
@@ -250,6 +290,7 @@ describe('Contact Schema', () => {
       const invalidData = {
         name: 'John Doe',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test Subject',
         message: longMessage,
       };
