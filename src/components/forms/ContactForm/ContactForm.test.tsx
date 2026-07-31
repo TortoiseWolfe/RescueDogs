@@ -4,6 +4,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ContactForm } from './ContactForm';
 import * as useWeb3FormsModule from '@/hooks/useWeb3Forms';
 
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/contact',
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+}));
+
 // Mock the useWeb3Forms hook
 vi.mock('@/hooks/useWeb3Forms', () => ({
   useWeb3Forms: vi.fn(),
@@ -43,11 +56,17 @@ describe('ContactForm', () => {
 
       expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/i am a/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/subject/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/message/i)).toBeInTheDocument();
       expect(
         screen.getByRole('button', { name: /send message/i })
       ).toBeInTheDocument();
+    });
+
+    it('preselects role from defaultRole (#128)', () => {
+      render(<ContactForm defaultRole="shelter" />);
+      expect(screen.getByLabelText(/i am a/i)).toHaveValue('shelter');
     });
 
     it('should render with custom className', () => {
@@ -188,6 +207,7 @@ describe('ContactForm', () => {
         // Fill out form with proper validation triggers
         const nameInput = screen.getByLabelText(/full name/i);
         const emailInput = screen.getByLabelText(/email address/i);
+        const roleSelect = screen.getByLabelText(/i am a/i);
         const subjectInput = screen.getByLabelText(/subject/i);
         const messageInput = screen.getByLabelText(/message/i);
 
@@ -195,6 +215,9 @@ describe('ContactForm', () => {
         await user.tab();
 
         await user.type(emailInput, 'john@example.com');
+        await user.tab();
+
+        await user.selectOptions(roleSelect, 'adopter');
         await user.tab();
 
         await user.type(subjectInput, 'Test Subject');
@@ -216,6 +239,7 @@ describe('ContactForm', () => {
           expect(mockSubmitForm).toHaveBeenCalledWith({
             name: 'John Doe',
             email: 'john@example.com',
+            role: 'adopter',
             subject: 'Test Subject',
             message: 'This is a test message',
             _gotcha: '',

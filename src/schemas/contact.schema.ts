@@ -1,6 +1,24 @@
 import { z } from 'zod';
 
 /**
+ * Who is contacting Raised Paws — used for triage in the Web3Forms payload (#128).
+ */
+export const CONTACT_ROLES = ['shelter', 'adopter', 'other'] as const;
+export type ContactRole = (typeof CONTACT_ROLES)[number];
+
+export const CONTACT_ROLE_LABELS: Record<ContactRole, string> = {
+  shelter: 'Shelter / rescue staff',
+  adopter: 'Adopter / applicant',
+  other: 'Other',
+};
+
+export function isContactRole(
+  value: string | null | undefined
+): value is ContactRole {
+  return value === 'shelter' || value === 'adopter' || value === 'other';
+}
+
+/**
  * Contact form validation schema
  * Uses Zod for runtime validation and TypeScript type inference
  * Follows existing form validation patterns in the codebase
@@ -26,6 +44,10 @@ export const contactSchema = z.object({
         .email('Please enter a valid email address')
         .max(254, 'Email address is too long')
     ),
+
+  role: z.enum(CONTACT_ROLES, {
+    message: 'Please tell us who you are',
+  }),
 
   subject: z
     .string()
@@ -257,5 +279,6 @@ export const sanitizeFormData = (data: ContactFormData): ContactFormData => {
     name: data.name.replace(/<[^>]*>/g, ''), // Strip HTML tags
     subject: data.subject.replace(/<[^>]*>/g, ''),
     message: data.message.replace(/<[^>]*>/g, ''),
+    role: data.role,
   };
 };

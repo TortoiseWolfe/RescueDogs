@@ -55,6 +55,7 @@ describe('useWeb3Forms Hook', () => {
   const validFormData: ContactFormData = {
     name: 'John Doe',
     email: 'john@example.com',
+    role: 'adopter',
     subject: 'Test Subject',
     message: 'This is a test message',
   };

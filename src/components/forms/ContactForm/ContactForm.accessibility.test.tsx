@@ -6,6 +6,19 @@ import * as useWeb3FormsModule from '@/hooks/useWeb3Forms';
 
 expect.extend(toHaveNoViolations);
 
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/contact',
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+}));
+
 // Mock the useWeb3Forms hook
 vi.mock('@/hooks/useWeb3Forms', () => ({
   useWeb3Forms: vi.fn(),
@@ -86,6 +99,7 @@ describe('ContactForm Accessibility', () => {
     // All form fields should have proper label associations
     expect(getByLabelText(/full name/i)).toBeTruthy();
     expect(getByLabelText(/email address/i)).toBeTruthy();
+    expect(getByLabelText(/i am a/i)).toBeTruthy();
     expect(getByLabelText(/subject/i)).toBeTruthy();
     expect(getByLabelText(/message/i)).toBeTruthy();
   });

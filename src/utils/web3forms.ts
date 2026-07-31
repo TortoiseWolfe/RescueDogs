@@ -2,6 +2,7 @@ import type {
   ContactFormData,
   Web3FormsResponse,
 } from '@/schemas/contact.schema';
+import { CONTACT_ROLE_LABELS } from '@/schemas/contact.schema';
 
 // Re-export the Web3FormsResponse type for external use
 export type { Web3FormsResponse };
@@ -64,6 +65,7 @@ export const sanitizeFormData = (data: ContactFormData): ContactFormData => {
     message: sanitizeString(data.message),
     // Email is already validated by schema, just return as-is
     email: data.email,
+    role: data.role,
   };
 };
 
@@ -98,10 +100,14 @@ export const submitToWeb3Forms = async (
 
   // Sanitize form data before submission
   const sanitizedData = sanitizeFormData(formData);
+  const roleLabel = CONTACT_ROLE_LABELS[sanitizedData.role];
 
   const payload = {
     access_key: WEB3FORMS_CONFIG.accessKey,
     ...sanitizedData,
+    // Human-readable triage field for the ops inbox (#128)
+    role_label: roleLabel,
+    subject: `[${roleLabel}] ${sanitizedData.subject}`,
     from_name: WEB3FORMS_CONFIG.fromName,
     botcheck: false,
   };

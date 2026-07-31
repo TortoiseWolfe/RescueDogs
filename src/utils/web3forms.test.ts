@@ -61,6 +61,7 @@ describe('Web3Forms Utilities', () => {
     const validFormData: ContactFormData = {
       name: 'John Doe',
       email: 'john@example.com',
+      role: 'adopter',
       subject: 'Test Subject',
       message: 'This is a test message',
     };
@@ -72,6 +73,7 @@ describe('Web3Forms Utilities', () => {
         data: {
           id: 'test-id',
           email: 'john@example.com',
+          role: 'adopter',
           from_name: 'John Doe',
           subject: 'Test Subject',
           message: 'This is a test message',
@@ -95,6 +97,8 @@ describe('Web3Forms Utilities', () => {
         body: JSON.stringify({
           access_key: WEB3FORMS_CONFIG.accessKey,
           ...validFormData,
+          role_label: 'Adopter / applicant',
+          subject: '[Adopter / applicant] Test Subject',
           from_name: 'Raised Paws Contact Form',
           botcheck: false,
         }),
@@ -143,6 +147,7 @@ describe('Web3Forms Utilities', () => {
       const unsafeData: ContactFormData = {
         name: '<script>alert("XSS")</script>John',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test<img src=x onerror=alert(1)>',
         message: 'Message with javascript:alert(1)',
       };
@@ -225,6 +230,7 @@ describe('Web3Forms Utilities', () => {
     const validFormData: ContactFormData = {
       name: 'John Doe',
       email: 'john@example.com',
+      role: 'adopter',
       subject: 'Test Subject',
       message: 'This is a test message',
     };
@@ -431,6 +437,7 @@ describe('Web3Forms Utilities', () => {
       const input: ContactFormData = {
         name: '<script>alert("XSS")</script>John',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test',
         message: 'Hello <script>evil()</script> world',
       };
@@ -444,6 +451,7 @@ describe('Web3Forms Utilities', () => {
       const input: ContactFormData = {
         name: 'John',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test <span onclick="alert(1)">click</span>',
         message: 'Test message',
       };
@@ -456,6 +464,7 @@ describe('Web3Forms Utilities', () => {
       const input: ContactFormData = {
         name: 'John',
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Test',
         message: 'Click <a href="javascript:void(0)">here</a>',
       };
@@ -468,6 +477,7 @@ describe('Web3Forms Utilities', () => {
       const input: ContactFormData = {
         name: "John O'Connor Jr.",
         email: 'john@example.com',
+        role: 'adopter',
         subject: 'Question about pricing & features',
         message: 'I have a question: Is this < $100?',
       };
@@ -487,6 +497,7 @@ describe('Web3Forms Utilities', () => {
         data: {
           id: '123',
           email: 'test@example.com',
+          role: 'adopter',
         },
       };
 
