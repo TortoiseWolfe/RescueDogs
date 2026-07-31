@@ -279,26 +279,47 @@ describe('GlobalNav role menus (#65)', () => {
   });
 
   it('keeps pill chrome on Log In (not on Try Demo or Dogs/Cats browse)', () => {
-    render(<GlobalNav />);
+    const { container } = render(<GlobalNav />);
 
     const loginPills = screen
       .getAllByRole('link', { name: /^log in$/i })
       .filter((el) => el.className.includes('btn'));
     expect(loginPills.length).toBeGreaterThanOrEqual(1);
     expect(loginPills[0].className).toMatch(/bg-white/);
+    // Visible on mobile chrome (#127); desktop keeps default btn-sm sizing
+    expect(loginPills[0].className).toMatch(/inline-flex/);
+    expect(loginPills[0].className).not.toMatch(/hidden\s+lg:inline-flex/);
+    expect(loginPills[0].className).toMatch(/max-lg:text-base/);
+    expect(loginPills[0].className).not.toMatch(/(?:^|\s)text-sm(?:\s|$)/);
+    expect(loginPills[0].className).not.toMatch(/(?:^|\s)sm:px-3(?:\s|$)/);
 
     const demoPills = screen
       .getAllByRole('link', { name: /^try demo$/i, hidden: true })
       .filter((el) => el.className.includes('btn'));
     expect(demoPills).toHaveLength(0);
 
-    const dogPills = screen
-      .getAllByRole('link', { name: /^dogs$/i, hidden: true })
-      .filter(
-        (el) =>
-          el.className.includes('btn') && el.className.includes('bg-white')
-      );
+    const dogPills = [...container.querySelectorAll('a[href="/dogs"]')].filter(
+      (el) => el.className.includes('btn') && el.className.includes('bg-white')
+    );
     expect(dogPills).toHaveLength(0);
+  });
+
+  it('scrolls the mobile hamburger menu when content is tall (#127)', () => {
+    const { container } = render(<GlobalNav />);
+
+    const menuTrigger = container.querySelector(
+      '[aria-label="Navigation menu"]'
+    );
+    expect(menuTrigger).toBeTruthy();
+    const panel =
+      menuTrigger!.parentElement?.querySelector('.dropdown-content');
+    expect(panel).toBeTruthy();
+    expect(panel!.className).toMatch(/overflow-y-auto/);
+    expect(panel!.className).toMatch(/max-h-/);
+    const list = panel!.querySelector('ul.menu');
+    expect(list).toBeTruthy();
+    expect(list!.className).toMatch(/menu-vertical/);
+    expect(list!.className).not.toMatch(/grid-cols-2/);
   });
 
   it('does not offer Create Account in role menus (sign-in page covers signup)', () => {
