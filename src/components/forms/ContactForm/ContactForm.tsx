@@ -46,7 +46,7 @@ const ContactFormInner: React.FC<ContactFormProps> = ({
   onError,
 }) => {
   const searchParams = useSearchParams();
-  const roleParam = searchParams.get('role');
+  const roleParam = searchParams?.get('role') ?? null;
   const roleFromQuery = isContactRole(roleParam) ? roleParam : undefined;
   const initialRole = defaultRole ?? roleFromQuery;
 
