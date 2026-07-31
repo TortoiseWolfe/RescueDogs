@@ -278,7 +278,7 @@ describe('GlobalNav role menus (#65)', () => {
     expect(labels).not.toContain('Blog');
   });
 
-  it('keeps pill chrome on Log In (not on Try Demo or Dogs/Cats browse)', () => {
+  it('keeps pill chrome on Log In for desktop only (#132)', () => {
     const { container } = render(<GlobalNav />);
 
     const loginPills = screen
@@ -286,12 +286,8 @@ describe('GlobalNav role menus (#65)', () => {
       .filter((el) => el.className.includes('btn'));
     expect(loginPills.length).toBeGreaterThanOrEqual(1);
     expect(loginPills[0].className).toMatch(/bg-white/);
-    // Visible on mobile chrome (#127); desktop keeps default btn-sm sizing
-    expect(loginPills[0].className).toMatch(/inline-flex/);
-    expect(loginPills[0].className).not.toMatch(/hidden\s+lg:inline-flex/);
-    expect(loginPills[0].className).toMatch(/max-lg:text-base/);
-    expect(loginPills[0].className).not.toMatch(/(?:^|\s)text-sm(?:\s|$)/);
-    expect(loginPills[0].className).not.toMatch(/(?:^|\s)sm:px-3(?:\s|$)/);
+    // Hidden below lg — guests use hamburger Account (#132)
+    expect(loginPills[0].className).toMatch(/hidden\s+lg:inline-flex/);
 
     const demoPills = screen
       .getAllByRole('link', { name: /^try demo$/i, hidden: true })
@@ -320,6 +316,27 @@ describe('GlobalNav role menus (#65)', () => {
     expect(list).toBeTruthy();
     expect(list!.className).toMatch(/menu-vertical/);
     expect(list!.className).not.toMatch(/grid-cols-2/);
+  });
+
+  it('styles hamburger section titles orange and items navy (#132)', () => {
+    const { container } = render(<GlobalNav />);
+
+    const menuTrigger = container.querySelector(
+      '[aria-label="Navigation menu"]'
+    );
+    const panel =
+      menuTrigger!.parentElement?.querySelector('.dropdown-content');
+    const title = panel!.querySelector('.menu-title span');
+    expect(title?.className).toMatch(/text-\[#f97316\]/);
+    const item = panel!.querySelector('ul.menu a');
+    expect(item?.className).toMatch(/text-\[#1e3a8a\]/);
+  });
+
+  it('exposes a chrome-compact flag for overlap measurement (#132)', () => {
+    const { container } = render(<GlobalNav />);
+    const row = container.querySelector('[data-chrome-compact]');
+    expect(row).toBeTruthy();
+    expect(row!.getAttribute('data-chrome-compact')).toMatch(/^(true|false)$/);
   });
 
   it('does not offer Create Account in role menus (sign-in page covers signup)', () => {
