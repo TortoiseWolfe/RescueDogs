@@ -36,10 +36,10 @@ const COPY: Record<
     title: 'Browse dogs',
     emoji: '🐶',
     description:
-      'Meet dogs available for adoption from partner shelters on Raised Paws.',
+      'Meet dogs available for adoption from partner shelters and rescues on Raised Paws.',
     emptyHeading: 'No dogs listed yet',
     emptyBody:
-      'When shelters add available dogs, you will find them here. Trait filters are coming later.',
+      'When shelters and rescues add available dogs, you will find them here. Trait filters are coming later.',
     otherHref: '/cats',
     otherLabel: 'Browse cats',
     listHeading: 'Dogs available now',
@@ -48,15 +48,18 @@ const COPY: Record<
     title: 'Browse cats',
     emoji: '🐱',
     description:
-      'Meet cats available for adoption from partner shelters on Raised Paws.',
+      'Meet cats available for adoption from partner shelters and rescues on Raised Paws.',
     emptyHeading: 'No cats listed yet',
     emptyBody:
-      'When shelters add available cats, you will find them here. Trait filters are coming later.',
+      'When shelters and rescues add available cats, you will find them here. Trait filters are coming later.',
     otherHref: '/dogs',
     otherLabel: 'Browse dogs',
     listHeading: 'Cats available now',
   },
 };
+
+const heroCtaClassName =
+  'btn btn-lg min-h-11 border-0 bg-white px-8 font-bold text-[#1e3a8a] hover:bg-[#e8edf7]';
 
 /**
  * Shared browse chrome for /dogs and /cats (#112 / #111).
@@ -129,16 +132,10 @@ export default function SpeciesBrowseView({
             {copy.description}
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link
-              href={copy.otherHref}
-              className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
-            >
+            <Link href={copy.otherHref} className={heroCtaClassName}>
               {copy.otherLabel}
             </Link>
-            <Link
-              href="/adopt"
-              className="btn btn-secondary btn-lg min-h-11 px-8"
-            >
+            <Link href="/adopt" className={heroCtaClassName}>
               Apply to adopt
             </Link>
           </div>

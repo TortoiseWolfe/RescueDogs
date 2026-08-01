@@ -16,7 +16,7 @@ const STATS = [
   },
   {
     value: '4',
-    label: 'shelters',
+    label: 'shelters & rescues',
     tone: 'text-[#5da8e0]',
   },
 ];
@@ -79,7 +79,8 @@ const STEPS = [
   {
     number: '3',
     title: 'Bring Them Home',
-    detail: 'Work with the shelter team and start your happily-ever-after.',
+    detail:
+      'Work with the shelter or rescue team and start your happily-ever-after.',
     bg: 'bg-[#d7e6ff] text-[#1e3a8a]',
   },
 ] as const;
@@ -129,8 +130,8 @@ export default function Home() {
             </h1>
 
             <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold break-normal text-[#f97316] sm:text-xl lg:mx-0">
-              Apply once, watch every status update live, and give shelters a
-              simple pipeline.
+              Apply once, watch every status update live, and give shelters
+              &amp; rescues a simple pipeline.
             </p>
 
             <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
@@ -286,7 +287,7 @@ export default function Home() {
           ))}
         </div>
         <p className="text-base-content/70 mx-auto mt-6 max-w-xl text-center text-sm font-medium">
-          Demo / early numbers — growing with our shelters.
+          Demo / early numbers — growing with our shelters &amp; rescues.
         </p>
       </section>
 
