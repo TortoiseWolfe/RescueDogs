@@ -81,40 +81,49 @@ describe('Contact Schema', () => {
       }
     });
 
-    it('should reject short subject', () => {
+    it('should reject empty subject', () => {
       const invalidData = {
         name: 'John Doe',
         email: 'john@example.com',
         role: 'adopter',
-        subject: 'Test', // Too short
+        subject: '   ',
         message: 'This is a test message',
       };
 
       const result = contactSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain(
-          'at least 5 characters'
-        );
+        expect(result.error.issues[0].message).toContain('required');
       }
     });
 
-    it('should reject short message', () => {
+    it('should reject empty message', () => {
       const invalidData = {
         name: 'John Doe',
         email: 'john@example.com',
         role: 'adopter',
         subject: 'Test Subject',
-        message: 'Too short', // Less than 10 characters
+        message: '   ',
       };
 
       const result = contactSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain(
-          'at least 10 characters'
-        );
+        expect(result.error.issues[0].message).toContain('required');
       }
+    });
+
+    it('should accept short subject and message', () => {
+      const validData = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        role: 'adopter',
+        subject: 'Hi',
+        message: 'Thanks',
+      };
+
+      const result = contactSchema.safeParse(validData);
+      expect(result.success).toBe(true);
     });
 
     it('should reject names with invalid characters', () => {

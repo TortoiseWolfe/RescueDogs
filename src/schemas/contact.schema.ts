@@ -7,7 +7,7 @@ export const CONTACT_ROLES = ['shelter', 'adopter', 'other'] as const;
 export type ContactRole = (typeof CONTACT_ROLES)[number];
 
 export const CONTACT_ROLE_LABELS: Record<ContactRole, string> = {
-  shelter: 'Shelter / rescue staff',
+  shelter: 'Shelter or rescue staff',
   adopter: 'Adopter / applicant',
   other: 'Other',
 };
@@ -55,7 +55,7 @@ export const contactSchema = z.object({
     .pipe(
       z
         .string()
-        .min(5, 'Subject must be at least 5 characters')
+        .min(1, 'Subject is required')
         .max(200, 'Subject must be less than 200 characters')
     ),
 
@@ -65,7 +65,7 @@ export const contactSchema = z.object({
     .pipe(
       z
         .string()
-        .min(10, 'Message must be at least 10 characters')
+        .min(1, 'Message is required')
         .max(5000, 'Message must be less than 5000 characters')
     ),
 

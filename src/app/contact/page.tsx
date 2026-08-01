@@ -5,12 +5,13 @@ import { projectConfig } from '@/config/project.config';
 export const metadata: Metadata = {
   title: 'Contact | Raised Paws',
   description:
-    'Contact Raised Paws about pilot interest, product feedback, or support for shelters and adopters.',
+    'Contact Raised Paws about pilot interest, product feedback, or support for shelters, rescues, and adopters.',
   keywords: [
     'contact',
     'support',
     'pilot',
     'shelter',
+    'rescue',
     'adopter',
     'Raised Paws',
   ],

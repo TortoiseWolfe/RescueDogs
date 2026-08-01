@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  buildSignInHref,
-  buildSignUpHref,
-} from '@/lib/portal/portal-preference';
+import { buildSignUpHref } from '@/lib/portal/portal-preference';
+
+const heroCtaClassName =
+  'btn btn-lg min-h-11 border-0 bg-white px-8 font-bold text-[#1e3a8a] hover:bg-[#e8edf7]';
 
 export const metadata: Metadata = {
   title: 'For adopters - Raised Paws',
@@ -25,37 +25,25 @@ export default function ForAdoptersPage() {
           <p className="mt-4 text-lg leading-relaxed text-white/90 sm:text-xl">
             Raised Paws is an adoption application tracker: apply once, watch
             every status update live, and know where you stand without chasing
-            the shelter for news.
+            the shelter or rescue for news.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
-              href={buildSignInHref('adopter')}
-              className="btn btn-secondary btn-lg min-h-11 px-8"
-            >
-              Log In
-            </Link>
-            <Link
               href={buildSignUpHref('adopter')}
-              className="btn btn-accent btn-lg min-h-11 px-8"
+              className={heroCtaClassName}
             >
               Create Account
             </Link>
             <Link
               href="/get-started?demo=1&choose=1"
-              className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
+              className={heroCtaClassName}
             >
               Try Demo
             </Link>
-            <Link
-              href="/dogs"
-              className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
-            >
+            <Link href="/dogs" className={heroCtaClassName}>
               Browse Dogs
             </Link>
-            <Link
-              href="/cats"
-              className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
-            >
+            <Link href="/cats" className={heroCtaClassName}>
               Browse Cats
             </Link>
           </div>
@@ -73,7 +61,8 @@ export default function ForAdoptersPage() {
           </li>
           <li>
             <strong className="text-base-content">Live status.</strong> See
-            submitted, in review, and next steps as the shelter updates them.
+            submitted, in review, and next steps as the shelter or rescue
+            updates them.
           </li>
           <li>
             <strong className="text-base-content">No guessing.</strong> Less
@@ -81,7 +70,7 @@ export default function ForAdoptersPage() {
           </li>
         </ul>
         <p className="text-base-content/70 mt-8 text-sm">
-          Looking for the shelter side instead?{' '}
+          Looking for the shelter or rescue side instead?{' '}
           <Link href="/for-shelters" className="link link-primary">
             For Shelters
           </Link>
