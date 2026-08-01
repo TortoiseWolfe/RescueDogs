@@ -37,6 +37,13 @@ describe('Footer (#74 / #65)', () => {
     expect(credit).toHaveAttribute('rel', expect.stringContaining('noopener'));
   });
 
+  it('shows the Raised Paws mark linking home (#136)', () => {
+    render(<Footer />);
+
+    const home = screen.getByRole('link', { name: /raised paws home/i });
+    expect(home).toHaveAttribute('href', '/');
+  });
+
   it('links to Blog in the footer as a pill (#65)', () => {
     render(<Footer />);
 

@@ -134,3 +134,4 @@ scripts/__tests__/fixtures/*
 # SpecKit wrapper (Docker-first) — tool + cache state, never commit
 .speckit-tools/
 .speckit-cache/
+tmp-logos/
