@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  buildSignInHref,
-  buildSignUpHref,
-} from '@/lib/portal/portal-preference';
+import { buildSignUpHref } from '@/lib/portal/portal-preference';
+
+const heroCtaClassName =
+  'btn btn-lg min-h-11 border-0 bg-white px-8 font-bold text-[#1e3a8a] hover:bg-[#e8edf7]';
 
 export const metadata: Metadata = {
-  title: 'For shelters - Raised Paws',
+  title: 'For shelters & rescues - Raised Paws',
   description:
-    'Anti-ghosting adoption pipeline: review applications and keep adopters updated in real time.',
+    'Anti-ghosting adoption pipeline for shelters and rescues: review applications and keep adopters updated in real time.',
 };
 
 export default function ForSheltersPage() {
@@ -17,32 +17,27 @@ export default function ForSheltersPage() {
       <section className="bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-20">
         <div className="mx-auto max-w-3xl text-center lg:text-left">
           <p className="font-friendly text-sm font-bold tracking-wide text-[#f97316] uppercase">
-            For Shelters &amp; rescues
+            For Shelters &amp; Rescues
           </p>
           <h1 className="font-display mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl">
             A simple pipeline that keeps adopters in the loop
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-white/90 sm:text-xl">
+            Whether you run a brick-and-mortar shelter or a foster-based rescue,
             Raised Paws is the anti-ghosting adoption platform: one application
             in, a clear staff pipeline, and live status for applicants—so your
             team spends less time on “any update?” emails.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
-              href={buildSignInHref('shelter')}
-              className="btn btn-secondary btn-lg min-h-11 px-8"
-            >
-              Log In
-            </Link>
-            <Link
               href={buildSignUpHref('shelter')}
-              className="btn btn-accent btn-lg min-h-11 px-8"
+              className={heroCtaClassName}
             >
               Create Account
             </Link>
             <Link
               href="/get-started?demo=1&choose=1"
-              className="btn btn-ghost btn-lg min-h-11 border-white/30 px-8 text-white"
+              className={heroCtaClassName}
             >
               Try Demo
             </Link>
@@ -65,8 +60,9 @@ export default function ForSheltersPage() {
             When you update an application, applicants see it—no silence.
           </li>
           <li>
-            <strong className="text-base-content">Staff access.</strong> Shelter
-            tools appear after your account is added as shelter staff.
+            <strong className="text-base-content">Staff access.</strong>{' '}
+            Pipeline tools appear after your account is added as staff at your
+            shelter or rescue.
           </li>
         </ul>
         <p className="text-base-content/70 mt-8 text-sm">

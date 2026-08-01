@@ -21,8 +21,8 @@ const defaultConfig = {
   projectDescription:
     'Pet adoption application tracker for shelters, adopters, and live status updates',
   basePath: '',
-  /** Public contact address — empty until ops configures an inbox (#128). */
-  contactEmail: '',
+  /** Public contact address shown on /contact (mailto). */
+  contactEmail: 'contact@raisedpaws.com',
 };
 
 /**

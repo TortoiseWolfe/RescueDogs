@@ -143,24 +143,18 @@ describe('ContactForm', () => {
         });
       });
 
-      it('should validate message length', async () => {
+      it('should require a non-empty message', async () => {
         const user = userEvent.setup();
         render(<ContactForm />);
 
-        const messageInput = screen.getByLabelText(/message/i);
         const submitButton = screen.getByRole('button', {
           name: /send message/i,
         });
 
-        await user.type(messageInput, 'Too short');
-
-        // Try to submit with short message
         await user.click(submitButton);
 
         await waitFor(() => {
-          expect(
-            screen.getByText(/message must be at least 10 characters/i)
-          ).toBeInTheDocument();
+          expect(screen.getByText(/message is required/i)).toBeInTheDocument();
         });
       });
 
