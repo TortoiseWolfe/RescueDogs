@@ -45,7 +45,7 @@ export function Footer() {
           <Link
             href="/"
             className="mb-2 inline-flex min-h-11 items-center justify-center transition-opacity hover:opacity-90"
-            aria-label="Raised Paws home"
+            aria-label="Raised Paws"
           >
             <Image
               src={`${projectConfig.basePath}/raised-paws-logo-white-paw.webp`}

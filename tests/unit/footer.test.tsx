@@ -40,7 +40,7 @@ describe('Footer (#74 / #65)', () => {
   it('shows the Raised Paws mark linking home (#136)', () => {
     render(<Footer />);
 
-    const home = screen.getByRole('link', { name: /raised paws home/i });
+    const home = screen.getByRole('link', { name: /^raised paws$/i });
     expect(home).toHaveAttribute('href', '/');
   });
 
