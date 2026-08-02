@@ -385,14 +385,14 @@ export function GlobalNav() {
                 className="flex min-h-11 min-w-0 items-center gap-1.5 transition-opacity hover:opacity-80 sm:gap-2"
               >
                 <Image
-                  src={`${projectConfig.basePath}/raised-paws-logo-64.webp`}
+                  src={`${projectConfig.basePath}/raised-paws-logo-white-paw.webp`}
                   alt="Raised Paws home"
                   width={44}
                   height={44}
                   className={
                     chromeCompact
-                      ? 'h-9 w-9 shrink-0 drop-shadow-sm'
-                      : 'h-10 w-10 shrink-0 drop-shadow-sm sm:h-11 sm:w-11'
+                      ? 'h-9 w-9 shrink-0 drop-shadow-[0_1px_2px_rgba(23,37,84,0.45)]'
+                      : 'h-10 w-10 shrink-0 drop-shadow-[0_1px_2px_rgba(23,37,84,0.45)] sm:h-11 sm:w-11'
                   }
                   priority
                 />

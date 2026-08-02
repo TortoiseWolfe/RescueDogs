@@ -33,8 +33,12 @@ test.describe('Cross-Page Navigation', () => {
     await dismissCookieBanner(page);
     await expect(page).toHaveURL(/\/docs/);
 
-    // Navigate back to Home via logo (#65 dropped Home text link)
-    await page.getByRole('link', { name: /Raised Paws home/i }).click();
+    // Navigate back to Home via header logo (#65 dropped Home text link;
+    // footer also links home with a distinct accessible name — #136)
+    await page
+      .locator('header')
+      .getByRole('link', { name: /Raised Paws home/i })
+      .click();
     await dismissCookieBanner(page);
     await expect(page).toHaveURL(/\/$/);
   });
@@ -83,8 +87,10 @@ test.describe('Cross-Page Navigation', () => {
       const nav = page.locator('nav, [role="navigation"]').first();
       await expect(nav).toBeVisible();
 
-      // Check key navigation links are present — logo is home (#65)
-      const homeLink = page.getByRole('link', { name: /Raised Paws home/i });
+      // Check key navigation links are present — header logo is home (#65 / #136)
+      const homeLink = page
+        .locator('header')
+        .getByRole('link', { name: /Raised Paws home/i });
       await expect(homeLink).toBeVisible();
 
       // Check footer links are consistent
