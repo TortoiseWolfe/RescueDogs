@@ -1,9 +1,11 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SocialIcon from '@/components/atomic/SocialIcon';
+import { projectConfig } from '@/config/project.config';
 import { RAISED_PAWS_SOCIALS } from '@/config/raised-paws-socials';
 
 /** Same white/navy pill chrome as the header — invert when pressed / current. */
@@ -40,8 +42,21 @@ export function Footer() {
       <div className="relative mx-auto w-full px-2 sm:container sm:px-6 lg:px-8">
         {/* Copy stays truly centered; chrome is out of flow on sm+ (#118). */}
         <div className="text-center">
+          <Link
+            href="/"
+            className="mb-2 inline-flex min-h-11 items-center justify-center transition-opacity hover:opacity-90"
+            aria-label="Raised Paws"
+          >
+            <Image
+              src={`${projectConfig.basePath}/raised-paws-logo-white-paw.webp`}
+              alt=""
+              width={48}
+              height={48}
+              className="h-10 w-10 sm:h-11 sm:w-11"
+            />
+          </Link>
           <p className="font-friendly text-sm leading-relaxed font-bold">
-            🐾 Raised Paws · Every pet deserves a happy tail.
+            Raised Paws · Every pet deserves a happy tail.
           </p>
           <p className="mt-1 text-xs text-white/90">
             Built by{' '}

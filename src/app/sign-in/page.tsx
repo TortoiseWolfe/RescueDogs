@@ -94,7 +94,11 @@ export default function SignInPage() {
   return (
     <main className="container mx-auto px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <div className="mx-auto max-w-md">
-        <h1 className="mb-2 text-center text-3xl font-bold sm:mb-3">
+        <h1
+          className={`text-center text-3xl font-bold ${
+            portal && !switchMessage ? 'mb-6 sm:mb-8' : 'mb-2 sm:mb-3'
+          }`}
+        >
           {heading}
         </h1>
         {switchMessage ? (
@@ -105,19 +109,7 @@ export default function SignInPage() {
           >
             <span>{switchMessage}</span>
           </div>
-        ) : portal ? (
-          <p className="text-base-content/70 mb-6 text-center text-sm sm:mb-8">
-            Exploring the other side?{' '}
-            <Link href="/for-adopters" className="link link-primary">
-              For Adopters
-            </Link>
-            {' · '}
-            <Link href="/for-shelters" className="link link-primary">
-              For Shelters
-            </Link>
-            .
-          </p>
-        ) : (
+        ) : portal ? null : (
           <p className="text-base-content/70 mb-6 text-center text-sm sm:mb-8">
             New here?{' '}
             <Link href="/for-adopters" className="link link-primary">
