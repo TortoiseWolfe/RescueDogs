@@ -25,12 +25,21 @@ product. Once one real shelter runs apply → status → tracker end-to-end, dem
 becomes optional walkthrough chrome.
 
 **Real pets.** Schema for shelters, pets, applications, and status history
-already exists. Near-term: staff add/edit pets with one photo in Supabase
-Storage (`pet-photos`), and location for filters on the shelter (`state` +
-`zip`) — see [Pet photos & location](./docs/product/VISION.md#pet-photos--location)
-in VISION. Browse listing (#112) and state/zip filters (#111) follow. Bulk
-import / Petfinder sync come later and reuse the same pet row + photo URL
+already exists. Staff can **add/edit pets with one photo** in Supabase Storage
+(`pet-photos`) at `/shelter/pets` (#110). Public browse (`/dogs`, `/cats`) and
+state/zip filters (#111 / #112) are live. Location for filters lives on the
+shelter (`state` + `zip`) — see
+[Pet photos & location](./docs/product/VISION.md#pet-photos--location) in VISION.
+Bulk import / Petfinder sync come later and reuse the same pet row + photo URL
 pattern.
+
+**Pilot pet load (practical).** For the first partners, expect photos + a short
+info sheet by email or shared folder. Upload happens in the **shelter staff**
+portal — not as an adopter. A normal account is not enough; the user must be in
+`shelter_members` for that shelter/rescue (demo: Try Demo → shelter door).
+Self-serve “create my rescue” is not built yet. Ops runbook + first pilot
+shelter membership: [#138](https://github.com/TortoiseWolfe/RescueDogs/issues/138)
+([FIRST-PARTNER-ONBOARDING.md](./docs/product/FIRST-PARTNER-ONBOARDING.md)).
 
 **Where applications live.** For partner shelters, **Raised Paws is the system
 of record** for intake, pipeline, and status — not a link-out to their Google
