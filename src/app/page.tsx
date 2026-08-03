@@ -22,16 +22,15 @@ const STATS = [
 ];
 
 /**
- * Demo Meet-the-Pets cards (#79). Portrait SVGs are temporary cartoons —
- * replace with real shelter photos when partner media is available.
+ * Demo Meet-the-Pets cards (#79 / #140). Cartoon portraits match seeded
+ * Second Chance Rescue pets — not real partner media.
  */
 const PETS = [
   {
-    name: 'Lola',
+    name: 'Biscuit',
     portrait: '/demo-pets/biscuit.png',
-    portraitAlt:
-      'Cartoon portrait of Lola, a white Chihuahua with black markings',
-    detail: '2 yrs · Chihuahua · loves belly rubs & long walks',
+    portraitAlt: 'Cartoon portrait of Biscuit, a golden Labrador mix',
+    detail: '2 yrs · Labrador Mix · hiking buddy energy',
     bg: 'bg-[#e8edf7]',
     border: 'border-[#a8b8d8]',
     image: 'from-[#7a94c4] to-[#e8edf7]',
@@ -41,8 +40,8 @@ const PETS = [
   {
     name: 'Pepper',
     portrait: '/demo-pets/pepper.png',
-    portraitAlt: 'Cartoon portrait of Pepper, a pepper-colored cat',
-    detail: '4 yrs · cat · curious, cuddly, and treat motivated',
+    portraitAlt: 'Cartoon portrait of Pepper, a black and white Border Collie',
+    detail: '4.5 yrs · Border Collie · smart and ready to train',
     bg: 'bg-[#fff7ed]',
     border: 'border-[#fed7aa]',
     image: 'from-[#ffedd5] to-[#fff7ed]',
@@ -50,11 +49,10 @@ const PETS = [
     cta: 'btn-secondary',
   },
   {
-    name: 'Zeus',
+    name: 'Tank',
     portrait: '/demo-pets/tank.png',
-    portraitAlt:
-      'Cartoon portrait of Zeus, a black Great Dane with gray muzzle',
-    detail: '6 yrs · Great Dane · gentle giant',
+    portraitAlt: 'Cartoon portrait of Tank, a gentle pit bull terrier',
+    detail: '6 yrs · Pit Bull Terrier · gentle giant',
     bg: 'bg-[#f1f6ff]',
     border: 'border-[#cfe0ff]',
     image: 'from-[#d7e6ff] to-[#e9f1ff]',

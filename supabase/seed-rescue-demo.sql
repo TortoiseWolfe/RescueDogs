@@ -84,20 +84,34 @@ ON CONFLICT (id) DO NOTHING;
 --    available-only dropdown filter)
 -- ============================================================================
 
-INSERT INTO pets (id, shelter_id, name, species, breed, sex, age_years, size, status) VALUES
+INSERT INTO pets (id, shelter_id, name, species, breed, sex, age_years, size, status, photo_url) VALUES
   ('44444444-4444-4444-4444-444444444401', '22222222-2222-2222-2222-222222222201',
-   'Biscuit', 'dog', 'Labrador Mix', 'male', 2.0, 'large', 'available'),
+   'Biscuit', 'dog', 'Labrador Mix', 'male', 2.0, 'large', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444401/demo-biscuit.png'),
   ('44444444-4444-4444-4444-444444444402', '22222222-2222-2222-2222-222222222201',
-   'Pepper', 'dog', 'Border Collie', 'female', 4.5, 'medium', 'available'),
+   'Pepper', 'dog', 'Border Collie', 'female', 4.5, 'medium', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444402/demo-pepper.png'),
   ('44444444-4444-4444-4444-444444444403', '22222222-2222-2222-2222-222222222201',
-   'Tank', 'dog', 'Pit Bull Terrier', 'male', 6.0, 'large', 'available'),
+   'Tank', 'dog', 'Pit Bull Terrier', 'male', 6.0, 'large', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444403/demo-tank.png'),
   ('44444444-4444-4444-4444-444444444404', '22222222-2222-2222-2222-222222222201',
-   'Noodle', 'dog', 'Dachshund', 'female', 1.5, 'small', 'available'),
+   'Noodle', 'dog', 'Dachshund', 'female', 1.5, 'small', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444404/demo-noodle.png'),
   ('44444444-4444-4444-4444-444444444405', '22222222-2222-2222-2222-222222222201',
-   'Miso', 'cat', 'Domestic Shorthair', 'female', 3.0, 'small', 'available'),
+   'Miso', 'cat', 'Domestic Shorthair', 'female', 3.0, 'small', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444405/demo-miso.png'),
   ('44444444-4444-4444-4444-444444444406', '22222222-2222-2222-2222-222222222201',
-   'Rocket', 'dog', 'Greyhound', 'male', 5.0, 'large', 'adopted')
-ON CONFLICT (id) DO NOTHING;
+   'Rocket', 'dog', 'Greyhound', 'male', 5.0, 'large', 'adopted',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444406/demo-rocket.png')
+ON CONFLICT (id) DO UPDATE SET
+  photo_url = EXCLUDED.photo_url,
+  name = EXCLUDED.name,
+  species = EXCLUDED.species,
+  breed = EXCLUDED.breed,
+  sex = EXCLUDED.sex,
+  age_years = EXCLUDED.age_years,
+  size = EXCLUDED.size,
+  status = EXCLUDED.status;
 
 -- ============================================================================
 -- 4. ADOPTER PROFILE (the reusable "universal application" answers)
