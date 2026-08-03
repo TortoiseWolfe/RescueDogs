@@ -120,7 +120,8 @@ Pick one pattern for this pilot (fill in):
 
 ## Ops onboarding checklist
 
-Use when provisioning the first real shelter (internal).
+Use when provisioning the first real shelter (internal). Full SQL / Management
+API steps: [FIRST-PARTNER-ONBOARDING.md](./FIRST-PARTNER-ONBOARDING.md) (#138).
 
 - [ ] Create `shelters` row (name, city, state, zip, contact)
 - [ ] Add `shelter_members` for agreed staff
