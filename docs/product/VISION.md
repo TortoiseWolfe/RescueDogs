@@ -157,32 +157,43 @@ The wedge is narrower and stronger:
 
 ### How pet information gets into the system
 
-The shipped MVP seeds pets and shelters for demo (`048-rescue-mvp`). Real shelter
-onboarding is future work, planned in phases:
+Staff **add/edit + photo upload** shipped in #110 (`/shelter/pets` → Supabase
+Storage `pet-photos`). Public browse (#112) and state/zip filters (#111) are
+live. What remains for a **real** partner is ops: a `shelters` row, at least
+one `shelter_members` user, then loading currently available pets.
 
-| Phase                     | How pets enter                                                                 | Who does the work                                                                          |
-| ------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| **Pilots (1–5 shelters)** | Spreadsheet import, Petfinder export, or copy from the shelter's existing site | RescueDogs + shelter during paid onboarding (see [BUSINESS-MODEL.md](./BUSINESS-MODEL.md)) |
-| **Growth**                | Simple shelter self-service: add and edit currently available pets             | Shelter staff                                                                              |
-| **Scale**                 | Sync with Petfinder, shelter management software, or website feeds             | Paid integrations (Tier B in business model)                                               |
+| Phase                     | How pets enter                                                             | Who does the work                                                                                                                 |
+| ------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Pilots (1–5 partners)** | Email / shared folder of photos + short fields → upload in `/shelter/pets` | Raised Paws operator and/or shelter staff on a linked membership ([#138](https://github.com/TortoiseWolfe/RescueDogs/issues/138)) |
+| **Growth**                | Shelter self-service day-to-day (membership already granted)               | Shelter / rescue staff                                                                                                            |
+| **Scale**                 | Sync with Petfinder, shelter management software, or website feeds         | Paid integrations (Tier B in business model)                                                                                      |
 
-For early pilots, a shelter may only need **currently available** animals in the
-system — often 10–30 pets, not their full historical catalog. Listing
-elsewhere (Petfinder, website, social) can continue; our apply link and pipeline
-are the product entry point.
+**Pilot practical notes (locked):**
+
+- Prefer a shared Drive/Dropbox folder over endless email threads; aim for
+  **currently available** animals only (often ~5–30), not the full historical
+  catalog.
+- Uploading requires a **shelter staff** sign-in. Adopter accounts cannot manage
+  pets. Demo: Try Demo → shelter door (`staff@demo.test`). Production: add the
+  operator or partner user to `shelter_members` (no self-serve create/join yet).
+- Listing elsewhere (Petfinder, website, social) can continue; our apply link
+  and pipeline are the product entry point.
+- Next ticket: [#138](https://github.com/TortoiseWolfe/RescueDogs/issues/138)
+  first-partner onboarding —
+  [FIRST-PARTNER-ONBOARDING.md](./FIRST-PARTNER-ONBOARDING.md).
 
 ### Data integrations (what we are not building)
 
 We are **not** planning a universal scraper or an extractor that pulls
-everything from every shelter database. Early pilots use a **one-time import**
-of currently available pets (spreadsheet, Petfinder export, or copy from their
-site). Shelters can keep listing animals on Petfinder or their own website.
+everything from every shelter database. Early pilots use **manual upload** (or
+a one-time spreadsheet/Petfinder export copy) of currently available pets.
+Shelters can keep listing animals on Petfinder or their own website.
 
-Over time we add **self-service pet management** in Raised Paws, then
-**targeted official integrations** (Petfinder, shelter management software such
-as PetPoint or Shelterluv, website feeds) — built **one system at a time** through
-APIs and partnerships, not unauthorized scraping.
-
+Day-to-day pet management in Raised Paws already exists for linked staff
+(#110). Next we add **targeted official integrations** (Petfinder, shelter
+management software such as PetPoint or Shelterluv, website feeds) — built
+**one system at a time** through APIs and partnerships, not unauthorized
+scraping.
 We do **not** need to mirror a shelter's full historical animal database — only
 the pets they are actively taking applications for. For **applications**, Raised
 Paws is the system of record for new intake and live status; we do not pull old
@@ -207,11 +218,13 @@ Pets inherit location via `shelter_id`. Do **not** denormalize state/zip onto
 every pet unless we later need foster-home overrides. Exact zip / state filters
 join `pets` → `shelters` (#111). Radius / map search is deferred.
 
-**Near-term tickets:** staff add/edit + photo (#110) → public `/dogs` `/cats`
-listings (#112) → state/zip filters (#111).
+**Near-term tickets:** ~~staff add/edit + photo (#110)~~ → ~~public `/dogs`
+`/cats` (#112)~~ → ~~state/zip filters (#111)~~ → **first-partner membership +
+pet-load runbook ([#138](https://github.com/TortoiseWolfe/RescueDogs/issues/138))**.
 
-**Deferred (no tickets yet):** bulk spreadsheet / Petfinder import, multi-photo
-galleries, foster zip overrides, geo/radius, migrating storage vendors.
+**Deferred (no tickets yet / parked):** bulk spreadsheet / Petfinder import,
+self-serve create-org, multi-photo galleries, foster zip overrides, geo/radius,
+migrating storage vendors, `/follow` early-interest list (#129).
 
 ### Universal application vs shelter-specific forms
 
@@ -441,6 +454,7 @@ and must restate Principle V.
 
 | Date       | Change                                                                                                 |
 | ---------- | ------------------------------------------------------------------------------------------------------ |
+| 2026-08-03 | Pilot pet load: staff portal upload + membership; next = #138 runbook; #110/#111/#112 marked shipped   |
 | 2026-07-28 | Link first-partner pilot packet ([PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md); #117)                     |
 | 2026-07-23 | Demo vs first real shelter; first-partner in-app Apply rule; README vision summary                     |
 | 2026-07-13 | Added “How we refer to Raised Paws” (tracker vs rescue-app naming)                                     |
