@@ -212,6 +212,13 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <p className="text-base-content/70 mt-10 text-sm">
+            Building with us from the sidelines?{' '}
+            <Link href="/follow" className="link link-primary">
+              Join the early interest list
+            </Link>
+            .
+          </p>
         </div>
       </section>
 
