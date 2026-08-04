@@ -62,6 +62,23 @@ describe('Footer (#74 / #65)', () => {
     expect(contacts[0].className).toMatch(/bg-white/);
   });
 
+  it('links to Follow between Blog and Contact (#129)', () => {
+    render(<Footer />);
+
+    const follows = screen.getAllByRole('link', { name: /^follow$/i });
+    expect(follows.length).toBeGreaterThanOrEqual(1);
+    expect(follows[0]).toHaveAttribute('href', '/follow');
+    expect(follows[0].className).toMatch(/bg-white/);
+  });
+
+  it('marks Follow as current on /follow (#129)', () => {
+    mockUsePathname.mockReturnValue('/follow');
+    render(<Footer />);
+
+    const follow = screen.getByRole('link', { name: /^follow$/i });
+    expect(follow).toHaveAttribute('aria-current', 'page');
+  });
+
   it('marks Contact as current on /contact (#128)', () => {
     mockUsePathname.mockReturnValue('/contact');
     render(<Footer />);

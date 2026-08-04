@@ -21,8 +21,10 @@ const footerSocialBtn =
 export function Footer() {
   const pathname = usePathname();
   const blogSelected = Boolean(pathname?.startsWith('/blog'));
+  const followSelected = Boolean(pathname?.startsWith('/follow'));
   const contactSelected = Boolean(pathname?.startsWith('/contact'));
   const blogClass = `${footerNavPill} ${blogSelected ? footerNavPillSelected : ''}`;
+  const followClass = `${footerNavPill} ${followSelected ? footerNavPillSelected : ''}`;
   const contactClass = `${footerNavPill} ${contactSelected ? footerNavPillSelected : ''}`;
 
   // Full-viewport messaging UIs — site footer overlaps conversation list on
@@ -106,6 +108,13 @@ export function Footer() {
               aria-current={blogSelected ? 'page' : undefined}
             >
               Blog
+            </Link>
+            <Link
+              href="/follow"
+              className={`${followClass} inline-flex h-11 min-h-11 shrink-0 items-center px-2.5 text-xs sm:px-3 sm:text-sm`}
+              aria-current={followSelected ? 'page' : undefined}
+            >
+              Follow
             </Link>
             <Link
               href="/contact"
