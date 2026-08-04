@@ -102,7 +102,19 @@ INSERT INTO pets (id, shelter_id, name, species, breed, sex, age_years, size, st
    'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444405/demo-miso.png'),
   ('44444444-4444-4444-4444-444444444406', '22222222-2222-2222-2222-222222222201',
    'Rocket', 'dog', 'Greyhound', 'male', 5.0, 'large', 'adopted',
-   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444406/demo-rocket.png')
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444406/demo-rocket.png'),
+  ('44444444-4444-4444-4444-444444444407', '22222222-2222-2222-2222-222222222201',
+   'Pickles', 'cat', 'Domestic Shorthair', 'male', 2.0, 'small', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444407/demo-pickles.png'),
+  ('44444444-4444-4444-4444-444444444408', '22222222-2222-2222-2222-222222222201',
+   'Ink', 'cat', 'Domestic Shorthair', 'female', 4.0, 'small', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444408/demo-ink.png'),
+  ('44444444-4444-4444-4444-444444444409', '22222222-2222-2222-2222-222222222201',
+   'Cloud', 'cat', 'Domestic Longhair', 'male', 1.0, 'medium', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444409/demo-cloud.png'),
+  ('44444444-4444-4444-4444-444444444410', '22222222-2222-2222-2222-222222222201',
+   'Chili', 'cat', 'Domestic Shorthair', 'female', 5.0, 'small', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444410/demo-chili.png')
 ON CONFLICT (id) DO UPDATE SET
   photo_url = EXCLUDED.photo_url,
   name = EXCLUDED.name,

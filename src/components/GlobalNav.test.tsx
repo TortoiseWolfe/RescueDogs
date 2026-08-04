@@ -145,16 +145,15 @@ describe('GlobalNav role menus (#65)', () => {
     });
   });
 
-  it('wraps desktop role menus in a white band (#79)', () => {
+  it('wraps desktop role menus in a wedged white band (#79 / #142)', () => {
     render(<GlobalNav />);
 
     const browseTrigger = screen.getByRole('button', {
       name: /browse pets/i,
     });
-    const strip = browseTrigger.closest('div[class*="bg-white"]');
+    const strip = browseTrigger.closest('div[class*="header-wedge"]');
     expect(strip).toBeTruthy();
-    expect(strip?.className).toMatch(/h-full|self-stretch/);
-    expect(strip?.className).toMatch(/bg-white/);
+    expect(strip?.className).toMatch(/header-wedge/);
     expect(strip?.className).not.toMatch(/rounded-full/);
 
     expect(
