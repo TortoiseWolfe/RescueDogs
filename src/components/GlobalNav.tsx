@@ -34,11 +34,11 @@ import {
 
 /** White chrome pills — invert to navy/white on press and when current (#65). */
 const navChromeBtn =
-  'btn btn-sm min-h-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
+  'btn btn-sm header-wedge-btn min-h-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
 const navChromeBtnSelected =
   '!bg-[#172554] !text-white hover:!bg-[#1e3a8a] hover:!text-white active:!bg-[#172554] active:!text-white';
 const navChromeIconBtn =
-  'btn btn-circle min-h-11 min-w-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
+  'btn btn-circle header-wedge-btn min-h-11 min-w-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
 /** Only when brand+chrome would collide (e.g. S9+ ~360px, Lumia ~320px) (#132). */
 const navChromeIconBtnCompact = 'min-h-10 min-w-10 h-10 w-10';
 
@@ -416,7 +416,9 @@ export function GlobalNav() {
               aria-hidden="true"
             />
             <div className="hidden self-stretch lg:flex lg:items-center lg:pr-3">
-              <div className="flex h-full items-center gap-0.5 bg-white px-2">
+              {/* White role band wedged into orange (#142) — decorative
+                  clip-path on ::before so dropdown panels are not clipped. */}
+              <div className="header-wedge my-2.5 flex min-h-11 items-center gap-0.5 px-4 py-0.5">
                 <RoleDropdown
                   prefixWord="Browse"
                   accentWord="Pets"
