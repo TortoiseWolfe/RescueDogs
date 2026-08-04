@@ -134,8 +134,8 @@
 }
 
 /* Menu bar: orange background in both light and dark modes.
- * Remap primary tokens at header scope so brand title stays white on orange.
- * Nav chrome buttons use explicit navy classes in GlobalNav (#53). */
+ * Remap primary tokens at header scope (chrome / borders). Brand title is
+ * styled separately (#142). Nav chrome buttons use navy in GlobalNav. */
 [data-theme='trusted-care-light'] .site-header {
   --color-primary: #f97316;
   --color-primary-content: #ffffff;
@@ -148,11 +148,45 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-/* The brand title (AnimatedLogo) hardcodes text-primary; inside the menu bar
- * that equals the bar background, so force it to the foreground token (white
- * on orange in both themes). */
+/* Brand title on orange header: white fill + navy outline (#142).
+ * AnimatedLogo uses text-primary (orange inside .site-header), so override. */
 .site-header .brand-logo {
-  color: var(--color-primary-content);
+  color: #ffffff;
+  -webkit-text-stroke: 1.25px #1e3a8a;
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 1px #1e3a8a,
+    0 1px 0 #1e3a8a,
+    0 -1px 0 #1e3a8a,
+    1px 0 0 #1e3a8a,
+    -1px 0 0 #1e3a8a;
+}
+
+/*
+ * Wedged inserts in the orange header (#142).
+ * Decorative background only (clip-path) so dropdown menus are not clipped.
+ * Trapezoid is wider at the bottom — reads as driven into the bar.
+ */
+.site-header .header-wedge {
+  position: relative;
+  isolation: isolate;
+}
+
+.site-header .header-wedge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* Soft top shade stands in for inset shadow (clip-path would clip box-shadow). */
+  background: linear-gradient(to bottom, #dbe3f0 0%, #ffffff 22%, #ffffff 100%);
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 100%, 0 100%);
+}
+
+/* White chrome controls: recessed into the orange face */
+.site-header .header-wedge-btn {
+  box-shadow:
+    inset 0 3px 5px rgba(23, 37, 84, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.65) !important;
 }
 
 /* Avatar glow/shadow — uses base-content so it auto-adapts:
