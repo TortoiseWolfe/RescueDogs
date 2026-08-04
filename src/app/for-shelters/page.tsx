@@ -70,6 +70,10 @@ export default function ForSheltersPage() {
           <Link href="/for-adopters" className="link link-primary">
             For Adopters
           </Link>
+          . Want occasional product updates?{' '}
+          <Link href="/follow" className="link link-primary">
+            Join the early interest list
+          </Link>
           .
         </p>
       </section>
