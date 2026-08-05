@@ -237,7 +237,7 @@ describe('GlobalNav role menus (#65)', () => {
     expect(apps[0]).toHaveAttribute('href', '/applications');
   });
 
-  it('shelter menu includes Shelter dashboard, Blog, and omits dog/cat browse', () => {
+  it('shelter menu includes Shelter Dashboard, Blog, and omits dog/cat browse', () => {
     render(<GlobalNav />);
 
     const shelterTrigger = screen.getByRole('button', {
@@ -249,7 +249,7 @@ describe('GlobalNav role menus (#65)', () => {
     const labels = [...list!.querySelectorAll('a')].map(
       (a) => a.textContent?.trim() || ''
     );
-    expect(labels).toContain('Shelter dashboard');
+    expect(labels).toContain('Shelter Dashboard');
     expect(labels).toContain('Blog');
     expect(labels).not.toContain('Browse Pets');
     expect(labels).not.toContain('Browse dogs');

@@ -82,7 +82,7 @@ export default function SignInPage() {
       ? 'Shelter Sign In'
       : portal === 'adopter'
         ? 'Adopter Sign In'
-        : 'Log In';
+        : 'Sign In';
 
   const switchMessage =
     demoSwitch && portal
@@ -110,7 +110,7 @@ export default function SignInPage() {
             <span>{switchMessage}</span>
           </div>
         ) : portal ? null : (
-          <p className="text-base-content/70 mb-6 text-center text-sm sm:mb-8">
+          <p className="text-base-content/70 mb-6 text-center text-xs whitespace-nowrap sm:mb-8 sm:text-sm">
             New here?{' '}
             <Link href="/for-adopters" className="link link-primary">
               For Adopters
@@ -119,7 +119,6 @@ export default function SignInPage() {
             <Link href="/for-shelters" className="link link-primary">
               For Shelters
             </Link>
-            .
           </p>
         )}
         {switchFrom && demoSwitch && portal ? (

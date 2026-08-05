@@ -55,7 +55,7 @@ export default function SignUpPage() {
   return (
     <main className="container mx-auto px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <div className="mx-auto max-w-md">
-        <h1 className="mb-2 text-center text-3xl font-bold sm:mb-3">
+        <h1 className="mb-2 text-center text-2xl font-bold whitespace-nowrap sm:mb-3 sm:text-3xl">
           {heading}
         </h1>
         {portal ? (
