@@ -35,6 +35,7 @@ const {
   isOAuthUser,
   getOAuthProvider,
   populateOAuthProfile,
+  parseAuthErrorFromUrl,
 } = await import('./oauth-utils');
 
 // Helper to create mock User objects
@@ -48,6 +49,67 @@ function createMockUser(overrides: Partial<User> = {}): User {
     ...overrides,
   } as User;
 }
+
+describe('parseAuthErrorFromUrl (#100)', () => {
+  it('reads an error from the URL FRAGMENT — the implicit-flow case that was broken', () => {
+    // The real shape of an expired confirmation/recovery link. The old redirect
+    // guard read only location.search, saw no error, and bounced the user to
+    // /sign-in two seconds after showing them the error panel.
+    const result = parseAuthErrorFromUrl(
+      '',
+      '#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired'
+    );
+
+    expect(result).toEqual({
+      error: 'access_denied',
+      errorDescription: 'Email link is invalid or has expired',
+    });
+  });
+
+  it('reads an error from the query string', () => {
+    const result = parseAuthErrorFromUrl(
+      '?error=server_error&error_description=Something+broke',
+      ''
+    );
+
+    expect(result).toEqual({
+      error: 'server_error',
+      errorDescription: 'Something broke',
+    });
+  });
+
+  it('returns null when the URL carries no error (the happy path must still redirect)', () => {
+    expect(parseAuthErrorFromUrl('', '')).toBeNull();
+    expect(
+      parseAuthErrorFromUrl(
+        '?code=abc123',
+        '#access_token=xyz&token_type=bearer'
+      )
+    ).toBeNull();
+  });
+
+  it('tolerates the leading ? and # being present or absent', () => {
+    expect(parseAuthErrorFromUrl('error=a', '')?.error).toBe('a');
+    expect(parseAuthErrorFromUrl('?error=a', '')?.error).toBe('a');
+    expect(parseAuthErrorFromUrl('', 'error=b')?.error).toBe('b');
+    expect(parseAuthErrorFromUrl('', '#error=b')?.error).toBe('b');
+  });
+
+  it('prefers the query copy when both carry an error', () => {
+    const result = parseAuthErrorFromUrl(
+      '?error=from_query',
+      '#error=from_hash'
+    );
+    expect(result?.error).toBe('from_query');
+  });
+
+  it('returns the error with a null description when none is supplied', () => {
+    expect(parseAuthErrorFromUrl('', '#error=access_denied')).toEqual({
+      error: 'access_denied',
+      errorDescription: null,
+    });
+  });
+});
 
 describe('extractOAuthDisplayName', () => {
   it('returns full_name when available in user_metadata', () => {

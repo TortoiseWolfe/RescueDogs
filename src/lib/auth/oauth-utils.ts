@@ -7,6 +7,55 @@ import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 import { createLogger } from '@/lib/logger';
 
+/** An auth error carried on a callback URL. */
+export interface AuthUrlError {
+  error: string;
+  errorDescription: string | null;
+}
+
+/**
+ * Read an auth error from a callback URL, checking BOTH the query string and the
+ * fragment.
+ *
+ * Why both (#100): `src/lib/supabase/client.ts` sets `flowType: 'implicit'` because
+ * the site is a static export with no server-side code exchange. Supabase's implicit
+ * flow returns errors in the URL **fragment** (`#error=...&error_description=...`),
+ * not the query string. Code that reads only `location.search` therefore sees no
+ * error for the most common real-world case — a user clicking an expired confirmation
+ * or password-recovery link.
+ *
+ * That is not hypothetical: `/auth/callback` displayed the error (it read the hash)
+ * while its redirect guard read only the query string, so the page showed the error
+ * and then bounced the user to `/sign-in?error=auth_callback_failed` two seconds
+ * later, before they could read it. Both call sites now share this one function so
+ * they cannot disagree again.
+ *
+ * @param search - `window.location.search`, with or without the leading `?`
+ * @param hash - `window.location.hash`, with or without the leading `#`
+ * @returns the error, or null when the URL carries none
+ */
+export function parseAuthErrorFromUrl(
+  search: string,
+  hash: string
+): AuthUrlError | null {
+  const query = new URLSearchParams(
+    search.startsWith('?') ? search.slice(1) : search
+  );
+  const fragment = new URLSearchParams(
+    hash.startsWith('#') ? hash.slice(1) : hash
+  );
+
+  // Query first: if a provider ever returns both, the query copy is the canonical one.
+  const error = query.get('error') ?? fragment.get('error');
+  if (!error) return null;
+
+  return {
+    error,
+    errorDescription:
+      query.get('error_description') ?? fragment.get('error_description'),
+  };
+}
+
 /**
  * Extract display name from OAuth user metadata using fallback cascade.
  * Priority: full_name > name > user_name > preferred_username > email prefix > "Anonymous User"
