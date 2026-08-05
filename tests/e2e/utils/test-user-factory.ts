@@ -1516,6 +1516,13 @@ export async function openConversationAs(
     timeout: 60000,
   });
 
+  // #126: the gate's device-key bootstrap is non-blocking, so the thread can be
+  // visible while this user's keys are still rotating. Callers open BOTH
+  // participants and await both, so settling here means neither side can encrypt
+  // to a key the other has already revoked. See waitForOwnKeysSettled.
+  const userId = (session.user as { id?: string })?.id;
+  if (userId) await waitForOwnKeysSettled(userId);
+
   return { page, context, close };
 }
 
@@ -1600,6 +1607,99 @@ export async function openAsPartner(
     browser,
     fixture.partnerSession,
     fixture.conversationId
+  );
+}
+
+/**
+ * #126 barrier: block until this user's encryption keys have STOPPED changing,
+ * so a peer that reads this user's public key afterwards gets one this user can
+ * actually decrypt with.
+ *
+ * Root cause of the chromium-msg-iso realtime-delivery flake: EncryptionKeyGate
+ * calls keyManagementService.ensureKeysForSession(), which — for a fresh throwaway
+ * user whose IndexedDB has no cached private key (always true on first open) —
+ * REVOKES the admin-seeded Argon2 key and generates a brand-new RANDOM ECDH
+ * *device* key. The seeded key's private half never exists in any browser. The gate
+ * is non-blocking (it renders the thread behind a pointer-events-none overlay, with
+ * no decrypt-retry), so under this shard's `workers:2` contention the viewer's
+ * `getUserPublicKey(partner)` — "newest non-revoked row" — can resolve to the
+ * partner's soon-revoked SEED key before the partner's device-key row commits. The
+ * partner only ever holds its device private key, so that message is bound to a key
+ * nobody can decrypt → permanent "AES-GCM decryption failed" that no reload
+ * recovers (the ciphertext is immutable and no decrypt-failure cache is involved).
+ *
+ * Called at the end of {@link openConversationAs}, so every isolated spec that opens
+ * both participants (and awaits both) is guaranteed both sides have settled before
+ * the first send — no per-spec wiring, and no weakening of any assertion: the test
+ * still performs a real send → realtime → decrypt of the plaintext.
+ *
+ * Settle condition: the newest non-revoked row IS the device key
+ * (`DEVICE_KEY_SALT_MARKER`), i.e. the gate has finished replacing the seeded
+ * Argon2 row. Waiting merely for the rows to "stop changing" does NOT work — the
+ * seeded row is already stable when the page opens, so such a check returns before
+ * rotation has even started.
+ *
+ * FAIL-OPEN by design: if the condition is not reached in time this logs a
+ * diagnostic and returns, it never throws. A stabilizer must not itself fail tests
+ * — an earlier revision did, and turned a 1-failure shard into 47 failures. If the
+ * gate ever stops rotating (pre-baked keys, or a fixed ensureKeysForSession) this
+ * simply becomes a no-op instead of a false red.
+ *
+ * Uses the admin client (bypasses RLS, reads committed state on the single shared
+ * Postgres — no read replica, so a committed row is immediately visible to the
+ * peer's subsequent online `getUserPublicKey` fetch).
+ */
+export async function waitForOwnKeysSettled(
+  userId: string,
+  opts: { timeoutMs?: number; pollMs?: number } = {}
+): Promise<void> {
+  const admin = getAdminClient();
+  if (!admin) return; // seeding was skipped too (no admin client) — nothing to wait on
+  const { timeoutMs = 10000, pollMs = 250 } = opts;
+
+  // Mirrors DEVICE_KEY_SALT_MARKER in src/services/messaging/key-service.ts.
+  // NOT imported: key-service pulls in @/lib/messaging/database, which constructs
+  // a Dexie instance at module scope and blows up under Node. Because this helper
+  // fails open, a drift in that constant degrades it to a no-op (with the warning
+  // below naming the salts it actually saw) rather than failing the suite.
+  const DEVICE_KEY_SALT_MARKER = 'rp-device-key-v1';
+
+  type KeyRow = { created_at: string; encryption_salt: string | null };
+  let lastRows: KeyRow[] | null = null;
+  let lastError: string | null = null;
+
+  /** True once the newest live key is the gate's device key. */
+  const deviceKeyIsNewest = async (): Promise<boolean> => {
+    const { data, error } = await admin
+      .from('user_encryption_keys')
+      .select('created_at, encryption_salt')
+      .eq('user_id', userId)
+      .eq('revoked', false)
+      .order('created_at', { ascending: false });
+    lastError = error?.message ?? null;
+    lastRows = (data as KeyRow[] | null) ?? null;
+    return lastRows?.[0]?.encryption_salt === DEVICE_KEY_SALT_MARKER;
+  };
+
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await deviceKeyIsNewest()) return;
+    await sleep(pollMs);
+  }
+
+  // Fail-open. The diagnostic tells the next reader exactly what the DB looked
+  // like, which is the evidence needed to finish diagnosing #126.
+  // Read through explicit types: both are assigned inside the closure above, which
+  // TypeScript's control-flow analysis cannot see (it narrows them to `never`).
+  const rows = lastRows as KeyRow[] | null;
+  const queryError = lastError as string | null;
+  console.warn(
+    `[#126] waitForOwnKeysSettled: device key not newest for ${userId.slice(0, 8)} ` +
+      `after ${timeoutMs}ms — proceeding anyway. ` +
+      `liveRows=${rows?.length ?? 'null'} ` +
+      `salts=${JSON.stringify(rows?.map((r) => r.encryption_salt) ?? null)} ` +
+      `queryError=${queryError ?? 'none'}`
   );
 }
 
