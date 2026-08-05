@@ -48,6 +48,13 @@ Shelters may still keep a required PDF or packet as a pipeline checklist step;
 status stays here. “Apply at the shelter, only track here” is a last resort
 that burns staff time and is not the founding bet.
 
+**Nonprofit timing (#148).** Do **not** form a 501(c)(3) yet — we’re early, and
+the paperwork is expensive without near-term grants or tax-deductible donors.
+Stay flexible; revisit when a specific grant/donor requires it, or when shelter
+traction + a real board + legal/CPA budget make it worthwhile. Structure options
+and revenue notes: [docs/product/BUSINESS-MODEL.md](./docs/product/BUSINESS-MODEL.md).
+Do not promise tax-deductible donations until we actually have IRS recognition.
+
 ## 🚀 Live Demo — Try the Loop
 
 Everything runs against a seeded demo shelter (**Second Chance Rescue**) with
