@@ -50,12 +50,15 @@ vi.mock('@/lib/supabase/messaging-client', () => ({
 // ---------------------------------------------------------------------------
 const mockStorePrivateKey = vi.fn().mockResolvedValue(undefined);
 const mockGetPrivateKey = vi.fn().mockResolvedValue(null);
+const mockGetPrivateKeyFingerprint = vi.fn().mockResolvedValue(null);
 
 vi.mock('@/lib/messaging/encryption', () => ({
   encryptionService: {
-    storePrivateKey: (userId: string, key: CryptoKey) =>
-      mockStorePrivateKey(userId, key),
+    storePrivateKey: (userId: string, key: CryptoKey, fingerprint?: string) =>
+      mockStorePrivateKey(userId, key, fingerprint),
     getPrivateKey: (userId: string) => mockGetPrivateKey(userId),
+    getPrivateKeyFingerprint: (userId: string) =>
+      mockGetPrivateKeyFingerprint(userId),
   },
 }));
 
@@ -93,9 +96,20 @@ vi.mock('@/lib/messaging/database', () => ({
 // crypto.subtle.importKey stub (restoreKeysFromCache imports the public JWK)
 // ---------------------------------------------------------------------------
 const mockImportKey = vi.fn().mockResolvedValue({} as CryptoKey);
+// generateKey/exportKey are used by initializeDeviceKeys (the #60 passwordless
+// bootstrap), which ensureKeysForSession falls through to on an IndexedDB miss.
+const mockGenerateKey = vi.fn().mockResolvedValue({
+  privateKey: {} as CryptoKey,
+  publicKey: {} as CryptoKey,
+});
+const mockExportKey = vi
+  .fn()
+  .mockResolvedValue({ kty: 'EC', crv: 'P-256', x: 'device-x', y: 'device-y' });
 vi.stubGlobal('crypto', {
   subtle: {
     importKey: mockImportKey,
+    generateKey: mockGenerateKey,
+    exportKey: mockExportKey,
   },
 });
 
@@ -169,6 +183,7 @@ describe('KeyManagementService', () => {
     // Default: persistence + restore stubs
     mockStorePrivateKey.mockResolvedValue(undefined);
     mockGetPrivateKey.mockResolvedValue(null);
+    mockGetPrivateKeyFingerprint.mockResolvedValue(null);
     mockImportKey.mockResolvedValue({} as CryptoKey);
 
     // Default: online (so getUserPublicKey hits DB unless overridden).
@@ -178,6 +193,123 @@ describe('KeyManagementService', () => {
   describe('singleton export', () => {
     it('exposes a singleton instance of KeyManagementService', () => {
       expect(keyManagementService).toBeInstanceOf(KeyManagementService);
+    });
+  });
+
+  describe('ensureKeysForSession concurrency (#126)', () => {
+    /**
+     * Regression guard for #126. EncryptionKeyGate's effect re-fires whenever the
+     * `user` OBJECT identity changes (AuthContext calls setUser at four sites during
+     * hydration / onAuthStateChange / refresh). With no single-flight guard, each
+     * re-fire ran a FULL bootstrap: revoke every live row, then insert a brand-new
+     * RANDOM device key.
+     *
+     * Observed in CI (run 30981937723): 62 of 74 opens ended with THREE live key
+     * rows, inserted within ~17ms of each other. A peer that fetched the recipient's
+     * public key mid-race encrypted to a key that was immediately superseded, and
+     * the recipient — holding only the last one — could never decrypt it. That is
+     * the permanent "AES-GCM decryption failed" behind the chromium-msg-iso flake,
+     * and it hits real users whose token refreshes while they open messaging.
+     */
+    const primeBootstrapMocks = () => {
+      // No cached private key => restoreKeysFromCache() misses and the bootstrap
+      // path runs (this is always true for a fresh browser/device).
+      mockGetPrivateKey.mockResolvedValue(null);
+      // hasKeysForUser() finds an existing row => the destructive revoke+insert path.
+      const builder = createMockQueryBuilder({ id: 'existing-key-row' }, null);
+      mockMessagingFrom.mockReturnValue(builder);
+      return builder;
+    };
+
+    it('performs exactly ONE bootstrap for concurrent calls', async () => {
+      const builder = primeBootstrapMocks();
+
+      const results = await Promise.all([
+        keyManagementService.ensureKeysForSession(CURRENT_USER_ID),
+        keyManagementService.ensureKeysForSession(CURRENT_USER_ID),
+        keyManagementService.ensureKeysForSession(CURRENT_USER_ID),
+      ]);
+
+      // One inserted key row, not three.
+      expect(builder.insert).toHaveBeenCalledTimes(1);
+      expect(mockGenerateKey).toHaveBeenCalledTimes(1);
+      // Every caller observes the SAME key pair.
+      expect(results[1]).toBe(results[0]);
+      expect(results[2]).toBe(results[0]);
+    });
+
+    it('still bootstraps again on a later call once keys are cleared', async () => {
+      const builder = primeBootstrapMocks();
+
+      await keyManagementService.ensureKeysForSession(CURRENT_USER_ID);
+      expect(builder.insert).toHaveBeenCalledTimes(1);
+
+      // A fresh session (e.g. sign out / sign in) must not be blocked by a stale
+      // in-flight entry — the guard has to release once settled (#60 UX).
+      keyManagementService.clearKeys();
+      mockGetPrivateKey.mockResolvedValue(null);
+      await keyManagementService.ensureKeysForSession(CURRENT_USER_ID);
+      expect(builder.insert).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('restoreKeysFromCache mismatch self-heal (#126)', () => {
+    /**
+     * If a duplicate-key race left the cached private key belonging to a
+     * DIFFERENT keypair than the newest stored public key, the old code happily
+     * assembled the mixed pair and returned true — so ensureKeysForSession
+     * short-circuited and the account stayed permanently broken in BOTH
+     * directions (peers encrypt to the newest row this user cannot decrypt;
+     * this user encrypts with a private key peers do not have the public half
+     * of). Returning false instead lets the bootstrap mint a consistent key.
+     */
+    it('refuses a mixed pair so the caller can re-bootstrap', async () => {
+      mockGetPrivateKey.mockResolvedValue({} as CryptoKey);
+      mockGetPrivateKeyFingerprint.mockResolvedValue('a-different-key');
+      mockMessagingFrom.mockReturnValue(
+        createMockQueryBuilder(
+          { encryption_salt: 'salt', public_key: PUBLIC_JWK },
+          null
+        )
+      );
+
+      const restored =
+        await keyManagementService.restoreKeysFromCache(CURRENT_USER_ID);
+
+      expect(restored).toBe(false);
+      expect(keyManagementService.getCurrentKeys()).toBeNull();
+    });
+
+    it('accepts the pair when the fingerprint matches', async () => {
+      mockGetPrivateKey.mockResolvedValue({} as CryptoKey);
+      mockGetPrivateKeyFingerprint.mockResolvedValue(PUBLIC_JWK.x);
+      mockMessagingFrom.mockReturnValue(
+        createMockQueryBuilder(
+          { encryption_salt: 'salt', public_key: PUBLIC_JWK },
+          null
+        )
+      );
+
+      const restored =
+        await keyManagementService.restoreKeysFromCache(CURRENT_USER_ID);
+
+      expect(restored).toBe(true);
+    });
+
+    it('accepts legacy records that predate the fingerprint field', async () => {
+      mockGetPrivateKey.mockResolvedValue({} as CryptoKey);
+      mockGetPrivateKeyFingerprint.mockResolvedValue(null); // legacy row
+      mockMessagingFrom.mockReturnValue(
+        createMockQueryBuilder(
+          { encryption_salt: 'salt', public_key: PUBLIC_JWK },
+          null
+        )
+      );
+
+      const restored =
+        await keyManagementService.restoreKeysFromCache(CURRENT_USER_ID);
+
+      expect(restored).toBe(true);
     });
   });
 
@@ -191,7 +323,10 @@ describe('KeyManagementService', () => {
       expect(mockDeriveKeyPair).toHaveBeenCalled();
       expect(mockStorePrivateKey).toHaveBeenCalledWith(
         CURRENT_USER_ID,
-        fakeKeyPair.privateKey
+        fakeKeyPair.privateKey,
+        // #126: the public-key fingerprint is persisted alongside the private
+        // key so restoreKeysFromCache can detect a mismatched pair.
+        PUBLIC_JWK.x
       );
       expect(keyManagementService.getCurrentKeys()).toEqual(fakeKeyPair);
     });
@@ -483,7 +618,10 @@ describe('KeyManagementService', () => {
       expect(mockDeriveKeyPair).toHaveBeenCalled();
       expect(mockStorePrivateKey).toHaveBeenCalledWith(
         CURRENT_USER_ID,
-        fakeKeyPair.privateKey
+        fakeKeyPair.privateKey,
+        // #126: the public-key fingerprint is persisted alongside the private
+        // key so restoreKeysFromCache can detect a mismatched pair.
+        PUBLIC_JWK.x
       );
       expect(keyManagementService.getCurrentKeys()).toEqual(fakeKeyPair);
     });

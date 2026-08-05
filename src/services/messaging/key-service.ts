@@ -61,6 +61,24 @@ export class KeyManagementService {
   private keyDerivationService = new KeyDerivationService();
 
   /**
+   * In-flight ensureKeysForSession() bootstraps, keyed by userId (#126).
+   *
+   * Without this, concurrent callers each ran a FULL destructive bootstrap —
+   * revoke every live key row, then insert a brand-new RANDOM device key. In CI
+   * (run 30981937723) 62 of 74 page opens ended with THREE live key rows created
+   * within ~17ms of each other, because EncryptionKeyGate's effect re-fires on
+   * every new `user` object identity (AuthContext calls setUser during hydration,
+   * onAuthStateChange, sign-in and refresh).
+   *
+   * The damage is not cosmetic: a peer that fetched this user's public key mid-race
+   * encrypted to a key that was superseded moments later. This user keeps only the
+   * last keypair, so that ciphertext is permanently undecryptable — the
+   * "AES-GCM decryption failed" behind #126, and a real-user data-loss path for
+   * anyone whose token refreshes while messaging loads.
+   */
+  private sessionBootstraps = new Map<string, Promise<DerivedKeyPair>>();
+
+  /**
    * Initialize encryption keys for NEW user (first login after registration)
    * Task: T007 (Feature 032)
    *
@@ -134,7 +152,11 @@ export class KeyManagementService {
       try {
         // keyPair.privateKey is already non-extractable (see
         // KeyDerivationService.importPrivateKey).
-        await encryptionService.storePrivateKey(user.id, keyPair.privateKey);
+        await encryptionService.storePrivateKey(
+          user.id,
+          keyPair.privateKey,
+          keyPair.publicKeyJwk?.x
+        );
       } catch (err) {
         logger.warn('Could not populate IndexedDB after initializeKeys()', {
           error: err,
@@ -254,7 +276,11 @@ export class KeyManagementService {
       try {
         // keyPair.privateKey is already non-extractable (see
         // KeyDerivationService.importPrivateKey).
-        await encryptionService.storePrivateKey(user.id, keyPair.privateKey);
+        await encryptionService.storePrivateKey(
+          user.id,
+          keyPair.privateKey,
+          keyPair.publicKeyJwk?.x
+        );
       } catch (err) {
         logger.warn('Could not populate IndexedDB after deriveKeys()', {
           error: err,
@@ -323,6 +349,28 @@ export class KeyManagementService {
     }
 
     const publicKeyJwk = data.public_key as unknown as JsonWebKey;
+
+    // #126: refuse a MIXED pair. The private key comes from IndexedDB while the
+    // public half comes from the newest non-revoked row — if a duplicate-key race
+    // left those belonging to different keypairs, assembling them here would cache
+    // a silently broken identity: this user could not decrypt anything sent to the
+    // newest row, and peers could not decrypt anything this user sent. Returning
+    // false instead lets ensureKeysForSession bootstrap a fresh, consistent device
+    // key, so the account self-heals rather than staying broken forever.
+    const cachedFingerprint =
+      await encryptionService.getPrivateKeyFingerprint(currentUserId);
+    if (cachedFingerprint && cachedFingerprint !== publicKeyJwk?.x) {
+      logger.warn(
+        'restoreKeysFromCache: cached private key does not match the newest stored public key — rotating',
+        {
+          userId: currentUserId,
+          cached: cachedFingerprint.slice(0, 8),
+          stored: publicKeyJwk?.x?.slice(0, 8) ?? 'null',
+        }
+      );
+      return false;
+    }
+
     const publicKey = await crypto.subtle.importKey(
       'jwk',
       publicKeyJwk,
@@ -373,6 +421,28 @@ export class KeyManagementService {
       return this.derivedKeys;
     }
 
+    // Single-flight (#126): concurrent callers share ONE bootstrap instead of each
+    // revoking and minting a fresh random device key. See `sessionBootstraps`.
+    const inFlight = this.sessionBootstraps.get(userId);
+    if (inFlight) {
+      return inFlight;
+    }
+
+    const bootstrap = this.bootstrapKeysForSession(userId);
+    this.sessionBootstraps.set(userId, bootstrap);
+    try {
+      return await bootstrap;
+    } finally {
+      // Release once settled — on failure, and after sign-out/sign-in, a later
+      // call must be able to bootstrap again (#60 passwordless UX).
+      this.sessionBootstraps.delete(userId);
+    }
+  }
+
+  /** The actual bootstrap; serialized per user by {@link ensureKeysForSession}. */
+  private async bootstrapKeysForSession(
+    userId: string
+  ): Promise<DerivedKeyPair> {
     const restored = await this.restoreKeysFromCache(userId);
     if (restored && this.derivedKeys) {
       return this.derivedKeys;
@@ -455,7 +525,11 @@ export class KeyManagementService {
 
       this.derivedKeys = keyPair;
       try {
-        await encryptionService.storePrivateKey(userId, keyPair.privateKey);
+        await encryptionService.storePrivateKey(
+          userId,
+          keyPair.privateKey,
+          keyPair.publicKeyJwk?.x
+        );
       } catch (err) {
         logger.warn(
           'Could not populate IndexedDB after initializeDeviceKeys()',
@@ -784,7 +858,11 @@ export class KeyManagementService {
       try {
         // keyPair.privateKey is already non-extractable (see
         // KeyDerivationService.importPrivateKey).
-        await encryptionService.storePrivateKey(user.id, keyPair.privateKey);
+        await encryptionService.storePrivateKey(
+          user.id,
+          keyPair.privateKey,
+          keyPair.publicKeyJwk?.x
+        );
       } catch (err) {
         logger.warn('Could not populate IndexedDB after rotateKeys()', {
           error: err,
