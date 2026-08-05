@@ -455,6 +455,31 @@ await el.evaluate((el) => {
 
 Apply this any time test code sets `scrollTop` and expects a scroll-event-driven UI side effect.
 
+### WebKit does NOT move focus to links/buttons on `Tab`
+
+**Why this matters**: Safari/WebKit only tabs to links and buttons when macOS "Full Keyboard Access" is enabled — off by default — and Playwright's WebKit build inherits that default. Chromium and Firefox tab to every focusable element. So this:
+
+```typescript
+await page.keyboard.press('Tab');
+await expect(page.locator(':focus').first()).toBeVisible(); // times out on WebKit ONLY
+```
+
+fails on the webkit shard alone, and reads like an accessibility defect in the page when it is really a browser behaviour difference. It kept `webkit-msg-iso` red on `main` (#154) — worse than it sounds, because a permanently-red job trains everyone to ignore that shard, which is exactly how #126 hid behind 3 "flaky" tests for weeks.
+
+**The fix pattern**: guard the Tab-traversal step by browser, keep every other assertion running.
+
+```typescript
+test('...', async ({ browser, browserName }) => {
+  if (browserName !== 'webkit') {
+    await page.keyboard.press('Tab');
+    await expect(page.locator(':focus').first()).toBeVisible();
+  }
+  // remaining WCAG assertions still run on every browser
+});
+```
+
+Prefer this over `test.skip(browserName === 'webkit')`, which aborts the whole test and silently drops the other assertions on WebKit.
+
 ### Branch hygiene — NON-NEGOTIABLE
 
 - **`delete_branch_on_merge=true`** is set on the repo. Every merged PR auto-deletes its head branch. Don't undo this.
