@@ -85,7 +85,7 @@ export default function GetStartedPage() {
       <div className="mb-8 text-center">
         <h1 className="font-display text-3xl font-extrabold sm:text-4xl">
           {intent === 'sign-up'
-            ? 'Create an account'
+            ? 'Create an Account'
             : demoMode
               ? 'Try Demo'
               : 'Choose a portal'}

@@ -74,7 +74,7 @@ const shelterMenuLinks: NavLinkItem[] = [
   { href: '/for-shelters', label: 'Overview' },
   { href: buildSignInHref('shelter'), label: 'Log In' },
   { href: DEMO_ENTRY_HREF, label: 'Try Demo' },
-  { href: '/shelter', label: 'Shelter dashboard' },
+  { href: '/shelter', label: 'Shelter Dashboard' },
   { href: '/blog', label: 'Blog' },
 ];
 

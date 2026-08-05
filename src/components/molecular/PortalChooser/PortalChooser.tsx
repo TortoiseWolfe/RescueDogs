@@ -40,19 +40,19 @@ const DOORS: Array<{
 }> = [
   {
     portal: 'adopter',
-    title: "I'm adopting",
+    title: "I'm adopting.",
     subtitle:
       "Apply once and track every status update live so you're never ghosted.",
-    ctaSignIn: 'Continue As Adopter',
+    ctaSignIn: 'Continue as Adopter',
     ctaSignUp: 'Create Adopter Account',
     accent: 'border-[#f97316]',
   },
   {
     portal: 'shelter',
-    title: "I'm a shelter / rescue",
+    title: "I'm a shelter or a rescue.",
     subtitle:
       'Review applications in a simple pipeline and keep adopters in the loop.',
-    ctaSignIn: 'Continue As Shelter',
+    ctaSignIn: 'Continue as Shelter',
     ctaSignUp: 'Create Shelter Account',
     accent: 'border-[#1e3a8a]',
   },
