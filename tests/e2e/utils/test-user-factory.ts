@@ -1611,6 +1611,73 @@ export async function openAsPartner(
 }
 
 /**
+ * #126 diagnostic: dump EVERY `user_encryption_keys` row (revoked ones included)
+ * for both participants, with the public-key fingerprint of each.
+ *
+ * Why this exists: closing the seed-key→device-key window did NOT stop the flake
+ * (run 30968387198 — the barrier settled every time, yet the same
+ * `getByText(<message>)` timeouts still occurred and were only masked by retries).
+ * So a message is still being encrypted to a key the recipient cannot use, for a
+ * reason we have not identified. The leading suspicion is DUPLICATE live rows: an
+ * earlier barrier revision that demanded exactly one non-revoked row never settled
+ * for any of 141 users, while "newest row is the device key" settles instantly.
+ *
+ * That matters because key selection is split-brained — senders use
+ * `getUserPublicKey()` (newest non-revoked row) while the recipient's
+ * `restoreKeysFromCache()` pairs its IndexedDB private key with the newest
+ * non-revoked row — and nothing binds a ciphertext to the key that encrypted it
+ * (`messages.key_version` is a constant).
+ *
+ * `fingerprint` is the first 8 chars of the JWK `x` coordinate, matching what
+ * `getUserPublicKey`/`deriveKeys` log, so sender and recipient state can be
+ * compared directly. Purely observational: never throws, never fails a test.
+ */
+export async function dumpIsoKeyState(
+  fixture: IsolatedConversation | null,
+  label: string
+): Promise<void> {
+  if (!fixture) return;
+  const admin = getAdminClient();
+  if (!admin) return;
+
+  const describe = async (who: string, userId: string): Promise<string> => {
+    const { data, error } = await admin
+      .from('user_encryption_keys')
+      .select('id, created_at, revoked, encryption_salt, public_key')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) return `${who}(${userId.slice(0, 8)})=ERROR:${error.message}`;
+    const rows = (data ?? []) as Array<{
+      created_at: string;
+      revoked: boolean;
+      encryption_salt: string | null;
+      public_key: { x?: string } | null;
+    }>;
+    const live = rows.filter((r) => !r.revoked).length;
+    const detail = rows
+      .map(
+        (r) =>
+          `{fp:${r.public_key?.x?.slice(0, 8) ?? 'null'},` +
+          `salt:${r.encryption_salt?.slice(0, 12) ?? 'null'},` +
+          `revoked:${r.revoked},at:${r.created_at}}`
+      )
+      .join(' ');
+    // Newest-first, so rows[0] is exactly what getUserPublicKey would return.
+    return `${who}(${userId.slice(0, 8)}) live=${live}/${rows.length} ${detail}`;
+  };
+
+  try {
+    const [viewer, partner] = await Promise.all([
+      describe('viewer', fixture.viewer.id),
+      describe('partner', fixture.partner.id),
+    ]);
+    console.log(`[#126][${label}] ${viewer} || ${partner}`);
+  } catch (err) {
+    console.log(`[#126][${label}] dump failed: ${(err as Error).message}`);
+  }
+}
+
+/**
  * #126 barrier: block until this user's encryption keys have STOPPED changing,
  * so a peer that reads this user's public key afterwards gets one this user can
  * actually decrypt with.
@@ -1684,7 +1751,17 @@ export async function waitForOwnKeysSettled(
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    if (await deviceKeyIsNewest()) return;
+    if (await deviceKeyIsNewest()) {
+      // #126: one line per open. `live` > 1 would confirm the duplicate-row
+      // hypothesis (the seeded row surviving revocation), which is the current
+      // leading explanation for the failures the barrier does NOT prevent.
+      const settled = lastRows as KeyRow[] | null;
+      console.log(
+        `[#126] keys settled for ${userId.slice(0, 8)}: live=${settled?.length ?? '?'} ` +
+          `salts=${JSON.stringify(settled?.map((r) => r.encryption_salt) ?? null)}`
+      );
+      return;
+    }
     await sleep(pollMs);
   }
 

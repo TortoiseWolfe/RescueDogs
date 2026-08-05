@@ -84,7 +84,11 @@ export class EncryptionService {
    *
    * @throws EncryptionError if the key is extractable or storage fails
    */
-  async storePrivateKey(userId: string, privateKey: CryptoKey): Promise<void> {
+  async storePrivateKey(
+    userId: string,
+    privateKey: CryptoKey,
+    publicKeyFingerprint?: string
+  ): Promise<void> {
     if (privateKey.extractable) {
       throw new EncryptionError(
         'Refusing to store extractable private key — caller must import with extractable=false'
@@ -95,9 +99,24 @@ export class EncryptionService {
         userId,
         privateKey,
         created_at: Date.now(),
+        publicKeyFingerprint,
       });
     } catch (error) {
       throw new EncryptionError('Failed to store private key', error);
+    }
+  }
+
+  /**
+   * Fingerprint of the public half of the cached private key, or null when the
+   * record is absent or predates the field (#126). Used by
+   * restoreKeysFromCache to reject a mismatched pair instead of caching it.
+   */
+  async getPrivateKeyFingerprint(userId: string): Promise<string | null> {
+    try {
+      const record = await db.messaging_private_keys.get(userId);
+      return record?.publicKeyFingerprint ?? null;
+    } catch {
+      return null; // never block messaging on a diagnostic lookup
     }
   }
 

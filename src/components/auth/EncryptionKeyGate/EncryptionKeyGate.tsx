@@ -35,10 +35,18 @@ export default function EncryptionKeyGate({
     wasAuthenticatedRef.current = true;
   }
 
+  // Depend on the user ID, not the `user` object (#126). AuthContext calls
+  // setUser(session?.user ?? null) during hydration, onAuthStateChange, sign-in
+  // and refresh — each a NEW object identity for the SAME user. Keying the effect
+  // on the object re-ran the bootstrap every time, and each run minted a fresh
+  // random device key, so a peer could encrypt to a key superseded moments later
+  // and never be able to decrypt it.
+  const userId = user?.id;
+
   useEffect(() => {
     if (authLoading) return;
 
-    if (!user) {
+    if (!userId) {
       setCheckingKeys(false);
       return;
     }
@@ -48,7 +56,7 @@ export default function EncryptionKeyGate({
     const bootstrap = async () => {
       setBootstrapError(null);
       try {
-        await keyManagementService.ensureKeysForSession(user.id);
+        await keyManagementService.ensureKeysForSession(userId);
         if (!cancelled) {
           setCheckingKeys(false);
         }
@@ -70,7 +78,7 @@ export default function EncryptionKeyGate({
     return () => {
       cancelled = true;
     };
-  }, [authLoading, user]);
+  }, [authLoading, userId]);
 
   // Always render children — blocking them behind a spinner prevented
   // the sidebar tabs from mounting, which broke E2E tests that wait for

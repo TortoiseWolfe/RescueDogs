@@ -18,6 +18,7 @@ import {
   openAsPartner,
   fillMessageInput,
   scrollThreadToBottom,
+  dumpIsoKeyState,
   type IsolatedConversation,
 } from '../utils/test-user-factory';
 
@@ -32,7 +33,8 @@ test.describe.configure({ mode: 'parallel' });
 async function waitForMessageOnPartner(
   page: Page,
   text: string,
-  attempts = 5
+  attempts = 5,
+  diagFixture: IsolatedConversation | null = null
 ): Promise<void> {
   const locator = page.getByText(text);
   for (let i = 0; i < attempts; i++) {
@@ -44,6 +46,11 @@ async function waitForMessageOnPartner(
       timeout: 30000,
     });
   }
+  // #126: every reload attempt has been exhausted, so this send is about to fail.
+  // Capture both participants' key rows HERE — this is the only moment the DB
+  // state of a genuine failure can be observed. See dumpIsoKeyState.
+  await dumpIsoKeyState(diagFixture, 'delivery-failed');
+
   // Final assertion — surfaces a real failure if it never arrived.
   await scrollThreadToBottom(page);
   await expect(locator).toBeVisible({ timeout: 15000 });
@@ -81,7 +88,7 @@ test.describe('Real-time Message Delivery (T098)', () => {
       await viewer.page.getByRole('button', { name: /send/i }).click();
 
       // Partner: Wait for message to appear (realtime, with reload fallback).
-      await waitForMessageOnPartner(partner.page, testMessage);
+      await waitForMessageOnPartner(partner.page, testMessage, 5, fixture);
       const endTime = Date.now();
 
       // The test is not meaningfully asserting sub-500ms realtime — it asserts
@@ -117,7 +124,7 @@ test.describe('Real-time Message Delivery (T098)', () => {
       await viewer.page.getByRole('button', { name: /send/i }).click();
 
       // Partner: Message appears (realtime, with reload fallback).
-      await waitForMessageOnPartner(partner.page, testMessage);
+      await waitForMessageOnPartner(partner.page, testMessage, 5, fixture);
 
       // Verify message is visible in both windows.
       await scrollThreadToBottom(viewer.page);
@@ -158,7 +165,7 @@ test.describe('Real-time Message Delivery (T098)', () => {
 
       // Partner: Verify all messages appear (with reload fallback).
       // Check the last message first — if it appears, the rest should be there.
-      await waitForMessageOnPartner(partner.page, messages[2]);
+      await waitForMessageOnPartner(partner.page, messages[2], 5, fixture);
       for (const msg of messages) {
         await expect(partner.page.getByText(msg)).toBeVisible();
       }
@@ -247,7 +254,7 @@ test.describe('Typing Indicators (T099)', () => {
       await viewer.page.getByRole('button', { name: /send/i }).click();
 
       // Partner: Message should appear (with reload fallback).
-      await waitForMessageOnPartner(partner.page, testMessage);
+      await waitForMessageOnPartner(partner.page, testMessage, 5, fixture);
     } finally {
       await viewer.close();
       await partner.close();
