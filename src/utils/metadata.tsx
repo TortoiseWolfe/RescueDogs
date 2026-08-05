@@ -85,8 +85,9 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
       images: [
         {
           url: imageUrl,
-          width: 1200,
-          height: 630,
+          // Match public/hero-held-paws.png (1024×558) — not 1200×630 (#89)
+          width: 1024,
+          height: 558,
           alt: `${title} - ${description}`,
         },
       ],
