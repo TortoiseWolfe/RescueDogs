@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { OAuthErrorBoundary } from './error-boundary';
 import { createLogger } from '@/lib/logger';
-import { isOAuthUser, populateOAuthProfile } from '@/lib/auth/oauth-utils';
+import {
+  isOAuthUser,
+  populateOAuthProfile,
+  parseAuthErrorFromUrl,
+} from '@/lib/auth/oauth-utils';
 
 const logger = createLogger('app:auth:callback:page');
 
@@ -16,19 +20,21 @@ function AuthCallbackContent() {
   const [errorDetails, setErrorDetails] = useState<string>('');
 
   useEffect(() => {
-    // Check for error in URL
-    const params = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    // Errors arrive in the URL fragment under the implicit flow — see
+    // parseAuthErrorFromUrl.
+    const authError = parseAuthErrorFromUrl(
+      window.location.search,
+      window.location.hash
+    );
 
-    const error = params.get('error') || hashParams.get('error');
-    const errorDescription =
-      params.get('error_description') || hashParams.get('error_description');
-
-    if (error) {
+    if (authError) {
       setErrorDetails(
-        `Error: ${error}\nDescription: ${errorDescription || 'No description'}`
+        `Error: ${authError.error}\nDescription: ${authError.errorDescription || 'No description'}`
       );
-      logger.error('OAuth error', { error, errorDescription });
+      logger.error('OAuth error', {
+        error: authError.error,
+        errorDescription: authError.errorDescription,
+      });
     }
   }, []);
 
@@ -37,11 +43,17 @@ function AuthCallbackContent() {
 
     const url = window.location.href;
     const hasCode = url.includes('code=');
-    const params = new URLSearchParams(window.location.search);
-    const error = params.get('error');
+    // #100: this guard used to read the query string only. Under the implicit flow
+    // the error lives in the fragment, so an expired link produced error=null here —
+    // the page rendered the error panel and STILL ran handleAuthComplete(), which
+    // bounced the user to /sign-in two seconds later before they could read it.
+    const authError = parseAuthErrorFromUrl(
+      window.location.search,
+      window.location.hash
+    );
 
     setDebugInfo(
-      `URL has code: ${hasCode}, has error: ${!!error}, isLoading: ${isLoading}, user: ${user?.email || 'null'}`
+      `URL has code: ${hasCode}, has error: ${!!authError}, isLoading: ${isLoading}, user: ${user?.email || 'null'}`
     );
 
     const handleAuthComplete = async () => {
@@ -70,7 +82,9 @@ function AuthCallbackContent() {
       }
     };
 
-    if (!isLoading && !error) {
+    // Never auto-redirect while an error is on screen — the user needs to read it
+    // and use the "Back to Sign In" button themselves (#100).
+    if (!isLoading && !authError) {
       handleAuthComplete();
     }
   }, [user, isLoading, router]);
