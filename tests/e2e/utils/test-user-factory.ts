@@ -1516,6 +1516,13 @@ export async function openConversationAs(
     timeout: 60000,
   });
 
+  // #126: the gate's device-key bootstrap is non-blocking, so the thread can be
+  // visible while this user's keys are still rotating. Callers open BOTH
+  // participants and await both, so settling here means neither side can encrypt
+  // to a key the other has already revoked. See waitForOwnKeysSettled.
+  const userId = (session.user as { id?: string })?.id;
+  if (userId) await waitForOwnKeysSettled(userId);
+
   return { page, context, close };
 }
 
@@ -1600,6 +1607,75 @@ export async function openAsPartner(
     browser,
     fixture.partnerSession,
     fixture.conversationId
+  );
+}
+
+/**
+ * #126 barrier: block until this user's encryption keys have STOPPED changing,
+ * so a peer that reads this user's public key afterwards gets one this user can
+ * actually decrypt with.
+ *
+ * Root cause of the chromium-msg-iso realtime-delivery flake: EncryptionKeyGate
+ * calls keyManagementService.ensureKeysForSession(), which — for a fresh throwaway
+ * user whose IndexedDB has no cached private key (always true on first open) —
+ * REVOKES the admin-seeded Argon2 key and generates a brand-new RANDOM ECDH
+ * *device* key. The seeded key's private half never exists in any browser. The gate
+ * is non-blocking (it renders the thread behind a pointer-events-none overlay, with
+ * no decrypt-retry), so under this shard's `workers:2` contention the viewer's
+ * `getUserPublicKey(partner)` — "newest non-revoked row" — can resolve to the
+ * partner's soon-revoked SEED key before the partner's device-key row commits. The
+ * partner only ever holds its device private key, so that message is bound to a key
+ * nobody can decrypt → permanent "AES-GCM decryption failed" that no reload
+ * recovers (the ciphertext is immutable and no decrypt-failure cache is involved).
+ *
+ * Called at the end of {@link openConversationAs}, so every isolated spec that opens
+ * both participants (and awaits both) is guaranteed both sides have settled before
+ * the first send — no per-spec wiring, and no weakening of any assertion: the test
+ * still performs a real send → realtime → decrypt of the plaintext.
+ *
+ * Settle condition is deliberately NOT "the newest key is the device key": if the
+ * gate ever stops rotating (pre-baked keys, or a fixed ensureKeysForSession), that
+ * check would time out and turn passing tests red. Instead we wait for the weaker,
+ * always-true-eventually property — exactly one non-revoked row whose `created_at`
+ * is unchanged across two consecutive polls, i.e. rotation has quiesced.
+ *
+ * Uses the admin client (bypasses RLS, reads committed state on the single shared
+ * Postgres — no read replica, so a committed row is immediately visible to the
+ * peer's subsequent online `getUserPublicKey` fetch).
+ */
+export async function waitForOwnKeysSettled(
+  userId: string,
+  opts: { timeoutMs?: number; pollMs?: number } = {}
+): Promise<void> {
+  const admin = getAdminClient();
+  if (!admin) return; // seeding was skipped too (no admin client) — nothing to wait on
+  const { timeoutMs = 15000, pollMs = 250 } = opts;
+
+  /** The single live key's created_at, or null when 0 or >1 rows are live. */
+  const liveKeyStamp = async (): Promise<string | null> => {
+    const { data } = await admin
+      .from('user_encryption_keys')
+      .select('created_at')
+      .eq('user_id', userId)
+      .eq('revoked', false)
+      .order('created_at', { ascending: false });
+    if (!data || data.length !== 1) return null; // mid-rotation (0 rows) or duplicates
+    return (data[0] as { created_at: string }).created_at;
+  };
+
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  const deadline = Date.now() + timeoutMs;
+  let previous: string | null = null;
+  while (Date.now() < deadline) {
+    const current = await liveKeyStamp();
+    // Two consecutive identical readings ⇒ the bootstrap has quiesced.
+    if (current !== null && current === previous) return;
+    previous = current;
+    await sleep(pollMs);
+  }
+  throw new Error(
+    `waitForOwnKeysSettled: encryption keys for ${userId.slice(0, 8)} did not settle ` +
+      `within ${timeoutMs}ms (still rotating, or duplicate live key rows). See #126.`
   );
 }
 
