@@ -338,6 +338,14 @@ describe('GlobalNav role menus (#65)', () => {
     expect(row!.getAttribute('data-chrome-compact')).toMatch(/^(true|false)$/);
   });
 
+  it('uses full-width desktop gutters instead of lg:container (#148)', () => {
+    const { container } = render(<GlobalNav />);
+    const nav = container.querySelector('nav[aria-label="Main"]');
+    expect(nav).toBeTruthy();
+    expect(nav!.className).not.toMatch(/\bcontainer\b/);
+    expect(nav!.className).toMatch(/lg:px-6/);
+  });
+
   it('does not offer Create Account in role menus (sign-in page covers signup)', () => {
     render(<GlobalNav />);
 

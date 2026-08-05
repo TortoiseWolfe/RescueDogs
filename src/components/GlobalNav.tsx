@@ -365,9 +365,11 @@ export function GlobalNav() {
     <>
       <header className="site-header bg-primary text-primary-content sticky top-0 z-50">
         {/* Below lg: logo + Raised Paws left; Messages / hamburger / theme right.
-            No chrome Log In (hamburger Account). lg+: role band unchanged (#132). */}
+            No chrome Log In (hamburger Account). lg+: role band unchanged (#132).
+            Desktop: no lg:container — full-width row with side buffer so brand
+            stays left and chrome stays right on wide screens (#148). */}
         <nav
-          className="mx-auto w-full px-2 max-lg:pr-1 lg:container lg:px-4 lg:pr-3"
+          className="mx-auto w-full px-2 max-lg:pr-1 lg:px-6 lg:pr-6 xl:px-8"
           aria-label="Main"
         >
           <div

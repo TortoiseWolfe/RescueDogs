@@ -16,6 +16,22 @@ bet — not the full ScriptHammer template surface.
 
 ---
 
+## Organizational form (timing)
+
+**Near-term recommendation (#148): do not form a 501(c)(3) yet.**
+
+Mission-driven does not require nonprofit paperwork on day one. Filing a
+state nonprofit + IRS Form 1023 costs time and money; the upside (grants,
+tax-deductible donations) only matters when we are ready to pursue them.
+Until then, keep a flexible entity, run pilots, and **do not promise
+tax-deductible donations**.
+
+**Revisit when** a specific grant or donor requires 501(c)(3), or when we have
+stable shelter traction, a real board, and budget for counsel/CPA. Full
+structure options (501(c)(3) vs B Corp vs for-profit): [BUSINESS-MODEL.md](./BUSINESS-MODEL.md).
+
+---
+
 ## Market gap (why not another Petfinder?)
 
 Most pet adoption apps (Petfinder, WeRescue, etc.) act as **search directories**:
