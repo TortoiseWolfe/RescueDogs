@@ -50,6 +50,10 @@ and report it.
 **Common pattern in rescue tech:** nonprofit or B Corp, with **shelters as
 customers** and **adopters never charged to apply or track status**.
 
+**Timing (#148):** Do **not** form a 501(c)(3) in the early pilot stage. Revisit
+when grants/donors or stable traction make recognition worth the cost. See
+[VISION — Organizational form (timing)](./VISION.md#organizational-form-timing).
+
 ---
 
 ## Who pays (and who doesn't)
