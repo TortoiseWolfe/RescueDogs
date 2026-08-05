@@ -93,9 +93,20 @@ vi.mock('@/lib/messaging/database', () => ({
 // crypto.subtle.importKey stub (restoreKeysFromCache imports the public JWK)
 // ---------------------------------------------------------------------------
 const mockImportKey = vi.fn().mockResolvedValue({} as CryptoKey);
+// generateKey/exportKey are used by initializeDeviceKeys (the #60 passwordless
+// bootstrap), which ensureKeysForSession falls through to on an IndexedDB miss.
+const mockGenerateKey = vi.fn().mockResolvedValue({
+  privateKey: {} as CryptoKey,
+  publicKey: {} as CryptoKey,
+});
+const mockExportKey = vi
+  .fn()
+  .mockResolvedValue({ kty: 'EC', crv: 'P-256', x: 'device-x', y: 'device-y' });
 vi.stubGlobal('crypto', {
   subtle: {
     importKey: mockImportKey,
+    generateKey: mockGenerateKey,
+    exportKey: mockExportKey,
   },
 });
 
@@ -178,6 +189,63 @@ describe('KeyManagementService', () => {
   describe('singleton export', () => {
     it('exposes a singleton instance of KeyManagementService', () => {
       expect(keyManagementService).toBeInstanceOf(KeyManagementService);
+    });
+  });
+
+  describe('ensureKeysForSession concurrency (#126)', () => {
+    /**
+     * Regression guard for #126. EncryptionKeyGate's effect re-fires whenever the
+     * `user` OBJECT identity changes (AuthContext calls setUser at four sites during
+     * hydration / onAuthStateChange / refresh). With no single-flight guard, each
+     * re-fire ran a FULL bootstrap: revoke every live row, then insert a brand-new
+     * RANDOM device key.
+     *
+     * Observed in CI (run 30981937723): 62 of 74 opens ended with THREE live key
+     * rows, inserted within ~17ms of each other. A peer that fetched the recipient's
+     * public key mid-race encrypted to a key that was immediately superseded, and
+     * the recipient — holding only the last one — could never decrypt it. That is
+     * the permanent "AES-GCM decryption failed" behind the chromium-msg-iso flake,
+     * and it hits real users whose token refreshes while they open messaging.
+     */
+    const primeBootstrapMocks = () => {
+      // No cached private key => restoreKeysFromCache() misses and the bootstrap
+      // path runs (this is always true for a fresh browser/device).
+      mockGetPrivateKey.mockResolvedValue(null);
+      // hasKeysForUser() finds an existing row => the destructive revoke+insert path.
+      const builder = createMockQueryBuilder({ id: 'existing-key-row' }, null);
+      mockMessagingFrom.mockReturnValue(builder);
+      return builder;
+    };
+
+    it('performs exactly ONE bootstrap for concurrent calls', async () => {
+      const builder = primeBootstrapMocks();
+
+      const results = await Promise.all([
+        keyManagementService.ensureKeysForSession(CURRENT_USER_ID),
+        keyManagementService.ensureKeysForSession(CURRENT_USER_ID),
+        keyManagementService.ensureKeysForSession(CURRENT_USER_ID),
+      ]);
+
+      // One inserted key row, not three.
+      expect(builder.insert).toHaveBeenCalledTimes(1);
+      expect(mockGenerateKey).toHaveBeenCalledTimes(1);
+      // Every caller observes the SAME key pair.
+      expect(results[1]).toBe(results[0]);
+      expect(results[2]).toBe(results[0]);
+    });
+
+    it('still bootstraps again on a later call once keys are cleared', async () => {
+      const builder = primeBootstrapMocks();
+
+      await keyManagementService.ensureKeysForSession(CURRENT_USER_ID);
+      expect(builder.insert).toHaveBeenCalledTimes(1);
+
+      // A fresh session (e.g. sign out / sign in) must not be blocked by a stale
+      // in-flight entry — the guard has to release once settled (#60 UX).
+      keyManagementService.clearKeys();
+      mockGetPrivateKey.mockResolvedValue(null);
+      await keyManagementService.ensureKeysForSession(CURRENT_USER_ID);
+      expect(builder.insert).toHaveBeenCalledTimes(2);
     });
   });
 
