@@ -253,6 +253,73 @@ describe('KeyManagementService', () => {
     });
   });
 
+  describe('atomic key rotation (#147)', () => {
+    /**
+     * Rotation used to REVOKE every live row and only then insert the replacement.
+     * That leaves a window where the user has ZERO usable keys: a peer calling
+     * getUserPublicKey in that gap gets nothing (message send fails outright), and a
+     * peer that read just before the revoke encrypts to a key now marked dead.
+     *
+     * Insert-first closes the window. Selection is newest-first, so during the brief
+     * overlap a peer reads the NEW key — the one this device actually holds — and the
+     * old rows are revoked immediately after. There is never a moment with no live key.
+     */
+    const orderTrackingBuilder = (order: string[]) => {
+      const builder: Record<string, unknown> = {
+        select: vi.fn().mockReturnThis(),
+        insert: vi.fn(() => {
+          order.push('insert');
+          return builder;
+        }),
+        update: vi.fn(() => {
+          order.push('revoke');
+          return builder;
+        }),
+        delete: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        neq: vi.fn().mockReturnThis(),
+        not: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: { id: 'new-device-row', encryption_salt: 'salt' },
+          error: null,
+        }),
+        maybeSingle: vi
+          .fn()
+          .mockResolvedValue({ data: { id: 'existing-row' }, error: null }),
+        then: vi.fn((resolve: (v: unknown) => unknown) =>
+          resolve({ data: { id: 'new-device-row' }, error: null })
+        ),
+      };
+      return builder;
+    };
+
+    it('inserts the new device key BEFORE revoking the old ones', async () => {
+      mockGetPrivateKey.mockResolvedValue(null); // IndexedDB miss → bootstrap path
+      const order: string[] = [];
+      mockMessagingFrom.mockReturnValue(orderTrackingBuilder(order));
+
+      await keyManagementService.ensureKeysForSession(CURRENT_USER_ID);
+
+      expect(order[0]).toBe('insert');
+      expect(order).toContain('revoke');
+    });
+
+    it('excludes the newly created key from the revoke', async () => {
+      mockGetPrivateKey.mockResolvedValue(null);
+      const order: string[] = [];
+      const builder = orderTrackingBuilder(order);
+      mockMessagingFrom.mockReturnValue(builder);
+
+      await keyManagementService.ensureKeysForSession(CURRENT_USER_ID);
+
+      // The revoke must scope AROUND the new row, or it kills the key it just made.
+      expect(builder.neq).toHaveBeenCalledWith('id', 'new-device-row');
+    });
+  });
+
   describe('restoreKeysFromCache mismatch self-heal (#126)', () => {
     /**
      * If a duplicate-key race left the cached private key belonging to a

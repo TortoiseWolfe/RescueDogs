@@ -454,9 +454,10 @@ export class KeyManagementService {
         'ensureKeysForSession: DB keys exist but IndexedDB miss — rotating to device keys',
         { userId }
       );
-      await this.revokeKeysForUser(userId);
     }
 
+    // #147: no pre-revoke. initializeDeviceKeys inserts the replacement first and
+    // then revokes the older rows, so the user is never left without a live key.
     return this.initializeDeviceKeys(userId);
   }
 
@@ -505,7 +506,13 @@ export class KeyManagementService {
         salt: DEVICE_KEY_SALT_MARKER,
       };
 
-      const { error: uploadError } = await msgClient
+      // #147: INSERT FIRST, then revoke the older rows. Revoking first left a
+      // window with zero usable keys — a peer calling getUserPublicKey in that gap
+      // gets null and the send fails outright, and a peer that read just before the
+      // revoke encrypts to a key now marked dead. Because selection is newest-first,
+      // during the brief overlap a peer reads the NEW key, which is the one this
+      // device holds. Returning the id lets the revoke scope around it.
+      const { data: inserted, error: uploadError } = await msgClient
         .from('user_encryption_keys')
         .insert({
           user_id: userId,
@@ -515,12 +522,19 @@ export class KeyManagementService {
           device_id: null,
           expires_at: null,
           revoked: false,
-        });
+        })
+        .select('id')
+        .single();
 
       if (uploadError) {
         throw new ConnectionError(
           'Failed to upload device public key: ' + uploadError.message
         );
+      }
+
+      const newKeyId = (inserted as { id?: string } | null)?.id;
+      if (newKeyId) {
+        await this.revokeKeysForUser(userId, newKeyId);
       }
 
       this.derivedKeys = keyPair;
@@ -556,14 +570,25 @@ export class KeyManagementService {
   }
 
   /** Revoke all active keys for a known user id (no getUser round-trip). */
-  private async revokeKeysForUser(userId: string): Promise<void> {
+  private async revokeKeysForUser(
+    userId: string,
+    keepKeyId?: string
+  ): Promise<void> {
     const supabase = createClient();
     const msgClient = createMessagingClient(supabase);
-    const { error: revokeError } = await msgClient
+    let query = msgClient
       .from('user_encryption_keys')
       .update({ revoked: true })
       .eq('user_id', userId)
       .eq('revoked', false);
+
+    // #147: when rotating, the replacement row is inserted BEFORE this runs, so it
+    // must be excluded or we would revoke the key we just created and leave the user
+    // with none.
+    if (keepKeyId) {
+      query = query.neq('id', keepKeyId);
+    }
+    const { error: revokeError } = await query;
 
     if (revokeError) {
       throw new ConnectionError(
