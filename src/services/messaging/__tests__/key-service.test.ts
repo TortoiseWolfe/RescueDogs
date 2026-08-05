@@ -50,12 +50,15 @@ vi.mock('@/lib/supabase/messaging-client', () => ({
 // ---------------------------------------------------------------------------
 const mockStorePrivateKey = vi.fn().mockResolvedValue(undefined);
 const mockGetPrivateKey = vi.fn().mockResolvedValue(null);
+const mockGetPrivateKeyFingerprint = vi.fn().mockResolvedValue(null);
 
 vi.mock('@/lib/messaging/encryption', () => ({
   encryptionService: {
-    storePrivateKey: (userId: string, key: CryptoKey) =>
-      mockStorePrivateKey(userId, key),
+    storePrivateKey: (userId: string, key: CryptoKey, fingerprint?: string) =>
+      mockStorePrivateKey(userId, key, fingerprint),
     getPrivateKey: (userId: string) => mockGetPrivateKey(userId),
+    getPrivateKeyFingerprint: (userId: string) =>
+      mockGetPrivateKeyFingerprint(userId),
   },
 }));
 
@@ -180,6 +183,7 @@ describe('KeyManagementService', () => {
     // Default: persistence + restore stubs
     mockStorePrivateKey.mockResolvedValue(undefined);
     mockGetPrivateKey.mockResolvedValue(null);
+    mockGetPrivateKeyFingerprint.mockResolvedValue(null);
     mockImportKey.mockResolvedValue({} as CryptoKey);
 
     // Default: online (so getUserPublicKey hits DB unless overridden).
@@ -249,6 +253,66 @@ describe('KeyManagementService', () => {
     });
   });
 
+  describe('restoreKeysFromCache mismatch self-heal (#126)', () => {
+    /**
+     * If a duplicate-key race left the cached private key belonging to a
+     * DIFFERENT keypair than the newest stored public key, the old code happily
+     * assembled the mixed pair and returned true — so ensureKeysForSession
+     * short-circuited and the account stayed permanently broken in BOTH
+     * directions (peers encrypt to the newest row this user cannot decrypt;
+     * this user encrypts with a private key peers do not have the public half
+     * of). Returning false instead lets the bootstrap mint a consistent key.
+     */
+    it('refuses a mixed pair so the caller can re-bootstrap', async () => {
+      mockGetPrivateKey.mockResolvedValue({} as CryptoKey);
+      mockGetPrivateKeyFingerprint.mockResolvedValue('a-different-key');
+      mockMessagingFrom.mockReturnValue(
+        createMockQueryBuilder(
+          { encryption_salt: 'salt', public_key: PUBLIC_JWK },
+          null
+        )
+      );
+
+      const restored =
+        await keyManagementService.restoreKeysFromCache(CURRENT_USER_ID);
+
+      expect(restored).toBe(false);
+      expect(keyManagementService.getCurrentKeys()).toBeNull();
+    });
+
+    it('accepts the pair when the fingerprint matches', async () => {
+      mockGetPrivateKey.mockResolvedValue({} as CryptoKey);
+      mockGetPrivateKeyFingerprint.mockResolvedValue(PUBLIC_JWK.x);
+      mockMessagingFrom.mockReturnValue(
+        createMockQueryBuilder(
+          { encryption_salt: 'salt', public_key: PUBLIC_JWK },
+          null
+        )
+      );
+
+      const restored =
+        await keyManagementService.restoreKeysFromCache(CURRENT_USER_ID);
+
+      expect(restored).toBe(true);
+    });
+
+    it('accepts legacy records that predate the fingerprint field', async () => {
+      mockGetPrivateKey.mockResolvedValue({} as CryptoKey);
+      mockGetPrivateKeyFingerprint.mockResolvedValue(null); // legacy row
+      mockMessagingFrom.mockReturnValue(
+        createMockQueryBuilder(
+          { encryption_salt: 'salt', public_key: PUBLIC_JWK },
+          null
+        )
+      );
+
+      const restored =
+        await keyManagementService.restoreKeysFromCache(CURRENT_USER_ID);
+
+      expect(restored).toBe(true);
+    });
+  });
+
   describe('initializeKeys', () => {
     it('derives, uploads, and stores keys for a new user', async () => {
       mockMessagingFrom.mockReturnValue(createMockQueryBuilder(null, null));
@@ -259,7 +323,10 @@ describe('KeyManagementService', () => {
       expect(mockDeriveKeyPair).toHaveBeenCalled();
       expect(mockStorePrivateKey).toHaveBeenCalledWith(
         CURRENT_USER_ID,
-        fakeKeyPair.privateKey
+        fakeKeyPair.privateKey,
+        // #126: the public-key fingerprint is persisted alongside the private
+        // key so restoreKeysFromCache can detect a mismatched pair.
+        PUBLIC_JWK.x
       );
       expect(keyManagementService.getCurrentKeys()).toEqual(fakeKeyPair);
     });
@@ -551,7 +618,10 @@ describe('KeyManagementService', () => {
       expect(mockDeriveKeyPair).toHaveBeenCalled();
       expect(mockStorePrivateKey).toHaveBeenCalledWith(
         CURRENT_USER_ID,
-        fakeKeyPair.privateKey
+        fakeKeyPair.privateKey,
+        // #126: the public-key fingerprint is persisted alongside the private
+        // key so restoreKeysFromCache can detect a mismatched pair.
+        PUBLIC_JWK.x
       );
       expect(keyManagementService.getCurrentKeys()).toEqual(fakeKeyPair);
     });

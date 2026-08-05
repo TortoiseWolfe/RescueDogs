@@ -152,7 +152,11 @@ export class KeyManagementService {
       try {
         // keyPair.privateKey is already non-extractable (see
         // KeyDerivationService.importPrivateKey).
-        await encryptionService.storePrivateKey(user.id, keyPair.privateKey);
+        await encryptionService.storePrivateKey(
+          user.id,
+          keyPair.privateKey,
+          keyPair.publicKeyJwk?.x
+        );
       } catch (err) {
         logger.warn('Could not populate IndexedDB after initializeKeys()', {
           error: err,
@@ -272,7 +276,11 @@ export class KeyManagementService {
       try {
         // keyPair.privateKey is already non-extractable (see
         // KeyDerivationService.importPrivateKey).
-        await encryptionService.storePrivateKey(user.id, keyPair.privateKey);
+        await encryptionService.storePrivateKey(
+          user.id,
+          keyPair.privateKey,
+          keyPair.publicKeyJwk?.x
+        );
       } catch (err) {
         logger.warn('Could not populate IndexedDB after deriveKeys()', {
           error: err,
@@ -341,6 +349,28 @@ export class KeyManagementService {
     }
 
     const publicKeyJwk = data.public_key as unknown as JsonWebKey;
+
+    // #126: refuse a MIXED pair. The private key comes from IndexedDB while the
+    // public half comes from the newest non-revoked row — if a duplicate-key race
+    // left those belonging to different keypairs, assembling them here would cache
+    // a silently broken identity: this user could not decrypt anything sent to the
+    // newest row, and peers could not decrypt anything this user sent. Returning
+    // false instead lets ensureKeysForSession bootstrap a fresh, consistent device
+    // key, so the account self-heals rather than staying broken forever.
+    const cachedFingerprint =
+      await encryptionService.getPrivateKeyFingerprint(currentUserId);
+    if (cachedFingerprint && cachedFingerprint !== publicKeyJwk?.x) {
+      logger.warn(
+        'restoreKeysFromCache: cached private key does not match the newest stored public key — rotating',
+        {
+          userId: currentUserId,
+          cached: cachedFingerprint.slice(0, 8),
+          stored: publicKeyJwk?.x?.slice(0, 8) ?? 'null',
+        }
+      );
+      return false;
+    }
+
     const publicKey = await crypto.subtle.importKey(
       'jwk',
       publicKeyJwk,
@@ -495,7 +525,11 @@ export class KeyManagementService {
 
       this.derivedKeys = keyPair;
       try {
-        await encryptionService.storePrivateKey(userId, keyPair.privateKey);
+        await encryptionService.storePrivateKey(
+          userId,
+          keyPair.privateKey,
+          keyPair.publicKeyJwk?.x
+        );
       } catch (err) {
         logger.warn(
           'Could not populate IndexedDB after initializeDeviceKeys()',
@@ -824,7 +858,11 @@ export class KeyManagementService {
       try {
         // keyPair.privateKey is already non-extractable (see
         // KeyDerivationService.importPrivateKey).
-        await encryptionService.storePrivateKey(user.id, keyPair.privateKey);
+        await encryptionService.storePrivateKey(
+          user.id,
+          keyPair.privateKey,
+          keyPair.publicKeyJwk?.x
+        );
       } catch (err) {
         logger.warn('Could not populate IndexedDB after rotateKeys()', {
           error: err,

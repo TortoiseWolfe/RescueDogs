@@ -136,6 +136,17 @@ export interface PrivateKey {
   userId: string;
   privateKey: CryptoKey;
   created_at: number;
+  /**
+   * Fingerprint (JWK `x`) of the PUBLIC half of this private key (#126).
+   *
+   * Lets restoreKeysFromCache detect that the cached private key no longer
+   * matches the newest `user_encryption_keys` row — otherwise it silently
+   * assembles a mixed pair (private K_a + public K_b) and reports success, so
+   * the mismatch is never repaired and BOTH directions of every thread fail to
+   * decrypt forever. Optional: records written before this field existed simply
+   * skip the check.
+   */
+  publicKeyFingerprint?: string;
 }
 
 export interface SyncMetadata {
