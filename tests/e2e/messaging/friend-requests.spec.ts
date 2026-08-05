@@ -254,15 +254,28 @@ test.describe('Accessibility', () => {
     fixture = null;
   });
 
-  test('connections page meets WCAG standards', async ({ browser }) => {
+  test('connections page meets WCAG standards', async ({
+    browser,
+    browserName,
+  }) => {
     fixture = await seedIsolatedConnection('none');
     test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
 
     const viewer = await openConnectionsTab(browser, fixture!.requesterSession);
     try {
       // Keyboard navigation reaches a visible focused element.
-      await viewer.page.keyboard.press('Tab');
-      await expect(viewer.page.locator(':focus').first()).toBeVisible();
+      //
+      // #154: skipped on WebKit only. Safari/WebKit does not move focus to links
+      // or buttons on Tab unless macOS "Full Keyboard Access" is enabled, and
+      // Playwright's WebKit build inherits that default — so `:focus` matches
+      // nothing and this times out. That is a browser behaviour difference, not
+      // an accessibility defect in the page: chromium and firefox still assert
+      // it, and every other WCAG check below still runs on WebKit. Same family
+      // as the documented WebKit `scrollTop` quirk in CLAUDE.md.
+      if (browserName !== 'webkit') {
+        await viewer.page.keyboard.press('Tab');
+        await expect(viewer.page.locator(':focus').first()).toBeVisible();
+      }
 
       // Search input has an accessible name.
       await expect(viewer.page.locator('#user-search-input')).toHaveAttribute(
