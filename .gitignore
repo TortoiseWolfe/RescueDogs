@@ -135,3 +135,6 @@ scripts/__tests__/fixtures/*
 .speckit-tools/
 .speckit-cache/
 tmp-logos/
+
+# graphify knowledge graph — generated, can be large; rebuild with `/graphify .`
+graphify-out/
