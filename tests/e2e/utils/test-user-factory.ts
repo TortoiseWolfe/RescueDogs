@@ -1516,12 +1516,10 @@ export async function openConversationAs(
     timeout: 60000,
   });
 
-  // #126: the gate's device-key bootstrap is non-blocking, so the thread can be
-  // visible while this user's keys are still rotating. Callers open BOTH
-  // participants and await both, so settling here means neither side can encrypt
-  // to a key the other has already revoked. See waitForOwnKeysSettled.
+  // #126 guard: assert this user ended up with exactly one live encryption key.
+  // See expectSingleLiveKey for why that invariant matters and why it is safe.
   const userId = (session.user as { id?: string })?.id;
-  if (userId) await waitForOwnKeysSettled(userId);
+  if (userId) await expectSingleLiveKey(userId);
 
   return { page, context, close };
 }
@@ -1611,173 +1609,61 @@ export async function openAsPartner(
 }
 
 /**
- * #126 diagnostic: dump EVERY `user_encryption_keys` row (revoked ones included)
- * for both participants, with the public-key fingerprint of each.
+ * #126 regression guard: every isolated user must end up with EXACTLY ONE live
+ * (non-revoked) `user_encryption_keys` row once their page has opened.
  *
- * Why this exists: closing the seed-key→device-key window did NOT stop the flake
- * (run 30968387198 — the barrier settled every time, yet the same
- * `getByText(<message>)` timeouts still occurred and were only masked by retries).
- * So a message is still being encrypted to a key the recipient cannot use, for a
- * reason we have not identified. The leading suspicion is DUPLICATE live rows: an
- * earlier barrier revision that demanded exactly one non-revoked row never settled
- * for any of 141 users, while "newest row is the device key" settles instantly.
+ * This is the invariant #126 violated. EncryptionKeyGate's effect re-fired on every
+ * new `user` object identity and ensureKeysForSession had no single-flight guard, so
+ * each re-fire revoked all live rows and inserted a fresh RANDOM device key. In CI,
+ * 62 of 74 opens ended with THREE live rows created within ~17ms; a peer that read the
+ * recipient's public key mid-race encrypted to a key superseded moments later, and
+ * that ciphertext is permanently undecryptable.
  *
- * That matters because key selection is split-brained — senders use
- * `getUserPublicKey()` (newest non-revoked row) while the recipient's
- * `restoreKeysFromCache()` pairs its IndexedDB private key with the newest
- * non-revoked row — and nothing binds a ciphertext to the key that encrypted it
- * (`messages.key_version` is a constant).
+ * After the fix (single-flight + `user?.id` effect dep) the observed count was
+ * `live=1` in 124/124 opens across two consecutive runs — so asserting it is safe and
+ * a violation is a genuine regression, not noise.
  *
- * `fingerprint` is the first 8 chars of the JWK `x` coordinate, matching what
- * `getUserPublicKey`/`deriveKeys` log, so sender and recipient state can be
- * compared directly. Purely observational: never throws, never fails a test.
+ * Polls briefly rather than sampling once, because the row is committed asynchronously
+ * by the gate's bootstrap; a real regression (2+ rows) never converges to 1, so this
+ * still fails loudly. Silently skipped when no admin client is configured (the same
+ * condition under which seedIsolatedConversation returns null and specs skip).
  */
-export async function dumpIsoKeyState(
-  fixture: IsolatedConversation | null,
-  label: string
-): Promise<void> {
-  if (!fixture) return;
-  const admin = getAdminClient();
-  if (!admin) return;
-
-  const describe = async (who: string, userId: string): Promise<string> => {
-    const { data, error } = await admin
-      .from('user_encryption_keys')
-      .select('id, created_at, revoked, encryption_salt, public_key')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-    if (error) return `${who}(${userId.slice(0, 8)})=ERROR:${error.message}`;
-    const rows = (data ?? []) as Array<{
-      created_at: string;
-      revoked: boolean;
-      encryption_salt: string | null;
-      public_key: { x?: string } | null;
-    }>;
-    const live = rows.filter((r) => !r.revoked).length;
-    const detail = rows
-      .map(
-        (r) =>
-          `{fp:${r.public_key?.x?.slice(0, 8) ?? 'null'},` +
-          `salt:${r.encryption_salt?.slice(0, 12) ?? 'null'},` +
-          `revoked:${r.revoked},at:${r.created_at}}`
-      )
-      .join(' ');
-    // Newest-first, so rows[0] is exactly what getUserPublicKey would return.
-    return `${who}(${userId.slice(0, 8)}) live=${live}/${rows.length} ${detail}`;
-  };
-
-  try {
-    const [viewer, partner] = await Promise.all([
-      describe('viewer', fixture.viewer.id),
-      describe('partner', fixture.partner.id),
-    ]);
-    console.log(`[#126][${label}] ${viewer} || ${partner}`);
-  } catch (err) {
-    console.log(`[#126][${label}] dump failed: ${(err as Error).message}`);
-  }
-}
-
-/**
- * #126 barrier: block until this user's encryption keys have STOPPED changing,
- * so a peer that reads this user's public key afterwards gets one this user can
- * actually decrypt with.
- *
- * Root cause of the chromium-msg-iso realtime-delivery flake: EncryptionKeyGate
- * calls keyManagementService.ensureKeysForSession(), which — for a fresh throwaway
- * user whose IndexedDB has no cached private key (always true on first open) —
- * REVOKES the admin-seeded Argon2 key and generates a brand-new RANDOM ECDH
- * *device* key. The seeded key's private half never exists in any browser. The gate
- * is non-blocking (it renders the thread behind a pointer-events-none overlay, with
- * no decrypt-retry), so under this shard's `workers:2` contention the viewer's
- * `getUserPublicKey(partner)` — "newest non-revoked row" — can resolve to the
- * partner's soon-revoked SEED key before the partner's device-key row commits. The
- * partner only ever holds its device private key, so that message is bound to a key
- * nobody can decrypt → permanent "AES-GCM decryption failed" that no reload
- * recovers (the ciphertext is immutable and no decrypt-failure cache is involved).
- *
- * Called at the end of {@link openConversationAs}, so every isolated spec that opens
- * both participants (and awaits both) is guaranteed both sides have settled before
- * the first send — no per-spec wiring, and no weakening of any assertion: the test
- * still performs a real send → realtime → decrypt of the plaintext.
- *
- * Settle condition: the newest non-revoked row IS the device key
- * (`DEVICE_KEY_SALT_MARKER`), i.e. the gate has finished replacing the seeded
- * Argon2 row. Waiting merely for the rows to "stop changing" does NOT work — the
- * seeded row is already stable when the page opens, so such a check returns before
- * rotation has even started.
- *
- * FAIL-OPEN by design: if the condition is not reached in time this logs a
- * diagnostic and returns, it never throws. A stabilizer must not itself fail tests
- * — an earlier revision did, and turned a 1-failure shard into 47 failures. If the
- * gate ever stops rotating (pre-baked keys, or a fixed ensureKeysForSession) this
- * simply becomes a no-op instead of a false red.
- *
- * Uses the admin client (bypasses RLS, reads committed state on the single shared
- * Postgres — no read replica, so a committed row is immediately visible to the
- * peer's subsequent online `getUserPublicKey` fetch).
- */
-export async function waitForOwnKeysSettled(
+export async function expectSingleLiveKey(
   userId: string,
   opts: { timeoutMs?: number; pollMs?: number } = {}
 ): Promise<void> {
   const admin = getAdminClient();
-  if (!admin) return; // seeding was skipped too (no admin client) — nothing to wait on
+  if (!admin) return;
   const { timeoutMs = 10000, pollMs = 250 } = opts;
 
-  // Mirrors DEVICE_KEY_SALT_MARKER in src/services/messaging/key-service.ts.
-  // NOT imported: key-service pulls in @/lib/messaging/database, which constructs
-  // a Dexie instance at module scope and blows up under Node. Because this helper
-  // fails open, a drift in that constant degrades it to a no-op (with the warning
-  // below naming the salts it actually saw) rather than failing the suite.
-  const DEVICE_KEY_SALT_MARKER = 'rp-device-key-v1';
-
-  type KeyRow = { created_at: string; encryption_salt: string | null };
-  let lastRows: KeyRow[] | null = null;
-  let lastError: string | null = null;
-
-  /** True once the newest live key is the gate's device key. */
-  const deviceKeyIsNewest = async (): Promise<boolean> => {
-    const { data, error } = await admin
+  const liveRows = async () => {
+    const { data } = await admin
       .from('user_encryption_keys')
-      .select('created_at, encryption_salt')
+      .select('encryption_salt, created_at')
       .eq('user_id', userId)
       .eq('revoked', false)
       .order('created_at', { ascending: false });
-    lastError = error?.message ?? null;
-    lastRows = (data as KeyRow[] | null) ?? null;
-    return lastRows?.[0]?.encryption_salt === DEVICE_KEY_SALT_MARKER;
+    return (data ?? []) as Array<{
+      encryption_salt: string | null;
+      created_at: string;
+    }>;
   };
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
   const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    if (await deviceKeyIsNewest()) {
-      // #126: one line per open. `live` > 1 would confirm the duplicate-row
-      // hypothesis (the seeded row surviving revocation), which is the current
-      // leading explanation for the failures the barrier does NOT prevent.
-      const settled = lastRows as KeyRow[] | null;
-      console.log(
-        `[#126] keys settled for ${userId.slice(0, 8)}: live=${settled?.length ?? '?'} ` +
-          `salts=${JSON.stringify(settled?.map((r) => r.encryption_salt) ?? null)}`
-      );
-      return;
-    }
+  let rows = await liveRows();
+  while (rows.length !== 1 && Date.now() < deadline) {
     await sleep(pollMs);
+    rows = await liveRows();
   }
 
-  // Fail-open. The diagnostic tells the next reader exactly what the DB looked
-  // like, which is the evidence needed to finish diagnosing #126.
-  // Read through explicit types: both are assigned inside the closure above, which
-  // TypeScript's control-flow analysis cannot see (it narrows them to `never`).
-  const rows = lastRows as KeyRow[] | null;
-  const queryError = lastError as string | null;
-  console.warn(
-    `[#126] waitForOwnKeysSettled: device key not newest for ${userId.slice(0, 8)} ` +
-      `after ${timeoutMs}ms — proceeding anyway. ` +
-      `liveRows=${rows?.length ?? 'null'} ` +
-      `salts=${JSON.stringify(rows?.map((r) => r.encryption_salt) ?? null)} ` +
-      `queryError=${queryError ?? 'none'}`
-  );
+  expect(
+    rows.length,
+    `#126 regression: user ${userId.slice(0, 8)} has ${rows.length} live encryption keys, ` +
+      `expected exactly 1. Concurrent key bootstraps are minting duplicate device keys again, ` +
+      `which makes messages encrypted to a superseded key permanently undecryptable. ` +
+      `Rows: ${JSON.stringify(rows.map((r) => ({ salt: r.encryption_salt?.slice(0, 12), at: r.created_at })))}`
+  ).toBe(1);
 }
 
 /**

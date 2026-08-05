@@ -440,11 +440,17 @@ jobs:
           # race). This is the CI validation gate: prove the cloud free-tier
           # sustains parallel signups before converting the rest. workers:2 is
           # conservative — raise only after this proves green & flake-free.
+          # failOnFlaky: a test that fails then passes on retry is reported as
+          # "flaky" and the job still goes GREEN. That is exactly how #126 hid —
+          # run 30968387198 was a green msg-iso with 3 flaky delivery failures
+          # masking a real key-rotation bug. This slice is now proven flake-free
+          # (0 flaky across two consecutive runs), so hold it to that standard.
           - {
               project: chromium-msg-iso,
               browser: chromium,
               shard: 1/1,
               workers: 2,
+              failOnFlaky: true,
             }
           - { project: chromium-gen, browser: chromium, shard: 1/6 }
           - { project: chromium-gen, browser: chromium, shard: 2/6 }
@@ -579,6 +585,9 @@ jobs:
           # for every other job → Playwright uses the config default (workers:1
           # on CI). Routed via env per workflow-injection guidance.
           WORKERS: ${{ matrix.workers }}
+          # Same routing for the flake gate (see matrix comment). Repo-controlled
+          # matrix value, never user input.
+          FAIL_ON_FLAKY: ${{ matrix.failOnFlaky }}
         run: |
           # --no-deps: skip the 'setup' project dependency. The auth-setup
           # job already ran setup once (with chromium) and uploaded the
@@ -589,13 +598,19 @@ jobs:
           if [ -n "$WORKERS" ]; then
             WORKERS_FLAG="--workers=$WORKERS"
           fi
+          # Treat a retry-rescued test as a failure on slices proven flake-free,
+          # so a real regression cannot hide behind a green check (#126).
+          FLAKY_FLAG=""
+          if [ "$FAIL_ON_FLAKY" = "true" ]; then
+            FLAKY_FLAG="--fail-on-flaky-tests"
+          fi
           pnpm exec playwright test \
             --project="$PROJECT" \
             --shard="$SHARD" \
             --reporter=blob \
             --trace=on-first-retry \
             --no-deps \
-            $WORKERS_FLAG
+            $WORKERS_FLAG $FLAKY_FLAG
 
       - name: Upload blob report
         if: always()
