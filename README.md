@@ -55,6 +55,29 @@ traction + a real board + legal/CPA budget make it worthwhile. Structure options
 and revenue notes: [docs/product/BUSINESS-MODEL.md](./docs/product/BUSINESS-MODEL.md).
 Do not promise tax-deductible donations until we actually have IRS recognition.
 
+**Sign-in paths (#159).** There are three ways into the same form — they differ
+by **portal preference** (landing / demo prefill), not by access control:
+
+| Path            | URL pattern               | Purpose                                                    |
+| --------------- | ------------------------- | ---------------------------------------------------------- |
+| Adopter Sign In | `/sign-in?portal=adopter` | Sets adopter preference; aims post-login at adopter flows  |
+| Shelter Sign In | `/sign-in?portal=shelter` | Sets shelter preference; aims post-login at shelter flows  |
+| Generic Sign In | `/sign-in`                | Header **Log In** escape hatch when no door was chosen yet |
+
+Chrome / menus stay short **Log In**; page headings say **Sign In** / **Adopter
+Sign In** / **Shelter Sign In**. Soft “New here?” links point at For Adopters /
+For Shelters — we do **not** force a chooser before the generic form. Shelter
+tools still require `shelter_members` (membership), regardless of which sign-in
+URL was used. Optional later polish: soft post-login “Where next?” when preference
+is missing — tracked on [#159](https://github.com/TortoiseWolfe/RescueDogs/issues/159).
+Deep dive: [docs/AUTH-SETUP.md — Raised Paws portal sign-in](./docs/AUTH-SETUP.md#raised-paws-portal-sign-in).
+
+**Search title.** The homepage `<title>` is built as
+`Raised Paws — {projectTagline}` from `src/config/project.config.ts`
+(`projectTagline`: **Pet Adoption Application Tracker**). If Google still shows
+an older short tagline, request indexing in Search Console — the live HTML
+already has the full phrase.
+
 ## 🚀 Live Demo — Try the Loop
 
 Everything runs against a seeded demo shelter (**Second Chance Rescue**) with

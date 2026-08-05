@@ -4,6 +4,32 @@ Complete guide for configuring Supabase authentication with email/password and O
 
 > **Forking RescueDogs for the first time?** Start at [`docs/FORK-CHECKLIST.md`](FORK-CHECKLIST.md) — it's the master walkthrough covering every external service this template integrates with (auth, payments, email, analytics). This document is the deep-dive for the auth portion.
 
+## Raised Paws portal sign-in
+
+Raised Paws uses **one** email/password (and optional OAuth) form at `/sign-in`.
+Portal query params only set a **local preference** for copy, demo prefill, and
+default post-login destination — they do **not** grant shelter access.
+
+| Path    | Example                   | Notes                                            |
+| ------- | ------------------------- | ------------------------------------------------ |
+| Adopter | `/sign-in?portal=adopter` | Heading: **Adopter Sign In**                     |
+| Shelter | `/sign-in?portal=shelter` | Heading: **Shelter Sign In**                     |
+| Generic | `/sign-in`                | Heading: **Sign In** — used by header **Log In** |
+
+**Naming:** keep chrome buttons as **Log In** (short); keep page headings as
+**Sign In** so they match Adopter/Shelter Sign In.
+
+**Do not** require an adopter/shelter chooser before every generic login. Soft
+links on the generic page (“New here? For Adopters · For Shelters”) are enough.
+After auth, shelter pipeline tools still require a `shelter_members` row.
+
+**Optional later (#159):** if pilots show confused landings from generic Log In
+with no saved preference, consider a soft post-login “Where next?” — never a
+hard gate before the form.
+
+Code: `src/app/sign-in/page.tsx`, `src/lib/portal/portal-preference.ts`,
+`src/lib/portal/resolve-post-login-path.ts`.
+
 ## Prerequisites
 
 - Supabase project created — substitute its ref for `<YOUR-PROJECT-REF>` in the URLs below
@@ -103,7 +129,7 @@ Complete guide for configuring Supabase authentication with email/password and O
 
 | Field                          | Value                                                        |
 | ------------------------------ | ------------------------------------------------------------ |
-| **Application name**           | `RescueDogs` (or your preferred name)                      |
+| **Application name**           | `RescueDogs` (or your preferred name)                        |
 | **Homepage URL**               | `http://localhost:3000` (development) or your production URL |
 | **Application description**    | (Optional) "Next.js template with authentication"            |
 | **Authorization callback URL** | `https://<YOUR-PROJECT-REF>.supabase.co/auth/v1/callback`    |
