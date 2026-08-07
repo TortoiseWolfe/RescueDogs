@@ -21,30 +21,19 @@ test.describe('PWA Installation', () => {
     await dismissCookieBanner(page);
   });
 
-  test('service worker registers successfully', async ({ page }) => {
-    // Wait for service worker to register
+  test('service worker is not registered (#162)', async ({ page }) => {
     const swResult = await page.evaluate(async () => {
       if (!('serviceWorker' in navigator)) {
         return { supported: false, registered: false };
       }
-
-      // Wait up to 5 seconds for service worker to register
-      for (let i = 0; i < 50; i++) {
-        const registration = await navigator.serviceWorker.getRegistration();
-        if (registration) {
-          return { supported: true, registered: true };
-        }
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-      return { supported: true, registered: false };
+      const registration = await navigator.serviceWorker.getRegistration();
+      return { supported: true, registered: !!registration };
     });
 
-    // In CI headless browsers, service workers may not register
-    // Test passes if SW not supported OR if SW is registered
-    // We don't fail if SW is supported but didn't register (CI environment)
-    expect(
-      swResult.supported === false || swResult.registered === true || true
-    ).toBe(true);
+    // Intentional: site is not installable; SW must not control the page
+    if (swResult.supported) {
+      expect(swResult.registered).toBe(false);
+    }
   });
 
   test('manifest file is linked correctly', async ({ page }) => {
@@ -101,7 +90,10 @@ test.describe('PWA Installation', () => {
     expect(manifest.name).toBeTruthy();
     expect(manifest.short_name).toBeTruthy();
     expect(manifest.start_url).toBeTruthy();
-    expect(manifest.display).toMatch(/standalone|fullscreen|minimal-ui/);
+    // browser — intentionally not installable (#162)
+    expect(manifest.display).toBe('browser');
+    expect(manifest.name).toMatch(/Raised Paws/);
+    expect(manifest.short_name).toBe('Raised Paws');
     expect(manifest.theme_color).toMatch(/^#[0-9A-Fa-f]{6}$/);
     expect(manifest.background_color).toMatch(/^#[0-9A-Fa-f]{6}$/);
 
@@ -109,7 +101,7 @@ test.describe('PWA Installation', () => {
     expect(Array.isArray(manifest.icons)).toBe(true);
     expect(manifest.icons.length).toBeGreaterThan(0);
 
-    // Verify at least one icon is 192x192 or larger (required for PWA)
+    // Verify at least one icon is 192x192 or larger
     const hasLargeIcon = manifest.icons.some((icon: { sizes: string }) => {
       const size = parseInt(icon.sizes.split('x')[0]);
       return size >= 192;
@@ -117,58 +109,17 @@ test.describe('PWA Installation', () => {
     expect(hasLargeIcon).toBe(true);
   });
 
-  test('app works offline after service worker activation', async ({
+  test('offline cache is skipped when service worker is disabled (#162)', async ({
     page,
-    context,
-    browserName,
   }) => {
-    // WebKit does not support page.reload() while offline with service workers —
-    // triggers "WebKit encountered an internal error". Known Playwright limitation.
-    test.skip(
-      browserName === 'webkit',
-      'WebKit does not support offline reload with service workers'
-    );
-    // Check if service workers are supported
     const swSupported = await page.evaluate(() => 'serviceWorker' in navigator);
+    if (!swSupported) return;
 
-    if (!swSupported) {
-      // Skip test if service workers not supported (CI headless browser)
-      return;
-    }
-
-    // Wait for service worker to be active (with timeout)
-    const swActive = await page.evaluate(async () => {
-      try {
-        // Race between serviceWorker.ready and a 5-second timeout
-        const timeoutPromise = new Promise<boolean>((resolve) =>
-          setTimeout(() => resolve(false), 5000)
-        );
-        const readyPromise = navigator.serviceWorker.ready.then(
-          (reg) => reg.active !== null
-        );
-        return await Promise.race([readyPromise, timeoutPromise]);
-      } catch {
-        return false;
-      }
-    });
-
-    if (!swActive) {
-      // Skip test if service worker didn't activate (common in dev/CI)
-      return;
-    }
-
-    // Go offline
-    await context.setOffline(true);
-
-    // Try to navigate while offline
-    try {
-      await page.reload();
-      // Page should still load (from cache)
-      await expect(page.locator('h1').first()).toBeVisible({ timeout: 5000 });
-    } finally {
-      // Go back online
-      await context.setOffline(false);
-    }
+    const registration = await page.evaluate(async () =>
+      navigator.serviceWorker.getRegistration()
+    );
+    // No SW → no offline shell; intentional to avoid Chrome Install prompt
+    expect(registration).toBeNull();
   });
 
   test('install button shows on supported browsers', async ({ page }) => {
@@ -272,8 +223,8 @@ test.describe('PWA Installation', () => {
     }
   });
 
-  test('web app is installable (Lighthouse PWA criteria)', async ({ page }) => {
-    // This test checks basic installability criteria
+  test('web app is intentionally not installable (#162)', async ({ page }) => {
+    // Chrome Install mini-infobar needs standalone|fullscreen|minimal-ui + SW
     const criteria = await page.evaluate(async () => {
       const results = {
         hasServiceWorker: false,
@@ -282,24 +233,21 @@ test.describe('PWA Installation', () => {
         hasIcon: false,
         hasStartUrl: false,
         hasName: false,
-        hasDisplay: false,
+        hasInstallableDisplay: false,
+        shortName: '',
       };
 
-      // Check service worker
       if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.getRegistration();
         results.hasServiceWorker = !!registration;
       }
 
-      // Check manifest
       const manifestLink = document.querySelector('link[rel="manifest"]');
       results.hasManifest = !!manifestLink;
 
-      // Check HTTPS (localhost is considered secure)
       results.isHttps =
         location.protocol === 'https:' || location.hostname === 'localhost';
 
-      // Check manifest content
       if (manifestLink) {
         try {
           const response = await fetch((manifestLink as HTMLLinkElement).href);
@@ -308,7 +256,8 @@ test.describe('PWA Installation', () => {
           results.hasIcon = manifest.icons && manifest.icons.length > 0;
           results.hasStartUrl = !!manifest.start_url;
           results.hasName = !!manifest.name;
-          results.hasDisplay =
+          results.shortName = manifest.short_name || '';
+          results.hasInstallableDisplay =
             manifest.display === 'standalone' ||
             manifest.display === 'fullscreen' ||
             manifest.display === 'minimal-ui';
@@ -320,15 +269,14 @@ test.describe('PWA Installation', () => {
       return results;
     });
 
-    // In CI, service worker may not register, so we skip that check
-    // All other criteria should be met for installability
     expect(criteria.hasManifest).toBe(true);
     expect(criteria.isHttps).toBe(true);
     expect(criteria.hasIcon).toBe(true);
     expect(criteria.hasStartUrl).toBe(true);
     expect(criteria.hasName).toBe(true);
-    expect(criteria.hasDisplay).toBe(true);
-    // Service worker check is lenient - may not work in CI
-    // expect(criteria.hasServiceWorker).toBe(true);
+    expect(criteria.shortName).toBe('Raised Paws');
+    // Not installable: browser display mode + no SW
+    expect(criteria.hasInstallableDisplay).toBe(false);
+    expect(criteria.hasServiceWorker).toBe(false);
   });
 });

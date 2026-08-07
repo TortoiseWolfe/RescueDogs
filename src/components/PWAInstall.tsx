@@ -1,12 +1,14 @@
 'use client';
 
 /**
- * Silent service-worker registration only.
- * User-facing Install App / PWA install CTAs were removed (#50).
+ * PWA lifecycle helper (#50, #162).
+ *
+ * User-facing Install CTAs were removed (#50). We no longer register a
+ * service worker so Chrome does not treat the site as installable (#162).
+ * Existing registrations from earlier deploys are unregistered on load.
  */
 
 import { useEffect } from 'react';
-import { projectConfig } from '@/config/project.config';
 import { createLogger } from '@/lib/logger';
 
 const logger = createLogger('components:pwa');
@@ -21,47 +23,34 @@ export default function PWAInstall() {
     // Skip in test environments
     if (process.env.NODE_ENV === 'test') return;
 
-    const registerSW = () => {
-      const swPath = projectConfig.swPath;
-      logger.debug('Registering Service Worker', { path: swPath });
-
-      const swUrl = `${swPath}?v=${Date.now()}`;
-
-      navigator.serviceWorker.register(swUrl).then(
-        (registration) => {
-          // Defensive: register() can resolve undefined in some hosting setups
-          if (!registration) {
-            logger.warn(
-              'Service Worker register() resolved with undefined — likely sw.js MIME or CSP issue'
-            );
+    const unregisterWorkers = () => {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => {
+          if (registrations.length === 0) {
+            logger.debug('No service workers to unregister');
             return;
           }
-
-          logger.info('Service Worker registered', {
-            scope: registration.scope,
-            state: registration.active?.state || 'installing',
-          });
-
-          registration.update().catch((err) => {
-            logger.debug('SW update failed', { error: err });
-          });
-
-          setInterval(() => {
-            registration.update().catch((err) => {
-              logger.debug('SW update check failed', { error: err });
-            });
-          }, 60000);
-        },
-        (error) => {
-          logger.error('Service Worker registration failed', { error });
-        }
-      );
+          return Promise.all(
+            registrations.map((registration) =>
+              registration.unregister().then((ok) => {
+                logger.info('Service Worker unregistered', {
+                  scope: registration.scope,
+                  ok,
+                });
+              })
+            )
+          );
+        })
+        .catch((error) => {
+          logger.error('Service Worker unregister failed', { error });
+        });
     };
 
     if (document.readyState === 'complete') {
-      registerSW();
+      unregisterWorkers();
     } else {
-      window.addEventListener('load', registerSW, { once: true });
+      window.addEventListener('load', unregisterWorkers, { once: true });
     }
   }, []);
 

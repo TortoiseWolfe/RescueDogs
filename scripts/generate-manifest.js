@@ -2,7 +2,11 @@
 
 /**
  * Generate PWA manifest.json at build time
- * This replaces the dynamic API route for static export compatibility
+ * This replaces the dynamic API route for static export compatibility.
+ *
+ * Branding uses the product display name (Raised Paws), never the GitHub
+ * repo slug (RescueDogs). Keep in sync with generateManifest() in
+ * src/config/project.config.ts (#162).
  */
 
 const fs = require('fs');
@@ -14,7 +18,12 @@ const projectConfigPath = path.join(
   '../src/config/project-detected.json'
 );
 let projectConfig = {
+  // Repo slug — used only for GitHub URLs / packaging, not PWA branding
   projectName: 'RescueDogs',
+  projectDisplayName: 'Raised Paws',
+  projectTagline: 'Pet Adoption Application Tracker',
+  projectDescription:
+    'Pet adoption application tracker for shelters, adopters, and live status updates',
   projectOwner: 'TortoiseWolfe',
   basePath: '',
 };
@@ -26,6 +35,12 @@ if (fs.existsSync(projectConfigPath)) {
     projectConfig = {
       ...projectConfig,
       ...detected,
+      // Detection only knows the repo slug — never let it overwrite brand
+      projectDisplayName:
+        detected.projectDisplayName || projectConfig.projectDisplayName,
+      projectTagline: detected.projectTagline || projectConfig.projectTagline,
+      projectDescription:
+        detected.projectDescription || projectConfig.projectDescription,
     };
   } catch (error) {
     console.warn(
@@ -39,6 +54,10 @@ if (fs.existsSync(projectConfigPath)) {
 if (process.env.NEXT_PUBLIC_PROJECT_NAME) {
   projectConfig.projectName = process.env.NEXT_PUBLIC_PROJECT_NAME;
 }
+if (process.env.NEXT_PUBLIC_PROJECT_DISPLAY_NAME) {
+  projectConfig.projectDisplayName =
+    process.env.NEXT_PUBLIC_PROJECT_DISPLAY_NAME;
+}
 if (process.env.NEXT_PUBLIC_PROJECT_OWNER) {
   projectConfig.projectOwner = process.env.NEXT_PUBLIC_PROJECT_OWNER;
 }
@@ -46,93 +65,60 @@ if (process.env.NEXT_PUBLIC_BASE_PATH !== undefined) {
   projectConfig.basePath = process.env.NEXT_PUBLIC_BASE_PATH;
 }
 
-// Generate manifest
+const basePath = projectConfig.basePath || '';
+const displayName = projectConfig.projectDisplayName;
+
+// display: browser — intentionally not installable as a PWA (#162).
+// Chrome's Install mini-infobar requires standalone|fullscreen|minimal-ui.
 const manifest = {
-  name: projectConfig.projectName,
-  short_name: projectConfig.projectName.substring(0, 12),
-  description: `${projectConfig.projectName} - Modern Next.js template with PWA, theming, and interactive components`,
-  theme_color: '#1a1a2e',
-  background_color: '#1a1a2e',
-  display: 'standalone',
-  start_url: `${projectConfig.basePath}/`,
-  scope: `${projectConfig.basePath}/`,
+  name: `${displayName} — ${projectConfig.projectTagline}`,
+  short_name: displayName,
+  description: projectConfig.projectDescription,
+  theme_color: '#1e3a8a',
+  background_color: '#ffffff',
+  display: 'browser',
+  start_url: `${basePath}/`,
+  scope: `${basePath}/`,
   orientation: 'portrait-primary',
-  categories: ['productivity', 'utilities'],
+  categories: ['lifestyle', 'productivity', 'utilities'],
   lang: 'en',
   dir: 'ltr',
   prefer_related_applications: false,
   icons: [
     {
-      src: `${projectConfig.basePath}/icon-72.svg`,
-      sizes: '72x72',
+      src: `${basePath}/favicon.svg`,
+      sizes: 'any',
       type: 'image/svg+xml',
-      purpose: 'any',
     },
     {
-      src: `${projectConfig.basePath}/icon-96.svg`,
-      sizes: '96x96',
-      type: 'image/svg+xml',
-      purpose: 'any',
-    },
-    {
-      src: `${projectConfig.basePath}/icon-128.svg`,
-      sizes: '128x128',
-      type: 'image/svg+xml',
-      purpose: 'any',
-    },
-    {
-      src: `${projectConfig.basePath}/icon-144.svg`,
-      sizes: '144x144',
-      type: 'image/svg+xml',
-      purpose: 'any',
-    },
-    {
-      src: `${projectConfig.basePath}/icon-152.svg`,
-      sizes: '152x152',
-      type: 'image/svg+xml',
-      purpose: 'any',
-    },
-    {
-      src: `${projectConfig.basePath}/icon-192.svg`,
+      src: `${basePath}/icon-192x192.svg`,
       sizes: '192x192',
       type: 'image/svg+xml',
       purpose: 'any',
     },
     {
-      src: `${projectConfig.basePath}/icon-384.svg`,
-      sizes: '384x384',
-      type: 'image/svg+xml',
-      purpose: 'any',
-    },
-    {
-      src: `${projectConfig.basePath}/icon-512.svg`,
+      src: `${basePath}/icon-512x512.svg`,
       sizes: '512x512',
       type: 'image/svg+xml',
       purpose: 'any',
     },
     {
-      src: `${projectConfig.basePath}/icon-192x192-maskable.png`,
-      sizes: '192x192',
-      type: 'image/png',
-      purpose: 'maskable',
-    },
-    {
-      src: `${projectConfig.basePath}/icon-512x512-maskable.png`,
+      src: `${basePath}/icon-maskable.svg`,
       sizes: '512x512',
-      type: 'image/png',
+      type: 'image/svg+xml',
       purpose: 'maskable',
     },
   ],
   screenshots: [
     {
-      src: `${projectConfig.basePath}/screenshots/desktop.png`,
+      src: `${basePath}/screenshots/desktop.png`,
       sizes: '1920x1080',
       type: 'image/png',
       form_factor: 'wide',
       label: 'Desktop view',
     },
     {
-      src: `${projectConfig.basePath}/screenshots/mobile.png`,
+      src: `${basePath}/screenshots/mobile.png`,
       sizes: '390x844',
       type: 'image/png',
       form_factor: 'narrow',
@@ -141,58 +127,28 @@ const manifest = {
   ],
   shortcuts: [
     {
-      name: 'Components',
-      url: `${projectConfig.basePath}/components`,
-      description: 'View all components',
-      icons: [
-        {
-          src: `${projectConfig.basePath}/icon-96.svg`,
-          sizes: '96x96',
-        },
-      ],
+      name: 'Adopt',
+      url: `${basePath}/adopt/`,
+      description: 'Start a universal adoption application',
     },
     {
-      name: 'Contact',
-      url: `${projectConfig.basePath}/contact`,
-      description: 'Send us a message',
-      icons: [
-        {
-          src: `${projectConfig.basePath}/icon-96.svg`,
-          sizes: '96x96',
-        },
-      ],
+      name: 'My applications',
+      url: `${basePath}/applications/`,
+      description: 'Track your adoption applications',
     },
     {
-      name: 'Themes',
-      url: `${projectConfig.basePath}/themes`,
-      description: 'Choose your theme',
-      icons: [
-        {
-          src: `${projectConfig.basePath}/icon-96.svg`,
-          sizes: '96x96',
-        },
-      ],
+      name: 'Sign In',
+      url: `${basePath}/sign-in/`,
+      description: `Sign In to ${displayName}`,
     },
   ],
-  related_applications: [],
-  prefer_related_applications: false,
-  protocol_handlers: [],
-  share_target: {
-    action: `${projectConfig.basePath}/share`,
-    method: 'POST',
-    enctype: 'multipart/form-data',
-    params: {
-      title: 'title',
-      text: 'text',
-      url: 'url',
-    },
-  },
 };
 
 // Write manifest to public directory
 const outputPath = path.join(__dirname, '../public/manifest.json');
-fs.writeFileSync(outputPath, JSON.stringify(manifest, null, 2));
+fs.writeFileSync(outputPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
-console.log(`✅ Generated manifest.json for ${projectConfig.projectName}`);
-console.log(`   Base path: ${projectConfig.basePath || '/'}`);
+console.log(`✅ Generated manifest.json for ${displayName}`);
+console.log(`   Base path: ${basePath || '/'}`);
+console.log(`   Display mode: ${manifest.display} (not installable)`);
 console.log(`   Output: ${outputPath}`);
