@@ -118,8 +118,9 @@ test.describe('PWA Installation', () => {
     const registration = await page.evaluate(async () =>
       navigator.serviceWorker.getRegistration()
     );
-    // No SW → no offline shell; intentional to avoid Chrome Install prompt
-    expect(registration).toBeNull();
+    // No SW → no offline shell; intentional to avoid Chrome Install prompt.
+    // getRegistration() resolves undefined (not null) when none is registered.
+    expect(registration).toBeFalsy();
   });
 
   test('install button shows on supported browsers', async ({ page }) => {
