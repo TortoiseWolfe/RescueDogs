@@ -146,7 +146,8 @@ export function generateManifest() {
     description: config.projectDescription,
     start_url: `${basePath}/`,
     scope: `${basePath}/`,
-    display: 'standalone',
+    // browser — not installable; avoids Chrome Install mini-infobar (#162)
+    display: 'browser',
     orientation: 'portrait-primary',
     theme_color: '#1e3a8a',
     background_color: '#ffffff',

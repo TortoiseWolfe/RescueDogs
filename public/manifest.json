@@ -1,76 +1,43 @@
 {
-  "name": "Raised Paws — Pet Adoption Tracker",
+  "name": "Raised Paws — Pet Adoption Application Tracker",
   "short_name": "Raised Paws",
   "description": "Pet adoption application tracker for shelters, adopters, and live status updates",
   "theme_color": "#1e3a8a",
   "background_color": "#ffffff",
-  "display": "standalone",
+  "display": "browser",
   "start_url": "/",
   "scope": "/",
   "orientation": "portrait-primary",
-  "categories": ["lifestyle", "productivity", "utilities"],
+  "categories": [
+    "lifestyle",
+    "productivity",
+    "utilities"
+  ],
   "lang": "en",
   "dir": "ltr",
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/icon-72.svg",
-      "sizes": "72x72",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     },
     {
-      "src": "/icon-96.svg",
-      "sizes": "96x96",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-128.svg",
-      "sizes": "128x128",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-144.svg",
-      "sizes": "144x144",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-152.svg",
-      "sizes": "152x152",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-192.svg",
+      "src": "/icon-192x192.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/icon-384.svg",
-      "sizes": "384x384",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-512.svg",
+      "src": "/icon-512x512.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/icon-192x192-maskable.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icon-512x512-maskable.png",
+      "src": "/icon-maskable.svg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "maskable"
     }
   ],
@@ -94,21 +61,17 @@
     {
       "name": "Adopt",
       "url": "/adopt/",
-      "description": "Start a universal adoption application",
-      "icons": [{ "src": "/icon-96.svg", "sizes": "96x96" }]
+      "description": "Start a universal adoption application"
     },
     {
       "name": "My applications",
       "url": "/applications/",
-      "description": "Track your adoption applications",
-      "icons": [{ "src": "/icon-96.svg", "sizes": "96x96" }]
+      "description": "Track your adoption applications"
     },
     {
-      "name": "Sign in",
+      "name": "Sign In",
       "url": "/sign-in/",
-      "description": "Sign in to Raised Paws",
-      "icons": [{ "src": "/icon-96.svg", "sizes": "96x96" }]
+      "description": "Sign In to Raised Paws"
     }
-  ],
-  "related_applications": []
+  ]
 }

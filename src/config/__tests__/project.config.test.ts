@@ -236,7 +236,7 @@ describe('Project Configuration', () => {
         'Pet adoption application tracker'
       );
       expect(manifest.start_url).toBe('/');
-      expect(manifest.display).toBe('standalone');
+      expect(manifest.display).toBe('browser');
       expect(manifest.theme_color).toBe('#1e3a8a');
       expect(manifest.background_color).toBe('#ffffff');
     });
