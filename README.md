@@ -104,7 +104,7 @@ bounces non-staff accounts back to the home page (that's the gate working).
 
 - **Apply to adopt** (prefilled from the saved universal application):
   <https://raisedpaws.com/adopt/>
-- **My applications** (Biscuit submitted, Pepper in reference check, Tank not selected):
+- **My applications** (Tiger submitted, Pepper in reference check, Tank not selected):
   <https://raisedpaws.com/applications/>
 - **Live status tracker** for Pepper:
   <https://raisedpaws.com/applications/status/?id=55555555-5555-5555-5555-555555555502>
@@ -113,7 +113,7 @@ bounces non-staff accounts back to the home page (that's the gate working).
 
 - **Pipeline dashboard** (filter tabs + counts):
   <https://raisedpaws.com/shelter/>
-- **Review Biscuit** (Submitted — advance it!):
+- **Review Tiger** (Submitted — advance it!):
   <https://raisedpaws.com/shelter/application/?id=55555555-5555-5555-5555-555555555501>
 - **Review Pepper** (Reference Check):
   <https://raisedpaws.com/shelter/application/?id=55555555-5555-5555-5555-555555555502>
@@ -122,9 +122,9 @@ bounces non-staff accounts back to the home page (that's the gate working).
 
 ### The two-window demo (the whole point)
 
-1. Window 1: sign in as **staff** → open Biscuit's review page.
+1. Window 1: sign in as **staff** → open Tiger's review page.
 2. Window 2 (incognito / second profile): sign in as the **adopter** → open
-   Biscuit's tracker at
+   Tiger's tracker at
    `https://raisedpaws.com/applications/status/?id=55555555-5555-5555-5555-555555555501`.
 3. In window 1, set the status to _Under Review_ and add a note.
 4. Watch window 2: the tracker advances and the note appears — **no reload**.
