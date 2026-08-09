@@ -177,7 +177,7 @@ Retro-fitted as-is wireframes (1920×1080, validated against
 - **Static hosting**: no server routes; all logic is client-side Supabase +
   RLS + SQL functions.
 - **Demo data** (`seed-rescue-demo.sql`): one shelter, 6 pets
-  (incl. Biscuit/Pepper/Tank), 3 applications, 7 history rows; demo accounts
+  (incl. Tiger/Pepper/Tank), 3 applications, 7 history rows; demo accounts
   `adopter@demo.test` / `staff@demo.test` (`DemoPass123!`).
 
 ## 7. References

@@ -85,11 +85,13 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================================
 
 INSERT INTO pets (id, shelter_id, name, species, breed, sex, age_years, size, status, photo_url) VALUES
+  -- Identity lock (#164): Pepper=cat; Zeus=Great Dane; Tank=Pit Bull; Lola=Chihuahua;
+  -- Tiger=Lab (formerly Biscuit); Scout=Border Collie. Homepage: Lola | Pepper | Tiger.
   ('44444444-4444-4444-4444-444444444401', '22222222-2222-2222-2222-222222222201',
-   'Biscuit', 'dog', 'Labrador Mix', 'male', 2.0, 'large', 'available',
-   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444401/demo-biscuit.png'),
+   'Tiger', 'dog', 'Labrador Mix', 'male', 2.0, 'large', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444401/demo-tiger.png'),
   ('44444444-4444-4444-4444-444444444402', '22222222-2222-2222-2222-222222222201',
-   'Pepper', 'dog', 'Border Collie', 'female', 4.5, 'medium', 'available',
+   'Pepper', 'cat', 'Domestic Shorthair', 'female', 4.0, 'small', 'available',
    'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444402/demo-pepper.png'),
   ('44444444-4444-4444-4444-444444444403', '22222222-2222-2222-2222-222222222201',
    'Tank', 'dog', 'Pit Bull Terrier', 'male', 6.0, 'large', 'available',
@@ -114,7 +116,16 @@ INSERT INTO pets (id, shelter_id, name, species, breed, sex, age_years, size, st
    'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444409/demo-cloud.png'),
   ('44444444-4444-4444-4444-444444444410', '22222222-2222-2222-2222-222222222201',
    'Chili', 'cat', 'Domestic Shorthair', 'female', 5.0, 'small', 'available',
-   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444410/demo-chili.png')
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444410/demo-chili.png'),
+  ('44444444-4444-4444-4444-444444444411', '22222222-2222-2222-2222-222222222201',
+   'Zeus', 'dog', 'Great Dane', 'male', 6.0, 'large', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444411/demo-zeus.png'),
+  ('44444444-4444-4444-4444-444444444412', '22222222-2222-2222-2222-222222222201',
+   'Scout', 'dog', 'Border Collie', 'female', 4.5, 'medium', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444412/demo-scout.png'),
+  ('44444444-4444-4444-4444-444444444413', '22222222-2222-2222-2222-222222222201',
+   'Lola', 'dog', 'Chihuahua', 'female', 2.0, 'small', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444413/demo-lola.png')
 ON CONFLICT (id) DO UPDATE SET
   photo_url = EXCLUDED.photo_url,
   name = EXCLUDED.name,
@@ -154,7 +165,7 @@ ON CONFLICT (id) DO NOTHING;
 --    through advance_application_status().
 -- ============================================================================
 
--- 5a. Fresh application for Biscuit — still 'submitted'
+-- 5a. Fresh application for Tiger — still 'submitted'
 INSERT INTO applications (id, adopter_id, pet_id, shelter_id, profile_snapshot, why_this_pet)
 SELECT
   '55555555-5555-5555-5555-555555555501',
@@ -162,7 +173,7 @@ SELECT
   '44444444-4444-4444-4444-444444444401',
   '22222222-2222-2222-2222-222222222201',
   to_jsonb(ap) - 'id' - 'created_at' - 'updated_at',
-  'Biscuit''s energy matches our hiking-every-weekend life, and our fenced yard is ready.'
+  'Tiger''s energy matches our hiking-every-weekend life, and our fenced yard is ready.'
 FROM adopter_profiles ap WHERE ap.id = '33333333-3333-3333-3333-333333333301'
 ON CONFLICT (id) DO NOTHING;
 
@@ -205,7 +216,7 @@ SELECT
   '44444444-4444-4444-4444-444444444403',
   '22222222-2222-2222-2222-222222222201',
   to_jsonb(ap) - 'id' - 'created_at' - 'updated_at',
-  'Tank looks like a gentle giant; we have room and patience for him.'
+  'Tank is a steady Pit Bull Terrier; we have room and patience for him.'
 FROM adopter_profiles ap WHERE ap.id = '33333333-3333-3333-3333-333333333301'
 ON CONFLICT (id) DO NOTHING;
 
@@ -220,7 +231,7 @@ SELECT * FROM (VALUES
    NULL, now() - interval '8 days'),
   ('55555555-5555-5555-5555-555555555503'::uuid, 'under_review', 'not_selected',
    '33333333-3333-3333-3333-333333333302'::uuid,
-   'Another family with no other pets was a better fit for Tank. Pepper or Biscuit could be great matches for you!',
+   'Another family with no other pets was a better fit for Tank. Pepper or Tiger could be great matches for you!',
    now() - interval '5 days')
 ) AS v(application_id, from_status, to_status, changed_by, note, created_at)
 WHERE NOT EXISTS (

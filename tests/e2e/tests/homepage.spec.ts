@@ -19,7 +19,7 @@ test.describe('Homepage Navigation', () => {
   test('navigate to the adopt page', async ({ page }) => {
     // Prefer visible pet-card CTAs — #65 hid Apply to Adopt inside For Adopters.
     await page
-      .getByRole('link', { name: /Meet (Lola|Pepper|Zeus)/i })
+      .getByRole('link', { name: /Meet (Lola|Pepper|Tiger)/i })
       .first()
       .click();
 

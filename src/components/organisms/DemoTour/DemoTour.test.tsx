@@ -42,7 +42,7 @@ describe('DemoTour', () => {
     expect(screen.getByTestId('demo-tour')).toBeInTheDocument();
     expect(screen.getByText('Start as the adopter')).toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: /Open Biscuit/i })
+      screen.getByRole('link', { name: /Open Tiger/i })
     ).toBeInTheDocument();
     expect(screen.getByTestId('demo-tour-switch-role')).toHaveTextContent(
       /shelter demo/i
