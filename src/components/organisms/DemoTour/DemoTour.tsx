@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import type { PortalType } from '@/lib/portal/portal-preference';
 import {
-  DEMO_BISCUIT_APPLICATION_ID,
+  DEMO_TIGER_APPLICATION_ID,
   DEMO_TOUR_RESTART_EVENT,
   enterDemoMode,
   getTourStep,
@@ -48,23 +48,23 @@ const ADOPTER_STEPS: TourStep[] = [
   {
     id: 'apps',
     title: 'Start as the adopter',
-    body: 'This demo uses two logins. First, look at My Applications (Biscuit, Pepper, Tank). Next you’ll switch to the shelter to change a status — then come back here and you’ll see that shelter update appear on the adopter pages in real time.',
+    body: 'This demo uses two logins. First, look at My Applications (Tiger, Pepper, Tank). Next you’ll switch to the shelter to change a status — then come back here and you’ll see that shelter update appear on the adopter pages in real time.',
     cta: {
-      href: `/applications/status?id=${DEMO_BISCUIT_APPLICATION_ID}`,
-      label: "Open Biscuit's tracker",
+      href: `/applications/status?id=${DEMO_TIGER_APPLICATION_ID}`,
+      label: "Open Tiger's tracker",
     },
     match: (path) => path === '/applications',
   },
   {
     id: 'tracker',
     title: 'Status tracker',
-    body: 'This timeline is what the adopter sees — current status and any notes from the shelter. Remember where Biscuit stands now so you can compare after the shelter makes a change.',
+    body: 'This timeline is what the adopter sees — current status and any notes from the shelter. Remember where Tiger stands now so you can compare after the shelter makes a change.',
     match: (path) => path.startsWith('/applications/status'),
   },
   {
     id: 'live',
     title: 'Then switch to the shelter',
-    body: 'Use Switch to shelter demo below. As staff, advance Biscuit’s status and add a note. Switch back to the adopter demo and reopen this tracker — the shelter’s update shows up here in real time.',
+    body: 'Use Switch to shelter demo below. As staff, advance Tiger’s status and add a note. Switch back to the adopter demo and reopen this tracker — the shelter’s update shows up here in real time.',
     match: (path) => path.startsWith('/applications/status'),
   },
 ];
@@ -73,10 +73,10 @@ const SHELTER_STEPS: TourStep[] = [
   {
     id: 'pipeline',
     title: 'Shelter side of the demo',
-    body: 'You’re signed in as shelter staff. Advance an application here; the adopter sees that status change on their tracker in real time. Start with Biscuit in the pipeline.',
+    body: 'You’re signed in as shelter staff. Advance an application here; the adopter sees that status change on their tracker in real time. Start with Tiger in the pipeline.',
     cta: {
-      href: `/shelter/application?id=${DEMO_BISCUIT_APPLICATION_ID}`,
-      label: 'Review Biscuit',
+      href: `/shelter/application?id=${DEMO_TIGER_APPLICATION_ID}`,
+      label: 'Review Tiger',
     },
     match: (path) => path === '/shelter' || path === '/shelter/',
   },
@@ -89,7 +89,7 @@ const SHELTER_STEPS: TourStep[] = [
   {
     id: 'advance',
     title: 'Change status, then switch back',
-    body: 'Advance Biscuit’s status and add an adopter-visible note. Then use Switch to adopter demo, open Biscuit’s tracker again, and confirm the new status and note appear in real time.',
+    body: 'Advance Tiger’s status and add an adopter-visible note. Then use Switch to adopter demo, open Tiger’s tracker again, and confirm the new status and note appear in real time.',
     match: (path) => path.startsWith('/shelter/application'),
   },
 ];
@@ -286,7 +286,7 @@ export default function DemoTour({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-base-content/70 text-sm">
           {role === 'adopter'
-            ? 'Next: switch to the shelter demo, change Biscuit’s status, then switch back — you’ll see that update on the adopter pages in real time.'
+            ? 'Next: switch to the shelter demo, change Tiger’s status, then switch back — you’ll see that update on the adopter pages in real time.'
             : 'After you change a status, switch back to the adopter demo and open the same application — the new status appears on the adopter tracker in real time.'}
         </p>
         <button

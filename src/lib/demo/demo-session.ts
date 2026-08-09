@@ -18,9 +18,10 @@ export const DEMO_TOUR_DISMISS_KEY = 'raised-paws-demo-tour-dismissed';
 export const DEMO_TOUR_STEP_KEY = 'raised-paws-demo-tour-step';
 export const DEMO_TOUR_RESTART_EVENT = 'raised-paws-demo-tour-restart';
 
-/** Seeded Biscuit application (README Live Demo). */
-export const DEMO_BISCUIT_APPLICATION_ID =
-  '55555555-5555-5555-5555-555555555501';
+/** Seeded Tiger application (formerly Biscuit; README Live Demo). */
+export const DEMO_TIGER_APPLICATION_ID = '55555555-5555-5555-5555-555555555501';
+/** @deprecated Use DEMO_TIGER_APPLICATION_ID */
+export const DEMO_BISCUIT_APPLICATION_ID = DEMO_TIGER_APPLICATION_ID;
 
 export type DemoTourDismissState = Partial<Record<PortalType, boolean>>;
 

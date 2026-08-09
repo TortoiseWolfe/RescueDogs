@@ -22,15 +22,19 @@ const STATS = [
 ];
 
 /**
- * Demo Meet-the-Pets cards (#79 / #140). Cartoon portraits match seeded
- * Second Chance Rescue pets — not real partner media.
+ * Demo Meet-the-Pets cards (#79 / #140 / #164).
+ * Identity lock — do not swap name ↔ species ↔ portrait:
+ *   Pepper = cat | Zeus = Great Dane | Tank = Pit Bull | Lola = Chihuahua | Tiger = Lab mix
+ * Homepage shows Lola | Pepper | Tiger (2 dogs + 1 cat). Full rotation of browse pets
+ * is deferred (follow-up ticket) — keep that 2+1 mix if/when rotating.
  */
 const PETS = [
   {
-    name: 'Biscuit',
-    portrait: '/demo-pets/biscuit.png',
-    portraitAlt: 'Cartoon portrait of Biscuit, a golden Labrador mix',
-    detail: '2 yrs · Labrador Mix · hiking buddy energy',
+    name: 'Lola',
+    portrait: '/demo-pets/lola.png',
+    portraitAlt:
+      'Cartoon portrait of Lola, a white Chihuahua with black patches',
+    detail: '2 yrs · Chihuahua · loves belly rubs & long walks',
     bg: 'bg-[#e8edf7]',
     border: 'border-[#a8b8d8]',
     image: 'from-[#7a94c4] to-[#e8edf7]',
@@ -40,8 +44,8 @@ const PETS = [
   {
     name: 'Pepper',
     portrait: '/demo-pets/pepper.png',
-    portraitAlt: 'Cartoon portrait of Pepper, a black and white Border Collie',
-    detail: '4.5 yrs · Border Collie · smart and ready to train',
+    portraitAlt: 'Cartoon portrait of Pepper, a warm tortoiseshell cat',
+    detail: '4 yrs · cat · curious, cuddly, and treat motivated',
     bg: 'bg-[#fff7ed]',
     border: 'border-[#fed7aa]',
     image: 'from-[#ffedd5] to-[#fff7ed]',
@@ -49,10 +53,10 @@ const PETS = [
     cta: 'btn-secondary',
   },
   {
-    name: 'Tank',
-    portrait: '/demo-pets/tank.png',
-    portraitAlt: 'Cartoon portrait of Tank, a gentle pit bull terrier',
-    detail: '6 yrs · Pit Bull Terrier · gentle giant',
+    name: 'Tiger',
+    portrait: '/demo-pets/tiger.png',
+    portraitAlt: 'Cartoon portrait of Tiger, a golden Labrador mix',
+    detail: '2 yrs · Labrador Mix · hiking buddy energy',
     bg: 'bg-[#f1f6ff]',
     border: 'border-[#cfe0ff]',
     image: 'from-[#d7e6ff] to-[#e9f1ff]',
@@ -97,25 +101,35 @@ export default function Home() {
       <section
         id="main-content"
         aria-labelledby="hero-heading"
-        className="relative bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-24"
+        className="relative bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-10 text-white sm:px-6 sm:py-16 lg:px-8 lg:py-24"
       >
         <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
           <div className="w-full min-w-0 flex-1 text-center lg:-translate-y-4 lg:text-left">
-            <div className="mb-6 flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
+            <div className="mb-3 flex w-full min-w-0 flex-row flex-wrap items-center justify-center gap-2 sm:mb-6 sm:gap-3 lg:justify-start">
               <Link
                 href="/dogs"
                 aria-label="Browse dogs"
-                className="font-friendly bg-accent inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90 sm:w-auto sm:text-base"
+                className="font-friendly bg-accent inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-white shadow-lg transition-opacity hover:opacity-90 sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base"
               >
-                <span aria-hidden="true">🐾</span>
+                <span
+                  aria-hidden="true"
+                  className="inline-block brightness-0 invert"
+                >
+                  🐾
+                </span>
                 Dogs
               </Link>
               <Link
                 href="/cats"
                 aria-label="Browse cats"
-                className="font-friendly bg-accent inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90 sm:w-auto sm:text-base"
+                className="font-friendly bg-accent inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-white shadow-lg transition-opacity hover:opacity-90 sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base"
               >
-                <span aria-hidden="true">🐾</span>
+                <span
+                  aria-hidden="true"
+                  className="inline-block brightness-0 invert"
+                >
+                  🐾
+                </span>
                 Cats
               </Link>
             </div>
