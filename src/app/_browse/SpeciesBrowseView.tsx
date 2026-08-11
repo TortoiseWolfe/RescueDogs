@@ -293,6 +293,11 @@ export default function SpeciesBrowseView({
                       <p className="text-base-content/80 text-sm">
                         {basicsLabel(pet)}
                       </p>
+                      {pet.notes?.trim() ? (
+                        <p className="text-base-content/70 text-sm leading-relaxed">
+                          {pet.notes.trim()}
+                        </p>
+                      ) : null}
                       {place && (
                         <p className="text-base-content/60 text-sm">{place}</p>
                       )}

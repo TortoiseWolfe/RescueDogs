@@ -9,6 +9,9 @@ import type {
   PetStatus,
 } from '@/types/applications';
 
+const PET_COLUMNS =
+  'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, created_at';
+
 export type PetWriteInput = {
   name: string;
   species: PetSpecies;
@@ -18,10 +21,11 @@ export type PetWriteInput = {
   size?: PetSize | null;
   status?: PetStatus;
   photo_url?: string | null;
+  notes?: string | null;
 };
 
 /**
- * Shelter-staff pet CRUD (#110). RLS enforces is_shelter_staff(shelter_id).
+ * Shelter-staff pet CRUD (#110 / #167). RLS enforces is_shelter_staff(shelter_id).
  */
 export class ShelterPetService {
   private supabase: SupabaseClient;
@@ -33,9 +37,7 @@ export class ShelterPetService {
   async listPets(shelterId: string): Promise<Pet[]> {
     const { data, error } = await this.supabase
       .from('pets')
-      .select(
-        'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, created_at'
-      )
+      .select(PET_COLUMNS)
       .eq('shelter_id', shelterId)
       .order('created_at', { ascending: false });
 
@@ -48,9 +50,7 @@ export class ShelterPetService {
   async getPet(petId: string): Promise<Pet | null> {
     const { data, error } = await this.supabase
       .from('pets')
-      .select(
-        'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, created_at'
-      )
+      .select(PET_COLUMNS)
       .eq('id', petId)
       .maybeSingle();
 
@@ -73,10 +73,9 @@ export class ShelterPetService {
         size: input.size ?? null,
         status: input.status ?? 'available',
         photo_url: input.photo_url ?? null,
+        notes: input.notes?.trim() || null,
       })
-      .select(
-        'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, created_at'
-      )
+      .select(PET_COLUMNS)
       .single();
 
     if (error) {
@@ -95,14 +94,13 @@ export class ShelterPetService {
     if (input.size !== undefined) patch.size = input.size;
     if (input.status !== undefined) patch.status = input.status;
     if (input.photo_url !== undefined) patch.photo_url = input.photo_url;
+    if (input.notes !== undefined) patch.notes = input.notes?.trim() || null;
 
     const { data, error } = await this.supabase
       .from('pets')
       .update(patch)
       .eq('id', petId)
-      .select(
-        'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, created_at'
-      )
+      .select(PET_COLUMNS)
       .single();
 
     if (error) {

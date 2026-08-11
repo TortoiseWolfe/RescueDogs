@@ -89,6 +89,11 @@ export default function ShelterPetsPage() {
                   {pet.species}
                   {pet.breed ? ` · ${pet.breed}` : ''} · {pet.status}
                 </p>
+                {pet.notes?.trim() ? (
+                  <p className="text-base-content/60 mt-1 line-clamp-2 text-sm">
+                    {pet.notes.trim()}
+                  </p>
+                ) : null}
               </div>
               <Link
                 href={`/shelter/pets/edit?id=${pet.id}`}

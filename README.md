@@ -14,10 +14,17 @@ Constitution: [`.specify/memory/constitution.md`](.specify/memory/constitution.m
 
 ## 🎯 Product vision (decisions)
 
-Raised Paws is an **anti-ghosting adoption tracker**, not another Petfinder.
-The founding loop is: **universal application → shelter pipeline → live status**.
-Full pillars, pilots, and deferred work live in
+Raised Paws is an **adoption application portal** and **anti-ghosting adoption
+tracker** — not another Petfinder. Shelters keep their website and listings;
+applicants use Raised Paws so status stays visible. The founding loop is:
+**universal application → shelter pipeline → live status**. Full pillars,
+pilots, and deferred work live in
 [docs/product/VISION.md](./docs/product/VISION.md).
+
+**What we tell shelters.** _[Shelter Name] adoption portal, powered by Raised
+Paws_ — Apply once, staff advance status in a simple pipeline, adopters watch
+live updates (fewer “any news?” emails). Paste-ready website / Petfinder / QR
+blurbs: [docs/product/SHELTER-SITE-COPY.md](./docs/product/SHELTER-SITE-COPY.md).
 
 **Demo vs real.** The seeded demo (Second Chance Rescue) is how we sell and
 test the loop before a partner shelter is live. It is scaffolding, not a second
@@ -25,10 +32,10 @@ product. Once one real shelter runs apply → status → tracker end-to-end, dem
 becomes optional walkthrough chrome.
 
 **Real pets.** Schema for shelters, pets, applications, and status history
-already exists. Staff can **add/edit pets with one photo** in Supabase Storage
-(`pet-photos`) at `/shelter/pets` (#110). Public browse (`/dogs`, `/cats`) and
-state/zip filters (#111 / #112) are live. Location for filters lives on the
-shelter (`state` + `zip`) — see
+already exists. Staff can **add/edit pets with one photo** (and optional public
+**notes**) in Supabase Storage (`pet-photos`) at `/shelter/pets` (#110 / #167).
+Public browse (`/dogs`, `/cats`) and state/zip filters (#111 / #112) are live.
+Location for filters lives on the shelter (`state` + `zip`) — see
 [Pet photos & location](./docs/product/VISION.md#pet-photos--location) in VISION.
 Bulk import / Petfinder sync come later and reuse the same pet row + photo URL
 pattern.

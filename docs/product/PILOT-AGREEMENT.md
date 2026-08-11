@@ -129,6 +129,7 @@ API steps: [FIRST-PARTNER-ONBOARDING.md](./FIRST-PARTNER-ONBOARDING.md) (#138).
 - [ ] Confirm `/dogs` `/cats` show their available animals
 - [ ] Confirm staff can open `/shelter` pipeline and advance status
 - [ ] Give shelter: Apply links, optional QR, short staff one-pager
+      ([SHELTER-SITE-COPY.md](./SHELTER-SITE-COPY.md))
 - [ ] Schedule mid-pilot and end-of-pilot check-ins
 - [ ] Capture feedback → backlog (import UX, packet step, messaging, filters)
 

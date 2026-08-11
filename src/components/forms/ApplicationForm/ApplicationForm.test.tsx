@@ -21,6 +21,7 @@ const pets: Pet[] = [
     size: 'large',
     photo_url: null,
     status: 'available',
+    notes: null,
     created_at: '2025-01-01T00:00:00Z',
   },
   {
@@ -34,6 +35,7 @@ const pets: Pet[] = [
     size: 'small',
     photo_url: null,
     status: 'available',
+    notes: null,
     created_at: '2025-01-02T00:00:00Z',
   },
 ];

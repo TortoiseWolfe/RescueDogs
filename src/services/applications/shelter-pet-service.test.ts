@@ -44,6 +44,7 @@ describe('ShelterPetService', () => {
         size: null,
         photo_url: null,
         status: 'available',
+        notes: null,
         created_at: '2026-01-01T00:00:00Z',
       },
     ];
@@ -68,6 +69,7 @@ describe('ShelterPetService', () => {
       size: null,
       photo_url: null,
       status: 'available',
+      notes: 'Pocket rocket with a soft heart.',
       created_at: '2026-01-01T00:00:00Z',
     };
     const from = mockFrom({ data: created, error: null });
@@ -76,6 +78,7 @@ describe('ShelterPetService', () => {
     const result = await service.createPet(shelterId, {
       name: '  Noodle  ',
       species: 'dog',
+      notes: '  Pocket rocket with a soft heart.  ',
     });
     expect(result.name).toBe('Noodle');
     expect(from.insert).toHaveBeenCalled();

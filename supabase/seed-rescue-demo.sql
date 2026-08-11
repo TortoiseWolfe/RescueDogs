@@ -136,6 +136,22 @@ ON CONFLICT (id) DO UPDATE SET
   size = EXCLUDED.size,
   status = EXCLUDED.status;
 
+-- Demo public bios (#167)
+UPDATE pets SET notes = v.notes
+FROM (VALUES
+  ('44444444-4444-4444-4444-444444444401'::uuid,
+   'Hiking-buddy energy — loves trails, tennis balls, and a fenced yard.'),
+  ('44444444-4444-4444-4444-444444444402'::uuid,
+   'Curious and cuddly; treat-motivated and happiest on a sunny windowsill.'),
+  ('44444444-4444-4444-4444-444444444403'::uuid,
+   'Steady Pit Bull Terrier — patient with people, thrives on routine.'),
+  ('44444444-4444-4444-4444-444444444411'::uuid,
+   'Gentle giant Great Dane — calm indoors, needs space to stretch.'),
+  ('44444444-4444-4444-4444-444444444413'::uuid,
+   'Pocket-sized charmer; loves belly rubs and short neighborhood walks.')
+) AS v(id, notes)
+WHERE pets.id = v.id;
+
 -- ============================================================================
 -- 4. ADOPTER PROFILE (the reusable "universal application" answers)
 -- ============================================================================

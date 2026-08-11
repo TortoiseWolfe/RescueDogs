@@ -118,6 +118,8 @@ export interface Pet {
   size: PetSize | null;
   photo_url: string | null;
   status: PetStatus;
+  /** Public short bio; omit in UI when null/empty (#167). */
+  notes: string | null;
   created_at: string;
 }
 
