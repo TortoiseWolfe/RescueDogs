@@ -59,19 +59,27 @@ The consumer-facing brand is **Raised Paws**. The repo/project name remains
 | Audience / context            | Prefer                                                                 | Avoid as the primary label                             |
 | ----------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------ |
 | Adopters, social, short title | **Pet adoption application tracker** or **pet adoption tracker**       | “Pet rescue and adoption app”                          |
-| Shelters, grants, tech lead   | **Anti-ghosting adoption platform** (or OS) for shelters               | “Petfinder alternative” / browse directory             |
+| Shelters, grants, tech lead   | **Adoption application portal** / anti-ghosting platform for shelters  | “Petfinder alternative” / browse directory             |
 | One-line product honesty      | Apply once → shelter pipeline → **live status** so nobody gets ghosted | Vague “we help rescue animals” without naming the loop |
 
-**Why “tracker” over “rescue app”:** a “pet rescue and adoption app” sounds like a
-listing marketplace (Petfinder-class). Today’s shipped product is the **application
-status loop** — that is the wedge. Broader rescue-ecosystem language fits later
-pillars and future horizons; it is not the accurate label for what people can
-use on [raisedpaws.com](https://raisedpaws.com) right now.
+**Why “tracker” / “portal” over “rescue app”:** a “pet rescue and adoption app”
+sounds like a listing marketplace (Petfinder-class). Today’s shipped product is
+the **application status loop** — that is the wedge. For shelters, prefer
+**application portal**: it runs _alongside_ their website and Petfinder; it does
+not replace them.
 
 **Draft lines to reuse:**
 
 - Adopters: _Raised Paws — track your pet adoption application so you’re never ghosted._
-- Shelters: _Raised Paws — the anti-ghosting adoption platform: one application, a simple pipeline, live status for applicants._
+- Shelters: _Raised Paws — your adoption application portal: one application, a simple pipeline, live status for applicants._
+- Co-brand handoff: _[Shelter Name] adoption portal, powered by Raised Paws._
+
+**Paste-ready copy for shelter websites / Petfinder / QR:**
+[SHELTER-SITE-COPY.md](./SHELTER-SITE-COPY.md).
+
+**Co-brand / title-mask levels (roadmap, not shipped):** soft co-brand on
+apply/status → browser tab title → shelter logo/skin → true white-label custom
+domain. Today `shelters` has `name` only (no logo theme fields).
 
 ---
 

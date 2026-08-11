@@ -34,6 +34,7 @@ function EditShelterPetContent() {
   const [ageYears, setAgeYears] = useState('');
   const [size, setSize] = useState<PetSize | ''>('');
   const [status, setStatus] = useState<PetStatus>('available');
+  const [notes, setNotes] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -70,6 +71,7 @@ function EditShelterPetContent() {
         setAgeYears(row.age_years != null ? String(row.age_years) : '');
         setSize(row.size ?? '');
         setStatus(row.status);
+        setNotes(row.notes ?? '');
       } catch {
         if (!cancelled) setError('Could not load pet.');
       } finally {
@@ -112,6 +114,7 @@ function EditShelterPetContent() {
         size: size || null,
         status,
         photo_url: photoUrl,
+        notes: notes || null,
       });
 
       router.push('/shelter/pets');
@@ -158,7 +161,7 @@ function EditShelterPetContent() {
             />
           )}
 
-          <form onSubmit={onSubmit} className="space-y-4">
+          <form onSubmit={onSubmit} className="flex flex-col gap-6">
             <label className="form-control w-full">
               <span className="label-text">Name</span>
               <input
@@ -248,6 +251,18 @@ function EditShelterPetContent() {
                 </select>
               </label>
             </div>
+
+            <label className="form-control w-full">
+              <span className="label-text">Notes (optional)</span>
+              <textarea
+                className="textarea textarea-bordered min-h-24 w-full"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                maxLength={2000}
+                rows={4}
+                placeholder="e.g. Good with kids; needs a quiet home and daily walks."
+              />
+            </label>
 
             <label className="form-control w-full">
               <span className="label-text">

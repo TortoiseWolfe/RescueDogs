@@ -13,6 +13,7 @@ const basePet: BrowsePet = {
   size: 'medium',
   photo_url: null,
   status: 'available',
+  notes: null,
   created_at: '2026-01-01T00:00:00Z',
   shelters: {
     name: 'Second Chance Rescue',
