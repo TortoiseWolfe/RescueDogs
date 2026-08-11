@@ -27,6 +27,7 @@ export default function NewShelterPetPage() {
   const [ageYears, setAgeYears] = useState('');
   const [size, setSize] = useState<PetSize | ''>('');
   const [status, setStatus] = useState<PetStatus>('available');
+  const [notes, setNotes] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +50,7 @@ export default function NewShelterPetPage() {
         age_years: ageYears ? Number(ageYears) : null,
         size: size || null,
         status,
+        notes: notes || null,
       });
 
       if (file) {
@@ -82,7 +84,7 @@ export default function NewShelterPetPage() {
         </Link>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="flex flex-col gap-6">
         <label className="form-control w-full">
           <span className="label-text">Name</span>
           <input
@@ -172,6 +174,18 @@ export default function NewShelterPetPage() {
             </select>
           </label>
         </div>
+
+        <label className="form-control w-full">
+          <span className="label-text">Notes (optional)</span>
+          <textarea
+            className="textarea textarea-bordered min-h-24 w-full"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            maxLength={2000}
+            rows={4}
+            placeholder="e.g. Good with kids; needs a quiet home and daily walks."
+          />
+        </label>
 
         <label className="form-control w-full">
           <span className="label-text">

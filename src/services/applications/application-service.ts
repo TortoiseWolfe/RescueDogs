@@ -76,7 +76,7 @@ export class ApplicationService {
     let query = this.supabase
       .from('pets')
       .select(
-        `id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, created_at, ${shelterEmbed}`
+        `id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, created_at, ${shelterEmbed}`
       )
       .eq('status', 'available')
       .eq('species', species);

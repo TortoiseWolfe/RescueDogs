@@ -2615,13 +2615,25 @@ CREATE TABLE IF NOT EXISTS pets (
   photo_url TEXT,
   status TEXT NOT NULL DEFAULT 'available'
     CHECK (status IN ('available', 'pending', 'adopted')),
+  notes TEXT CHECK (notes IS NULL OR length(notes) <= 2000),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Idempotent for databases created before notes (#167)
+ALTER TABLE pets ADD COLUMN IF NOT EXISTS notes TEXT;
+DO $$
+BEGIN
+  ALTER TABLE pets ADD CONSTRAINT pets_notes_length
+    CHECK (notes IS NULL OR length(notes) <= 2000);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_pets_shelter_available
   ON pets(shelter_id) WHERE status = 'available';
 
-COMMENT ON TABLE pets IS 'Minimal pet records: application dropdown + shelter context. NOT a discovery/browse feature (Constitution Principle V).';
+COMMENT ON TABLE pets IS 'Pet records for apply / browse / shelter staff. notes = public short bio (#167).';
+COMMENT ON COLUMN pets.notes IS 'Public short bio for browse cards; staff-editable; omit UI when null/empty (#167)';
 
 CREATE TABLE IF NOT EXISTS adopter_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
