@@ -6,8 +6,8 @@ import type {
   Application,
   ApplicationWithPet,
   ApplicationWithPetAndHistory,
+  AvailablePet,
   BrowsePet,
-  Pet,
   PetSpecies,
   ProfileSnapshot,
 } from '@/types/applications';
@@ -18,6 +18,9 @@ import {
 
 /** Embedded-pet columns selected with every application row. */
 const PET_EMBED = 'pets(id, name, species, breed, photo_url, status)';
+
+/** Soft co-brand (#169): shelter display name on apply/status. */
+const SHELTER_NAME_EMBED = 'shelters(name)';
 
 export interface ApplicationSubmitInput {
   petId: string;
@@ -41,11 +44,11 @@ export class ApplicationService {
     this.supabase = supabase;
   }
 
-  /** Pets that can be applied for (status = 'available'). */
-  async getAvailablePets(species?: PetSpecies): Promise<Pet[]> {
+  /** Pets that can be applied for (status = 'available'), with shelter name. */
+  async getAvailablePets(species?: PetSpecies): Promise<AvailablePet[]> {
     let query = this.supabase
       .from('pets')
-      .select('*')
+      .select(`*, ${SHELTER_NAME_EMBED}`)
       .eq('status', 'available');
 
     if (species) {
@@ -55,7 +58,8 @@ export class ApplicationService {
     const { data, error } = await query.order('name');
 
     if (error) throw error;
-    return (data ?? []) as Pet[];
+    // Generated Database types treat FK embeds as arrays; PostgREST returns an object.
+    return (data ?? []) as unknown as AvailablePet[];
   }
 
   /**
@@ -159,7 +163,9 @@ export class ApplicationService {
   ): Promise<ApplicationWithPetAndHistory | null> {
     const { data, error } = await this.supabase
       .from('applications')
-      .select(`*, ${PET_EMBED}, application_status_history(*)`)
+      .select(
+        `*, ${PET_EMBED}, ${SHELTER_NAME_EMBED}, application_status_history(*)`
+      )
       .eq('id', id)
       .order('created_at', {
         referencedTable: 'application_status_history',

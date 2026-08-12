@@ -3,6 +3,7 @@
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/auth/ProtectedRoute/ProtectedRoute';
+import SoftCoBrand from '@/components/molecular/SoftCoBrand';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { ApplicationService } from '@/services/applications';
@@ -11,7 +12,7 @@ import {
   toProfileSnapshot,
   type ApplicationFormData,
 } from '@/schemas/application.schema';
-import type { AdopterProfile, Pet } from '@/types/applications';
+import type { AdopterProfile, AvailablePet } from '@/types/applications';
 import SearchParamsReader from './SearchParamsReader';
 
 /** Map a saved adopter profile to form default values (nulls → undefined). */
@@ -43,7 +44,8 @@ function AdoptContent() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [preselectedPetId, setPreselectedPetId] = useState<string | null>(null);
-  const [pets, setPets] = useState<Pet[]>([]);
+  const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+  const [pets, setPets] = useState<AvailablePet[]>([]);
   const [defaults, setDefaults] = useState<
     Partial<ApplicationFormData> | undefined
   >(undefined);
@@ -53,6 +55,10 @@ function AdoptContent() {
 
   const handleParams = useCallback((petId: string | null) => {
     setPreselectedPetId(petId);
+  }, []);
+
+  const handlePetIdChange = useCallback((petId: string) => {
+    setSelectedPetId(petId);
   }, []);
 
   useEffect(() => {
@@ -81,6 +87,18 @@ function AdoptContent() {
       cancelled = true;
     };
   }, [authLoading, user]);
+
+  const shelterName =
+    pets.find((p) => p.id === selectedPetId)?.shelters?.name?.trim() || null;
+
+  useEffect(() => {
+    if (!shelterName) return;
+    const previous = document.title;
+    document.title = `Apply with ${shelterName} | Raised Paws`;
+    return () => {
+      document.title = previous;
+    };
+  }, [shelterName]);
 
   const handleSubmit = useCallback(
     async (data: ApplicationFormData) => {
@@ -130,6 +148,13 @@ function AdoptContent() {
           One application, every answer saved for next time — and you can watch
           its status live from the moment you submit.
         </p>
+        {shelterName && (
+          <SoftCoBrand
+            shelterName={shelterName}
+            context="apply"
+            className="mt-3"
+          />
+        )}
       </header>
 
       {error && (
@@ -150,6 +175,7 @@ function AdoptContent() {
           pets={pets}
           defaultValues={defaults}
           preselectedPetId={preselectedPetId ?? undefined}
+          onPetIdChange={handlePetIdChange}
           onSubmit={handleSubmit}
           submitting={submitting}
         />
