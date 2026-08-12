@@ -34,6 +34,15 @@ function generateSignUpEmail(prefix: string): string {
   const timestamp = Date.now();
   const random = Math.random().toString(36).slice(2, 8);
 
+  // Prefer a dedicated sink domain when configured (CI). Supabase mails a real
+  // confirmation link for every signup, and in CI that link points at the
+  // runner's own http://localhost:3000 — useless to anyone who receives it.
+  // Sending it to a sink keeps it out of a human inbox.
+  const sinkDomain = process.env.E2E_MAIL_SINK_DOMAIN;
+  if (sinkDomain) {
+    return `signup-${prefix}-${timestamp}-${random}@${sinkDomain}`;
+  }
+
   // Derive domain from primary test user
   if (baseEmail.includes('@gmail.com')) {
     const baseUser = baseEmail.split('+')[0] || baseEmail.split('@')[0];
