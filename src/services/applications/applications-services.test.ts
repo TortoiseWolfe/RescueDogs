@@ -57,13 +57,21 @@ describe('ApplicationService', () => {
   });
 
   it('getAvailablePets queries available pets ordered by name', async () => {
-    const pets = [{ id: PET_ID, name: 'Biscuit', status: 'available' }];
+    const pets = [
+      {
+        id: PET_ID,
+        name: 'Biscuit',
+        status: 'available',
+        shelters: { name: 'Second Chance Rescue' },
+      },
+    ];
     const builder = createQueryBuilder({ data: pets, error: null });
     mock.from.mockReturnValue(builder);
 
     const result = await service.getAvailablePets();
 
     expect(mock.from).toHaveBeenCalledWith('pets');
+    expect(builder.select).toHaveBeenCalledWith('*, shelters(name)');
     expect(builder.eq).toHaveBeenCalledWith('status', 'available');
     expect(builder.order).toHaveBeenCalledWith('name');
     expect(result).toEqual(pets);

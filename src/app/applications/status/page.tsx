@@ -1,8 +1,9 @@
 'use client';
 
-import React, { Suspense, useCallback, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import ProtectedRoute from '@/components/auth/ProtectedRoute/ProtectedRoute';
+import SoftCoBrand from '@/components/molecular/SoftCoBrand';
 import { supabase } from '@/lib/supabase/client';
 import { ApplicationService } from '@/services/applications';
 import { useApplicationRealtime } from '@/hooks/useApplicationRealtime';
@@ -30,6 +31,17 @@ function StatusTrackerContent() {
 
   const { application, loading, error, refetch } =
     useApplicationRealtime(applicationId);
+
+  const shelterName = application?.shelters?.name?.trim() || null;
+
+  useEffect(() => {
+    if (!shelterName || !application) return;
+    const previous = document.title;
+    document.title = `${application.pets.name} · ${shelterName} | Raised Paws`;
+    return () => {
+      document.title = previous;
+    };
+  }, [shelterName, application]);
 
   const handleWithdraw = useCallback(async () => {
     if (!applicationId) return;
@@ -104,16 +116,27 @@ function StatusTrackerContent() {
 
         {application && (
           <>
-            <header className="mb-6 flex items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-bold">
-                  Application for {application.pets.name}
-                </h1>
-                {application.pets.breed && (
-                  <p className="text-sm opacity-70">{application.pets.breed}</p>
-                )}
+            <header className="mb-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold">
+                    Application for {application.pets.name}
+                  </h1>
+                  {application.pets.breed && (
+                    <p className="text-sm opacity-70">
+                      {application.pets.breed}
+                    </p>
+                  )}
+                </div>
+                <StatusBadge status={application.status} />
               </div>
-              <StatusBadge status={application.status} />
+              {shelterName && (
+                <SoftCoBrand
+                  shelterName={shelterName}
+                  context="status"
+                  className="mt-3"
+                />
+              )}
             </header>
 
             <StatusTimeline

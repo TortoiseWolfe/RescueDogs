@@ -22,6 +22,8 @@ export interface ApplicationFormProps {
   preselectedPetId?: string;
   /** Receives the zod-parsed form data on valid submit. */
   onSubmit: (data: ApplicationFormData) => void | Promise<void>;
+  /** Fires when the selected pet_id changes (soft co-brand #169). */
+  onPetIdChange?: (petId: string) => void;
   /** Disables the submit button while the parent persists the application. */
   submitting?: boolean;
   /** Additional CSS classes for the form element. */
@@ -174,6 +176,7 @@ export default function ApplicationForm({
   defaultValues,
   preselectedPetId,
   onSubmit,
+  onPetIdChange,
   submitting = false,
   className = '',
 }: ApplicationFormProps) {
@@ -227,6 +230,13 @@ export default function ApplicationForm({
       setValue('pet_id', preselectedPetId);
     }
   }, [preselectedPetId, setValue]);
+
+  const petId = watch('pet_id');
+  useEffect(() => {
+    if (onPetIdChange && petId) {
+      onPetIdChange(petId);
+    }
+  }, [petId, onPetIdChange]);
 
   const housingType = watch('housing_type') as HousingType | undefined;
   const renting = !!housingType && isRenting(housingType);
