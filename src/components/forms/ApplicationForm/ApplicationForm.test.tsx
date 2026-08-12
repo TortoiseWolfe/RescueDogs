@@ -123,6 +123,16 @@ describe('ApplicationForm', () => {
       expect(petSelect()).toHaveValue(MOCHI_ID);
     });
 
+    it('notifies onPetIdChange when the selected pet changes', async () => {
+      const user = userEvent.setup();
+      const onPetIdChange = vi.fn();
+      renderForm({ onPetIdChange });
+
+      await user.selectOptions(petSelect(), MOCHI_ID);
+
+      await waitFor(() => expect(onPetIdChange).toHaveBeenCalledWith(MOCHI_ID));
+    });
+
     it('applies preselectedPetId that arrives AFTER the initial render', async () => {
       // Under static export the /adopt page reads ?pet= via useSearchParams in
       // a useEffect, so preselectedPetId is undefined on first paint and only

@@ -123,6 +123,17 @@ export interface Pet {
   created_at: string;
 }
 
+/** Soft co-brand (#169): embedded shelters.name only. */
+export type ShelterNameEmbed = { name: string } | null;
+
+/**
+ * Available pet for the adopt form (#169): includes shelter name for
+ * soft co-brand when a pet is selected.
+ */
+export interface AvailablePet extends Pet {
+  shelters: ShelterNameEmbed;
+}
+
 /** Available pet row for public /dogs and /cats browse (#112 / #111). */
 export interface BrowsePet extends Pet {
   shelters: {
@@ -227,4 +238,6 @@ export interface ApplicationWithPet extends Application {
 
 export interface ApplicationWithPetAndHistory extends ApplicationWithPet {
   application_status_history: StatusHistoryEntry[];
+  /** Soft co-brand (#169); present when the query embeds shelters(name). */
+  shelters?: ShelterNameEmbed;
 }
