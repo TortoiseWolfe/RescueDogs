@@ -23,6 +23,13 @@ function generateRegistrationEmail(prefix: string): string {
   const timestamp = Date.now();
   const random = Math.random().toString(36).slice(2, 8);
 
+  // See sign-up.spec.ts: prefer a sink domain in CI so Supabase's real
+  // confirmation mail never reaches a human inbox.
+  const sinkDomain = process.env.E2E_MAIL_SINK_DOMAIN;
+  if (sinkDomain) {
+    return `reg-${prefix}-${timestamp}-${random}@${sinkDomain}`;
+  }
+
   // Derive domain from primary test user
   if (baseEmail.includes('@gmail.com')) {
     const baseUser = baseEmail.split('+')[0] || baseEmail.split('@')[0];
