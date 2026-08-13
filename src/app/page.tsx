@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { detectedConfig } from '@/config/project-detected';
+import MeetThePetsSection from './_home/MeetThePetsSection';
 
 /** Early-stage placeholders (#79) — not live shelter counts. */
 const STATS = [
@@ -20,50 +21,6 @@ const STATS = [
     tone: 'text-[#5da8e0]',
   },
 ];
-
-/**
- * Demo Meet-the-Pets cards (#79 / #140 / #164).
- * Identity lock — do not swap name ↔ species ↔ portrait:
- *   Pepper = cat | Zeus = Great Dane | Tank = Pit Bull | Lola = Chihuahua | Tiger = Lab mix
- * Homepage shows Lola | Pepper | Tiger (2 dogs + 1 cat). Full rotation of browse pets
- * is deferred (follow-up ticket) — keep that 2+1 mix if/when rotating.
- */
-const PETS = [
-  {
-    name: 'Lola',
-    portrait: '/demo-pets/lola.png',
-    portraitAlt:
-      'Cartoon portrait of Lola, a white Chihuahua with black patches',
-    detail: '2 yrs · Chihuahua · loves belly rubs & long walks',
-    bg: 'bg-[#e8edf7]',
-    border: 'border-[#a8b8d8]',
-    image: 'from-[#7a94c4] to-[#e8edf7]',
-    title: 'text-[#1e3a8a]',
-    cta: 'btn-primary',
-  },
-  {
-    name: 'Pepper',
-    portrait: '/demo-pets/pepper.png',
-    portraitAlt: 'Cartoon portrait of Pepper, a warm tortoiseshell cat',
-    detail: '4 yrs · cat · curious, cuddly, and treat motivated',
-    bg: 'bg-[#fff7ed]',
-    border: 'border-[#fed7aa]',
-    image: 'from-[#ffedd5] to-[#fff7ed]',
-    title: 'text-[#c2410c]',
-    cta: 'btn-secondary',
-  },
-  {
-    name: 'Tiger',
-    portrait: '/demo-pets/tiger.png',
-    portraitAlt: 'Cartoon portrait of Tiger, a golden Labrador mix',
-    detail: '2 yrs · Labrador Mix · hiking buddy energy',
-    bg: 'bg-[#f1f6ff]',
-    border: 'border-[#cfe0ff]',
-    image: 'from-[#d7e6ff] to-[#e9f1ff]',
-    title: 'text-[#27408f]',
-    cta: 'border-[#cfe0ff] bg-[#d7e6ff] text-[#27408f] hover:border-[#a8c4f5] hover:bg-[#cfe0ff]',
-  },
-] as const;
 
 const STEPS = [
   {
@@ -236,61 +193,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section
-        aria-labelledby="meet-pets-heading"
-        className="bg-base-100 px-4 py-10 sm:px-6 lg:px-8"
-      >
-        <div className="mx-auto max-w-6xl text-center">
-          <h2
-            id="meet-pets-heading"
-            className="font-display text-base-content text-4xl font-extrabold sm:text-5xl"
-          >
-            Say hello!
-          </h2>
-          <p className="text-base-content/95 mt-2 mb-8 text-lg font-semibold">
-            A few demo pets are ready for your tour.
-          </p>
-
-          <div className="grid gap-7 md:grid-cols-3">
-            {PETS.map((pet) => (
-              <article
-                key={pet.name}
-                className={`card border-[3px] text-left ${pet.bg} ${pet.border}`}
-              >
-                <div className="card-body gap-4 p-4">
-                  <div
-                    className={`relative grid h-52 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br ${pet.image}`}
-                  >
-                    <Image
-                      src={`${detectedConfig.basePath}${pet.portrait}`}
-                      alt={pet.portraitAlt}
-                      width={180}
-                      height={180}
-                      className="h-44 w-44 object-contain drop-shadow-lg"
-                    />
-                  </div>
-                  <div className="px-2">
-                    <h3
-                      className={`font-friendly text-2xl font-bold ${pet.title}`}
-                    >
-                      {pet.name}
-                    </h3>
-                    <p className="text-base-content/95 font-semibold">
-                      {pet.detail}
-                    </p>
-                  </div>
-                  <Link
-                    href="/adopt"
-                    className={`btn ${pet.cta} min-h-11 w-full`}
-                  >
-                    Meet {pet.name}
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+      <MeetThePetsSection />
 
       <section aria-label="Rescue impact" className="bg-base-100 px-4 py-10">
         <div className="mx-auto grid max-w-4xl gap-8 text-center sm:grid-cols-3">
