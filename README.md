@@ -639,7 +639,8 @@ Key context:
 
 ## 📄 License
 
-MIT - See [LICENSE](./LICENSE) for details
+MIT — see [LICENSE](./LICENSE). The Raised Paws name and logo are trademarks of
+Raised Paws.
 
 ---
 

@@ -61,6 +61,9 @@ export function Footer() {
             Raised Paws · Every pet deserves a happy tail.
           </p>
           <p className="mt-1 text-xs text-white/90">
+            © {new Date().getFullYear()} Raised Paws
+          </p>
+          <p className="mt-1 text-xs text-white/90">
             Built by{' '}
             <a
               href="https://www.techstackdevs.com"
