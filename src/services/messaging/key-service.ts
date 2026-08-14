@@ -972,7 +972,8 @@ export class KeyManagementService {
   async getUserPublicKey(userId: string): Promise<JsonWebKey | null> {
     logger.debug('getUserPublicKey: Fetching public key', { userId });
 
-    // If offline, fall back to cached key (populated by prior online fetch)
+    // If offline, fall back to cached key (populated by prior online fetch).
+    // Never hit the network while offline — fetch throws and masks cache misses.
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       const cached = this.publicKeyCache.get(userId);
       if (cached) {
@@ -983,6 +984,10 @@ export class KeyManagementService {
         });
         return cached;
       }
+      logger.debug('getUserPublicKey: offline cache miss', {
+        userIdPrefix: userId.slice(0, 8),
+      });
+      return null;
     }
     const supabase = createClient();
     const msgClient = createMessagingClient(supabase);

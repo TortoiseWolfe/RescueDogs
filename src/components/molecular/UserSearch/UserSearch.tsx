@@ -97,7 +97,7 @@ export default function UserSearch({
       <form onSubmit={handleSearch} className="mb-6">
         <div className="form-control">
           <label htmlFor="user-search-input" className="label">
-            <span className="label-text">Search for users by name</span>
+            <span className="label-text">Search by name or username</span>
           </label>
           <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
             <input
@@ -105,7 +105,7 @@ export default function UserSearch({
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Enter name"
+              placeholder="Enter name or username"
               className="input input-bordered min-h-11 flex-1"
               aria-label="Search for users"
               disabled={loading}
@@ -165,8 +165,13 @@ export default function UserSearch({
                       </div>
                       <div>
                         <p className="font-semibold">
-                          {user.display_name || 'Unknown User'}
+                          {user.display_name || user.username || 'Unknown User'}
                         </p>
+                        {user.username && user.display_name && (
+                          <p className="text-base-content/70 text-sm">
+                            @{user.username}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <button

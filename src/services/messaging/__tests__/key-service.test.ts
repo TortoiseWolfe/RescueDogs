@@ -791,6 +791,15 @@ describe('KeyManagementService', () => {
       expect(result).toEqual(PUBLIC_JWK);
       expect(mockMessagingFrom).not.toHaveBeenCalled();
     });
+
+    it('returns null on offline cache miss without querying the database', async () => {
+      setOnline(false);
+
+      expect(
+        await keyManagementService.getUserPublicKey(OTHER_USER_ID)
+      ).toBeNull();
+      expect(mockMessagingFrom).not.toHaveBeenCalled();
+    });
   });
 
   describe('clearPublicKeyCache', () => {
@@ -803,15 +812,14 @@ describe('KeyManagementService', () => {
 
       keyManagementService.clearPublicKeyCache();
 
-      // Offline + no cache → falls through to DB query (which now finds nothing).
+      // Offline + no cache → return null immediately (no network).
       setOnline(false);
-      mockMessagingFrom.mockReturnValue(
-        createMockQueryBuilder(null, { code: 'PGRST116', message: 'no rows' })
-      );
+      mockMessagingFrom.mockClear();
 
       expect(
         await keyManagementService.getUserPublicKey(OTHER_USER_ID)
       ).toBeNull();
+      expect(mockMessagingFrom).not.toHaveBeenCalled();
     });
   });
 });
