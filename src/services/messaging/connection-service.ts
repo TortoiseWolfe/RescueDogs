@@ -262,35 +262,19 @@ export class ConnectionService {
   }
 
   /**
-   * Search for users by display_name with partial matching
-   * Task: T019
+   * Search for users by display_name or username (partial match).
+   * Task: T019 / #105
    *
-   * Searches the user_profiles table for users matching the query (partial match on
-   * display_name). Returns users with their connection status relative
-   * to the current user. Excludes the current user from results.
+   * Does **not** search email (privacy — issue #105 deferred that path).
+   * New signups get a seeded display_name so they stay findable.
    *
    * @param input - SearchUsersInput containing search parameters
    * @param input.query - Text to search for (partial match, minimum 3 characters)
    * @param input.limit - Maximum number of results (default: 10)
    * @returns Promise<SearchUsersResult> - Matching users and list of already connected user IDs
-   * @returns {UserProfile[]} users - Array of matching user profiles
-   * @returns {string[]} already_connected - User IDs already connected with current user
    * @throws AuthenticationError if user is not signed in
    * @throws ValidationError if query is less than 3 characters
    * @throws ConnectionError if database query fails
-   *
-   * @example
-   * ```typescript
-   * const result = await connectionService.searchUsers({
-   *   query: 'john',  // Matches "johndoe", "John Smith", etc.
-   *   limit: 5
-   * });
-   *
-   * // Filter out already connected users
-   * const newUsers = result.users.filter(
-   *   user => !result.already_connected.includes(user.id)
-   * );
-   * ```
    */
   async searchUsers(input: SearchUsersInput): Promise<SearchUsersResult> {
     const supabase = createClient();
@@ -316,13 +300,21 @@ export class ConnectionService {
       );
     }
 
-    // Search for users by display_name (partial match, case-insensitive)
-    // Uses ilike for PostgreSQL case-insensitive pattern matching
-    const searchPattern = `%${query}%`;
+    // Escape PostgREST filter / ILIKE metacharacters so commas and wildcards
+    // in the query cannot break .or() or broaden the match unexpectedly.
+    const escaped = query
+      .replace(/\\/g, '\\\\')
+      .replace(/%/g, '\\%')
+      .replace(/_/g, '\\_')
+      .replace(/,/g, '')
+      .replace(/"/g, '');
+    const searchPattern = `%${escaped}%`;
     const { data: profiles, error } = await supabase
       .from('user_profiles')
-      .select('id, display_name, avatar_url')
-      .ilike('display_name', searchPattern)
+      .select('id, username, display_name, avatar_url')
+      .or(
+        `display_name.ilike."${searchPattern}",username.ilike."${searchPattern}"`
+      )
       .neq('id', user.id) // Exclude current user from results
       .limit(input.limit || 10);
 

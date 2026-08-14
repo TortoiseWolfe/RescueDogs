@@ -38,8 +38,10 @@ const createMockQueryBuilder = (data: any = null, error: any = null) => ({
   eq: vi.fn().mockReturnThis(),
   neq: vi.fn().mockReturnThis(),
   or: vi.fn().mockReturnThis(),
+  ilike: vi.fn().mockReturnThis(),
   order: vi.fn().mockReturnThis(),
   limit: vi.fn().mockReturnThis(),
+  returns: vi.fn().mockReturnThis(),
   single: vi.fn().mockResolvedValue({ data, error }),
   maybeSingle: vi.fn().mockResolvedValue({ data, error }),
   then: vi.fn((resolve) => resolve({ data, error })),
@@ -83,6 +85,38 @@ describe('ConnectionService', () => {
       await expect(
         connectionService.searchUsers({ query: 'test@example.com', limit: 10 })
       ).rejects.toThrow('You must be signed in');
+    });
+
+    it('searches display_name and username (#105)', async () => {
+      const profiles = [
+        {
+          id: USER_1_ID,
+          display_name: 'Ada',
+          username: 'ada',
+          avatar_url: null,
+        },
+      ];
+      const profileBuilder = createMockQueryBuilder(profiles);
+      const connectionBuilder = createMockQueryBuilder([]);
+
+      vi.mocked(mockSupabase.from).mockImplementation((table: string) => {
+        if (table === 'user_profiles') return profileBuilder as any;
+        return connectionBuilder as any;
+      });
+
+      const result = await connectionService.searchUsers({
+        query: 'ada',
+        limit: 10,
+      });
+
+      expect(profileBuilder.select).toHaveBeenCalledWith(
+        'id, username, display_name, avatar_url'
+      );
+      expect(profileBuilder.or).toHaveBeenCalledWith(
+        'display_name.ilike."%ada%",username.ilike."%ada%"'
+      );
+      expect(result.users).toEqual(profiles);
+      expect(result.already_connected).toEqual([]);
     });
   });
 

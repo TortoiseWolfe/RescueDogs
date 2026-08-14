@@ -238,7 +238,8 @@ export interface RespondToRequestInput {
 }
 
 export interface SearchUsersInput {
-  query: string; // Email or username (exact match)
+  /** Partial match on display_name or username (min 3 chars). Not email (#105). */
+  query: string;
   limit?: number;
 }
 

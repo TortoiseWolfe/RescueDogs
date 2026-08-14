@@ -27,6 +27,7 @@ import {
   openAsPartner,
   fillMessageInput,
   scrollThreadToBottom,
+  warmupPeerKeyCacheForOfflineSend,
   getAdminClient,
   handleReAuthModal,
   DEFAULT_TEST_PASSWORD,
@@ -144,6 +145,7 @@ test.describe('Offline Message Queue', () => {
       // Wait for loadMessages to finish before going offline (populates
       // conversation cache needed for offline encryption).
       await waitForConversationCached(viewer.page);
+      await warmupPeerKeyCacheForOfflineSend(viewer.page);
 
       // ===== STEP 2: Go offline =====
       // Verify message input is ready before going offline
@@ -198,11 +200,14 @@ test.describe('Offline Message Queue', () => {
       });
       await expect(messageInput).toBeVisible({ timeout: 45000 });
       await waitForConversationCached(viewer.page);
+      await warmupPeerKeyCacheForOfflineSend(viewer.page);
 
       // ===== STEP 2: Go offline =====
       await viewer.context.setOffline(true);
 
       // ===== STEP 3: Send 3 messages while offline =====
+      // Use fillMessageInput (waits for React-controlled value) — raw
+      // locator.fill can race the send click under CI load (#105 flake).
       const messages = [
         `Offline message 1 ${Date.now()}`,
         `Offline message 2 ${Date.now()}`,
@@ -212,28 +217,30 @@ test.describe('Offline Message Queue', () => {
       const sendButton = viewer.page.getByRole('button', { name: /send/i });
 
       for (const msg of messages) {
-        await messageInput.fill(msg);
+        await fillMessageInput(viewer.page, msg);
         await sendButton.click();
-        // Wait for UI to stabilize between sends
         await waitForUIStability(viewer.page);
       }
 
       // ===== STEP 4: Verify all 3 messages are queued =====
+      // Match T146: scroll + 30s — default 5s is too tight under msg-iso load.
+      await scrollThreadToBottom(viewer.page);
       for (const msg of messages) {
         const bubble = viewer.page.getByText(msg);
-        await expect(bubble).toBeVisible();
+        await expect(bubble).toBeVisible({ timeout: 30000 });
       }
 
       // ===== STEP 5: Go online =====
       await viewer.context.setOffline(false);
 
       // ===== STEP 6: Wait for all messages to sync =====
-      await viewer.page.waitForTimeout(5000);
+      // Queue drain + 3 INSERTs can exceed 5s under shared-Supabase CI load.
+      await viewer.page.waitForTimeout(10000);
 
-      // All messages should still be visible (synced)
+      await scrollThreadToBottom(viewer.page);
       for (const msg of messages) {
         const bubble = viewer.page.getByText(msg);
-        await expect(bubble).toBeVisible();
+        await expect(bubble).toBeVisible({ timeout: 30000 });
       }
     } finally {
       await viewer.close();
@@ -337,6 +344,8 @@ test.describe('Offline Message Queue', () => {
       'Skipping conflict resolution test - Supabase admin client not available'
     );
 
+    const conversationId = fixture!.conversationId;
+
     // Open BOTH participants concurrently — each pays a gate-load + Argon2id
     // unlock, and serializing them would exhaust the per-test budget.
     const [pageAOwner, pageBOwner]: [OpenedParticipant, OpenedParticipant] =
@@ -357,6 +366,8 @@ test.describe('Offline Message Queue', () => {
       await expect(inputB).toBeVisible({ timeout: 45000 });
       await waitForConversationCached(pageA);
       await waitForConversationCached(pageB);
+      await warmupPeerKeyCacheForOfflineSend(pageA);
+      await warmupPeerKeyCacheForOfflineSend(pageB);
 
       // ===== STEP 2: Both go offline =====
       await pageAOwner.context.setOffline(true);
@@ -405,7 +416,7 @@ test.describe('Offline Message Queue', () => {
         const { data } = await adminClient!
           .from('messages')
           .select('sequence_number')
-          .eq('conversation_id', fixture!.conversationId)
+          .eq('conversation_id', conversationId)
           .order('sequence_number', { ascending: true });
         if (data && data.length >= 2) {
           messages = data;
