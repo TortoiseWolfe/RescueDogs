@@ -2262,6 +2262,23 @@ export async function scrollThreadToBottom(page: Page): Promise<void> {
 }
 
 /**
+ * Send one message while online so the peer public-key cache (and shared
+ * secret) is warm before `setOffline(true)`. Required after #60 device-key
+ * bootstrap — cacheConversationData alone is not always enough under CI load.
+ * See offline-queue-sync.spec.ts and msg-iso offline-queue failures (#105).
+ */
+export async function warmupPeerKeyCacheForOfflineSend(
+  page: Page
+): Promise<void> {
+  const sendButton = page.getByRole('button', { name: /send/i });
+  const warmup = `Offline warmup ${Date.now()}`;
+  await fillMessageInput(page, warmup);
+  await sendButton.click();
+  await scrollThreadToBottom(page);
+  await expect(page.getByText(warmup)).toBeVisible({ timeout: 30000 });
+}
+
+/**
  * Navigate to a URL with retry logic for transient server failures.
  *
  * The static server (npx serve) can become temporarily unresponsive

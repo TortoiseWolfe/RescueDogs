@@ -27,6 +27,7 @@ import {
   openAsPartner,
   fillMessageInput,
   scrollThreadToBottom,
+  warmupPeerKeyCacheForOfflineSend,
   getAdminClient,
   handleReAuthModal,
   DEFAULT_TEST_PASSWORD,
@@ -144,6 +145,7 @@ test.describe('Offline Message Queue', () => {
       // Wait for loadMessages to finish before going offline (populates
       // conversation cache needed for offline encryption).
       await waitForConversationCached(viewer.page);
+      await warmupPeerKeyCacheForOfflineSend(viewer.page);
 
       // ===== STEP 2: Go offline =====
       // Verify message input is ready before going offline
@@ -198,6 +200,7 @@ test.describe('Offline Message Queue', () => {
       });
       await expect(messageInput).toBeVisible({ timeout: 45000 });
       await waitForConversationCached(viewer.page);
+      await warmupPeerKeyCacheForOfflineSend(viewer.page);
 
       // ===== STEP 2: Go offline =====
       await viewer.context.setOffline(true);
@@ -341,6 +344,8 @@ test.describe('Offline Message Queue', () => {
       'Skipping conflict resolution test - Supabase admin client not available'
     );
 
+    const conversationId = fixture!.conversationId;
+
     // Open BOTH participants concurrently — each pays a gate-load + Argon2id
     // unlock, and serializing them would exhaust the per-test budget.
     const [pageAOwner, pageBOwner]: [OpenedParticipant, OpenedParticipant] =
@@ -361,6 +366,8 @@ test.describe('Offline Message Queue', () => {
       await expect(inputB).toBeVisible({ timeout: 45000 });
       await waitForConversationCached(pageA);
       await waitForConversationCached(pageB);
+      await warmupPeerKeyCacheForOfflineSend(pageA);
+      await warmupPeerKeyCacheForOfflineSend(pageB);
 
       // ===== STEP 2: Both go offline =====
       await pageAOwner.context.setOffline(true);
@@ -409,7 +416,7 @@ test.describe('Offline Message Queue', () => {
         const { data } = await adminClient!
           .from('messages')
           .select('sequence_number')
-          .eq('conversation_id', fixture!.conversationId)
+          .eq('conversation_id', conversationId)
           .order('sequence_number', { ascending: true });
         if (data && data.length >= 2) {
           messages = data;
