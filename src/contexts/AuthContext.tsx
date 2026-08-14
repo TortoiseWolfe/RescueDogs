@@ -147,7 +147,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     displayNameSeedUserId.current = nextUser.id;
-    void ensureDisplayNameSeeded(nextUser);
+    // Defer so conversation/key prefetch wins the first Supabase round-trip
+    // (display_name seed is best-effort; offline-queue E2E needs key cache).
+    queueMicrotask(() => {
+      void ensureDisplayNameSeeded(nextUser);
+    });
   }, []);
 
   // Stable callbacks for useIdleTimeout — without useCallback, every render

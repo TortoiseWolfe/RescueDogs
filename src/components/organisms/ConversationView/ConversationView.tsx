@@ -120,9 +120,9 @@ export default function ConversationView({
         return;
       }
 
-      // Cache for offline sendMessage support (fire-and-forget pre-fetches
-      // the recipient's public key for offline encryption)
-      void cacheConversationData(conversationId, conversation);
+      // Cache for offline sendMessage support — await so recipient public key
+      // is in publicKeyCache before the UI settles (msg-iso offline E2E).
+      await cacheConversationData(conversationId, conversation);
 
       const otherParticipantId =
         conversation.participant_1_id === user.id
