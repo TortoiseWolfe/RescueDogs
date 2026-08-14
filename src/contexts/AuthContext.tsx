@@ -141,6 +141,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     if (displayNameSeedUserId.current === nextUser.id) return;
+    // Don't lock the user id while offline — seed is best-effort and must
+    // retry after reconnect (also avoids racing IndexedDB offline queue).
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      return;
+    }
     displayNameSeedUserId.current = nextUser.id;
     void ensureDisplayNameSeeded(nextUser);
   }, []);

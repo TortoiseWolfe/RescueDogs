@@ -172,6 +172,12 @@ const logger = createLogger('lib:auth:oauth-utils');
  * @returns true if display_name was written
  */
 export async function ensureDisplayNameSeeded(user: User): Promise<boolean> {
+  // Skip while offline — seed is best-effort on next online session and
+  // must not compete with IndexedDB offline-queue traffic (msg-iso E2E).
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return false;
+  }
+
   const supabase = createClient();
 
   try {

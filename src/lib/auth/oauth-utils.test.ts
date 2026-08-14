@@ -407,6 +407,37 @@ describe('ensureDisplayNameSeeded', () => {
     expect(result).toBe(false);
     expect(update).not.toHaveBeenCalled();
   });
+
+  it('skips seeding when navigator is offline', async () => {
+    const user = createMockUser({
+      id: 'seed-user',
+      email: 'offline@example.com',
+    });
+    const originalDescriptor = Object.getOwnPropertyDescriptor(
+      navigator,
+      'onLine'
+    );
+    Object.defineProperty(navigator, 'onLine', {
+      configurable: true,
+      get: () => false,
+    });
+
+    try {
+      const result = await ensureDisplayNameSeeded(user);
+      expect(result).toBe(false);
+      expect(mockSupabase.from).not.toHaveBeenCalled();
+    } finally {
+      if (originalDescriptor) {
+        Object.defineProperty(navigator, 'onLine', originalDescriptor);
+      } else {
+        // jsdom default is online
+        Object.defineProperty(navigator, 'onLine', {
+          configurable: true,
+          get: () => true,
+        });
+      }
+    }
+  });
 });
 
 describe('populateOAuthProfile', () => {
