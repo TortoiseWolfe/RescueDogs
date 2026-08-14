@@ -19,6 +19,7 @@ import { supabase, setAllowAuthTokenRemoval } from '@/lib/supabase/client';
 import { getInternalUrl, getRedirectUrl } from '@/config/project.config';
 import { useIdleTimeout } from '@/hooks/useIdleTimeout';
 import { retryWithBackoff } from '@/lib/auth/retry-utils';
+import { ensureDisplayNameSeeded } from '@/lib/auth/oauth-utils';
 import { createLogger } from '@/lib/logger';
 import IdleTimeoutModal from '@/components/molecular/IdleTimeoutModal';
 import { clearPortalPreference } from '@/lib/portal/portal-preference';
@@ -120,6 +121,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [retryCount, setRetryCount] = useState(0);
   const [showIdleModal, setShowIdleModal] = useState(false);
   const isLocalSignOut = useRef(false);
+  /** #105: seed display_name at most once per signed-in user id. */
+  const displayNameSeedUserId = useRef<string | null>(null);
 
   // Mirror current `user` into a ref so the idle-timeout callbacks below can
   // read its latest value without depending on it. Inline arrow callbacks
@@ -131,6 +134,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     userRef.current = user;
   }, [user]);
+
+  const seedDisplayNameIfNeeded = useCallback((nextUser: User | null) => {
+    if (!nextUser) {
+      displayNameSeedUserId.current = null;
+      return;
+    }
+    if (displayNameSeedUserId.current === nextUser.id) return;
+    displayNameSeedUserId.current = nextUser.id;
+    void ensureDisplayNameSeeded(nextUser);
+  }, []);
 
   // Stable callbacks for useIdleTimeout — without useCallback, every render
   // would feed new identities into the hook and force its effect to tear
@@ -186,6 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearTimeout(loadingTimeout);
         setSession(session);
         setUser(session?.user ?? null);
+        seedDisplayNameIfNeeded(session?.user ?? null);
         setError(null);
         setIsLoading(false);
       } catch (err) {
@@ -236,6 +250,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setSession(session);
       setUser(session?.user ?? null);
+      seedDisplayNameIfNeeded(session?.user ?? null);
       setIsLoading(false);
 
       // FR-009: real cross-tab sign-out — redirect to home.
@@ -284,7 +299,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       clearTimeout(loadingTimeout);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [seedDisplayNameIfNeeded]);
 
   const signUp = useCallback(async (email: string, password: string) => {
     try {

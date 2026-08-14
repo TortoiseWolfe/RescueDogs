@@ -35,6 +35,7 @@ const {
   isOAuthUser,
   getOAuthProvider,
   populateOAuthProfile,
+  ensureDisplayNameSeeded,
   parseAuthErrorFromUrl,
 } = await import('./oauth-utils');
 
@@ -348,6 +349,63 @@ describe('getOAuthProvider', () => {
       app_metadata: { provider: 'github' },
     });
     expect(getOAuthProvider(user)).toBe('Github');
+  });
+});
+
+describe('ensureDisplayNameSeeded', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('seeds display_name from email local-part when blank', async () => {
+    const user = createMockUser({
+      id: 'seed-user',
+      email: 'ada.lovelace@example.com',
+      user_metadata: {},
+    });
+
+    const updateEq = vi.fn().mockResolvedValue({ data: null, error: null });
+    const update = vi.fn().mockReturnValue({ eq: updateEq });
+
+    vi.mocked(mockSupabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { display_name: null },
+            error: null,
+          }),
+        }),
+      }),
+      update,
+    } as any);
+
+    const result = await ensureDisplayNameSeeded(user);
+    expect(result).toBe(true);
+    expect(update).toHaveBeenCalledWith({ display_name: 'ada.lovelace' });
+  });
+
+  it('does not overwrite an existing display_name', async () => {
+    const user = createMockUser({
+      id: 'seed-user',
+      email: 'ada.lovelace@example.com',
+    });
+
+    const update = vi.fn();
+    vi.mocked(mockSupabase.from).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { display_name: 'Ada Lovelace' },
+            error: null,
+          }),
+        }),
+      }),
+      update,
+    } as any);
+
+    const result = await ensureDisplayNameSeeded(user);
+    expect(result).toBe(false);
+    expect(update).not.toHaveBeenCalled();
   });
 });
 

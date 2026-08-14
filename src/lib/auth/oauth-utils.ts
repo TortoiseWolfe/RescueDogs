@@ -165,6 +165,62 @@ export function getOAuthProvider(user: User | null): string | null {
 const logger = createLogger('lib:auth:oauth-utils');
 
 /**
+ * Seed display_name when it is null/blank (#105).
+ * Uses the same cascade as extractOAuthDisplayName (works for email/password
+ * and OAuth). Never overwrites a name the user already set.
+ *
+ * @returns true if display_name was written
+ */
+export async function ensureDisplayNameSeeded(user: User): Promise<boolean> {
+  const supabase = createClient();
+
+  try {
+    const { data: profile, error: queryError } = await supabase
+      .from('user_profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .single();
+
+    if (queryError || !profile) {
+      logger.error('Failed to query profile for display_name seed', {
+        userId: user.id,
+        error: queryError?.message,
+      });
+      return false;
+    }
+
+    if (profile.display_name?.trim()) {
+      return false;
+    }
+
+    const seed = extractOAuthDisplayName(user).slice(0, 100);
+    const { error: updateError } = await supabase
+      .from('user_profiles')
+      .update({ display_name: seed })
+      .eq('id', user.id);
+
+    if (updateError) {
+      logger.error('Failed to seed display_name', {
+        userId: user.id,
+        error: updateError.message,
+      });
+      return false;
+    }
+
+    logger.info('display_name seeded for discoverability', {
+      userId: user.id,
+    });
+    return true;
+  } catch (err) {
+    logger.error('Unexpected error seeding display_name', {
+      userId: user.id,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return false;
+  }
+}
+
+/**
  * Populate user_profiles with OAuth metadata (display_name, avatar_url)
  * Only populates NULL values - never overwrites existing data (FR-003)
  * Errors are logged but do not block OAuth flow (NFR-001)
@@ -191,11 +247,11 @@ export async function populateOAuthProfile(user: User): Promise<boolean> {
       return false;
     }
 
-    // Check what needs updating (only NULL values)
+    // Check what needs updating (only NULL / blank values)
     const updates: { display_name?: string; avatar_url?: string } = {};
 
-    if (profile.display_name === null) {
-      updates.display_name = extractOAuthDisplayName(user);
+    if (!profile.display_name?.trim()) {
+      updates.display_name = extractOAuthDisplayName(user).slice(0, 100);
     }
 
     if (profile.avatar_url === null) {

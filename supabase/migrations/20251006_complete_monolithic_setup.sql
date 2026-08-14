@@ -381,15 +381,30 @@ END;
 $$;
 
 -- Auto-create user profile on signup
+-- #105: seed display_name so messaging search can find new users (OAuth
+-- metadata first, else email local-part). Never leave NULL when we have a seed.
 CREATE OR REPLACE FUNCTION create_user_profile()
 RETURNS TRIGGER
 SECURITY DEFINER
 SET search_path = public
 LANGUAGE plpgsql
 AS $$
+DECLARE
+  v_display TEXT;
 BEGIN
-  INSERT INTO public.user_profiles (id, created_at, updated_at)
-  VALUES (NEW.id, NOW(), NOW())
+  v_display := COALESCE(
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'full_name'), ''),
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'name'), ''),
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'user_name'), ''),
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'preferred_username'), ''),
+    NULLIF(split_part(COALESCE(NEW.email, ''), '@', 1), '')
+  );
+  IF v_display IS NOT NULL AND char_length(v_display) > 100 THEN
+    v_display := left(v_display, 100);
+  END IF;
+
+  INSERT INTO public.user_profiles (id, display_name, created_at, updated_at)
+  VALUES (NEW.id, v_display, NOW(), NOW())
   ON CONFLICT (id) DO NOTHING;
 
   -- #49: write the 'sign_up' audit event here, in the AFTER INSERT ON auth.users
