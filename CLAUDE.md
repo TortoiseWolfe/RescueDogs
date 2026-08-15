@@ -493,6 +493,24 @@ Prefer this over `test.skip(browserName === 'webkit')`, which aborts the whole t
 - **UI is misleading**: the workflow-run-list page shows the workflow's _overall_ status with the most-recent activity timestamp. That timestamp is when the _last queued sub-job started_, not when the run as a whole started. Reading "In progress 10:35 PM" as "nothing started yet" is wrong but easy to do.
 - **For per-job status**: click into the run itself (job-graph view) or use the API. Don't trust the list page.
 
+### `gh variable` / `gh secret` need an explicit `--repo` — they read ScriptHammer otherwise
+
+This repo is a fork with an `upstream` remote pointing at `TortoiseWolfe/ScriptHammer`. `gh repo set-default` was run here, so `gh repo view`, `gh issue list`, `gh run list`, and `gh pr list` all correctly resolve to RescueDogs — **but `gh variable list` and `gh secret list` still read the parent repo.**
+
+```bash
+# ❌ WRONG - silently returns ScriptHammer's config
+gh variable list
+gh secret list
+
+# ✅ CORRECT
+gh variable list --repo TortoiseWolfe/RescueDogs
+gh secret list --repo TortoiseWolfe/RescueDogs
+```
+
+**Why this matters**: on 2026-08-15 the bare form returned `NEXT_PUBLIC_DEPLOY_URL = https://scripthammer.com` and a `SUPABASE_PROJECT_REF` that does not exist in this repo. That output is what manufactured issue #156 ("three different Supabase project refs"), which was closed as not-a-bug once the same commands were re-run with `--repo`. RescueDogs has exactly one ref, `cmdhajshektesctrappl`, and local `.env`, the CI variable, and both anon-key JWTs agree on it.
+
+**Smell test for output stolen from upstream**: a timestamp that predates the June 2026 fork, a `scripthammer.com` value, or a key name you don't recognise from this repo. Any one of those means you're reading the wrong repository — re-run with `--repo` before acting on it.
+
 ## Important Notes
 
 - Never create components manually - use the generator
