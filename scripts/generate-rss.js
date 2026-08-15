@@ -6,7 +6,11 @@ const matter = require('gray-matter');
 
 const BLOG_DIR = path.join(process.cwd(), 'blog');
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
-const SITE_URL = 'https://tortoisewolfe.github.io/RescueDogs';
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_DEPLOY_URL ||
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  'https://raisedpaws.com'
+).replace(/\/$/, '');
 
 function escapeXml(unsafe) {
   return unsafe

@@ -241,7 +241,7 @@ function generateArticleJsonLd(
     '@type': 'Article',
     headline: post.title,
     description: post.excerpt,
-    image: imageUrl || `${baseUrl}/og-image-default.png`,
+    image: imageUrl || `${baseUrl}/hero-held-paws.png`,
     datePublished: post.publishedAt || post.createdAt,
     dateModified: post.updatedAt,
     author: {

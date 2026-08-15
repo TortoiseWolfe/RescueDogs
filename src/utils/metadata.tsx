@@ -161,17 +161,12 @@ export function generateJsonLd(options: MetadataOptions = {}) {
     url: projectConfig.deployUrl,
     publisher: {
       '@type': 'Organization',
-      name: projectConfig.projectOwner,
-      url: projectConfig.projectUrl,
+      name: displayName,
+      url: projectConfig.deployUrl,
       logo: {
         '@type': 'ImageObject',
         url: `${projectConfig.deployUrl}/favicon.svg`,
       },
-    },
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${projectConfig.deployUrl}/search?q={search_term_string}`,
-      'query-input': 'required name=search_term_string',
     },
   };
 

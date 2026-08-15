@@ -1,4 +1,4 @@
-# RescueDogs Robots.txt
+# Raised Paws Robots.txt
 User-agent: *
 Allow: /
 
@@ -15,4 +15,4 @@ Disallow: /messages/
 Disallow: /conversations/
 Disallow: /payment-demo/
 
-Sitemap: https://tortoisewolfe.github.io/RescueDogs/sitemap.xml
+Sitemap: https://raisedpaws.com/sitemap.xml
