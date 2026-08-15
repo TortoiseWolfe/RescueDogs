@@ -5,11 +5,24 @@ const path = require('path');
 
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
 const BLOG_DATA_PATH = path.join(process.cwd(), 'src/lib/blog/blog-data.json');
-const SITE_URL = 'https://tortoisewolfe.github.io/RescueDogs';
+// Prefer deploy/site env (CI sets NEXT_PUBLIC_DEPLOY_URL=https://raisedpaws.com).
+// Never hardcode github.io — that was the pre–custom-domain Pages URL (#176).
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_DEPLOY_URL ||
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  'https://raisedpaws.com'
+).replace(/\/$/, '');
 
 // Static pages in the application (public, indexable pages only)
 const staticPages = [
   '', // Homepage
+  '/adopt',
+  '/for-adopters',
+  '/for-shelters',
+  '/dogs',
+  '/cats',
+  '/get-started',
+  '/follow',
   '/blog',
   '/blog/seo',
   '/blog/tags',
@@ -136,7 +149,7 @@ ${tagPages
 function generateRobotsTxt() {
   const disallowRules = disallowedPaths.map((p) => `Disallow: ${p}`).join('\n');
 
-  const robotsTxt = `# RescueDogs Robots.txt
+  const robotsTxt = `# Raised Paws Robots.txt
 User-agent: *
 Allow: /
 
