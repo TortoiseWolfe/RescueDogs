@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Baloo_2, Fredoka, Geist_Mono, Nunito } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import ThemeScript from '@/components/ThemeScript';
 import { GlobalNav } from '@/components/GlobalNav';
@@ -24,12 +24,16 @@ import { SetupBanner } from '@/components/SetupBanner';
 import DemoTour from '@/components/organisms/DemoTour';
 import A11yDevOverlay from '@/components/organisms/A11yDevOverlay';
 
-const nunito = Nunito({
+const nunito = localFont({
+  src: [
+    { path: './fonts/nunito-400.woff2', weight: '400', style: 'normal' },
+    { path: './fonts/nunito-600.woff2', weight: '600', style: 'normal' },
+    { path: './fonts/nunito-700.woff2', weight: '700', style: 'normal' },
+    { path: './fonts/nunito-800.woff2', weight: '800', style: 'normal' },
+  ],
   variable: '--font-nunito',
-  subsets: ['latin'],
   display: 'swap',
   preload: true,
-  weight: ['400', '600', '700', '800'],
   fallback: [
     'system-ui',
     '-apple-system',
@@ -42,12 +46,16 @@ const nunito = Nunito({
   ],
 });
 
-const fredoka = Fredoka({
+const fredoka = localFont({
+  src: [
+    { path: './fonts/fredoka-400.woff2', weight: '400', style: 'normal' },
+    { path: './fonts/fredoka-500.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/fredoka-600.woff2', weight: '600', style: 'normal' },
+    { path: './fonts/fredoka-700.woff2', weight: '700', style: 'normal' },
+  ],
   variable: '--font-fredoka',
-  subsets: ['latin'],
   display: 'swap',
   preload: true,
-  weight: ['400', '500', '600', '700'],
   fallback: [
     'system-ui',
     '-apple-system',
@@ -58,18 +66,24 @@ const fredoka = Fredoka({
   ],
 });
 
-const baloo = Baloo_2({
+const baloo = localFont({
+  src: [
+    { path: './fonts/baloo2-500.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/baloo2-600.woff2', weight: '600', style: 'normal' },
+    { path: './fonts/baloo2-700.woff2', weight: '700', style: 'normal' },
+    { path: './fonts/baloo2-800.woff2', weight: '800', style: 'normal' },
+  ],
   variable: '--font-baloo',
-  subsets: ['latin'],
   display: 'swap',
   preload: true,
-  weight: ['500', '600', '700', '800'],
   fallback: ['Nunito', 'system-ui', 'sans-serif'],
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: [
+    { path: './fonts/geist-mono-400.woff2', weight: '400', style: 'normal' },
+  ],
   variable: '--font-geist-mono',
-  subsets: ['latin'],
   display: 'swap',
   preload: true,
   fallback: [
