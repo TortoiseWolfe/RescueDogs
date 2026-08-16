@@ -18,10 +18,17 @@ test.describe('Homepage Navigation', () => {
 
   test('navigate to the adopt page', async ({ page }) => {
     // Prefer visible pet-card CTAs — #65 hid Apply to Adopt inside For Adopters.
-    await page
-      .getByRole('link', { name: /Meet (Lola|Pepper|Tiger)/i })
-      .first()
-      .click();
+    // Rotation-agnostic (#165): MeetThePetsSection SSRs Lola/Pepper/Tiger, then
+    // a mount effect swaps in a random 2-dogs + 1-cat trio. Pinning the selector
+    // to those three names missed ~1 attempt in 3. Scope to the section and take
+    // whichever "Meet <name>" CTA is rendered — every pet card links to /adopt.
+    const petSection = page.locator(
+      'section[aria-labelledby="meet-pets-heading"]'
+    );
+    const petCtas = petSection.getByRole('link', { name: /^Meet\s/i });
+    await expect(petCtas).toHaveCount(3);
+
+    await petCtas.first().click();
 
     await expect(page).toHaveURL(/.*adopt/);
   });
