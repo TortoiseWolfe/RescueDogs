@@ -232,7 +232,7 @@ export default function DemoTour({
         >
           <div className="card-body gap-3 p-4 sm:flex-row sm:items-start sm:gap-4">
             <div className="min-w-0 flex-1">
-              <p className="text-secondary text-xs font-semibold tracking-wide uppercase">
+              <p className="text-xs font-semibold tracking-wide text-[var(--brand-ink)] uppercase">
                 Demo tour · {roleLabel} · Step {clampedIndex + 1} of{' '}
                 {steps.length}
               </p>
@@ -291,7 +291,7 @@ export default function DemoTour({
         </p>
         <button
           type="button"
-          className="btn btn-outline btn-secondary min-h-11 shrink-0"
+          className="btn btn-secondary min-h-11 shrink-0"
           data-testid="demo-tour-switch-role"
           disabled={switching}
           onClick={() => void handleSwitchRole()}
