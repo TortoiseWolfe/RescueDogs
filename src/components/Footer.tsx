@@ -18,6 +18,15 @@ const footerNavPillSelected =
 const footerSocialBtn =
   'btn btn-circle shrink-0 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white h-11 w-11 min-h-11 min-w-11';
 
+/**
+ * Copyright year, fixed at build time by next.config.ts. Deliberately not
+ * `new Date().getFullYear()`: this is a static export, so calling that here
+ * bakes the build year into the prerendered HTML and then mismatches the
+ * browser's year on hydration after Jan 1. The literal fallback keeps Vitest
+ * and Storybook (which don't read next.config.ts) deterministic too.
+ */
+const COPYRIGHT_YEAR = process.env.NEXT_PUBLIC_BUILD_YEAR || '2026';
+
 export function Footer() {
   const pathname = usePathname();
   const blogSelected = Boolean(pathname?.startsWith('/blog'));
@@ -57,11 +66,11 @@ export function Footer() {
               className="h-10 w-10 sm:h-11 sm:w-11"
             />
           </Link>
-          <p className="font-friendly text-sm leading-relaxed font-bold">
+          <p className="font-friendly text-xs leading-relaxed font-bold sm:text-sm">
             Raised Paws · Every pet deserves a happy tail.
           </p>
           <p className="mt-1 text-xs text-white/90">
-            © {new Date().getFullYear()} Raised Paws
+            © {COPYRIGHT_YEAR} Raised Paws
           </p>
           <p className="mt-1 text-xs text-white/90">
             Built by{' '}
