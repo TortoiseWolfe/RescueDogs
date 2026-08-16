@@ -317,7 +317,7 @@ describe('GlobalNav role menus (#65)', () => {
     expect(list!.className).not.toMatch(/grid-cols-2/);
   });
 
-  it('styles hamburger section titles orange and items navy (#132)', () => {
+  it('styles hamburger section titles orange and items with theme text', () => {
     const { container } = render(<GlobalNav />);
 
     const menuTrigger = container.querySelector(
@@ -328,7 +328,8 @@ describe('GlobalNav role menus (#65)', () => {
     const title = panel!.querySelector('.menu-title span');
     expect(title?.className).toMatch(/text-\[#f97316\]/);
     const item = panel!.querySelector('ul.menu a');
-    expect(item?.className).toMatch(/text-\[#1e3a8a\]/);
+    expect(item?.className).toMatch(/text-base-content/);
+    expect(item?.className).not.toMatch(/text-\[#1e3a8a\]/);
   });
 
   it('exposes a chrome-compact flag for overlap measurement (#132)', () => {

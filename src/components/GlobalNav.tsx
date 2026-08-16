@@ -499,10 +499,12 @@ export function GlobalNav() {
                   </label>
                   <ul
                     tabIndex={0}
-                    className="menu menu-sm dropdown-content bg-base-100 text-base-content rounded-box -right-2 z-50 mt-3 w-48 max-w-[calc(100vw-4rem)] p-2 shadow sm:w-52"
+                    className="menu dropdown-content bg-base-100 text-base-content rounded-box -right-2 z-50 mt-3 w-48 max-w-[calc(100vw-4rem)] p-2 text-sm font-medium shadow sm:w-52"
                   >
                     <li className="menu-title">
-                      <span>{user.email}</span>
+                      <span className="truncate !text-xs !font-semibold !text-[#f97316] !normal-case">
+                        {user.email}
+                      </span>
                     </li>
                     <li>
                       <Link href="/profile">Profile</Link>
@@ -579,7 +581,8 @@ export function GlobalNav() {
               ) : null}
 
               {/* Mobile/tablet menu — one column + scroll. Titles orange, items
-                  navy (#132). Hamburger left of theme so panel isn’t clipped. */}
+                  theme text (navy in light, white in dark). Hamburger left of
+                  theme so panel isn’t clipped. */}
               <div className="dropdown dropdown-end lg:hidden">
                 <label
                   tabIndex={0}
@@ -614,7 +617,7 @@ export function GlobalNav() {
                         <li key={`m-adopter-${item.href}-${item.label}`}>
                           <Link
                             href={item.href}
-                            className="min-h-11 !text-[#1e3a8a]"
+                            className="text-base-content min-h-11"
                             onClick={blurActiveElement}
                           >
                             {item.label}
@@ -630,7 +633,7 @@ export function GlobalNav() {
                         <li key={`m-shelter-${item.href}-${item.label}`}>
                           <Link
                             href={item.href}
-                            className="min-h-11 !text-[#1e3a8a]"
+                            className="text-base-content min-h-11"
                             onClick={blurActiveElement}
                           >
                             {item.label}
@@ -646,7 +649,7 @@ export function GlobalNav() {
                         <li>
                           <Link
                             href="/profile"
-                            className="min-h-11 !text-[#1e3a8a]"
+                            className="text-base-content min-h-11"
                             onClick={blurActiveElement}
                           >
                             Profile
@@ -655,7 +658,7 @@ export function GlobalNav() {
                         <li>
                           <Link
                             href="/account"
-                            className="min-h-11 !text-[#1e3a8a]"
+                            className="text-base-content min-h-11"
                             onClick={blurActiveElement}
                           >
                             Account Settings
@@ -665,7 +668,7 @@ export function GlobalNav() {
                           <li>
                             <Link
                               href="/admin"
-                              className="min-h-11 !text-[#1e3a8a]"
+                              className="text-base-content min-h-11"
                               onClick={blurActiveElement}
                             >
                               Admin Dashboard
@@ -677,7 +680,7 @@ export function GlobalNav() {
                             <li>
                               <button
                                 type="button"
-                                className="min-h-11 !text-[#1e3a8a]"
+                                className="text-base-content min-h-11"
                                 data-testid="switch-demo-role-mobile"
                                 onClick={(e) => {
                                   e.preventDefault();
@@ -696,7 +699,7 @@ export function GlobalNav() {
                             <li>
                               <button
                                 type="button"
-                                className="min-h-11 !text-[#1e3a8a]"
+                                className="text-base-content min-h-11"
                                 data-testid="restart-demo-tour-mobile"
                                 onClick={(e) => {
                                   e.preventDefault();
@@ -712,7 +715,7 @@ export function GlobalNav() {
                         <li>
                           <button
                             type="button"
-                            className="min-h-11 !text-[#1e3a8a]"
+                            className="text-base-content min-h-11"
                             onClick={(e) => {
                               e.preventDefault();
                               blurActiveElement();
@@ -731,7 +734,7 @@ export function GlobalNav() {
                         <li>
                           <Link
                             href={DEMO_ENTRY_HREF}
-                            className="min-h-11 !text-[#1e3a8a]"
+                            className="text-base-content min-h-11"
                             onClick={blurActiveElement}
                           >
                             Try Demo
@@ -740,7 +743,7 @@ export function GlobalNav() {
                         <li>
                           <Link
                             href="/sign-in"
-                            className="min-h-11 !text-[#1e3a8a]"
+                            className="text-base-content min-h-11"
                             onClick={blurActiveElement}
                           >
                             Log In
