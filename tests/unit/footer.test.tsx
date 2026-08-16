@@ -31,9 +31,7 @@ describe('Footer (#74 / #65)', () => {
       screen.getByText(/raised paws · every pet deserves a happy tail/i)
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByText(new RegExp(`© ${new Date().getFullYear()} Raised Paws`))
-    ).toBeInTheDocument();
+    expect(screen.getByText(/© \d{4} Raised Paws/)).toBeInTheDocument();
 
     const credit = screen.getByRole('link', { name: /tech stack devs/i });
     expect(credit).toHaveAttribute('href', 'https://www.techstackdevs.com');

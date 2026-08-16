@@ -58,6 +58,11 @@ const nextConfig: NextConfig = {
     // so the resolved basePath must be injected here or client code that builds
     // URLs (auth redirects) sees '' in production (issue #154).
     NEXT_PUBLIC_BASE_PATH: basePath,
+    // `new Date()` inside a prerendered client component bakes the build year
+    // into the static export and then disagrees with the browser's clock after
+    // Jan 1, which React reports as a hydration mismatch. Inline the year once
+    // here so the server HTML and the client bundle always agree.
+    NEXT_PUBLIC_BUILD_YEAR: String(new Date().getFullYear()),
   },
   webpack: (config, { isServer }) => {
     // Optimize code splitting for better performance

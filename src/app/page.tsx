@@ -62,7 +62,7 @@ export default function Home() {
       >
         <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
           <div className="w-full min-w-0 flex-1 text-center lg:-translate-y-4 lg:text-left">
-            <div className="mb-3 flex w-full min-w-0 flex-row flex-wrap items-center justify-center gap-2 sm:mb-6 sm:gap-3 lg:justify-start">
+            <div className="mb-3 flex flex-row flex-wrap items-center justify-center gap-2 sm:mb-6 sm:gap-3 lg:justify-start">
               <Link
                 href="/dogs"
                 aria-label="Browse dogs"
