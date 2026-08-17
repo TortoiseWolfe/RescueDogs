@@ -39,8 +39,11 @@ const navChromeBtnSelected =
   '!bg-[#172554] !text-white hover:!bg-[#1e3a8a] hover:!text-white active:!bg-[#172554] active:!text-white';
 const navChromeIconBtn =
   'btn btn-circle header-wedge-btn min-h-11 min-w-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
-/** Only when brand+chrome would collide (e.g. S9+ ~360px, Lumia ~320px) (#132). */
-const navChromeIconBtnCompact = 'min-h-10 min-w-10 h-10 w-10';
+/** Dark-mode variant of the same 44px chrome pill. Compact layouts (S9+ ~360px,
+    Lumia ~320px) tighten the row gap and the brand, never the tap target —
+    see docs/MOBILE-FIRST.md (#132). */
+const navChromeIconBtnDark =
+  'btn btn-circle min-h-11 min-w-11 border-0 !bg-[#1e3a8a] !text-white hover:!bg-[#172554] hover:!text-white active:!bg-[#172554] active:!text-white';
 
 /**
  * Role-menu colors on the white desktop strip (#79 / #115).
@@ -198,6 +201,7 @@ export function GlobalNav() {
   const [chromeCompact, setChromeCompact] = useState(false);
   const navRowRef = useRef<HTMLDivElement>(null);
   const brandRef = useRef<HTMLDivElement>(null);
+  const wordmarkRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     setDemoSession(isDemoMode());
@@ -205,6 +209,8 @@ export function GlobalNav() {
 
   // Measure brand vs row — compact only on phones where S9+/Lumia-class widths
   // collide (~320–360px). Wider phones keep full 44px targets (#132).
+  // Collision math always includes the wordmark width, even when we take it
+  // out of flow, so hiding it cannot flip compact off and flicker (#185).
   useLayoutEffect(() => {
     const row = navRowRef.current;
     const brand = brandRef.current;
@@ -222,7 +228,15 @@ export function GlobalNav() {
       const gap = 4;
       const fullChrome = fullIcon * iconCount + gap * (iconCount - 1);
       const padding = 12;
-      const needed = brand.scrollWidth + fullChrome + padding;
+      const logo = brand.querySelector('img');
+      const logoWidth = logo
+        ? Math.ceil(logo.getBoundingClientRect().width)
+        : 0;
+      const wordmarkWidth = wordmarkRef.current?.scrollWidth ?? 0;
+      const brandGap = 6;
+      const intrinsicBrand =
+        logoWidth + (wordmarkWidth > 0 ? brandGap + wordmarkWidth : 0);
+      const needed = intrinsicBrand + fullChrome + padding;
       setChromeCompact(needed > row.clientWidth);
     };
 
@@ -230,6 +244,7 @@ export function GlobalNav() {
     const ro = new ResizeObserver(measure);
     ro.observe(row);
     ro.observe(brand);
+    if (wordmarkRef.current) ro.observe(wordmarkRef.current);
     window.addEventListener('resize', measure);
     return () => {
       ro.disconnect();
@@ -237,12 +252,8 @@ export function GlobalNav() {
     };
   }, [user]);
 
-  const chromeIconClass = chromeCompact
-    ? `${navChromeIconBtn} ${navChromeIconBtnCompact}`
-    : navChromeIconBtn;
-  const themeDarkClass = chromeCompact
-    ? 'btn btn-circle min-h-10 min-w-10 h-10 w-10 border-0 !bg-[#1e3a8a] !text-white hover:!bg-[#172554] hover:!text-white active:!bg-[#172554] active:!text-white'
-    : 'btn btn-circle min-h-11 min-w-11 border-0 !bg-[#1e3a8a] !text-white hover:!bg-[#172554] hover:!text-white active:!bg-[#172554] active:!text-white';
+  const chromeIconClass = navChromeIconBtn;
+  const themeDarkClass = navChromeIconBtnDark;
 
   const messagesSignInHref = buildSignInHref(
     getPortalPreference() ?? 'adopter'
@@ -384,7 +395,7 @@ export function GlobalNav() {
             >
               <Link
                 href="/"
-                className="flex min-h-11 min-w-0 items-center gap-1.5 transition-opacity hover:opacity-80 sm:gap-2"
+                className="relative flex min-h-11 min-w-0 items-center gap-1.5 transition-opacity hover:opacity-80 sm:gap-2"
               >
                 <Image
                   src={`${projectConfig.basePath}/raised-paws-logo-white-paw.webp`}
@@ -398,7 +409,14 @@ export function GlobalNav() {
                   }
                   priority
                 />
-                <span className="min-w-0">
+                {/* Icon-only only when signed-in chrome actually collides. */}
+                <span
+                  ref={wordmarkRef}
+                  data-testid="brand-wordmark"
+                  className={
+                    user && chromeCompact ? 'invisible absolute' : 'min-w-0'
+                  }
+                >
                   <AnimatedLogo
                     text={projectConfig.projectDisplayName}
                     className={
@@ -440,7 +458,9 @@ export function GlobalNav() {
             </div>
 
             {/* Orange chrome — flush right; hamburger left of theme (#132). */}
-            <div className="ml-auto flex h-full shrink-0 items-center justify-end gap-1 sm:gap-1.5 lg:gap-2.5 lg:pr-2 lg:pl-6">
+            <div
+              className={`ml-auto flex h-full shrink-0 items-center justify-end sm:gap-1.5 lg:gap-2.5 lg:pr-2 lg:pl-6 ${chromeCompact ? 'gap-0.5' : 'gap-1'}`}
+            >
               {user ? (
                 <Link
                   href="/messages"
