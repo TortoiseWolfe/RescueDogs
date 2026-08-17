@@ -339,6 +339,55 @@ describe('GlobalNav role menus (#65)', () => {
     expect(row!.getAttribute('data-chrome-compact')).toMatch(/^(true|false)$/);
   });
 
+  it('keeps every chrome icon button at the 44px touch target', () => {
+    const { container } = render(<GlobalNav />);
+    const row = container.querySelector('[data-chrome-compact]');
+    // jsdom reports clientWidth 0, so measurement always lands on compact.
+    expect(row!.getAttribute('data-chrome-compact')).toBe('true');
+
+    const themeButton =
+      container.querySelector('[aria-label="Switch to light mode"]') ??
+      container.querySelector('[aria-label="Switch to dark mode"]');
+    const chromeButtons = [
+      container.querySelector('[aria-label="Messages"]'),
+      container.querySelector('[aria-label="Navigation menu"]'),
+      themeButton,
+    ];
+
+    for (const el of chromeButtons) {
+      expect(el).toBeTruthy();
+      const className = el!.getAttribute('class') ?? '';
+      expect(className).toMatch(/\bmin-h-11\b/);
+      expect(className).toMatch(/\bmin-w-11\b/);
+      expect(className).not.toMatch(/\bh-10\b|\bw-10\b/);
+    }
+
+    expect(screen.getByTestId('brand-wordmark').className).not.toMatch(
+      /invisible/
+    );
+  });
+
+  it('hides the wordmark on narrow signed-in chrome so four icons cannot overlap it', () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        id: 'user-1',
+        email: 'test@example.com',
+        user_metadata: {},
+      },
+      signOut: vi.fn(),
+      isLoading: false,
+      isAuthenticated: true,
+    });
+
+    render(<GlobalNav />);
+
+    expect(screen.getByTestId('brand-wordmark').className).toMatch(/invisible/);
+    expect(screen.getByTestId('brand-wordmark').className).toMatch(/absolute/);
+    expect(
+      screen.getByRole('link', { name: /raised paws home/i })
+    ).toBeInTheDocument();
+  });
+
   it('uses full-width desktop gutters instead of lg:container (#148)', () => {
     const { container } = render(<GlobalNav />);
     const nav = container.querySelector('nav[aria-label="Main"]');
