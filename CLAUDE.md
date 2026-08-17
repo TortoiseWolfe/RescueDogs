@@ -511,11 +511,76 @@ gh secret list --repo TortoiseWolfe/RescueDogs
 
 **Smell test for output stolen from upstream**: a timestamp that predates the June 2026 fork, a `scripthammer.com` value, or a key name you don't recognise from this repo. Any one of those means you're reading the wrong repository — re-run with `--repo` before acting on it.
 
+### The contrast gate is WCAG **AAA (7:1)**, not AA
+
+`tests/e2e/color-contrast.spec.ts` runs axe's **`color-contrast-enhanced`** rule — AAA — against `/`, `/themes/`, `/accessibility/`, `/status/` in both themes. That was a deliberate choice (#21 / #81). AA's 4.5:1 is **not** the bar here.
+
+This is easy to get wrong and expensive when you do: #190 was written citing "the 4.5:1 WCAG AA threshold", the fix landed at 6.31:1, and it failed `chromium-gen 2/6` on both themes. The correction (#204) darkened `--color-accent-content` / `--color-secondary-content` from `#0c1929` to `#040c14` — 7.02:1 on the `#f97316` fill.
+
+Two things worth carrying forward:
+
+- **`#f97316` cannot reach AAA with any text colour.** The ceiling is 7.49:1 with pure black. If a surface needs orange, the _fill_ has to change, not just the text.
+- **A contrast "fix" can convert a hidden failure into a visible one.** White-on-orange was always 2.80:1, but axe reported those nodes `incomplete` (it couldn't resolve a colour through the hero's `bg-gradient-to-b` ancestor), so CI never counted them. Making the colour deterministic is what turned a real, shipped defect into a measurable violation. A newly-red contrast test may mean you _exposed_ a bug, not caused one.
+
+Only those four pages are gated. `/contact` and `/follow` have no automated contrast check at all — verify those by measuring computed styles in a browser, not by trusting a green suite.
+
+### `pnpm run format` rewrites the **entire repo**, not your changes
+
+The repo is not prettier-clean, so `pnpm run format` touches everything it can reach. One run during #190 produced **74 changed files / 2363 insertions**, including `.github/workflows/e2e.yml`, `public/sw.js`, and a 3847-line wireframe viewer — none of them related to the change.
+
+Format the files you actually touched:
+
+```bash
+docker compose exec rescuedogs pnpm exec prettier --write <paths>
+# or just verify, since lint-staged formats on commit anyway:
+docker compose exec rescuedogs pnpm exec prettier --check <paths>
+```
+
+If you already ran the repo-wide version, revert everything outside your scope before committing — a 28-line fix buried in a 2000-line diff is unreviewable.
+
+### E2E cannot run locally at all without `SUPABASE_SERVICE_ROLE_KEY`
+
+`tests/e2e/global-setup.ts:28-49` hard-requires five env vars and aborts the whole run if any is missing. That gate is unconditional: it fires even for specs that never touch Supabase, so you cannot run a homepage-only test locally without the service-role key. That key is in schlajo's Supabase account — see **#6**.
+
+Practical consequence: for local verification, prove the behaviour another way rather than assuming the suite will tell you. Both of these worked well on #189/#190:
+
+- Run the pure function directly (`pnpm exec tsx`) over many iterations to measure a probability claim.
+- Drive the dev server and read computed styles / DOM state in a browser.
+
+Also note `CI` is set inside the container, so Playwright takes the `reuseExistingServer: false` branch and will refuse to start against a running dev server. Use `SKIP_WEBSERVER=1` when a server is already up.
+
+### A green E2E job can still be hiding a flake
+
+Only `*-msg-iso` sets `--fail-on-flaky-tests`. The `-gen` shards leave `FAIL_ON_FLAKY` empty, so a test that fails then passes on retry reports as **`1 flaky, 42 passed`** and the job goes green.
+
+Observed live on 2026-08-15: #189 hard-failed `main` on `chromium-gen 5/6` (all 3 attempts), then flaked silently green on the very next PR run. Read the flaky count in the job log, not just the conclusion — this is the #126 blind spot in a different shard.
+
+### `mergeStateStatus: CLEAN` is **not** a signal that E2E ran
+
+`main` now has branch protection: required checks **`Test (20.x)`** and **`accessibility`** (the raw check-run names — the `Workflow / job` display form does not match and would block every PR), `strict: false`, `enforce_admins: true`, no review requirement, force-pushes and deletions disabled.
+
+**E2E is deliberately NOT a required check.** `e2e.yml` is the only workflow with `paths-ignore`, so a docs-only PR never reports an E2E context — making it required would render such PRs permanently unmergeable. (`Test Report` is also unsuitable: it is a summary job with no `needs.*.result` gate, so it can go green while shards are red.)
+
+The consequence to internalise: because E2E is not required, a PR whose E2E is still `pending` reports `mergeable=MERGEABLE, mergeStateStatus=CLEAN` — the E2E context is simply **absent from `statusCheckRollup`**. Verify the E2E _run's own status_ before merging; `CLEAN` only means "no required check is failing".
+
+Making E2E genuinely requirable needs a gate job that checks `needs.*.result` plus converting `paths-ignore` into per-job conditions (skipped jobs satisfy required checks). Not done yet.
+
+### Check for an existing PR before starting a ticket
+
+Two collaborators on a small ticket queue means a ticket can be finished between the moment it is filed and the moment someone picks it up. #180 was filed, escalated, and already had an open PR (#182) within the hour; #193 and #195 were both implemented by schlajo after being reassigned.
+
+```bash
+gh pr list --repo TortoiseWolfe/RescueDogs --state open
+git ls-remote --heads origin
+```
+
+Also: a PR title containing `(#NNN)` does **not** close the issue — only a `Closes #NNN` keyword in the body does. #193 sat open and looked like unstarted work for hours after it had shipped.
+
 ## Important Notes
 
 - Never create components manually - use the generator
 - All PRs must pass component structure validation
-- **E2E tests DO run in CI** (chromium + firefox + webkit across 28 shards) — was previously local-only but is now part of the GitHub Actions pipeline; see "CI & E2E Stability" above
+- **E2E tests DO run in CI** — **24 shards** on a push to `main` (8 per browser: 1 msg + 1 msg-iso + 6 gen, across chromium/firefox/webkit). A **pull request runs chromium only (8 shards)** unless it carries the `full-e2e` label. See "CI & E2E Stability" above
 - Docker-first development is mandatory
 - Use `min-h-11 min-w-11` for 44px touch targets (mobile-first)
 
