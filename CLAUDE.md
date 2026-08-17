@@ -511,6 +511,40 @@ gh secret list --repo TortoiseWolfe/RescueDogs
 
 **Smell test for output stolen from upstream**: a timestamp that predates the June 2026 fork, a `scripthammer.com` value, or a key name you don't recognise from this repo. Any one of those means you're reading the wrong repository — re-run with `--repo` before acting on it.
 
+### gh 2.46.0 is broken for `issue view` / `pr view` / `pr edit` — use `--json` or `gh api`
+
+The installed CLI is **gh 2.46.0**, which still requests `repository.issue.projectCards`. GitHub sunset Projects (classic), so these all exit 1 printing only a GraphQL deprecation error and **no content**:
+
+```bash
+gh issue view 5                    # ✗ exits 1, prints nothing
+gh issue view 5 --comments         # ✗ same
+gh pr view 202                     # ✗ same
+gh pr edit 202 --add-reviewer foo  # ✗ same — and the reviewer is NOT added
+```
+
+The failure is easy to misread as "the issue doesn't exist" or "gh isn't authenticated". It is neither.
+
+**What works:**
+
+```bash
+# reading — the --json projection avoids the broken field
+gh issue view 5 --repo TortoiseWolfe/RescueDogs --json body,comments \
+  --jq '.body, "\n=== LATEST COMMENT ===\n", .comments[-1].body'
+
+# writing — go straight to REST
+gh api -X POST repos/TortoiseWolfe/RescueDogs/pulls/202/requested_reviewers \
+  -f 'reviewers[]=schlajo'
+```
+
+`gh issue comment`, `gh pr comment`, `gh pr create`, `gh issue create`, `gh pr merge`, `gh run *` and `gh api` are all unaffected.
+
+Note `gh pr edit` fails **silently in the worst way**: it prints the GraphQL error but the surrounding shell often keeps going, so a reviewer request or label edit can look done when nothing happened. Verify writes:
+
+```bash
+gh api repos/TortoiseWolfe/RescueDogs/pulls/202 \
+  --jq '[.requested_reviewers[].login]'
+```
+
 ### The contrast gate is WCAG **AAA (7:1)**, not AA
 
 `tests/e2e/color-contrast.spec.ts` runs axe's **`color-contrast-enhanced`** rule — AAA — against `/`, `/themes/`, `/accessibility/`, `/status/` in both themes. That was a deliberate choice (#21 / #81). AA's 4.5:1 is **not** the bar here.
