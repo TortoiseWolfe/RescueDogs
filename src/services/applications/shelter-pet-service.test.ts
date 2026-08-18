@@ -81,6 +81,44 @@ describe('ShelterPetService', () => {
       notes: '  Pocket rocket with a soft heart.  ',
     });
     expect(result.name).toBe('Noodle');
-    expect(from.insert).toHaveBeenCalled();
+    expect(from.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        shelter_id: shelterId,
+        name: 'Noodle',
+        notes: 'Pocket rocket with a soft heart.',
+      })
+    );
+  });
+
+  it('updates a pet with a trimmed patch payload', async () => {
+    const updated = {
+      id: 'pet-2',
+      shelter_id: shelterId,
+      name: 'Noodle',
+      species: 'dog',
+      breed: null,
+      sex: null,
+      age_years: null,
+      size: null,
+      photo_url: null,
+      status: 'adopted',
+      notes: 'Now fully house-trained.',
+      created_at: '2026-01-01T00:00:00Z',
+    };
+    const from = mockFrom({ data: updated, error: null });
+    const supabase = { from: vi.fn().mockReturnValue(from) } as any;
+    const service = new ShelterPetService(supabase);
+    const result = await service.updatePet('pet-2', {
+      name: '  Noodle  ',
+      notes: '  Now fully house-trained.  ',
+      breed: '   ',
+    });
+    expect(result.name).toBe('Noodle');
+    expect(from.update).toHaveBeenCalledWith({
+      name: 'Noodle',
+      notes: 'Now fully house-trained.',
+      breed: null,
+    });
+    expect(from.eq).toHaveBeenCalledWith('id', 'pet-2');
   });
 });
