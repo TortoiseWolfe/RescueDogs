@@ -33,9 +33,9 @@
   --color-primary: #1e3a8a;
   --color-primary-content: #ffffff;
   --color-secondary: #f97316;
-  --color-secondary-content: #0c1929;
+  --color-secondary-content: #040c14;
   --color-accent: #f97316;
-  --color-accent-content: #0c1929;
+  --color-accent-content: #040c14;
 
   --color-neutral: #334155;
   --color-neutral-content: #ffffff;
@@ -71,9 +71,9 @@
   --color-primary: #1e3a8a;
   --color-primary-content: #ffffff;
   --color-secondary: #f97316;
-  --color-secondary-content: #0c1929;
+  --color-secondary-content: #040c14;
   --color-accent: #f97316;
-  --color-accent-content: #0c1929;
+  --color-accent-content: #040c14;
 
   --color-neutral: #1e3a8a;
   --color-neutral-content: #f8fafc;
@@ -94,6 +94,26 @@
   --border: 1px;
   --depth: 1;
   --noise: 1;
+}
+
+/* Brand "ink" — the readable orange for TEXT on a base-100 surface.
+ * --color-secondary / --color-accent (#f97316) are FILL colors: only 2.71:1
+ * against light base-100 (#fdfbf7), so orange TEXT on the page background
+ * fails WCAG AA. #9a3412 is the same hue darkened to 7.07:1 on light — the
+ * value GlobalNav.tsx:52 already justifies as NAV_ACCENT. On dark base-100
+ * (#0c1929) plain #f97316 is already 6.31:1, so dark keeps it.
+ * Use text-[var(--brand-ink)] for orange TEXT.
+ * Use text-accent-content / text-secondary-content for text ON orange fills. */
+:root {
+  --brand-ink: #9a3412;
+}
+
+[data-theme='trusted-care-light'] {
+  --brand-ink: #9a3412;
+}
+
+[data-theme='trusted-care-dark'] {
+  --brand-ink: #f97316;
 }
 
 /* RescueDogs visual polish — Trusted Care light + dark */
