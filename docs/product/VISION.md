@@ -179,6 +179,30 @@ The wedge is narrower and stronger:
 > Shelters can keep listing pets wherever they already do. Use RescueDogs so
 > applicants stop getting ghosted.
 
+### First partner (who we ask)
+
+The first real user is a **small foster- or breed-based rescue**, not a
+Humane Society that already runs PetPoint/Shelterluv. Those orgs are happy
+with existing software and need a webmaster to change Adopt buttons. A
+20-animal group that lives on Facebook can paste a link this week.
+
+**Foster is go-to-market, not the next build.** Principle V still holds: do
+not start pillar 1 (foster scheduling, waivers, weekend-foster marketplace)
+until the tracker loop is proven with a real partner. An empty foster board
+needs animals _and_ homes; an empty tracker only needs one org. Pitch
+foster-based groups **the application tracker** (“applicants and foster
+inquiries stop disappearing into DMs”). Building the foster product is a
+constitution change, not a side quest.
+
+Cold Facebook comments on strangers’ shelter posts do not compound. The
+partner’s _own_ posts, Petfinder bio, and apply instructions do.
+
+**Cost language (locked for outreach):** founding pilots are **at no
+charge**. Do not advertise “free forever,” “free for a month,” or “free for
+a year” in public comments — that reads as a SaaS trial and contradicts the
+draft paid Shelter tier. If someone asks what it costs: nothing for the
+pilot; talk paid only if it clearly saves status-chasing.
+
 ### How pet information gets into the system
 
 Staff **add/edit + photo upload** shipped in #110 (`/shelter/pets` → Supabase
@@ -197,6 +221,15 @@ one `shelter_members` user, then loading currently available pets.
 - Prefer a shared Drive/Dropbox folder over endless email threads; aim for
   **currently available** animals only (often ~5–30), not the full historical
   catalog.
+- **Inventory vs live cohort.** List animals they would still take an
+  application for — including pets with **nobody in process yet**. Empty
+  pipeline on those is correct. Do **not** only list pets that already have
+  a pending adoption: the catalog looks spoken-for, and those animals leave
+  as soon as they go home.
+- **Optional kickstart (small):** 3–8 _in-flight_ applications staff still
+  owe an update (review / more-info, not “approved, waiting on pickup”) so
+  `/shelter` is not empty on day one. Do **not** migrate historical apps
+  ([PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md) §2).
 - Uploading requires a **shelter staff** sign-in. Adopter accounts cannot manage
   pets. Demo: Try Demo → shelter door (`staff@demo.test`). Production: add the
   operator or partner user to `shelter_members` (no self-serve create/join yet).
@@ -283,10 +316,36 @@ Pre-fill is the bridge between "apply once" and shelter reality. The shipped
 form already supports profile prefill; future work includes PDF export, copy for
 external web forms, and integrations with shelter management tools.
 
+### Where the apply link lives (no webmaster required)
+
+Do **not** send people to the bare homepage (`https://raisedpaws.com`). They
+land on our brand, not that shelter’s pets. Give a **specific apply URL**
+(shelter- or pet-scoped when we have it). Copy should read as _[Shelter]
+application — live status_, with Raised Paws in small print — not “go use
+another rescue’s site.”
+
+Asking IT to replace the website Adopt button is a bad **first** ask. Use
+channels staff already type into, in this order:
+
+1. Petfinder / Adopt-a-Pet animal bio (a form, not HTML)
+2. Facebook post, About, Linktree
+3. Google Form / PDF header (Pattern C: “Start here so we can track you”)
+4. Email auto-reply and a desk QR
+5. Website “How to adopt” **last** — one hyperlink a volunteer can paste,
+   not a redesign
+
+Paste-ready blurbs: [SHELTER-SITE-COPY.md](./SHELTER-SITE-COPY.md).
+
+**One primary apply path for pilot pets.** Two buttons (old form + ours)
+split the pipeline and reintroduce ghosting. The old form can stay for
+animals not in the pilot set.
+
 ### The pilot ask (simple and concrete)
 
-1. Import **currently available** pets (spreadsheet, export, or manual one-time setup).
-2. Send applicants to the **RescueDogs apply link** for those pets.
+1. Import **currently available** pets (subset or all — including those with
+   no applicants yet). Optionally seed a handful of in-flight apps.
+2. Put a **specific Raised Paws apply link** on those pets (Petfinder / social
+   / form first; website if easy).
 3. Staff run **status updates in the pipeline** — even if they still file a
    separate county PDF offline.
 
@@ -312,6 +371,10 @@ pillar 3 is proven with a real shelter.
 - Single-weekend fosters / field trips for high-energy dogs
 - Quick onboarding, waivers, foster-to-adopt pipeline with weekly check-ins
 - "Press to adopt" when a foster decides to keep the animal
+
+Parked until pillar 3 has a real partner. Recruiting a **foster-based rescue
+as the first tracker customer** is in scope (see First partner above).
+Shipping this pillar before that proof is not.
 
 ### 2. Decentralized stray rescue
 
@@ -476,13 +539,14 @@ and must restate Principle V.
 
 ## Revision history
 
-| Date       | Change                                                                                                 |
-| ---------- | ------------------------------------------------------------------------------------------------------ |
-| 2026-08-03 | Pilot pet load: staff portal upload + membership; next = #138 runbook; #110/#111/#112 marked shipped   |
-| 2026-07-28 | Link first-partner pilot packet ([PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md); #117)                     |
-| 2026-07-23 | Demo vs first real shelter; first-partner in-app Apply rule; README vision summary                     |
-| 2026-07-13 | Added “How we refer to Raised Paws” (tracker vs rescue-app naming)                                     |
-| 2026-07-12 | Added data-integration guardrails under shelter onboarding; clarified no universal DB extractor        |
-| 2026-07-12 | Added shelter onboarding and application strategy for pillar 3 pilots                                  |
-| 2026-07-11 | Added post-pillar future horizons for wellness, microchip reunion, and a federated animal-services hub |
-| 2026-07-04 | Initial capture from founding brainstorm + constitution/MVP alignment review                           |
+| Date       | Change                                                                                                                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-08-18 | First partner = small foster/breed group; foster is GTM not next build; inventory vs in-flight cohort; apply-link channels (no webmaster / no bare homepage); founding-pilot cost language |
+| 2026-08-03 | Pilot pet load: staff portal upload + membership; next = #138 runbook; #110/#111/#112 marked shipped                                                                                       |
+| 2026-07-28 | Link first-partner pilot packet ([PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md); #117)                                                                                                         |
+| 2026-07-23 | Demo vs first real shelter; first-partner in-app Apply rule; README vision summary                                                                                                         |
+| 2026-07-13 | Added “How we refer to Raised Paws” (tracker vs rescue-app naming)                                                                                                                         |
+| 2026-07-12 | Added data-integration guardrails under shelter onboarding; clarified no universal DB extractor                                                                                            |
+| 2026-07-12 | Added shelter onboarding and application strategy for pillar 3 pilots                                                                                                                      |
+| 2026-07-11 | Added post-pillar future horizons for wellness, microchip reunion, and a federated animal-services hub                                                                                     |
+| 2026-07-04 | Initial capture from founding brainstorm + constitution/MVP alignment review                                                                                                               |
