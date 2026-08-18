@@ -202,6 +202,9 @@ export function GlobalNav() {
   const navRowRef = useRef<HTMLDivElement>(null);
   const brandRef = useRef<HTMLDivElement>(null);
   const wordmarkRef = useRef<HTMLSpanElement>(null);
+  /** Brand width from the last non-compact layout. Fixed reference so
+   *  compacting can never change its own measurement input (#185). */
+  const fullBrandWidthRef = useRef(0);
 
   useEffect(() => {
     setDemoSession(isDemoMode());
@@ -210,7 +213,8 @@ export function GlobalNav() {
   // Measure brand vs row — compact only on phones where S9+/Lumia-class widths
   // collide (~320–360px). Wider phones keep full 44px targets (#132).
   // Collision math always includes the wordmark width, even when we take it
-  // out of flow, so hiding it cannot flip compact off and flicker (#185).
+  // out of flow. Compact still shrinks the live logo/type, so we cache the
+  // last full-size brand width and compare against that (#185).
   useLayoutEffect(() => {
     const row = navRowRef.current;
     const brand = brandRef.current;
@@ -234,9 +238,18 @@ export function GlobalNav() {
         : 0;
       const wordmarkWidth = wordmarkRef.current?.scrollWidth ?? 0;
       const brandGap = 6;
-      const intrinsicBrand =
+      const liveBrand =
         logoWidth + (wordmarkWidth > 0 ? brandGap + wordmarkWidth : 0);
-      const needed = intrinsicBrand + fullChrome + padding;
+      // Compacting shrinks the brand we measure (logo 40→36px, wordmark
+      // 18→16px). Measuring the live brand makes the decision depend on
+      // its own output, so the ResizeObserver flips it every frame on
+      // ~377–400px viewports (#185). Only refresh the reference width
+      // while the brand is rendered at full size.
+      if (row.dataset.chromeCompact !== 'true') {
+        fullBrandWidthRef.current = liveBrand;
+      }
+      const brandWidth = fullBrandWidthRef.current || liveBrand;
+      const needed = brandWidth + fullChrome + padding;
       setChromeCompact(needed > row.clientWidth);
     };
 
