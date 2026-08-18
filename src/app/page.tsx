@@ -66,12 +66,9 @@ export default function Home() {
               <Link
                 href="/dogs"
                 aria-label="Browse dogs"
-                className="font-friendly bg-accent inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-white shadow-lg transition-opacity hover:opacity-90 sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base"
+                className="font-friendly bg-accent text-accent-content inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold shadow-lg transition-opacity hover:opacity-90 sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base"
               >
-                <span
-                  aria-hidden="true"
-                  className="inline-block brightness-0 invert"
-                >
+                <span aria-hidden="true" className="inline-block brightness-0">
                   🐾
                 </span>
                 Dogs
@@ -79,12 +76,9 @@ export default function Home() {
               <Link
                 href="/cats"
                 aria-label="Browse cats"
-                className="font-friendly bg-accent inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-white shadow-lg transition-opacity hover:opacity-90 sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base"
+                className="font-friendly bg-accent text-accent-content inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold shadow-lg transition-opacity hover:opacity-90 sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base"
               >
-                <span
-                  aria-hidden="true"
-                  className="inline-block brightness-0 invert"
-                >
+                <span aria-hidden="true" className="inline-block brightness-0">
                   🐾
                 </span>
                 Cats

@@ -35,7 +35,7 @@ export default function FollowPage() {
 
       <div className="relative mx-auto max-w-2xl">
         <div className="mb-8 text-center">
-          <p className="font-friendly text-sm font-bold tracking-wide text-[#f97316] uppercase">
+          <p className="font-friendly text-sm font-bold tracking-wide text-[var(--brand-ink)] uppercase">
             Early interest
           </p>
           <h1 className="font-display mt-2 !text-2xl font-extrabold tracking-tight text-[#1e3a8a] sm:!text-4xl md:!text-5xl">

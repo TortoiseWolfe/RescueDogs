@@ -93,7 +93,7 @@ export default function ContactPage() {
                   Prefer mail?{' '}
                   <a
                     href={`mailto:${publicEmail}`}
-                    className="link font-semibold text-[#f97316]"
+                    className="link font-semibold text-[var(--brand-ink)]"
                   >
                     {publicEmail}
                   </a>
