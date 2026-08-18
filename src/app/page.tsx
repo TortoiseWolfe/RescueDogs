@@ -213,10 +213,16 @@ export default function Home() {
         </p>
       </section>
 
-      <section className="bg-base-100 px-4 pb-12 sm:px-6 lg:px-8">
+      <section
+        aria-labelledby="live-loop-heading"
+        className="bg-base-100 px-4 pb-12 sm:px-6 lg:px-8"
+      >
         <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#f97316] p-8 text-white shadow-2xl sm:p-12 lg:flex lg:items-center lg:justify-between lg:gap-8">
           <div>
-            <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
+            <h2
+              id="live-loop-heading"
+              className="font-display text-3xl font-extrabold sm:text-4xl"
+            >
               Want to see the live rescue loop?
             </h2>
             <p className="mt-2 max-w-2xl text-base font-bold text-[#172554] sm:text-lg">
