@@ -35,7 +35,19 @@ test.describe('Homepage Navigation', () => {
 
   test('navigate to demo login tips from the homepage', async ({ page }) => {
     // Orange CTA band points at demo tips (get-started), not the status tracker.
-    await page.locator('a[href*="/get-started"]').first().click();
+    // Scoped to that section (#211): GlobalNav renders DEMO_ENTRY_HREF as a
+    // collapsed role="menuitem" and the header precedes <main>, so a page-wide
+    // `a[href*="/get-started"]`.first() resolved to a hidden nav item and timed
+    // out. It was intermittent because the guest nav ships in the static export
+    // and auth only resolves on hydration. getByRole ignores role="menuitem",
+    // the section scope excludes the header, and toBeVisible fails fast.
+    const ctaBand = page.locator(
+      'section[aria-labelledby="live-loop-heading"]'
+    );
+    const demoCta = ctaBand.getByRole('link', { name: /^Try Demo$/ });
+    await expect(demoCta).toBeVisible();
+
+    await demoCta.click();
 
     await expect(page).toHaveURL(/.*get-started/);
   });
