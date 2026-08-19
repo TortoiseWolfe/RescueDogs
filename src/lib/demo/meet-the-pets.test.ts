@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   DEFAULT_MEET_THE_PETS,
+  HOMEPAGE_SLOT_THEMES,
   MEET_THE_PETS_POOL,
   pickMeetThePets,
   type MeetPetCard,
@@ -10,6 +11,15 @@ import {
 function identityRandom() {
   return 0;
 }
+
+describe('HOMEPAGE_SLOT_THEMES', () => {
+  it('locks the homepage row to navy, orange, and baby blue', () => {
+    expect(HOMEPAGE_SLOT_THEMES).toHaveLength(3);
+    expect(HOMEPAGE_SLOT_THEMES[0].bg).toBe('bg-[#e8edf7]');
+    expect(HOMEPAGE_SLOT_THEMES[1].bg).toBe('bg-[#fff7ed]');
+    expect(HOMEPAGE_SLOT_THEMES[2].bg).toBe('bg-[#f1f6ff]');
+  });
+});
 
 describe('MEET_THE_PETS_POOL identity lock', () => {
   it('keeps Pepper as a cat and Zeus/Tank/Scout/Lola/Tiger as dogs', () => {
