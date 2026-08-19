@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { detectedConfig } from '@/config/project-detected';
@@ -44,6 +45,15 @@ const STEPS = [
   },
 ] as const;
 
+/**
+ * Desktop: slide the centered copy chunk toward the left edge (away from
+ * the photo). Raise this number to go further left.
+ */
+const HERO_COPY_NUDGE_LEFT_PX = 96;
+
+const HERO_SPECIES_PILL_CLASS =
+  'font-friendly border-accent inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full border-2 bg-transparent px-3 py-1 text-xs font-bold text-white shadow-none transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] focus-visible:-translate-y-0.5 focus-visible:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base';
+
 export default function Home() {
   return (
     <main className="bg-base-100 flex min-h-full flex-col overflow-hidden">
@@ -61,55 +71,70 @@ export default function Home() {
         className="relative bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-10 text-white sm:px-6 sm:py-16 lg:px-8 lg:py-24"
       >
         <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
-          <div className="w-full min-w-0 flex-1 text-center lg:-translate-y-4 lg:text-left">
-            <div className="mb-3 flex flex-row flex-wrap items-center justify-center gap-2 sm:mb-6 sm:gap-3 lg:justify-start">
-              <Link
-                href="/dogs"
-                aria-label="Browse dogs"
-                className="font-friendly bg-accent text-accent-content inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold shadow-lg transition-opacity hover:opacity-90 sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base"
-              >
-                <span aria-hidden="true" className="inline-block brightness-0">
-                  🐾
-                </span>
-                Dogs
-              </Link>
-              <Link
-                href="/cats"
-                aria-label="Browse cats"
-                className="font-friendly bg-accent text-accent-content inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold shadow-lg transition-opacity hover:opacity-90 sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base"
-              >
-                <span aria-hidden="true" className="inline-block brightness-0">
-                  🐾
-                </span>
-                Cats
-              </Link>
-            </div>
-
-            <h1
-              id="hero-heading"
-              className="font-display mb-5 text-4xl leading-tight font-extrabold tracking-tight break-normal text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl sm:leading-none lg:text-7xl"
+          <div className="w-full min-w-0 flex-1 lg:-translate-y-4">
+            {/* Centered copy stack, shifted left. Tweak HERO_COPY_NUDGE_LEFT_PX. */}
+            <div
+              className="mx-auto max-w-xl text-center lg:mx-0 lg:translate-x-[var(--hero-copy-nudge)]"
+              style={
+                {
+                  ['--hero-copy-nudge']: `-${HERO_COPY_NUDGE_LEFT_PX}px`,
+                } as CSSProperties
+              }
             >
-              Track your pet adoption applications.
-            </h1>
-
-            <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed font-semibold break-normal text-[#f97316] sm:text-xl lg:mx-0">
-              Apply once, watch every status update live, and give shelters
-              &amp; rescues a simple pipeline.
-            </p>
-
-            <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
-              <Link
-                href="/get-started?choose=1&intent=signup"
-                className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto sm:text-base"
+              <div className="mb-3 flex flex-row flex-wrap items-center justify-center gap-2 sm:mb-6 sm:gap-3">
+                <Link
+                  href="/dogs"
+                  aria-label="Browse dogs"
+                  className={HERO_SPECIES_PILL_CLASS}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="inline-block brightness-0 invert"
+                  >
+                    🐾
+                  </span>
+                  Dogs
+                </Link>
+                <Link
+                  href="/cats"
+                  aria-label="Browse cats"
+                  className={HERO_SPECIES_PILL_CLASS}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="inline-block brightness-0 invert"
+                  >
+                    🐾
+                  </span>
+                  Cats
+                </Link>
+              </div>
+              <h1
+                id="hero-heading"
+                className="font-display mb-5 text-4xl leading-tight font-extrabold tracking-tight break-normal text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl sm:leading-none lg:text-7xl"
               >
-                Create Account
-              </Link>
-              <Link
-                href="/get-started?demo=1&choose=1"
-                className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto sm:text-base"
-              >
-                Try Demo
-              </Link>
+                Track your pet adoption applications.
+              </h1>
+
+              <p className="mb-8 text-lg leading-relaxed font-semibold break-normal text-[#f97316] sm:text-xl">
+                Apply once, watch every status update live, and give shelters
+                &amp; rescues a simple pipeline.
+              </p>
+
+              <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center">
+                <Link
+                  href="/get-started?choose=1&intent=signup"
+                  className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto sm:text-base"
+                >
+                  Create Account
+                </Link>
+                <Link
+                  href="/get-started?demo=1&choose=1"
+                  className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto sm:text-base"
+                >
+                  Try Demo
+                </Link>
+              </div>
             </div>
           </div>
 

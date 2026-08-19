@@ -19,6 +19,35 @@ export interface MeetPetCard {
   cta: string;
 }
 
+/**
+ * Homepage row is always navy | orange | baby blue (#215), regardless of
+ * which three pets `pickMeetThePets` drew. Per-pet theme fields on the pool
+ * are leftovers and must not drive the homepage.
+ */
+export const HOMEPAGE_SLOT_THEMES = [
+  {
+    bg: 'bg-[#e8edf7]',
+    border: 'border-[#a8b8d8]',
+    image: 'from-[#7a94c4] to-[#e8edf7]',
+    title: 'text-[#1e3a8a]',
+    cta: 'btn-primary',
+  },
+  {
+    bg: 'bg-[#fff7ed]',
+    border: 'border-[#fed7aa]',
+    image: 'from-[#ffedd5] to-[#fff7ed]',
+    title: 'text-[#c2410c]',
+    cta: 'btn-secondary',
+  },
+  {
+    bg: 'bg-[#f1f6ff]',
+    border: 'border-[#cfe0ff]',
+    image: 'from-[#d7e6ff] to-[#e9f1ff]',
+    title: 'text-[#27408f]',
+    cta: 'border-[#cfe0ff] bg-[#d7e6ff] text-[#27408f] hover:border-[#a8c4f5] hover:bg-[#cfe0ff]',
+  },
+] as const;
+
 /** Available demo pets with local cartoon portraits (exclude adopted). */
 export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {

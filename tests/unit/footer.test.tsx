@@ -37,6 +37,13 @@ describe('Footer (#74 / #65)', () => {
     expect(credit).toHaveAttribute('href', 'https://www.techstackdevs.com');
     expect(credit).toHaveAttribute('target', '_blank');
     expect(credit).toHaveAttribute('rel', expect.stringContaining('noopener'));
+
+    const hammer = screen.getByRole('link', { name: /scripthammer/i });
+    expect(hammer).toHaveAttribute('href', 'https://scripthammer.com');
+    expect(hammer).toHaveAttribute('target', '_blank');
+    expect(hammer).toHaveAttribute('rel', expect.stringContaining('noopener'));
+
+    expect(screen.queryByText(/powered by supabase/i)).not.toBeInTheDocument();
   });
 
   it('shows the Raised Paws mark linking home (#136)', () => {
