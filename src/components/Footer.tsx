@@ -84,8 +84,17 @@ export function Footer() {
               className="link text-white underline"
             >
               Tech Stack Devs
+            </a>{' '}
+            and{' '}
+            <a
+              href="https://scripthammer.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link text-white underline"
+            >
+              ScriptHammer
             </a>
-            , powered by Supabase.
+            .
           </p>
         </div>
 

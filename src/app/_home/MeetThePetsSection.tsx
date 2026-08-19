@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { detectedConfig } from '@/config/project-detected';
 import {
   DEFAULT_MEET_THE_PETS,
+  HOMEPAGE_SLOT_THEMES,
   pickMeetThePets,
   type MeetPetCard,
 } from '@/lib/demo/meet-the-pets';
@@ -40,42 +41,45 @@ export default function MeetThePetsSection() {
         </p>
 
         <div className="grid gap-7 md:grid-cols-3">
-          {pets.map((pet) => (
-            <article
-              key={pet.name}
-              className={`card border-[3px] text-left ${pet.bg} ${pet.border}`}
-            >
-              <div className="card-body gap-4 p-4">
-                <div
-                  className={`relative grid h-52 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br ${pet.image}`}
-                >
-                  <Image
-                    src={`${detectedConfig.basePath}${pet.portrait}`}
-                    alt={pet.portraitAlt}
-                    width={180}
-                    height={180}
-                    className="h-44 w-44 object-contain drop-shadow-lg"
-                  />
-                </div>
-                <div className="px-2">
-                  <h3
-                    className={`font-friendly text-2xl font-bold ${pet.title}`}
+          {pets.map((pet, slot) => {
+            const theme = HOMEPAGE_SLOT_THEMES[slot] ?? HOMEPAGE_SLOT_THEMES[0];
+            return (
+              <article
+                key={pet.name}
+                className={`card h-full border-[3px] text-left ${theme.bg} ${theme.border}`}
+              >
+                <div className="card-body flex h-full flex-col gap-4 p-4">
+                  <div
+                    className={`relative grid h-52 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br ${theme.image}`}
                   >
-                    {pet.name}
-                  </h3>
-                  <p className="text-base-content/95 font-semibold">
-                    {pet.detail}
-                  </p>
+                    <Image
+                      src={`${detectedConfig.basePath}${pet.portrait}`}
+                      alt={pet.portraitAlt}
+                      width={180}
+                      height={180}
+                      className="h-44 w-44 object-contain drop-shadow-lg"
+                    />
+                  </div>
+                  <div className="flex-1 px-2">
+                    <h3
+                      className={`font-friendly text-2xl font-bold ${theme.title}`}
+                    >
+                      {pet.name}
+                    </h3>
+                    <p className="text-base-content/95 font-semibold">
+                      {pet.detail}
+                    </p>
+                  </div>
+                  <Link
+                    href="/adopt"
+                    className={`btn ${theme.cta} mt-auto min-h-11 w-full`}
+                  >
+                    Meet {pet.name}
+                  </Link>
                 </div>
-                <Link
-                  href="/adopt"
-                  className={`btn ${pet.cta} min-h-11 w-full`}
-                >
-                  Meet {pet.name}
-                </Link>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>
