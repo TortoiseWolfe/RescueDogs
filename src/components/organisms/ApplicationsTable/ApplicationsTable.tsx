@@ -110,12 +110,24 @@ export default function ApplicationsTable({
       </div>
 
       {applications.length === 0 ? (
-        <p
-          className="text-base-content/60 py-8 text-center"
+        <div
+          className="text-base-content/80 flex flex-col items-center gap-4 py-8 text-center"
           data-testid="applications-empty"
         >
-          No applications in this view yet
-        </p>
+          <p>No applications yet — that is normal for a new shelter.</p>
+          <p className="text-base-content/60 max-w-md text-sm">
+            Add available pets so adopters can apply. Applications will show up
+            here when they do.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link href="/shelter/pets/new" className="btn btn-primary min-h-11">
+              Add a pet
+            </Link>
+            <Link href="/shelter/pets" className="btn btn-ghost min-h-11">
+              View pets
+            </Link>
+          </div>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="table">
