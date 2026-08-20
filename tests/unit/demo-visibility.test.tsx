@@ -58,4 +58,15 @@ describe('Demo visibility pages (#67 / #74)', () => {
       DEMO_HREF
     );
   });
+
+  it('for-shelters leads with a pilot contact CTA, not Create Account (#217)', () => {
+    render(<ForSheltersPage />);
+
+    expect(
+      screen.getByRole('link', { name: /talk to us about a pilot/i })
+    ).toHaveAttribute('href', '/contact?role=shelter');
+    expect(
+      screen.queryByRole('link', { name: /^create account$/i })
+    ).not.toBeInTheDocument();
+  });
 });

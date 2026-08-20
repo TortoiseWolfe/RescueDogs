@@ -58,6 +58,16 @@ export default function SignUpPage() {
         <h1 className="mb-2 text-center text-2xl font-bold whitespace-nowrap sm:mb-3 sm:text-3xl">
           {heading}
         </h1>
+        {portal === 'shelter' ? (
+          <p className="text-base-content/70 mb-4 text-center text-sm">
+            This creates a login only. A rescue pipeline still needs a staff
+            membership —{' '}
+            <Link href="/contact?role=shelter" className="link link-primary">
+              contact us
+            </Link>{' '}
+            or email contact@raisedpaws.com.
+          </p>
+        ) : null}
         {portal ? (
           <p className="text-base-content/70 mb-6 text-center text-sm sm:mb-8">
             Wrong audience?{' '}
