@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { buildSignUpHref } from '@/lib/portal/portal-preference';
+import { projectConfig } from '@/config/project.config';
 
 const heroCtaClassName =
   'btn btn-lg min-h-11 border-0 bg-white px-8 font-bold text-[#1e3a8a] hover:bg-[#e8edf7]';
@@ -29,11 +29,8 @@ export default function ForSheltersPage() {
             team spends less time on “any update?” emails.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link
-              href={buildSignUpHref('shelter')}
-              className={heroCtaClassName}
-            >
-              Create Account
+            <Link href="/contact?role=shelter" className={heroCtaClassName}>
+              Talk to us about a pilot
             </Link>
             <Link
               href="/get-started?demo=1&choose=1"
@@ -42,6 +39,17 @@ export default function ForSheltersPage() {
               Try Demo
             </Link>
           </div>
+          <p className="mt-4 text-sm text-white/80">
+            Founding pilots are at no charge. Creating a login does not open a
+            pipeline yet — we add your rescue, then you list pets. Or email{' '}
+            <a
+              href={`mailto:${projectConfig.contactEmail}`}
+              className="underline"
+            >
+              {projectConfig.contactEmail}
+            </a>
+            .
+          </p>
         </div>
       </section>
 
@@ -60,9 +68,9 @@ export default function ForSheltersPage() {
             When you update an application, applicants see it—no silence.
           </li>
           <li>
-            <strong className="text-base-content">Staff access.</strong>{' '}
-            Pipeline tools appear after your account is added as staff at your
-            shelter or rescue.
+            <strong className="text-base-content">Staff access.</strong> After
+            we add your rescue, you list pets and see applications. Self-serve
+            create-org is not live yet — contact us to start.
           </li>
         </ul>
         <p className="text-base-content/70 mt-8 text-sm">

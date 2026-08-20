@@ -117,14 +117,27 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
                 is separate from tracking an application.
               </li>
               <li>
-                Joining a real rescue? Contact them to be added as shelter staff
-                on Raised Paws; self-serve create/join is not available yet.
+                Founding a real rescue on Raised Paws?{' '}
+                <Link
+                  href="/contact?role=shelter"
+                  className="link link-primary"
+                >
+                  Contact us
+                </Link>{' '}
+                or email contact@raisedpaws.com — we add your organization, then
+                you list pets. Self-serve create-org is not live yet.
               </li>
             </ul>
             <div className="card-actions mt-2 flex flex-wrap gap-3">
               <Link
-                href="/get-started?choose=1&demo=1"
+                href="/contact?role=shelter"
                 className="btn btn-primary min-h-11"
+              >
+                Contact us
+              </Link>
+              <Link
+                href="/get-started?choose=1&demo=1"
+                className="btn btn-ghost min-h-11"
               >
                 Try Demo
               </Link>
