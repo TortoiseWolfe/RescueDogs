@@ -2784,6 +2784,78 @@ COMMENT ON FUNCTION get_application_applicant_email(UUID) IS
 REVOKE ALL ON FUNCTION get_application_applicant_email(UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION get_application_applicant_email(UUID) TO authenticated;
 
+-- ─── Self-serve create-org (#218) ──────────────────────────────────────────
+-- No client INSERT policies on shelters / shelter_members. First-time users
+-- become manager of exactly one rescue. Existing members (incl. demo staff)
+-- cannot create a second org.
+
+CREATE OR REPLACE FUNCTION create_my_shelter(
+  p_name TEXT,
+  p_city TEXT DEFAULT NULL,
+  p_state TEXT DEFAULT NULL,
+  p_zip TEXT DEFAULT NULL,
+  p_contact_email TEXT DEFAULT NULL
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID := auth.uid();
+  v_name TEXT := btrim(COALESCE(p_name, ''));
+  v_city TEXT := nullif(btrim(COALESCE(p_city, '')), '');
+  v_state TEXT := nullif(btrim(COALESCE(p_state, '')), '');
+  v_zip TEXT := nullif(btrim(COALESCE(p_zip, '')), '');
+  v_email TEXT := nullif(btrim(COALESCE(p_contact_email, '')), '');
+  v_id UUID;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'not authenticated';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM shelter_members WHERE user_id = v_uid) THEN
+    RAISE EXCEPTION 'already_a_member';
+  END IF;
+
+  IF length(v_name) < 2 OR length(v_name) > 120 THEN
+    RAISE EXCEPTION 'invalid_name';
+  END IF;
+
+  IF v_city IS NOT NULL AND length(v_city) > 100 THEN
+    RAISE EXCEPTION 'invalid_city';
+  END IF;
+  IF v_state IS NOT NULL AND length(v_state) > 50 THEN
+    RAISE EXCEPTION 'invalid_state';
+  END IF;
+  IF v_zip IS NOT NULL AND length(v_zip) > 20 THEN
+    RAISE EXCEPTION 'invalid_zip';
+  END IF;
+
+  IF v_email IS NULL THEN
+    SELECT email INTO v_email FROM auth.users WHERE id = v_uid;
+  END IF;
+  IF v_email IS NOT NULL AND length(v_email) > 255 THEN
+    RAISE EXCEPTION 'invalid_contact_email';
+  END IF;
+
+  INSERT INTO shelters (name, city, state, zip, contact_email)
+  VALUES (v_name, v_city, v_state, v_zip, v_email)
+  RETURNING id INTO v_id;
+
+  INSERT INTO shelter_members (shelter_id, user_id, role)
+  VALUES (v_id, v_uid, 'manager');
+
+  RETURN v_id;
+END;
+$$;
+
+COMMENT ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT) IS
+  'Authenticated non-member creates one shelter and becomes manager (#218).';
+
+REVOKE ALL ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT) TO authenticated;
+
 -- ─── Status transitions: SECURITY DEFINER RPCs (the only write path) ───────
 -- applications has NO client UPDATE/DELETE policies; with output:'export'
 -- there is no server runtime, so Postgres is the only trusted layer.

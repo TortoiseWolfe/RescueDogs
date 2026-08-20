@@ -68,5 +68,11 @@ describe('Demo visibility pages (#67 / #74)', () => {
     expect(
       screen.queryByRole('link', { name: /^create account$/i })
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/self-serve create-org is not live/i)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/create your shelter or rescue at the shelter portal/i)
+    ).toBeInTheDocument();
   });
 });

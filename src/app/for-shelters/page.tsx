@@ -40,8 +40,8 @@ export default function ForSheltersPage() {
             </Link>
           </div>
           <p className="mt-4 text-sm text-white/80">
-            Founding pilots are at no charge. Creating a login does not open a
-            pipeline yet — we add your rescue, then you list pets. Or email{' '}
+            Founding pilots are at no charge. Create an account, then create
+            your shelter or rescue at the shelter portal to list pets. Or email{' '}
             <a
               href={`mailto:${projectConfig.contactEmail}`}
               className="underline"
@@ -68,9 +68,13 @@ export default function ForSheltersPage() {
             When you update an application, applicants see it—no silence.
           </li>
           <li>
-            <strong className="text-base-content">Staff access.</strong> After
-            we add your rescue, you list pets and see applications. Self-serve
-            create-org is not live yet — contact us to start.
+            <strong className="text-base-content">Staff access.</strong> Sign
+            in, create your shelter or rescue, then list pets and see
+            applications. Need a hand?{' '}
+            <Link href="/contact?role=shelter" className="link link-primary">
+              Contact us
+            </Link>
+            .
           </li>
         </ul>
         <p className="text-base-content/70 mt-8 text-sm">
