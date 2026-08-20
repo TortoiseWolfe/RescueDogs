@@ -261,6 +261,41 @@ describe('ShelterApplicationService', () => {
     expect(await service.getMyShelterMembership(USER_ID)).toBeNull();
   });
 
+  it('createMyShelter calls the RPC with p_ argument names (#218)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: SHELTER_ID,
+      error: null,
+    });
+
+    const id = await service.createMyShelter({
+      name: 'Happy Tails',
+      city: 'Asheville',
+      state: 'NC',
+      zip: '28801',
+      contactEmail: 'hello@example.com',
+    });
+
+    expect(mock.rpc).toHaveBeenCalledWith('create_my_shelter', {
+      p_name: 'Happy Tails',
+      p_city: 'Asheville',
+      p_state: 'NC',
+      p_zip: '28801',
+      p_contact_email: 'hello@example.com',
+    });
+    expect(id).toBe(SHELTER_ID);
+  });
+
+  it('createMyShelter maps already_a_member to AlreadyAMemberError (#218)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: null,
+      error: { message: 'already_a_member' },
+    });
+
+    await expect(
+      service.createMyShelter({ name: 'Happy Tails' })
+    ).rejects.toMatchObject({ name: 'AlreadyAMemberError' });
+  });
+
   it('listShelterApplications filters by status when provided', async () => {
     const builder = createQueryBuilder({ data: [], error: null });
     mock.from.mockReturnValue(builder);

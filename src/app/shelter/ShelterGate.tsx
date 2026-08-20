@@ -10,7 +10,10 @@ import React, {
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase/client';
-import { ShelterApplicationService } from '@/services/applications';
+import {
+  AlreadyAMemberError,
+  ShelterApplicationService,
+} from '@/services/applications';
 import type { ShelterMembershipInfo } from '@/services/applications';
 
 const ShelterContext = createContext<ShelterMembershipInfo | null>(null);
@@ -92,15 +95,18 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
       <div className="container mx-auto max-w-lg px-4 py-16">
         <div className="card bg-base-100 border-base-300 border shadow-xl">
           <div className="card-body gap-4">
-            <h1 className="card-title text-2xl">
-              No shelter access on this account
-            </h1>
+            <h1 className="card-title text-2xl">Create your rescue</h1>
             <p className="text-base-content/80">
-              This login is not linked to a shelter membership. Shelter pipeline
-              pages are for staff who have been added to a rescue. Creating an
-              account alone does not grant shelter access — ask your rescue to
-              add you as staff, or use the demo shelter door below.
+              This login is not linked to a shelter yet. Create your rescue to
+              list pets and see applications. Founding use is at no charge.
             </p>
+            <CreateRescueForm
+              onCreated={async () => {
+                const service = new ShelterApplicationService(supabase);
+                const next = await service.getMyShelterMembership(user!.id);
+                setMembership(next);
+              }}
+            />
             <ul className="text-base-content/80 list-disc space-y-1 pl-5 text-sm">
               <li>
                 Trying the demo? Use{' '}
@@ -117,24 +123,17 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
                 is separate from tracking an application.
               </li>
               <li>
-                Founding a real rescue on Raised Paws?{' '}
+                Need help?{' '}
                 <Link
                   href="/contact?role=shelter"
                   className="link link-primary"
                 >
                   Contact us
                 </Link>{' '}
-                or email contact@raisedpaws.com — we add your organization, then
-                you list pets. Self-serve create-org is not live yet.
+                or email contact@raisedpaws.com.
               </li>
             </ul>
             <div className="card-actions mt-2 flex flex-wrap gap-3">
-              <Link
-                href="/contact?role=shelter"
-                className="btn btn-primary min-h-11"
-              >
-                Contact us
-              </Link>
               <Link
                 href="/get-started?choose=1&demo=1"
                 className="btn btn-ghost min-h-11"
@@ -179,5 +178,105 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
         {children}
       </div>
     </ShelterContext.Provider>
+  );
+}
+
+function CreateRescueForm({ onCreated }: { onCreated: () => Promise<void> }) {
+  const [name, setName] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [zip, setZip] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const service = new ShelterApplicationService(supabase);
+      await service.createMyShelter({
+        name,
+        city: city || undefined,
+        state: state || undefined,
+        zip: zip || undefined,
+      });
+      await onCreated();
+    } catch (err) {
+      if (err instanceof AlreadyAMemberError) {
+        setError(
+          'This account is already on a rescue. Sign in again to open it.'
+        );
+      } else {
+        setError('Could not create your rescue. Check the name and try again.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const fieldClass = 'input input-bordered min-h-11 w-full';
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <label className="form-control">
+        <span className="label-text mb-1 font-semibold">
+          Shelter or Rescue Name
+        </span>
+        <input
+          required
+          minLength={2}
+          maxLength={120}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className={fieldClass}
+          autoComplete="organization"
+        />
+      </label>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <label className="form-control">
+          <span className="label-text mb-1 font-semibold">City</span>
+          <input
+            maxLength={100}
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            className={fieldClass}
+            autoComplete="address-level2"
+          />
+        </label>
+        <label className="form-control">
+          <span className="label-text mb-1 font-semibold">State</span>
+          <input
+            maxLength={50}
+            value={state}
+            onChange={(e) => setState(e.target.value)}
+            className={fieldClass}
+            autoComplete="address-level1"
+          />
+        </label>
+        <label className="form-control">
+          <span className="label-text mb-1 font-semibold">ZIP</span>
+          <input
+            maxLength={20}
+            value={zip}
+            onChange={(e) => setZip(e.target.value)}
+            className={fieldClass}
+            autoComplete="postal-code"
+          />
+        </label>
+      </div>
+      {error ? (
+        <p role="alert" className="text-error text-sm">
+          {error}
+        </p>
+      ) : null}
+      <button
+        type="submit"
+        className="btn btn-primary min-h-11"
+        disabled={submitting}
+      >
+        {submitting ? 'Creating…' : 'Create Shelter or Rescue'}
+      </button>
+    </form>
   );
 }

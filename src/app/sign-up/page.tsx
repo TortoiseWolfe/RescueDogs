@@ -60,12 +60,12 @@ export default function SignUpPage() {
         </h1>
         {portal === 'shelter' ? (
           <p className="text-base-content/70 mb-4 text-center text-sm">
-            This creates a login only. A rescue pipeline still needs a staff
-            membership —{' '}
+            This creates a login. After you sign in, open the shelter portal to
+            create your shelter or rescue — or{' '}
             <Link href="/contact?role=shelter" className="link link-primary">
               contact us
             </Link>{' '}
-            or email contact@raisedpaws.com.
+            if you need a hand.
           </p>
         ) : null}
         {portal ? (

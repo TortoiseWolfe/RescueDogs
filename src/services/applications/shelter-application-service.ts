@@ -17,6 +17,21 @@ export interface ShelterMembershipInfo {
   role: ShelterRole;
 }
 
+export interface CreateMyShelterInput {
+  name: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  contactEmail?: string;
+}
+
+export class AlreadyAMemberError extends Error {
+  constructor() {
+    super('already_a_member');
+    this.name = 'AlreadyAMemberError';
+  }
+}
+
 /**
  * Shelter-staff-side data access. Reads are scoped by the
  * is_shelter_staff() RLS policies; the only mutation is the
@@ -55,6 +70,32 @@ export class ShelterApplicationService {
       shelterName: row.shelters?.name ?? '',
       role: row.role,
     };
+  }
+
+  /**
+   * First-time staff onboarding (#218). SECURITY DEFINER RPC — no client
+   * INSERT on shelters / shelter_members. Rejects users who already belong
+   * to a rescue (including demo staff).
+   */
+  async createMyShelter(input: CreateMyShelterInput): Promise<string> {
+    const { data, error } = await this.supabase.rpc('create_my_shelter', {
+      p_name: input.name,
+      p_city: input.city ?? null,
+      p_state: input.state ?? null,
+      p_zip: input.zip ?? null,
+      p_contact_email: input.contactEmail ?? null,
+    });
+
+    if (error) {
+      if (error.message?.includes('already_a_member')) {
+        throw new AlreadyAMemberError();
+      }
+      throw error;
+    }
+    if (typeof data !== 'string' || data.length === 0) {
+      throw new Error('create_my_shelter returned no id');
+    }
+    return data;
   }
 
   /** The shelter's pipeline, optionally filtered by status. */
