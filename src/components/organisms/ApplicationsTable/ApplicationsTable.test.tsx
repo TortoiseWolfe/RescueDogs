@@ -197,8 +197,16 @@ describe('ApplicationsTable', () => {
       />
     );
 
-    expect(screen.getByTestId('applications-empty')).toHaveTextContent(
-      'No applications in this view yet'
+    const empty = screen.getByTestId('applications-empty');
+    expect(empty).toHaveTextContent(/no applications yet/i);
+    expect(empty).toHaveTextContent(/add available pets/i);
+    expect(screen.getByRole('link', { name: /^add a pet$/i })).toHaveAttribute(
+      'href',
+      '/shelter/pets/new'
+    );
+    expect(screen.getByRole('link', { name: /^view pets$/i })).toHaveAttribute(
+      'href',
+      '/shelter/pets'
     );
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
