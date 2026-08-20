@@ -1,9 +1,17 @@
 # First-partner shelter onboarding (ops runbook)
 
-**Tracking:** [#138](https://github.com/TortoiseWolfe/RescueDogs/issues/138)  
-**Audience:** Raised Paws operators (not public site copy)  
+**Tracking:** [#138](https://github.com/TortoiseWolfe/RescueDogs/issues/138),
+[#218](https://github.com/TortoiseWolfe/RescueDogs/issues/218)
+**Audience:** Raised Paws operators (not public site copy)
 **Goal:** A real (non-demo) shelter/rescue row + staff membership so someone can
 sign in and upload pets at `/shelter/pets`.
+
+**Self-serve (#218):** signed-in users who are not already staff can create one
+rescue at `/shelter` (`create_my_shelter` RPC). This SQL runbook remains for
+demo repair and support.
+
+Related: [VISION.md](./VISION.md) (pilot pet load), [PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md)
+(partner-facing ask).
 
 Related: [VISION.md](./VISION.md) (pilot pet load), [PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md)
 (partner-facing ask).
@@ -19,7 +27,8 @@ Related: [VISION.md](./VISION.md) (pilot pet load), [PILOT-AGREEMENT.md](./PILOT
 | Auth user               | Staff must **already have** an account on raisedpaws.com (sign up once)             |
 | Shelter facts           | Name, city, state, zip, contact email                                               |
 
-**Not required:** Petfinder sync, CSV importer, or self-serve “create my rescue.”
+**Not required for new users:** operator SQL — they can create a rescue in-app
+after sign-up. Petfinder sync and CSV import are still out of scope.
 
 ---
 
