@@ -49,7 +49,7 @@ const STEPS = [
  * Desktop: slide the centered copy chunk toward the left edge (away from
  * the photo). Raise this number to go further left.
  */
-const HERO_COPY_NUDGE_LEFT_PX = 96;
+const HERO_COPY_NUDGE_LEFT_PX = 76;
 
 const HERO_SPECIES_PILL_CLASS =
   'font-friendly border-accent inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full border-2 bg-transparent px-3 py-1 text-xs font-bold text-white shadow-none transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] focus-visible:-translate-y-0.5 focus-visible:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base';
@@ -236,30 +236,28 @@ export default function Home() {
         aria-labelledby="live-loop-heading"
         className="bg-base-100 px-4 pb-12 sm:px-6 lg:px-8"
       >
-        <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#f97316] p-8 text-white shadow-2xl sm:p-12 lg:flex lg:items-center lg:justify-between lg:gap-8">
-          <div>
+        <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#f97316] p-8 text-white shadow-2xl sm:p-10">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
             <h2
               id="live-loop-heading"
               className="font-display text-3xl font-extrabold sm:text-4xl"
             >
               Want to see the live rescue loop?
             </h2>
-            <p className="mt-2 max-w-2xl text-base font-bold text-[#172554] sm:text-lg">
-              Choose the adopter or shelter door, sign in with a prefilled demo
-              account, then walk the real loop: submit or review an application,
-              move statuses in the shelter pipeline, and watch updates sync live
-              on the other side. You can switch demo roles anytime from the
-              account menu.
-            </p>
-          </div>
-          <div className="mt-6 flex flex-wrap gap-4 lg:mt-0 lg:shrink-0">
             <Link
               href="/get-started?demo=1&choose=1"
-              className="btn btn-lg min-h-12 bg-white px-10 text-lg font-bold text-[#1e3a8a] hover:bg-[#e8edf7]"
+              className="btn btn-lg min-h-12 shrink-0 self-end bg-white px-10 text-lg font-bold text-[#1e3a8a] hover:bg-[#e8edf7] sm:mr-6 sm:self-auto"
             >
               Try Demo
             </Link>
           </div>
+          <p className="mt-3 w-full text-base font-bold text-[#172554] sm:text-lg">
+            Choose the adopter or shelter door, sign in with a prefilled demo
+            account, then walk the real loop: submit or review an application,
+            move statuses in the shelter pipeline, and watch updates sync live
+            on the other side. You can switch demo roles anytime from the
+            account menu.
+          </p>
         </div>
       </section>
     </main>

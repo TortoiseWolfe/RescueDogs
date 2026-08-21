@@ -71,6 +71,23 @@ describe('Footer (#74 / #65)', () => {
     expect(contacts[0].className).toMatch(/bg-white/);
   });
 
+  it('links Privacy, Cookies, and Terms in the legal nav (#230)', () => {
+    render(<Footer />);
+
+    expect(screen.getByRole('link', { name: /^privacy$/i })).toHaveAttribute(
+      'href',
+      '/privacy'
+    );
+    expect(screen.getByRole('link', { name: /^cookies$/i })).toHaveAttribute(
+      'href',
+      '/cookies'
+    );
+    expect(screen.getByRole('link', { name: /^terms$/i })).toHaveAttribute(
+      'href',
+      '/terms'
+    );
+  });
+
   it('links to Follow between Blog and Contact (#129)', () => {
     render(<Footer />);
 
