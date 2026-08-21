@@ -2544,13 +2544,6 @@ BEGIN
 
   IF NOT EXISTS (
     SELECT 1 FROM pg_publication_tables
-    WHERE pubname = 'supabase_realtime' AND tablename = 'typing_indicators'
-  ) THEN
-    ALTER PUBLICATION supabase_realtime ADD TABLE public.typing_indicators;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_publication_tables
     WHERE pubname = 'supabase_realtime' AND tablename = 'user_connections'
   ) THEN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.user_connections;
@@ -2571,6 +2564,17 @@ BEGIN
     WHERE pubname = 'supabase_realtime' AND tablename = 'subscriptions'
   ) THEN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.subscriptions;
+  END IF;
+
+  -- typing_indicators was published but has no reader and no writer: nothing in
+  -- src/ ever calls .from('typing_indicators'), and typing is broadcast-only.
+  -- Publishing it billed Realtime deliveries for a table nobody subscribes to
+  -- (#224). Guarded DROP so databases created before this change converge.
+  IF EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND tablename = 'typing_indicators'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime DROP TABLE public.typing_indicators;
   END IF;
 END $$;
 

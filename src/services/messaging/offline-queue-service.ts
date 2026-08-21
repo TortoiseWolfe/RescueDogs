@@ -227,12 +227,6 @@ export class OfflineQueueService {
             );
           }
 
-          // Update conversation's last_message_at
-          await msgClient
-            .from('conversations')
-            .update({ last_message_at: new Date().toISOString() })
-            .eq('id', queuedMsg.conversation_id);
-
           // Mark as synced
           await messagingDb.messaging_queued_messages.update(queuedMsg.id, {
             status: 'sent' as QueueStatus,
