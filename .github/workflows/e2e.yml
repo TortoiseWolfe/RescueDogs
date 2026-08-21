@@ -639,7 +639,9 @@ jobs:
     # label (e.g. messaging error-string handling — see the real Safari "Load
     # failed" retry bug fixed in commit 7fb7563).
     if: >-
-      always() && !cancelled() &&
+      needs.smoke.result == 'success' &&
+      needs['rate-limiting'].result == 'success' &&
+      needs['auth-setup'].result == 'success' &&
       (github.event_name != 'pull_request' ||
        contains(github.event.pull_request.labels.*.name, 'full-e2e'))
     timeout-minutes: 60
@@ -805,7 +807,9 @@ jobs:
     # Lever 2: see e2e-firefox above — skipped on PRs (chromium gates those)
     # unless the PR carries the `full-e2e` label; runs on push-to-main + cron.
     if: >-
-      always() && !cancelled() &&
+      needs.smoke.result == 'success' &&
+      needs['rate-limiting'].result == 'success' &&
+      needs['auth-setup'].result == 'success' &&
       (github.event_name != 'pull_request' ||
        contains(github.event.pull_request.labels.*.name, 'full-e2e'))
     timeout-minutes: 60
