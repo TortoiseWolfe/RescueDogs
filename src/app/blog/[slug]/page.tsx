@@ -256,7 +256,7 @@ function generateArticleJsonLd(
       url: baseUrl,
       logo: {
         '@type': 'ImageObject',
-        url: `${baseUrl}/apple-icon.png`,
+        url: `${baseUrl}/logo-512.png`,
       },
     },
     mainEntityOfPage: {
