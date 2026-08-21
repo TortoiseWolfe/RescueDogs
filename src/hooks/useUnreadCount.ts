@@ -9,13 +9,22 @@ const logger = createLogger('hooks:unreadCount');
 
 export function useUnreadCount() {
   const { user } = useAuth();
+  // Depend on the id, not the user object: AuthContext replaces `user` on every
+  // auth event (including hourly TOKEN_REFRESHED), which used to tear down and
+  // recreate the channel each time.
+  const userId = user?.id ?? null;
+
   const [unreadCount, setUnreadCount] = useState(0);
+  // Comma-joined conversation ids, used to build the server-side Realtime
+  // filter. A primitive, so a refetch that returns the same set does not
+  // resubscribe.
+  const [conversationKey, setConversationKey] = useState('');
   const channelRef = useRef<RealtimeChannel | null>(null);
-  const conversationIdsRef = useRef<string[]>([]);
 
   const fetchUnreadCount = useCallback(async () => {
-    if (!user) {
+    if (!userId) {
       setUnreadCount(0);
+      setConversationKey('');
       return;
     }
 
@@ -26,24 +35,25 @@ export function useUnreadCount() {
       const result = await msgClient
         .from('conversations')
         .select('id')
-        .or(`participant_1_id.eq.${user.id},participant_2_id.eq.${user.id}`);
+        .or(`participant_1_id.eq.${userId},participant_2_id.eq.${userId}`);
 
       const conversations = result.data as { id: string }[] | null;
 
       if (!conversations || conversations.length === 0) {
         setUnreadCount(0);
-        conversationIdsRef.current = [];
+        setConversationKey('');
         return;
       }
 
-      conversationIdsRef.current = conversations.map((c) => c.id);
+      const conversationIds = conversations.map((c) => c.id);
+      setConversationKey(conversationIds.join(','));
 
       // Count unread messages (messages where read_at is null and sender is NOT current user)
       const { count } = await msgClient
         .from('messages')
         .select('id', { count: 'exact', head: true })
-        .in('conversation_id', conversationIdsRef.current)
-        .neq('sender_id', user.id)
+        .in('conversation_id', conversationIds)
+        .neq('sender_id', userId)
         .is('read_at', null);
 
       setUnreadCount(count || 0);
@@ -51,56 +61,82 @@ export function useUnreadCount() {
       logger.error('Failed to fetch unread count', { error });
       setUnreadCount(0);
     }
-  }, [user]);
+  }, [userId]);
 
+  // Stable handle so the subscription effect below does not depend on the
+  // callback's identity.
+  const fetchRef = useRef(fetchUnreadCount);
   useEffect(() => {
-    if (!user) {
+    fetchRef.current = fetchUnreadCount;
+  }, [fetchUnreadCount]);
+
+  // Initial fetch, plus a refetch when the tab regains focus (covers gaps if
+  // realtime dropped while backgrounded).
+  useEffect(() => {
+    if (!userId) {
       setUnreadCount(0);
+      setConversationKey('');
       return;
     }
 
-    fetchUnreadCount();
+    void fetchUnreadCount();
 
-    // Subscribe to realtime message changes instead of polling
-    const channel = supabase
-      .channel(`unread-messages-${user.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'messages' },
-        (payload) => {
-          // Only refetch if the change is in one of our conversations
-          const conversationId =
-            (payload.new as { conversation_id?: string })?.conversation_id ||
-            (payload.old as { conversation_id?: string })?.conversation_id;
-
-          if (
-            conversationId &&
-            conversationIdsRef.current.includes(conversationId)
-          ) {
-            fetchUnreadCount();
-          }
-        }
-      )
-      .subscribe();
-
-    channelRef.current = channel;
-
-    // Refetch when tab regains focus (covers gaps if realtime dropped while backgrounded)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        fetchUnreadCount();
+        void fetchRef.current();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
     };
-  }, [user, fetchUnreadCount]);
+  }, [userId, fetchUnreadCount]);
+
+  // Realtime, scoped SERVER-SIDE to this user's conversations (#224).
+  //
+  // This binding used to be table-wide (`table: 'messages'` with no filter) and
+  // the conversation check ran in JS after delivery — so every message in the
+  // table was billed and delivered to every signed-in user on every page, then
+  // discarded. GlobalNav renders in the root layout, so the fan-out was
+  // (all message row changes) x (all signed-in tabs). The filter moves exactly
+  // that predicate to the server.
+  useEffect(() => {
+    if (!userId || !conversationKey) {
+      return;
+    }
+
+    const channel = supabase
+      .channel(`unread-messages-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=in.(${conversationKey})`,
+        },
+        () => {
+          void fetchRef.current();
+        }
+      )
+      .subscribe((status) => {
+        // Loudly, because nothing in the E2E suite covers the unread badge: if
+        // the filter is ever rejected the badge would otherwise go quietly dead.
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          logger.error('Unread-count realtime channel failed to join', {
+            status,
+          });
+        }
+      });
+
+    channelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+      channelRef.current = null;
+    };
+  }, [userId, conversationKey]);
 
   return unreadCount;
 }
