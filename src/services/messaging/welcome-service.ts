@@ -254,12 +254,6 @@ export class WelcomeService {
         };
       }
 
-      // Step 8: Update conversation's last_message_at
-      await msgClient
-        .from('conversations')
-        .update({ last_message_at: new Date().toISOString() })
-        .eq('id', conversationId);
-
       // Step 9: Mark welcome message as sent (FR-007)
       const { error: updateError } = await supabase
         .from('user_profiles')
