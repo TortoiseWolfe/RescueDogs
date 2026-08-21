@@ -52,6 +52,12 @@ export const DEVICE_KEY_SALT_MARKER = 'rp-device-key-v1';
 export class KeyManagementService {
   /** In-memory storage for derived keys (cleared on logout) */
   private derivedKeys: DerivedKeyPair | null = null;
+  /**
+   * #147: user_encryption_keys.id of the newest non-revoked row per user,
+   * populated as a side effect of getUserPublicKey. Lets sendMessage record
+   * which key encrypted a message without an extra query on the hot path.
+   */
+  private activeKeyIdCache = new Map<string, string>();
 
   /** Cache for other users' public keys (keyed by userId).
    * Populated on first fetch, enables offline message encryption. */
@@ -534,6 +540,8 @@ export class KeyManagementService {
 
       const newKeyId = (inserted as { id?: string } | null)?.id;
       if (newKeyId) {
+        // #147: the cached id now points at a row we are about to revoke.
+        this.activeKeyIdCache.set(userId, newKeyId);
         await this.revokeKeysForUser(userId, newKeyId);
       }
 
@@ -969,6 +977,25 @@ export class KeyManagementService {
    * @returns Promise<JsonWebKey | null> - Public key or null if not found
    * @throws ConnectionError if query fails
    */
+  /**
+   * #147: the id of the newest non-revoked `user_encryption_keys` row for a
+   * user — i.e. the key `getUserPublicKey` would hand out right now.
+   *
+   * Returns null rather than throwing: binding a message to its key is
+   * diagnostic, so a miss must degrade to "unknown key" and never block a send.
+   */
+  async getActiveKeyId(userId: string): Promise<string | null> {
+    const cached = this.activeKeyIdCache.get(userId);
+    if (cached) return cached;
+    try {
+      // Populates activeKeyIdCache as a side effect.
+      await this.getUserPublicKey(userId);
+    } catch {
+      return null;
+    }
+    return this.activeKeyIdCache.get(userId) ?? null;
+  }
+
   async getUserPublicKey(userId: string): Promise<JsonWebKey | null> {
     logger.debug('getUserPublicKey: Fetching public key', { userId });
 
@@ -995,7 +1022,10 @@ export class KeyManagementService {
     try {
       const { data, error } = await msgClient
         .from('user_encryption_keys')
-        .select('public_key')
+        // #147: `id` identifies WHICH key row this is, so a message can record
+        // the key it was encrypted to. Without it the send path knows the key
+        // material but not its identity.
+        .select('id, public_key')
         .eq('user_id', userId)
         .eq('revoked', false)
         .order('created_at', { ascending: false })
@@ -1031,6 +1061,12 @@ export class KeyManagementService {
       });
       if (publicKey) {
         this.publicKeyCache.set(userId, publicKey);
+        // #147: keep the row id next to the material so sendMessage can bind
+        // the ciphertext to it without a second round trip.
+        const keyId = (data as { id?: string } | null)?.id;
+        if (keyId) {
+          this.activeKeyIdCache.set(userId, keyId);
+        }
       }
       return publicKey;
     } catch (error) {
