@@ -42,6 +42,15 @@ concurrency:
   group: e2e-supabase-${{ github.repository }}
   cancel-in-progress: false
 
+# Container jobs (#214) default to `sh -e {0}`, and /bin/sh in the Playwright
+# image is dash — which has no `pipefail`. Six steps here start with
+# `set -euo pipefail`, so every one of them died on line 1 with
+# "Illegal option -o pipefail" the moment the jobs moved into a container.
+# Force bash everywhere rather than rewriting those steps to be dash-safe.
+defaults:
+  run:
+    shell: bash
+
 env:
   # NOTE: the build + most jobs read these from `vars.*`. The per-browser REST
   # health-check curls (see the `secrets.NEXT_PUBLIC_SUPABASE_*` usages below)
