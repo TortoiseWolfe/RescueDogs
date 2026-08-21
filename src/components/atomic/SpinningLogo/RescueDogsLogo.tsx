@@ -1,6 +1,14 @@
 import React from 'react';
 import Image from 'next/image';
 
+/**
+ * The static Raised Paws mark.
+ *
+ * It pointed at `/rescuedogs-logo.svg`, which despite the filename was
+ * ScriptHammer's artwork inherited at the fork (#233). The `alt` text already
+ * said "Raised Paws Logo" — only the image was someone else's.
+ */
+
 export interface RescueDogsLogoProps {
   className?: string;
   width?: number;
@@ -14,7 +22,7 @@ export const RescueDogsLogo: React.FC<RescueDogsLogoProps> = ({
 }) => {
   return (
     <Image
-      src="/rescuedogs-logo.svg"
+      src="/raised-paws-logo.png"
       alt="Raised Paws Logo"
       width={width}
       height={height}
