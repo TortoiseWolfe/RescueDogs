@@ -484,12 +484,6 @@ export class MessageService {
           );
         }
 
-        // Update conversation's last_message_at
-        await msgClient
-          .from('conversations')
-          .update({ last_message_at: new Date().toISOString() })
-          .eq('id', input.conversation_id);
-
         return {
           message,
           queued: false, // Not queued (successful send)
