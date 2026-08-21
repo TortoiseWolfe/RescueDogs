@@ -1,6 +1,6 @@
 # Supabase Realtime usage — investigation and recommendation
 
-**Issue:** [#224](https://github.com/TortoiseWolfe/RescueDogs/issues/224) · **Deadline:** Fair Use Policy applies **2026-09-19** · **Status:** decision doc, no code changes
+**Issue:** [#224](https://github.com/TortoiseWolfe/RescueDogs/issues/224) · **Deadline:** dashboard says projects are **restricted from 18 Sep 2026**; the fair-use email cited 2026-09-19. Plan against the earlier date. · **Status:** decision doc, no code changes
 
 Supabase's fair-use notice reports org **Tech by Schlajo** at **2,296,215** Realtime messages against a ~2.2M Free-plan quota — **96,215 over, 4.4%**. One-time grace for this billing period.
 
@@ -197,7 +197,7 @@ Send items 1-3 to ScriptHammer. The unfiltered `useUnreadCount` binding is byte-
 
 ---
 
-## 9. Sequencing against the 2026-09-19 deadline
+## 9. Sequencing against the 18 Sep 2026 restriction date
 
 | Order | Action                                    | Effort             | Est. reduction                 |
 | ----- | ----------------------------------------- | ------------------ | ------------------------------ |
