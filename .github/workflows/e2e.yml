@@ -116,6 +116,13 @@ jobs:
   smoke:
     name: Smoke Tests
     runs-on: ubuntu-latest
+    # #214: browsers come from the image, not a download. Every 60-minute
+    # hang in this workflow was the `Install Playwright` step stalling —
+    # never a test. The tag MUST track the resolved @playwright/test in
+    # pnpm-lock.yaml (1.55.0); a mismatch makes Playwright re-download at
+    # runtime and reintroduces the bug.
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
     needs: build
     timeout-minutes: 15
 
@@ -136,14 +143,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright (chromium only)
-        run: |
-          for i in 1 2 3; do
-            pnpm exec playwright install --with-deps chromium && break
-            echo "Retry $i: playwright install failed, retrying in 10s..."
-            sleep 10
-          done
 
       - name: Download build
         uses: actions/download-artifact@v8
@@ -217,6 +216,13 @@ jobs:
   rate-limiting:
     name: Rate-Limiting Tests
     runs-on: ubuntu-latest
+    # #214: browsers come from the image, not a download. Every 60-minute
+    # hang in this workflow was the `Install Playwright` step stalling —
+    # never a test. The tag MUST track the resolved @playwright/test in
+    # pnpm-lock.yaml (1.55.0); a mismatch makes Playwright re-download at
+    # runtime and reintroduces the bug.
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
     needs: smoke
     timeout-minutes: 10
     continue-on-error: true
@@ -238,14 +244,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright (chromium only)
-        run: |
-          for i in 1 2 3; do
-            pnpm exec playwright install --with-deps chromium && break
-            echo "Retry $i: playwright install failed, retrying in 10s..."
-            sleep 10
-          done
 
       - name: Download build
         uses: actions/download-artifact@v8
@@ -310,6 +308,13 @@ jobs:
   auth-setup:
     name: Auth Setup
     runs-on: ubuntu-latest
+    # #214: browsers come from the image, not a download. Every 60-minute
+    # hang in this workflow was the `Install Playwright` step stalling —
+    # never a test. The tag MUST track the resolved @playwright/test in
+    # pnpm-lock.yaml (1.55.0); a mismatch makes Playwright re-download at
+    # runtime and reintroduces the bug.
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
     needs: smoke
     timeout-minutes: 15
 
@@ -330,14 +335,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright (chromium only for auth)
-        run: |
-          for i in 1 2 3; do
-            pnpm exec playwright install --with-deps chromium && break
-            echo "Retry $i: playwright install failed, retrying in 10s..."
-            sleep 10
-          done
 
       - name: Download build
         uses: actions/download-artifact@v8
@@ -416,6 +413,13 @@ jobs:
   e2e:
     name: E2E (${{ matrix.project }} ${{ matrix.shard }})
     runs-on: ubuntu-latest
+    # #214: browsers come from the image, not a download. Every 60-minute
+    # hang in this workflow was the `Install Playwright` step stalling —
+    # never a test. The tag MUST track the resolved @playwright/test in
+    # pnpm-lock.yaml (1.55.0); a mismatch makes Playwright re-download at
+    # runtime and reintroduces the bug.
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
     needs: [smoke, rate-limiting, auth-setup]
     timeout-minutes: 60
     strategy:
@@ -479,16 +483,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright browsers
-        env:
-          BROWSER: ${{ matrix.browser }}
-        run: |
-          for i in 1 2 3; do
-            pnpm exec playwright install --with-deps "$BROWSER" && break
-            echo "Retry $i: $BROWSER install failed, retrying in 10s..."
-            sleep 10
-          done
 
       - name: Download build
         uses: actions/download-artifact@v8
@@ -630,6 +624,13 @@ jobs:
   e2e-firefox:
     name: E2E (${{ matrix.project }} ${{ matrix.shard }})
     runs-on: ubuntu-latest
+    # #214: browsers come from the image, not a download. Every 60-minute
+    # hang in this workflow was the `Install Playwright` step stalling —
+    # never a test. The tag MUST track the resolved @playwright/test in
+    # pnpm-lock.yaml (1.55.0); a mismatch makes Playwright re-download at
+    # runtime and reintroduces the bug.
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
     # Lever 1: depends only on the build/auth artifacts (same as e2e/chromium),
     # NOT on the chromium job — so all 3 browsers run in parallel.
     needs: [smoke, rate-limiting, auth-setup]
@@ -681,15 +682,6 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Install Playwright browsers
-        env:
-          BROWSER: ${{ matrix.browser }}
-        run: |
-          for i in 1 2 3; do
-            pnpm exec playwright install --with-deps "$BROWSER" && break
-            echo "Retry $i: $BROWSER install failed, retrying in 10s..."
-            sleep 10
-          done
       - name: Download build
         uses: actions/download-artifact@v8
         with:
@@ -802,6 +794,13 @@ jobs:
   e2e-webkit:
     name: E2E (${{ matrix.project }} ${{ matrix.shard }})
     runs-on: ubuntu-latest
+    # #214: browsers come from the image, not a download. Every 60-minute
+    # hang in this workflow was the `Install Playwright` step stalling —
+    # never a test. The tag MUST track the resolved @playwright/test in
+    # pnpm-lock.yaml (1.55.0); a mismatch makes Playwright re-download at
+    # runtime and reintroduces the bug.
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
     # Lever 1: depends only on build/auth artifacts, NOT firefox — all 3 parallel.
     needs: [smoke, rate-limiting, auth-setup]
     # Lever 2: see e2e-firefox above — skipped on PRs (chromium gates those)
@@ -849,15 +848,6 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Install Playwright browsers
-        env:
-          BROWSER: ${{ matrix.browser }}
-        run: |
-          for i in 1 2 3; do
-            pnpm exec playwright install --with-deps "$BROWSER" && break
-            echo "Retry $i: $BROWSER install failed, retrying in 10s..."
-            sleep 10
-          done
       - name: Download build
         uses: actions/download-artifact@v8
         with:
