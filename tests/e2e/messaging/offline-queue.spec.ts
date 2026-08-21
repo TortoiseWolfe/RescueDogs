@@ -316,19 +316,41 @@ test.describe('Offline Message Queue', () => {
       // ===== STEP 5: Verify retry delays =====
       expect(attemptCount).toBeGreaterThanOrEqual(3);
 
-      // Calculate delays between attempts
+      // Calculate delays between attempts.
+      //
+      // #207: FLOORS ONLY. The upper bounds used to be `< 2000` and `< 3000`,
+      // and they flaked under CI load — 4171ms against a 3000ms ceiling took
+      // main red on 2026-08-21.
+      //
+      // The measured delta is not just the backoff sleep. On `continue`,
+      // message-service.ts re-runs a real sequence-number SELECT before the
+      // next POST, and this spec's own route handler intercepts and
+      // route.continue()s it. So `delay1 < 2000` was really asserting "a live
+      // Supabase round trip finishes in under 1000ms" — in a *-msg-iso project
+      // running multiple workers against the shared project. This same file
+      // already concedes the point above: "Queue drain + 3 INSERTs can exceed
+      // 5s under shared-Supabase CI load."
+      //
+      // The floors are what carry the meaning and they cannot flake — a timer
+      // never fires early. They already encode the doubling on their own:
+      // 900 for the first retry, 1800 for the second. Remove the backoff and
+      // both still fail.
+      //
+      // Deliberately NOT asserting delay2 > delay1 * 1.5 instead. Under load a
+      // slow SELECT in the first gap and a fast one in the second can invert
+      // that comparison while the backoff is working correctly — it would just
+      // trade one flake for another.
       if (retryTimestamps.length >= 2) {
         const delay1 = retryTimestamps[1] - retryTimestamps[0];
-        // First retry should be ~1s (1000ms)
-        expect(delay1).toBeGreaterThanOrEqual(900); // Allow 100ms margin
-        expect(delay1).toBeLessThan(2000);
+        // First retry backoff is 1000ms; 100ms margin for timer granularity.
+        expect(delay1).toBeGreaterThanOrEqual(900);
       }
 
       if (retryTimestamps.length >= 3) {
         const delay2 = retryTimestamps[2] - retryTimestamps[1];
-        // Second retry should be ~2s (2000ms)
+        // Second retry backoff is 2000ms — 2x the first, which is the property
+        // under test.
         expect(delay2).toBeGreaterThanOrEqual(1800);
-        expect(delay2).toBeLessThan(3000);
       }
     } finally {
       await viewer.close();
