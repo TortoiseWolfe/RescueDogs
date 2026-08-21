@@ -67,6 +67,8 @@
     "validate:structure": "node scripts/validate-structure.js",
     "generate:component": "plop component",
     "generate:blog": "node scripts/generate-blog-data.js",
+    "generate:icons": "node scripts/generate-icons.js",
+    "check:icons": "node scripts/generate-icons.js --check",
     "test:e2e": "playwright test",
     "test:a11y": "pa11y-ci --config config/pa11yci.json",
     "test:a11y:dev": "start-server-and-test dev http://localhost:3000 test:a11y",

@@ -50,6 +50,13 @@ jobs:
       - name: Type check
         run: pnpm type-check
 
+      # Fails when a brand icon is hand-edited or goes stale against
+      # public/raised-paws-logo.png. This is the gate that did not exist when
+      # raisedpaws.com shipped ScriptHammer's printing mallet as its favicon
+      # and PWA install icon (#232).
+      - name: Check brand icons match the mark
+        run: pnpm check:icons
+
       - name: Run tests
         run: pnpm test --run
 
