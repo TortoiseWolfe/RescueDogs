@@ -2146,6 +2146,26 @@ ALTER TABLE conversations ADD CONSTRAINT check_group_participants CHECK (
 ALTER TABLE messages
   ADD COLUMN IF NOT EXISTS key_version INTEGER NOT NULL DEFAULT 1;
 
+-- #147: bind ciphertext to the keys that encrypted it.
+--
+-- key_version above is a constant 1 on every row, so a message carries no
+-- record of WHICH key encrypted it. ECDH needs the sender's public key and the
+-- recipient's private key, so either side rotating makes the ciphertext
+-- undecryptable — and today that surfaces only as a caught AES-GCM exception,
+-- never as a deterministic check. These two columns let the reader tell which
+-- side rotated, and let a future repair path find the old key: revoked rows are
+-- retained (revoked = true), not deleted.
+--
+-- Nullable and additive on purpose: existing rows and any code that does not yet
+-- populate them keep working unchanged. ON DELETE SET NULL so removing a key row
+-- degrades a message to "unknown key" rather than blocking the delete or
+-- cascading into message loss.
+ALTER TABLE messages
+  ADD COLUMN IF NOT EXISTS sender_key_id UUID
+    REFERENCES user_encryption_keys(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS recipient_key_id UUID
+    REFERENCES user_encryption_keys(id) ON DELETE SET NULL;
+
 -- T008: Add system message columns to messages table
 ALTER TABLE messages
   ADD COLUMN IF NOT EXISTS is_system_message BOOLEAN NOT NULL DEFAULT FALSE,
