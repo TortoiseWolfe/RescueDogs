@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 
 // Mock logger
 vi.mock('@/lib/logger', () => ({
@@ -59,8 +59,22 @@ vi.mock('@/lib/supabase/client', () => ({
 import { useUnreadCount } from '../useUnreadCount';
 
 describe('useUnreadCount', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    // Restore the signed-in default. vi.clearAllMocks() clears CALLS but not
+    // return values, so the "no user" test below used to leak `user: null` into
+    // every test after it — which is why several of them passed while the hook
+    // was returning early and never touching Supabase at all.
+    const { useAuth } = await import('@/contexts/AuthContext');
+    vi.mocked(useAuth).mockReturnValue({
+      user: mockUser,
+      session: { user: mockUser },
+      isLoading: false,
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+      signUp: vi.fn(),
+    } as never);
 
     // Setup messaging client mock chain
     mockMessagingFrom.mockImplementation((table: string) => {
@@ -136,6 +150,47 @@ describe('useUnreadCount', () => {
         );
       });
     });
+
+    // #224: the binding must be scoped SERVER-SIDE. It was previously
+    // table-wide, so every message in the table was delivered to every
+    // signed-in user on every page and then discarded in JS. Asserting the
+    // exact filter string, not objectContaining, so a regression to the
+    // unfiltered form fails here — nothing in the E2E suite covers the badge.
+    it('should scope the subscription to the user conversations (#224)', async () => {
+      renderHook(() => useUnreadCount());
+
+      await waitFor(() => {
+        expect(mockChannel.on).toHaveBeenCalledWith(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'messages',
+            filter: 'conversation_id=in.(conv-1,conv-2)',
+          },
+          expect.any(Function)
+        );
+      });
+    });
+
+    it('should not open a table-wide messages binding (#224)', async () => {
+      renderHook(() => useUnreadCount());
+
+      await waitFor(() => {
+        expect(mockChannel.on).toHaveBeenCalled();
+      });
+
+      const bindings = mockChannel.on.mock.calls.filter(
+        (call) => call[0] === 'postgres_changes'
+      );
+      expect(bindings.length).toBeGreaterThan(0);
+      for (const [, config] of bindings) {
+        expect(config).toHaveProperty('filter');
+        expect((config as { filter: string }).filter).toContain(
+          'conversation_id=in.'
+        );
+      }
+    });
   });
 
   describe('when user is not authenticated', () => {
@@ -176,6 +231,40 @@ describe('useUnreadCount', () => {
       await waitFor(() => {
         expect(result.current).toBe(0);
       });
+    });
+  });
+
+  describe('when no conversations', () => {
+    it('should not subscribe at all (#224)', async () => {
+      const { supabase } = await import('@/lib/supabase/client');
+
+      mockMessagingFrom.mockImplementation((table: string) => {
+        if (table === 'conversations') {
+          return {
+            select: vi.fn(() => ({
+              or: vi.fn().mockResolvedValue({ data: [] }),
+            })),
+          };
+        }
+        return {};
+      });
+
+      renderHook(() => useUnreadCount());
+
+      // Wait for the conversations lookup to actually resolve. Asserting on
+      // `result.current === 0` would be useless here: the hook STARTS at 0, so
+      // waitFor resolves on the first render and the assertion below would race
+      // the effect instead of testing it.
+      await waitFor(() => {
+        expect(mockMessagingFrom).toHaveBeenCalledWith('conversations');
+      });
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      // No conversations means nothing to watch — opening a channel here is
+      // pure cost.
+      expect(supabase.channel).not.toHaveBeenCalled();
     });
   });
 
