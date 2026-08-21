@@ -313,6 +313,19 @@ export class MessageService {
         sharedSecret
       );
 
+      // #147: bind the ciphertext to the keys that produced it. ECDH needs the
+      // sender's public key and the recipient's private key, so EITHER side
+      // rotating makes this row undecryptable — and without these ids the
+      // reader can only catch an AES-GCM exception and guess why.
+      //
+      // Both resolve from cache in the common path (getUserPublicKey populated
+      // it above). Failures degrade to null, never block the send: a message
+      // that sends without provenance beats a send that fails to record it.
+      const [senderKeyId, recipientKeyId] = await Promise.all([
+        keyManagementService.getActiveKeyId(user.id).catch(() => null),
+        keyManagementService.getActiveKeyId(recipientId).catch(() => null),
+      ]);
+
       // Check if online - if offline, queue immediately
       if (!navigator.onLine) {
         const messageId = crypto.randomUUID();
@@ -403,6 +416,10 @@ export class MessageService {
                 sender_id: user.id,
                 encrypted_content: encrypted.ciphertext,
                 initialization_vector: encrypted.iv,
+                // #147: nullable — an older client, or a lookup miss, simply
+                // leaves these unset and the row behaves as it always did.
+                sender_key_id: senderKeyId,
+                recipient_key_id: recipientKeyId,
                 sequence_number: nextSequenceNumber,
                 deleted: false,
                 edited: false,
@@ -841,6 +858,29 @@ export class MessageService {
             // Single logger.error call below is sufficient — the previous
             // duplicate console.error was redundant noise in production.
             const err = decryptError as Error;
+            // #147: say WHICH key rotated. Before these columns existed this
+            // was an unexplained AES-GCM error and the only recourse was to
+            // guess. `null` means the row predates the binding, not that the
+            // keys matched.
+            const ownKeyId = await keyManagementService
+              .getActiveKeyId(user.id)
+              .catch(() => null);
+            const senderKeyId = await keyManagementService
+              .getActiveKeyId(msg.sender_id)
+              .catch(() => null);
+            const boundRecipientKey = (msg as { recipient_key_id?: string })
+              .recipient_key_id;
+            const boundSenderKey = (msg as { sender_key_id?: string })
+              .sender_key_id;
+            const rotated = !boundRecipientKey
+              ? 'unknown (message predates key binding)'
+              : boundRecipientKey !== ownKeyId
+                ? 'recipient — this device holds a newer key than the one it was encrypted to'
+                : boundSenderKey &&
+                    senderKeyId &&
+                    boundSenderKey !== senderKeyId
+                  ? 'sender — they rotated after sending'
+                  : 'neither — key ids match, so this is not a rotation problem';
             logger.error('Decryption FAILED for message', {
               messageId: msg.id,
               errorName: String(err.name || 'unknown'),
@@ -849,6 +889,12 @@ export class MessageService {
               contentLength: msg.encrypted_content?.length || 0,
               ivLength: msg.initialization_vector?.length || 0,
               createdAt: msg.created_at,
+              // #147 diagnostics
+              rotated,
+              boundRecipientKey: boundRecipientKey?.slice(0, 8) ?? null,
+              currentRecipientKey: ownKeyId?.slice(0, 8) ?? null,
+              boundSenderKey: boundSenderKey?.slice(0, 8) ?? null,
+              currentSenderKey: senderKeyId?.slice(0, 8) ?? null,
             });
             const senderProfile = profileMap.get(msg.sender_id);
             return {

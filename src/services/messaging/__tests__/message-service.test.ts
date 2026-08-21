@@ -88,6 +88,8 @@ vi.mock('../key-service', () => ({
     getCurrentKeys: vi.fn(),
     restoreKeysFromCache: vi.fn(),
     getUserPublicKey: vi.fn(),
+    // #147: sendMessage binds ciphertext to the key ids that produced it.
+    getActiveKeyId: vi.fn(),
   },
 }));
 
@@ -186,6 +188,9 @@ beforeEach(async () => {
   });
   keyManagementService.restoreKeysFromCache.mockResolvedValue(true);
   keyManagementService.getUserPublicKey.mockResolvedValue(DUMMY_PUBLIC_JWK);
+  keyManagementService.getActiveKeyId.mockResolvedValue(
+    '00000000-0000-4000-8000-000000000001'
+  );
 
   encryptionService.deriveSharedSecret.mockResolvedValue(
     {} as unknown as CryptoKey
@@ -267,6 +272,101 @@ describe('MessageService', () => {
       expect(encryptionService.encryptMessage).toHaveBeenCalledWith(
         'hello world',
         expect.anything()
+      );
+    });
+
+    // #147: a message must record WHICH keys encrypted it. ECDH needs the
+    // sender's public key and the recipient's private key, so either side
+    // rotating makes the row undecryptable — and without these ids the reader
+    // can only catch an AES-GCM error and guess which side moved.
+    it('binds the ciphertext to the sender and recipient key ids (#147)', async () => {
+      const SENDER_KEY = '11111111-1111-4111-8111-111111111111';
+      const RECIPIENT_KEY = '22222222-2222-4222-8222-222222222222';
+      keyManagementService.getActiveKeyId.mockImplementation(
+        async (userId: string) =>
+          userId === CURRENT_USER_ID ? SENDER_KEY : RECIPIENT_KEY
+      );
+
+      let insertBuilder: ReturnType<typeof createMockQueryBuilder> | null =
+        null;
+      mockMsgFrom.mockImplementation((table: string) => {
+        if (table === 'conversations') {
+          return createMockQueryBuilder(baseConv, null);
+        }
+        if (table === 'messages') {
+          const builder = createMockQueryBuilder(
+            { id: MESSAGE_ID, sequence_number: 1 },
+            null
+          );
+          builder.maybeSingle = vi
+            .fn()
+            .mockResolvedValue({ data: { sequence_number: 5 }, error: null });
+          builder.single = vi.fn().mockResolvedValue({
+            data: { id: MESSAGE_ID, sequence_number: 6 },
+            error: null,
+          });
+          insertBuilder = builder;
+          return builder;
+        }
+        return createMockQueryBuilder(null, null);
+      });
+
+      await messageService.sendMessage({
+        conversation_id: CONVERSATION_ID,
+        content: 'hello world',
+      });
+
+      // Assert the PAYLOAD, not the echoed return value.
+      expect(insertBuilder!.insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sender_key_id: SENDER_KEY,
+          recipient_key_id: RECIPIENT_KEY,
+        })
+      );
+    });
+
+    it('still sends when a key id cannot be resolved (#147)', async () => {
+      // Provenance is diagnostic. A lookup miss must degrade to null, never
+      // block the send — a message without provenance beats a failed send.
+      keyManagementService.getActiveKeyId.mockRejectedValue(
+        new Error('lookup exploded')
+      );
+
+      let insertBuilder: ReturnType<typeof createMockQueryBuilder> | null =
+        null;
+      mockMsgFrom.mockImplementation((table: string) => {
+        if (table === 'conversations') {
+          return createMockQueryBuilder(baseConv, null);
+        }
+        if (table === 'messages') {
+          const builder = createMockQueryBuilder(
+            { id: MESSAGE_ID, sequence_number: 1 },
+            null
+          );
+          builder.maybeSingle = vi
+            .fn()
+            .mockResolvedValue({ data: { sequence_number: 5 }, error: null });
+          builder.single = vi.fn().mockResolvedValue({
+            data: { id: MESSAGE_ID, sequence_number: 6 },
+            error: null,
+          });
+          insertBuilder = builder;
+          return builder;
+        }
+        return createMockQueryBuilder(null, null);
+      });
+
+      const result = await messageService.sendMessage({
+        conversation_id: CONVERSATION_ID,
+        content: 'hello world',
+      });
+
+      expect(result.queued).toBe(false);
+      expect(insertBuilder!.insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sender_key_id: null,
+          recipient_key_id: null,
+        })
       );
     });
 
