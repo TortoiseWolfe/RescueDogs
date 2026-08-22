@@ -319,6 +319,30 @@ test.describe('Messaging Scroll - User Story 3: Jump to Bottom Button', () => {
 
     const messageThread = page.locator('[data-testid="message-thread"]');
     await expect(messageThread).toBeVisible({ timeout: 30000 });
+
+    // #247: wait for the thread to actually BE scrollable, not for a proxy.
+    //
+    // toBeVisible() only proves the CONTAINER mounted — it is visible while
+    // empty. waitForUIStability() resolves after 3 stable animation frames
+    // (~50ms of nothing painting), which the async fetch -> decrypt -> render
+    // of 30 seeded messages easily outlasts. Scrolling in that window is a
+    // no-op, because Math.max(0, scrollHeight - clientHeight - 600) collapses
+    // to 0 when the content still fits, and the assertion below then reported
+    // a baffling "Expected: > 500, Received: 0" — a hard failure on main
+    // (run 32538143109) whose real cause was "the messages had not arrived".
+    //
+    // Poll for the one property the next line depends on.
+    await expect
+      .poll(
+        () => messageThread.evaluate((el) => el.scrollHeight - el.clientHeight),
+        {
+          timeout: 30000,
+          message:
+            'fixture thread never became scrollable — the 30 seeded messages did not render',
+        }
+      )
+      .toBeGreaterThan(600);
+
     await waitForUIStability(page);
 
     // Scroll up more than 500px to trigger button
