@@ -186,7 +186,7 @@ export default function RootLayout({
                 </div>
               </ErrorBoundary>
               <Footer />
-              <CookieConsent />
+              <CookieConsent privacyPolicyUrl="/privacy" />
               <ConsentModal />
               <PWAInstall />
               {process.env.NODE_ENV === 'development' && <A11yDevOverlay />}

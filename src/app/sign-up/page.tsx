@@ -100,6 +100,18 @@ export default function SignUpPage() {
           }
         />
 
+        <p className="text-base-content/70 mt-4 text-center text-xs leading-relaxed sm:text-sm">
+          By creating an account you agree to our{' '}
+          <Link href="/terms" className="link link-primary">
+            Terms of Use
+          </Link>{' '}
+          and acknowledge our{' '}
+          <Link href="/privacy" className="link link-primary">
+            Privacy Policy
+          </Link>
+          .
+        </p>
+
         {/* OAuth sign-up hidden until Google/GitHub providers are enabled in
             Supabase. Restore by un-commenting the import above and this block:
         <div className="divider my-6">OR</div>
