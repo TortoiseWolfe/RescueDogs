@@ -237,20 +237,12 @@ export default function Home() {
         className="bg-base-100 px-4 pb-12 sm:px-6 lg:px-8"
       >
         <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#f97316] p-8 text-white shadow-2xl sm:p-10">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-            <h2
-              id="live-loop-heading"
-              className="font-display text-3xl font-extrabold sm:text-4xl"
-            >
-              Want to see the live rescue loop?
-            </h2>
-            <Link
-              href="/get-started?demo=1&choose=1"
-              className="btn btn-lg min-h-12 shrink-0 self-end bg-white px-10 text-lg font-bold text-[#1e3a8a] hover:bg-[#e8edf7] sm:mr-6 sm:self-auto"
-            >
-              Try Demo
-            </Link>
-          </div>
+          <h2
+            id="live-loop-heading"
+            className="font-display text-3xl font-extrabold sm:text-4xl"
+          >
+            Want to see the live rescue loop?
+          </h2>
           <p className="mt-3 w-full text-base font-bold text-[#172554] sm:text-lg">
             Choose the adopter or shelter door, sign in with a prefilled demo
             account, then walk the real loop: submit or review an application,
@@ -258,6 +250,15 @@ export default function Home() {
             on the other side. You can switch demo roles anytime from the
             account menu.
           </p>
+          {/* Under the copy, centered at every width */}
+          <div className="mt-5 flex justify-center">
+            <Link
+              href="/get-started?demo=1&choose=1"
+              className="btn btn-lg min-h-12 bg-white px-10 text-lg font-bold text-[#1e3a8a] hover:bg-[#e8edf7]"
+            >
+              Try Demo
+            </Link>
+          </div>
         </div>
       </section>
     </main>
