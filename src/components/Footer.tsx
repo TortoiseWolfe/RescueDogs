@@ -103,8 +103,8 @@ export function Footer() {
           ))}
         </ul>
 
-        {/* Built by — left edge, row 2; one line, centered under icons */}
-        <p className="text-center text-xs whitespace-nowrap text-white/90 md:col-start-1 md:row-start-2 md:translate-y-3">
+        {/* Built by — one line from md+; wraps on narrow phones (320px E2E) */}
+        <p className="max-w-full text-center text-xs text-white/90 md:col-start-1 md:row-start-2 md:translate-y-3 md:whitespace-nowrap">
           Built by{' '}
           <a
             href="https://www.techstackdevs.com"
