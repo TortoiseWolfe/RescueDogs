@@ -53,11 +53,12 @@ export function Footer() {
     <footer className="mt-auto bg-[#1e3a8a] py-5 text-white shadow-[0_-8px_24px_rgba(30,58,138,0.35)] sm:py-6">
       {/*
         Mobile: brand → socials → credit → pills → legal.
-        md+: auto | 1fr | auto keeps side clusters on the outer edges;
-        2-row grid keeps icons/pills on the logo row (not floating high
-        as one tall side stack).
+        md+: equal 1fr | auto | 1fr so logo + tagline sit on the true bar
+        center (#254). Side clusters are stacked columns (items-center) so
+        Built by / legal center under their button rows, while the stacks
+        stay start/end on the edges.
       */}
-      <div className="mx-auto grid w-full grid-cols-1 items-center justify-items-center gap-3 px-2 sm:container sm:px-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:grid-rows-[auto_auto] md:gap-x-6 md:gap-y-1 md:px-4 lg:px-6">
+      <div className="mx-auto grid w-full grid-cols-1 items-center justify-items-center gap-3 px-2 sm:container sm:px-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:grid-rows-[auto_auto] md:gap-x-6 md:gap-y-1 md:px-4 lg:px-6">
         {/* Logo — center, row 1 */}
         <Link
           href="/"
@@ -83,95 +84,98 @@ export function Footer() {
           </p>
         </div>
 
-        {/* Socials — left edge, row 1; slight drop so sides sit with brand, not above it */}
-        <ul
-          className="m-0 flex list-none flex-wrap items-center justify-center gap-0.5 p-0 md:col-start-1 md:row-start-1 md:translate-y-3 md:gap-2"
-          aria-label="Raised Paws on social media"
-        >
-          {RAISED_PAWS_SOCIALS.map((social) => (
-            <li key={social.platform} className="shrink-0">
-              <a
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Raised Paws on ${social.label}`}
-                className={footerSocialBtn}
-              >
-                <SocialIcon platform={social.platform} className="h-5 w-5" />
-              </a>
-            </li>
-          ))}
-        </ul>
+        {/* Left cluster — socials + Built by centered as a unit */}
+        <div className="flex max-w-full flex-col items-center gap-3 md:col-start-1 md:row-span-2 md:translate-y-3 md:gap-1 md:justify-self-start">
+          <ul
+            className="m-0 flex list-none flex-wrap items-center justify-center gap-0.5 p-0 md:gap-2"
+            aria-label="Raised Paws on social media"
+          >
+            {RAISED_PAWS_SOCIALS.map((social) => (
+              <li key={social.platform} className="shrink-0">
+                <a
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Raised Paws on ${social.label}`}
+                  className={footerSocialBtn}
+                >
+                  <SocialIcon platform={social.platform} className="h-5 w-5" />
+                </a>
+              </li>
+            ))}
+          </ul>
 
-        {/* Built by — one line from md+; wraps on narrow phones (320px E2E) */}
-        <p className="max-w-full text-center text-xs text-white/90 md:col-start-1 md:row-start-2 md:translate-y-3 md:whitespace-nowrap">
-          Built by{' '}
-          <a
-            href="https://www.techstackdevs.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            /* Persistent underline (not link-hover) so the link is
-               distinguishable from surrounding footer text by more than color
-               alone — satisfies axe's link-in-text-block (WCAG 1.4.1). */
-            className="link text-white underline"
-          >
-            Tech Stack Devs
-          </a>{' '}
-          and{' '}
-          <a
-            href="https://scripthammer.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="link text-white underline"
-          >
-            ScriptHammer
-          </a>
-          .
-        </p>
+          {/* One line from md+; wraps on narrow phones (320px E2E) */}
+          <p className="max-w-full text-center text-xs text-white/90 md:whitespace-nowrap">
+            Built by{' '}
+            <a
+              href="https://www.techstackdevs.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              /* Persistent underline (not link-hover) so the link is
+                 distinguishable from surrounding footer text by more than color
+                 alone — satisfies axe's link-in-text-block (WCAG 1.4.1). */
+              className="link text-white underline"
+            >
+              Tech Stack Devs
+            </a>{' '}
+            and{' '}
+            <a
+              href="https://scripthammer.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link text-white underline"
+            >
+              ScriptHammer
+            </a>
+            .
+          </p>
+        </div>
 
-        {/* Pills — right edge, row 1 */}
-        <nav
-          className="flex flex-wrap items-center justify-center gap-1 md:col-start-3 md:row-start-1 md:translate-y-3"
-          aria-label="Footer links"
-        >
-          <Link
-            href="/blog"
-            className={`${blogClass} inline-flex h-11 min-h-11 shrink-0 items-center px-2.5 text-xs sm:px-3 sm:text-sm`}
-            aria-current={blogSelected ? 'page' : undefined}
+        {/* Right cluster — pills + legal centered as a unit */}
+        <div className="flex max-w-full flex-col items-center gap-3 md:col-start-3 md:row-span-2 md:translate-y-3 md:gap-1 md:justify-self-end">
+          <nav
+            className="flex flex-wrap items-center justify-center gap-1"
+            aria-label="Footer links"
           >
-            Blog
-          </Link>
-          <Link
-            href="/follow"
-            className={`${followClass} inline-flex h-11 min-h-11 shrink-0 items-center px-2.5 text-xs sm:px-3 sm:text-sm`}
-            aria-current={followSelected ? 'page' : undefined}
-          >
-            Follow
-          </Link>
-          <Link
-            href="/contact"
-            className={`${contactClass} inline-flex h-11 min-h-11 shrink-0 items-center px-2.5 text-xs sm:px-3 sm:text-sm`}
-            aria-current={contactSelected ? 'page' : undefined}
-          >
-            Contact
-          </Link>
-        </nav>
+            <Link
+              href="/blog"
+              className={`${blogClass} inline-flex h-11 min-h-11 shrink-0 items-center px-2.5 text-xs sm:px-3 sm:text-sm`}
+              aria-current={blogSelected ? 'page' : undefined}
+            >
+              Blog
+            </Link>
+            <Link
+              href="/follow"
+              className={`${followClass} inline-flex h-11 min-h-11 shrink-0 items-center px-2.5 text-xs sm:px-3 sm:text-sm`}
+              aria-current={followSelected ? 'page' : undefined}
+            >
+              Follow
+            </Link>
+            <Link
+              href="/contact"
+              className={`${contactClass} inline-flex h-11 min-h-11 shrink-0 items-center px-2.5 text-xs sm:px-3 sm:text-sm`}
+              aria-current={contactSelected ? 'page' : undefined}
+            >
+              Contact
+            </Link>
+          </nav>
 
-        {/* Legal — right edge, row 2; centered under pills */}
-        <nav
-          className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 md:col-start-3 md:row-start-2 md:translate-y-3"
-          aria-label="Legal"
-        >
-          <Link href="/privacy" className={legalLinkClass}>
-            Privacy
-          </Link>
-          <Link href="/cookies" className={legalLinkClass}>
-            Cookies
-          </Link>
-          <Link href="/terms" className={legalLinkClass}>
-            Terms
-          </Link>
-        </nav>
+          <nav
+            className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1"
+            aria-label="Legal"
+          >
+            <Link href="/privacy" className={legalLinkClass}>
+              Privacy
+            </Link>
+            <Link href="/cookies" className={legalLinkClass}>
+              Cookies
+            </Link>
+            <Link href="/terms" className={legalLinkClass}>
+              Terms
+            </Link>
+          </nav>
+        </div>
       </div>
     </footer>
   );

@@ -86,7 +86,8 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO pets (id, shelter_id, name, species, breed, sex, age_years, size, status, photo_url) VALUES
   -- Identity lock (#164): Pepper=cat; Zeus=Great Dane; Tank=Pit Bull; Lola=Chihuahua;
-  -- Tiger=Lab (formerly Biscuit); Scout=Border Collie. Homepage: Lola | Pepper | Tiger.
+  -- Tiger=Lab (formerly Biscuit); Scout=Border Collie; Rocky=German Shepherd (#254).
+  -- Homepage: Lola | Pepper | Tiger.
   ('44444444-4444-4444-4444-444444444401', '22222222-2222-2222-2222-222222222201',
    'Tiger', 'dog', 'Labrador Mix', 'male', 2.0, 'large', 'available',
    'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444401/demo-tiger.png'),
@@ -125,7 +126,10 @@ INSERT INTO pets (id, shelter_id, name, species, breed, sex, age_years, size, st
    'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444412/demo-scout.png'),
   ('44444444-4444-4444-4444-444444444413', '22222222-2222-2222-2222-222222222201',
    'Lola', 'dog', 'Chihuahua', 'female', 2.0, 'small', 'available',
-   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444413/demo-lola.png')
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444413/demo-lola.png'),
+  ('44444444-4444-4444-4444-444444444414', '22222222-2222-2222-2222-222222222201',
+   'Rocky', 'dog', 'German Shepherd', 'male', 3.0, 'large', 'available',
+   'https://cmdhajshektesctrappl.supabase.co/storage/v1/object/public/pet-photos/22222222-2222-2222-2222-222222222201/44444444-4444-4444-4444-444444444414/demo-rocky.png')
 ON CONFLICT (id) DO UPDATE SET
   photo_url = EXCLUDED.photo_url,
   name = EXCLUDED.name,
@@ -148,7 +152,9 @@ FROM (VALUES
   ('44444444-4444-4444-4444-444444444411'::uuid,
    'Gentle giant Great Dane — calm indoors, needs space to stretch.'),
   ('44444444-4444-4444-4444-444444444413'::uuid,
-   'Pocket-sized charmer; loves belly rubs and short neighborhood walks.')
+   'Pocket-sized charmer; loves belly rubs and short neighborhood walks.'),
+  ('44444444-4444-4444-4444-444444444414'::uuid,
+   'Loyal German Shepherd — smart, steady, ready for training and long walks.')
 ) AS v(id, notes)
 WHERE pets.id = v.id;
 

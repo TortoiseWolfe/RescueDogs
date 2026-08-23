@@ -22,7 +22,7 @@ describe('HOMEPAGE_SLOT_THEMES', () => {
 });
 
 describe('MEET_THE_PETS_POOL identity lock', () => {
-  it('keeps Pepper as a cat and Zeus/Tank/Scout/Lola/Tiger as dogs', () => {
+  it('keeps Pepper as a cat and Zeus/Tank/Scout/Lola/Tiger/Rocky as dogs', () => {
     const byName = Object.fromEntries(
       MEET_THE_PETS_POOL.map((p) => [p.name, p])
     ) as Record<string, MeetPetCard>;
@@ -33,6 +33,9 @@ describe('MEET_THE_PETS_POOL identity lock', () => {
     expect(byName.Scout?.species).toBe('dog');
     expect(byName.Lola?.species).toBe('dog');
     expect(byName.Tiger?.species).toBe('dog');
+    expect(byName.Rocky?.species).toBe('dog');
+    expect(byName.Rocky?.portrait).toBe('/demo-pets/rocky.png');
+    expect(byName.Rocky?.detail).toMatch(/German Shepherd/);
   });
 
   it('binds each pet name to its own portrait path', () => {
