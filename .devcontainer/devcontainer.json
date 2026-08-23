@@ -1,0 +1,20 @@
+{
+  "name": "RescueDogs",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "rescuedogs",
+  "workspaceFolder": "/app",
+  "shutdownAction": "none",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "eslint.workingDirectories": [{ "mode": "auto" }]
+      }
+    }
+  }
+}
