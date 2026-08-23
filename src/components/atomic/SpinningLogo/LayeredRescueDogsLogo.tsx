@@ -5,6 +5,31 @@ import Image from 'next/image';
 import { SpinningLogo } from './SpinningLogo';
 import { detectedConfig } from '@/config/project-detected';
 
+/**
+ * The spinning Raised Paws mark.
+ *
+ * WHY THIS IS ONE LAYER AND NOT THREE (#233). It used to compose three images:
+ * a static printing mallet behind, a rotating silver gear carrying a wordmark,
+ * and script-tag brackets in front. All three were ScriptHammer's artwork,
+ * inherited at the fork and never replaced — `rescuedogs-logo.svg` was
+ * byte-identical to upstream's mark and still carried the comment "Your
+ * ScriptHammer logo with correct orientation and larger scale". A mallet and a
+ * pair of angle brackets say "this is a code template"; they say nothing about
+ * adopting a dog.
+ *
+ * The Raised Paws mark is a single unified symbol — navy triangle, orange
+ * border, white paw whose pad is a heart — so there is nothing to stack. The
+ * layering was not a feature we lost; it was upstream's composition, and
+ * keeping a three-layer structure with one real layer would have been a
+ * costume.
+ *
+ * The component, its name and its props are deliberately unchanged. Six
+ * Storybook stories drive it, and upstream still ships the layered original at
+ * `src/app/page.tsx` and `src/app/sign-in/page.tsx` — deleting ours would make
+ * any future upstream merge re-add a file we had removed, with no conflict
+ * marker to notice it by. That is the exact failure this repo just fixed in
+ * #232.
+ */
 export interface LayeredRescueDogsLogoProps {
   className?: string;
   size?: number;
@@ -26,41 +51,12 @@ export const LayeredRescueDogsLogo: React.FC<LayeredRescueDogsLogoProps> = ({
         aspectRatio: '1 / 1',
       }}
     >
-      {/* Layer 1: Static printing mallet (BACK) */}
-      <div
-        className="pointer-events-none absolute"
-        style={{
-          top: '58%',
-          left: '42%',
-          transform: 'translate(-50%, -50%)',
-          width: '65%',
-          height: '65%',
-          opacity: 0.9,
-        }}
-      >
-        <Image
-          src={`${detectedConfig.basePath}/printing-mallet.svg`}
-          alt="Printing Mallet"
-          width={400}
-          height={400}
-          className="h-full w-full"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-            filter: 'drop-shadow(2px 2px 2px rgb(0 0 0 / 0.8))',
-          }}
-          priority
-        />
-      </div>
-
-      {/* Layer 2: Rotating silver gear + "RescueDogs.com" text (MIDDLE) */}
       <SpinningLogo speed={speed} pauseOnHover={pauseOnHover}>
         <Image
-          src={`${detectedConfig.basePath}/rescuedogs-logo.svg`}
-          alt="Raised Paws gear logo"
-          width={400}
-          height={400}
+          src={`${detectedConfig.basePath}/raised-paws-logo.png`}
+          alt="Raised Paws logo"
+          width={512}
+          height={512}
           className="absolute inset-0 h-full w-full"
           style={{
             width: '100%',
@@ -71,33 +67,6 @@ export const LayeredRescueDogsLogo: React.FC<LayeredRescueDogsLogoProps> = ({
           priority
         />
       </SpinningLogo>
-
-      {/* Layer 3: Static script tags (FRONT) */}
-      <div
-        className="pointer-events-none absolute"
-        style={{
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '68%',
-          height: '68%',
-        }}
-      >
-        <Image
-          src={`${detectedConfig.basePath}/script-tags.svg`}
-          alt="Script Tags"
-          width={400}
-          height={400}
-          className="h-full w-full"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-            filter: 'drop-shadow(2px 2px 2px rgb(0 0 0 / 0.8))',
-          }}
-          priority
-        />
-      </div>
     </div>
   );
 };
