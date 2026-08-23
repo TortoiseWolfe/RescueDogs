@@ -3117,6 +3117,11 @@ CREATE POLICY "Shelter staff update pets" ON pets
   USING (is_shelter_staff(shelter_id))
   WITH CHECK (is_shelter_staff(shelter_id));
 
+DROP POLICY IF EXISTS "Shelter staff delete pets" ON pets;
+CREATE POLICY "Shelter staff delete pets" ON pets
+  FOR DELETE TO authenticated
+  USING (is_shelter_staff(shelter_id));
+
 -- pet-photos storage: first path segment = shelter_id (#110)
 -- Uses split_part (not storage.foldername) — same rationale as avatars.
 DROP POLICY IF EXISTS "Shelter staff upload pet photos" ON storage.objects;

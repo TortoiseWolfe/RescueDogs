@@ -8,6 +8,7 @@ function mockFrom(result: { data: unknown; error: unknown }) {
     'select',
     'insert',
     'update',
+    'delete',
     'eq',
     'order',
     'maybeSingle',
@@ -120,5 +121,49 @@ describe('ShelterPetService', () => {
       breed: null,
     });
     expect(from.eq).toHaveBeenCalledWith('id', 'pet-2');
+  });
+
+  it('returns application count for a pet (#223)', async () => {
+    const builder: Record<string, unknown> = {};
+    const self = () => builder;
+    builder.select = vi.fn(self);
+    builder.eq = vi.fn().mockResolvedValue({ count: 3, error: null });
+    const supabase = { from: vi.fn().mockReturnValue(builder) } as any;
+    const service = new ShelterPetService(supabase);
+    const count = await service.getPetApplicationCount('pet-2');
+    expect(count).toBe(3);
+    expect(supabase.from).toHaveBeenCalledWith('applications');
+    expect(builder.select).toHaveBeenCalledWith('id', {
+      count: 'exact',
+      head: true,
+    });
+    expect(builder.eq).toHaveBeenCalledWith('pet_id', 'pet-2');
+  });
+
+  it('deletes a pet by id (#223)', async () => {
+    const builder: Record<string, unknown> = {};
+    const self = () => builder;
+    builder.delete = vi.fn(self);
+    builder.eq = vi.fn().mockResolvedValue({ error: null });
+    const supabase = { from: vi.fn().mockReturnValue(builder) } as any;
+    const service = new ShelterPetService(supabase);
+    await service.deletePet('pet-2');
+    expect(supabase.from).toHaveBeenCalledWith('pets');
+    expect(builder.delete).toHaveBeenCalled();
+    expect(builder.eq).toHaveBeenCalledWith('id', 'pet-2');
+  });
+
+  it('throws when deletePet fails (#223)', async () => {
+    const builder: Record<string, unknown> = {};
+    const self = () => builder;
+    builder.delete = vi.fn(self);
+    builder.eq = vi.fn().mockResolvedValue({
+      error: { message: 'permission denied' },
+    });
+    const supabase = { from: vi.fn().mockReturnValue(builder) } as any;
+    const service = new ShelterPetService(supabase);
+    await expect(service.deletePet('pet-2')).rejects.toThrow(
+      /Failed to delete pet: permission denied/
+    );
   });
 });
