@@ -1,7 +1,7 @@
 /**
  * Homepage Meet-the-Pets pool (#165).
  * Identity lock — name ↔ species ↔ breed ↔ portrait never cross
- * (same lock as seed / #164).
+ * (same lock as seed / #164). Rocky = German Shepherd (#254).
  */
 
 export type MeetPetSpecies = 'dog' | 'cat';
@@ -122,6 +122,18 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#dcfce7] to-[#f0fdf4]',
     title: 'text-[#166534]',
     cta: 'border-[#bbf7d0] bg-[#dcfce7] text-[#166534] hover:border-[#86efac] hover:bg-[#bbf7d0]',
+  },
+  {
+    name: 'Rocky',
+    species: 'dog',
+    portrait: '/demo-pets/rocky.png',
+    portraitAlt: 'Cartoon portrait of Rocky, a German Shepherd',
+    detail: '3 yrs · German Shepherd · loyal, smart, ready for long walks',
+    bg: 'bg-[#faf5ff]',
+    border: 'border-[#e9d5ff]',
+    image: 'from-[#f3e8ff] to-[#faf5ff]',
+    title: 'text-[#6b21a8]',
+    cta: 'btn-primary',
   },
   {
     name: 'Noodle',
