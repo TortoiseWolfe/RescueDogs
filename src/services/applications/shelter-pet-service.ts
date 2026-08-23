@@ -108,4 +108,24 @@ export class ShelterPetService {
     }
     return data as Pet;
   }
+
+  async getPetApplicationCount(petId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('applications')
+      .select('id', { count: 'exact', head: true })
+      .eq('pet_id', petId);
+
+    if (error) {
+      throw new Error(`Failed to count applications: ${error.message}`);
+    }
+    return count ?? 0;
+  }
+
+  async deletePet(petId: string): Promise<void> {
+    const { error } = await this.supabase.from('pets').delete().eq('id', petId);
+
+    if (error) {
+      throw new Error(`Failed to delete pet: ${error.message}`);
+    }
+  }
 }

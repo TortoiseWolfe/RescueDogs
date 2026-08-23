@@ -38,6 +38,8 @@ function EditShelterPetContent() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [applicationCount, setApplicationCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const handleParams = useCallback((id: string | null) => {
@@ -56,7 +58,10 @@ function EditShelterPetContent() {
     (async () => {
       try {
         const service = new ShelterPetService(supabase);
-        const row = await service.getPet(petId);
+        const [row, appCount] = await Promise.all([
+          service.getPet(petId),
+          service.getPetApplicationCount(petId),
+        ]);
         if (cancelled) return;
         if (!row || row.shelter_id !== shelterId) {
           setError('Pet not found for this shelter.');
@@ -64,6 +69,7 @@ function EditShelterPetContent() {
           return;
         }
         setPet(row);
+        setApplicationCount(appCount);
         setName(row.name);
         setSpecies(row.species);
         setBreed(row.breed ?? '');
@@ -123,6 +129,25 @@ function EditShelterPetContent() {
         err instanceof Error ? err.message : 'Could not update pet. Try again.'
       );
       setSaving(false);
+    }
+  }
+
+  async function onDelete() {
+    if (!pet || applicationCount > 0) return;
+    const ok = window.confirm(`Delete ${pet.name}? This cannot be undone.`);
+    if (!ok) return;
+
+    setDeleting(true);
+    setError(null);
+    try {
+      const service = new ShelterPetService(supabase);
+      await service.deletePet(pet.id);
+      router.push('/shelter/pets');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Could not delete pet. Try again.'
+      );
+      setDeleting(false);
     }
   }
 
@@ -285,7 +310,7 @@ function EditShelterPetContent() {
             <button
               type="submit"
               className="btn btn-primary min-h-11"
-              disabled={saving}
+              disabled={saving || deleting}
             >
               {saving ? (
                 <span className="loading loading-spinner loading-sm" />
@@ -294,6 +319,29 @@ function EditShelterPetContent() {
               )}
             </button>
           </form>
+
+          <div className="border-base-300 border-t pt-4">
+            {applicationCount === 0 ? (
+              <button
+                type="button"
+                className="btn btn-outline btn-error min-h-11 w-full"
+                disabled={saving || deleting}
+                onClick={() => void onDelete()}
+              >
+                {deleting ? (
+                  <span className="loading loading-spinner loading-sm" />
+                ) : (
+                  'Delete pet'
+                )}
+              </button>
+            ) : (
+              <p className="text-base-content/80 text-sm">
+                This pet has {applicationCount} application
+                {applicationCount === 1 ? '' : 's'}, so it can&apos;t be
+                deleted. Set status to Adopted to remove it from browse.
+              </p>
+            )}
+          </div>
         </div>
       )}
     </>

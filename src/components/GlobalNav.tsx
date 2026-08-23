@@ -532,10 +532,13 @@ export function GlobalNav() {
                   </label>
                   <ul
                     tabIndex={0}
-                    className="menu dropdown-content bg-base-100 text-base-content rounded-box -right-2 z-50 mt-3 w-48 max-w-[calc(100vw-4rem)] p-2 text-sm font-medium shadow sm:w-52"
+                    className="menu dropdown-content bg-base-100 text-base-content rounded-box -right-2 z-50 mt-3 w-52 max-w-[calc(100vw-4rem)] overflow-hidden p-2 text-sm font-medium shadow sm:w-56"
                   >
-                    <li className="menu-title">
-                      <span className="truncate !text-xs !font-semibold !text-[#f97316] !normal-case">
+                    <li className="menu-title max-w-full min-w-0 overflow-hidden">
+                      <span
+                        className="block max-w-full truncate !text-xs !font-semibold !text-[#f97316] !normal-case"
+                        title={user.email ?? undefined}
+                      >
                         {user.email}
                       </span>
                     </li>
