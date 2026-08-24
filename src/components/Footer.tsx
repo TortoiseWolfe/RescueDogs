@@ -85,7 +85,7 @@ export function Footer() {
         </div>
 
         {/* Left cluster — socials + Built by centered as a unit */}
-        <div className="flex max-w-full flex-col items-center gap-3 md:col-start-1 md:row-span-2 md:translate-y-3 md:gap-1 md:justify-self-start">
+        <div className="flex max-w-full flex-col items-center gap-3 md:col-start-1 md:row-span-2 md:translate-y-3 md:justify-self-start">
           <ul
             className="m-0 flex list-none flex-wrap items-center justify-center gap-0.5 p-0 md:gap-2"
             aria-label="Raised Paws on social media"
