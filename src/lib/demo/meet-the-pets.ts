@@ -53,7 +53,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Lola',
     species: 'dog',
-    portrait: '/demo-pets/lola.png',
+    portrait: '/demo-pets/lola.webp',
     portraitAlt:
       'Cartoon portrait of Lola, a white Chihuahua with black patches',
     detail: '2 yrs · Chihuahua · loves belly rubs & long walks',
@@ -66,7 +66,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Pepper',
     species: 'cat',
-    portrait: '/demo-pets/pepper.png',
+    portrait: '/demo-pets/pepper.webp',
     portraitAlt: 'Cartoon portrait of Pepper, a warm tortoiseshell cat',
     detail: '4 yrs · cat · curious, cuddly, and treat motivated',
     bg: 'bg-[#fff7ed]',
@@ -78,7 +78,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Tiger',
     species: 'dog',
-    portrait: '/demo-pets/tiger.png',
+    portrait: '/demo-pets/tiger.webp',
     portraitAlt: 'Cartoon portrait of Tiger, a golden Labrador mix',
     detail: '2 yrs · Labrador Mix · hiking buddy energy',
     bg: 'bg-[#f1f6ff]',
@@ -90,7 +90,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Tank',
     species: 'dog',
-    portrait: '/demo-pets/tank.png',
+    portrait: '/demo-pets/tank.webp',
     portraitAlt: 'Cartoon portrait of Tank, a sturdy Pit Bull Terrier',
     detail: '6 yrs · Pit Bull Terrier · patient, thrives on routine',
     bg: 'bg-[#f5f3ff]',
@@ -102,7 +102,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Zeus',
     species: 'dog',
-    portrait: '/demo-pets/zeus.png',
+    portrait: '/demo-pets/zeus.webp',
     portraitAlt: 'Cartoon portrait of Zeus, a gentle Great Dane',
     detail: '6 yrs · Great Dane · calm indoors, needs room to stretch',
     bg: 'bg-[#ecfeff]',
@@ -114,7 +114,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Scout',
     species: 'dog',
-    portrait: '/demo-pets/scout.png',
+    portrait: '/demo-pets/scout.webp',
     portraitAlt: 'Cartoon portrait of Scout, a Border Collie',
     detail: '4 yrs · Border Collie · sharp, eager, always ready to play',
     bg: 'bg-[#f0fdf4]',
@@ -126,7 +126,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Rocky',
     species: 'dog',
-    portrait: '/demo-pets/rocky.png',
+    portrait: '/demo-pets/rocky.webp',
     portraitAlt: 'Cartoon portrait of Rocky, a German Shepherd',
     detail: '3 yrs · German Shepherd · loyal, smart, ready for long walks',
     bg: 'bg-[#faf5ff]',
@@ -138,7 +138,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Noodle',
     species: 'dog',
-    portrait: '/demo-pets/noodle.png',
+    portrait: '/demo-pets/noodle.webp',
     portraitAlt: 'Cartoon portrait of Noodle, a Dachshund',
     detail: '1 yrs · Dachshund · small, silly, and full of personality',
     bg: 'bg-[#fefce8]',
@@ -150,7 +150,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Miso',
     species: 'cat',
-    portrait: '/demo-pets/miso.png',
+    portrait: '/demo-pets/miso.webp',
     portraitAlt: 'Cartoon portrait of Miso, a Domestic Shorthair cat',
     detail: '3 yrs · cat · soft lap warmer with a quiet purr',
     bg: 'bg-[#fff7ed]',
@@ -162,7 +162,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Pickles',
     species: 'cat',
-    portrait: '/demo-pets/pickles.png',
+    portrait: '/demo-pets/pickles.webp',
     portraitAlt: 'Cartoon portrait of Pickles, a Domestic Shorthair cat',
     detail: '2 yrs · cat · playful mischief in a compact package',
     bg: 'bg-[#f0fdf4]',
@@ -174,7 +174,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Ink',
     species: 'cat',
-    portrait: '/demo-pets/ink.png',
+    portrait: '/demo-pets/ink.webp',
     portraitAlt: 'Cartoon portrait of Ink, a Domestic Shorthair cat',
     detail: '4 yrs · cat · sleek, curious, and window-sill royalty',
     bg: 'bg-[#f5f3ff]',
@@ -186,7 +186,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Cloud',
     species: 'cat',
-    portrait: '/demo-pets/cloud.png',
+    portrait: '/demo-pets/cloud.webp',
     portraitAlt: 'Cartoon portrait of Cloud, a Domestic Longhair cat',
     detail: '1 yrs · cat · fluffy cloud energy, soft as a sweater',
     bg: 'bg-[#f1f6ff]',
@@ -198,7 +198,7 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
   {
     name: 'Chili',
     species: 'cat',
-    portrait: '/demo-pets/chili.png',
+    portrait: '/demo-pets/chili.webp',
     portraitAlt: 'Cartoon portrait of Chili, a Domestic Shorthair cat',
     detail: '5 yrs · cat · warm personality with a spicy streak',
     bg: 'bg-[#fff1f2]',
