@@ -34,13 +34,13 @@ describe('MEET_THE_PETS_POOL identity lock', () => {
     expect(byName.Lola?.species).toBe('dog');
     expect(byName.Tiger?.species).toBe('dog');
     expect(byName.Rocky?.species).toBe('dog');
-    expect(byName.Rocky?.portrait).toBe('/demo-pets/rocky.png');
+    expect(byName.Rocky?.portrait).toBe('/demo-pets/rocky.webp');
     expect(byName.Rocky?.detail).toMatch(/German Shepherd/);
   });
 
   it('binds each pet name to its own portrait path', () => {
     for (const pet of MEET_THE_PETS_POOL) {
-      expect(pet.portrait).toBe(`/demo-pets/${pet.name.toLowerCase()}.png`);
+      expect(pet.portrait).toBe(`/demo-pets/${pet.name.toLowerCase()}.webp`);
     }
   });
 });
