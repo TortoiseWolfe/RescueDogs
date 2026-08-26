@@ -11,10 +11,9 @@ rescue at `/shelter` (`create_my_shelter` RPC). This SQL runbook remains for
 demo repair and support.
 
 Related: [VISION.md](./VISION.md) (pilot pet load), [PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md)
-(partner-facing ask).
-
-Related: [VISION.md](./VISION.md) (pilot pet load), [PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md)
-(partner-facing ask).
+(partner-facing ask), [FIRST-PARTNER-ZOOM-RUNBOOK.md](./FIRST-PARTNER-ZOOM-RUNBOOK.md)
+(live onboarding), [FIRST-PARTNER-ZOOM-HANDOUT.md](./FIRST-PARTNER-ZOOM-HANDOUT.md)
+(partner one-pager).
 
 ---
 

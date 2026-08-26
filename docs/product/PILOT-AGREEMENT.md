@@ -9,6 +9,8 @@
 | Artifact                             | Where it lives                                                                                       | Why                                                 |
 | ------------------------------------ | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
 | **Pilot agreement**                  | Copy this outline into a private Doc/PDF for the shelter; keep this file as the team source of truth | Shelter-specific terms; may need legal eyes later   |
+| **Partner one-pager**                | [FIRST-PARTNER-ZOOM-HANDOUT.md](./FIRST-PARTNER-ZOOM-HANDOUT.md)                                     | Bookmarks, Petfinder blurb, statuses, parallel flow |
+| **Zoom runbook (ops)**               | [FIRST-PARTNER-ZOOM-RUNBOOK.md](./FIRST-PARTNER-ZOOM-RUNBOOK.md)                                     | Live onboarding agenda + product gaps to disclose   |
 | **Ops onboarding checklist**         | Bottom of this file (and the tracking issue)                                                         | Internal: provision shelter, pets, links, check-ins |
 | **Public “How a pilot works” blurb** | Optional later on `/for-shelters`                                                                    | Sales copy only — not a contract                    |
 | **In-app staff checklist**           | Deferred until after the first real pilot                                                            | Build once we know the friction                     |
@@ -128,8 +130,10 @@ API steps: [FIRST-PARTNER-ONBOARDING.md](./FIRST-PARTNER-ONBOARDING.md) (#138).
 - [ ] Load currently available pets (manual Add pet and/or one-time import) + photos
 - [ ] Confirm `/dogs` `/cats` show their available animals
 - [ ] Confirm staff can open `/shelter` pipeline and advance status
-- [ ] Give shelter: Apply links, optional QR, short staff one-pager
-      ([SHELTER-SITE-COPY.md](./SHELTER-SITE-COPY.md))
+- [ ] Give shelter: Apply links, optional QR, partner one-pager
+      ([FIRST-PARTNER-ZOOM-HANDOUT.md](./FIRST-PARTNER-ZOOM-HANDOUT.md);
+      longer blurbs: [SHELTER-SITE-COPY.md](./SHELTER-SITE-COPY.md))
+- [ ] Run Zoom using [FIRST-PARTNER-ZOOM-RUNBOOK.md](./FIRST-PARTNER-ZOOM-RUNBOOK.md)
 - [ ] Schedule mid-pilot and end-of-pilot check-ins
 - [ ] Capture feedback → backlog (import UX, packet step, messaging, filters)
 
