@@ -71,8 +71,8 @@ keep email folders and paper files if you want — we're fixing the front door a
 4. Move status when something real happens (even small updates help adopters).
 5. You can **Message** in the app or email them from the address on the detail screen.
 
-**Today:** check **Applications** on your phone — email alerts when a new app
-arrives are coming soon.
+**Email alert:** when configured, new applications also email your rescue
+contact address (see **Applications** either way).
 
 ---
 

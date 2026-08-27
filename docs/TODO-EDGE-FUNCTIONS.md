@@ -47,6 +47,7 @@ The blog post "Offline Payment System: Stripe, PayPal & GDPR" (Oct 9) documents 
 ✅ **stripe-webhook** - Webhook handler for Stripe events
 ✅ **paypal-webhook** - Webhook handler for PayPal events
 ✅ **send-payment-email** - Email notifications for payments
+✅ **notify-shelter-application** - Email shelter on new adoption application (#260)
 ✅ **\_shared** - Shared utilities
 
 ---

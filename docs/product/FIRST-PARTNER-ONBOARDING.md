@@ -145,7 +145,53 @@ you are on the wrong Auth user.
 - [ ] At least one available pet + photo via `/shelter/pets`
 - [ ] Visible on `/dogs` or `/cats`
 - [ ] Staff can open `/shelter` pipeline
+- [ ] Shelter application email notify configured ([#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260))
 - [ ] Partner packet / check-in scheduled
+
+---
+
+## Shelter application email (#260)
+
+When a new application is submitted, staff receive email at `shelters.contact_email`
+via the `notify-shelter-application` Edge Function (Resend + pg_net trigger).
+
+### One-time deploy (ops)
+
+1. Deploy the function and secrets (from repo root, inside Docker):
+
+```bash
+docker compose exec rescuedogs supabase functions deploy notify-shelter-application --project-ref "$NEXT_PUBLIC_SUPABASE_PROJECT_REF"
+docker compose exec rescuedogs supabase secrets set \
+  APPLICATION_NOTIFY_WEBHOOK_SECRET="$(openssl rand -hex 32)" \
+  RESEND_API_KEY="re_…" \
+  --project-ref "$NEXT_PUBLIC_SUPABASE_PROJECT_REF"
+```
+
+Also ensure `RESEND_API_KEY` and `NEXT_PUBLIC_DEPLOY_URL=https://raisedpaws.com`
+are set on the function (inherit from project secrets / dashboard).
+
+2. Apply new monolithic SQL (pg_net trigger + config table) via Management API
+   if not already on the project — same flow as other schema changes.
+
+3. Wire the trigger (replace URL and secret with your values):
+
+```bash
+EDGE_URL="https://${NEXT_PUBLIC_SUPABASE_PROJECT_REF}.supabase.co/functions/v1/notify-shelter-application"
+WEBHOOK_SECRET="…same as APPLICATION_NOTIFY_WEBHOOK_SECRET…"
+
+sb_query "
+UPDATE private.shelter_application_notify_config
+SET
+  edge_function_url = '${EDGE_URL}',
+  webhook_secret = '${WEBHOOK_SECRET}',
+  updated_at = NOW()
+WHERE id = 1;
+"
+```
+
+4. Smoke test: submit a demo application → email arrives at shelter `contact_email`.
+
+Until step 3 is done, the trigger no-ops safely; staff still use `/shelter`.
 
 ---
 
