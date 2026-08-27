@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { ShelterApplicationService } from '@/services/applications';
 import ApplicationsTable from '@/components/organisms/ApplicationsTable';
+import AddStaffForm from './AddStaffForm';
 import { useShelterMembership } from './ShelterGate';
 import type {
   ApplicationStatus,
@@ -64,10 +65,13 @@ export default function ShelterPipelinePage() {
   }
 
   return (
-    <ApplicationsTable
-      applications={applications}
-      statusFilter={statusFilter}
-      onFilterChange={setStatusFilter}
-    />
+    <>
+      <ApplicationsTable
+        applications={applications}
+        statusFilter={statusFilter}
+        onFilterChange={setStatusFilter}
+      />
+      <AddStaffForm />
+    </>
   );
 }

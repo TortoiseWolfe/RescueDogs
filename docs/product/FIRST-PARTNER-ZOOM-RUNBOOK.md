@@ -13,8 +13,8 @@ Use this for the live walkthrough: account → rescue → 3 dogs → Petfinder l
 
 - [ ] Partner has **not** sent dog info ahead — they'll upload live (faster learning).
 - [ ] You have [FIRST-PARTNER-ZOOM-HANDOUT.md](./FIRST-PARTNER-ZOOM-HANDOUT.md) ready to paste into a Google Doc after the call.
-- [ ] Confirm open tickets: [#220](https://github.com/TortoiseWolfe/RescueDogs/issues/220) (add staff by email), [#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260) (email on new application).
-- [ ] If you need backup access to their pipeline: plan for **#220** or a dedicated ops email — one membership per user today; see **Staff membership** below.
+- [ ] Confirm the rescue's **contact email** is one she reads — that address gets the new-application alert ([#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260)).
+- [ ] If you want backup access to her pipeline, use a **dedicated ops email** that is not already on another rescue — still one membership per user ([#261](https://github.com/TortoiseWolfe/RescueDogs/issues/261)); see **Staff membership** below.
 
 ---
 
@@ -49,7 +49,7 @@ Walk through **Applications** tab and the handout **parallel workflow** table.
 - Pattern **B** for this partner: Raised Paws + she keeps PDF/email filing if she wants.
 - Universal form ≠ full prescreen day one — gap-fill after real apps if needed.
 - You may watch the first 3 dogs for support — she approves adopters.
-- Email when someone applies: [#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260) — bookmark `/shelter` until shipped.
+- Email when someone applies goes to the rescue contact address ([#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260)) — still bookmark `/shelter`, the dashboard is the source of truth.
 
 ---
 
@@ -71,9 +71,9 @@ Walk through **Applications** tab and the handout **parallel workflow** table.
 
 **Gaps today**
 
-- No email to shelter on new application — [#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260).
-- No in-app **Add staff** — [#220](https://github.com/TortoiseWolfe/RescueDogs/issues/220).
-- One rescue membership per user — multi-pilot ops: [#261](https://github.com/TortoiseWolfe/RescueDogs/issues/261); add staff UI: [#220](https://github.com/TortoiseWolfe/RescueDogs/issues/220).
+- One rescue membership per user — multi-pilot ops: [#261](https://github.com/TortoiseWolfe/RescueDogs/issues/261).
+- No staff roster or **remove staff** — adding is one-way in the UI; removal is still SQL ([#261](https://github.com/TortoiseWolfe/RescueDogs/issues/261) follow-up).
+- No invite emails — a teammate must create their own account before the manager can add them ([#220](https://github.com/TortoiseWolfe/RescueDogs/issues/220) out of scope: static hosting has no server to send from).
 
 ---
 
@@ -81,9 +81,11 @@ Walk through **Applications** tab and the handout **parallel workflow** table.
 
 Staff links **user UUID → shelter**, not a new email account. Existing Raised Paws login is required.
 
-**No in-app add-staff button yet** — [#220](https://github.com/TortoiseWolfe/RescueDogs/issues/220). Manual SQL only if urgent: [FIRST-PARTNER-ONBOARDING.md](./FIRST-PARTNER-ONBOARDING.md) §3.
+**Add a teammate (manager only, [#220](https://github.com/TortoiseWolfe/RescueDogs/issues/220)):** on `/shelter`, scroll to **Add a teammate**, enter their account email, submit. The form is hidden for `role=staff`, and Postgres rejects non-managers regardless.
 
-**If you're already on another rescue:** don't add yourself via SQL without a plan — UI shows one shelter only. Prefer: dedicated ops email, Supabase query, or wait for multi-membership + switcher.
+The invitee must already have a **confirmed** Raised Paws account — staff can read applicant names, addresses, and phone numbers, so an unverified address is refused. Errors say exactly which condition failed.
+
+**If you're already on another rescue:** the add will be refused with _"that account already belongs to another rescue"_ — one membership per user until [#261](https://github.com/TortoiseWolfe/RescueDogs/issues/261). Use a dedicated ops email that is not on any rescue yet. Manual SQL fallback: [FIRST-PARTNER-ONBOARDING.md](./FIRST-PARTNER-ONBOARDING.md) §3.
 
 Tell partner if you join as backup staff:
 
@@ -96,7 +98,7 @@ Tell partner if you join as backup staff:
 - [ ] Send partner the Google Doc / PDF from [FIRST-PARTNER-ZOOM-HANDOUT.md](./FIRST-PARTNER-ZOOM-HANDOUT.md).
 - [ ] Update [shelter-prospects.md](./shelter-prospects.md) — status, last touch, pilot scope (3 dogs).
 - [ ] Schedule mid-pilot check-in (1–2 weeks).
-- [ ] Capture friction → backlog ([#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260), #220, custom fields only if blocking).
+- [ ] Capture friction → backlog ([#261](https://github.com/TortoiseWolfe/RescueDogs/issues/261), custom fields only if blocking).
 
 ---
 
@@ -105,7 +107,7 @@ Tell partner if you join as backup staff:
 - [#117](https://github.com/TortoiseWolfe/RescueDogs/issues/117) — pilot agreement (closed; doc lives here)
 - [#138](https://github.com/TortoiseWolfe/RescueDogs/issues/138) — first-partner onboarding SQL
 - [#218](https://github.com/TortoiseWolfe/RescueDogs/issues/218) — self-serve create rescue (shipped)
-- [#220](https://github.com/TortoiseWolfe/RescueDogs/issues/220) — add staff by email (open)
+- [#220](https://github.com/TortoiseWolfe/RescueDogs/issues/220) — add staff by email (shipped)
+- [#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260) — email staff on new application (shipped)
 - [#261](https://github.com/TortoiseWolfe/RescueDogs/issues/261) — multi-rescue staff + switcher (open)
-- [#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260) — email staff on new application (open)
 - [AUTH-SETUP.md](../AUTH-SETUP.md) — one sign-in, portal params cosmetic

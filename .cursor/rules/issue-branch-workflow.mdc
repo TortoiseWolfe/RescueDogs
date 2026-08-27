@@ -1,0 +1,42 @@
+---
+description: Ask before creating a branch when starting GitHub issue or PR fix work
+alwaysApply: true
+---
+
+# Issue / PR branch workflow
+
+When the user asks you to **implement, fix, or take care of** a GitHub issue or PR
+(numbered issue, issue URL, or "fix #N"):
+
+## Before editing any code
+
+1. Run `git status -sb` and note the current branch.
+2. **Ask the user** whether to create a new branch (use `AskQuestion` when available):
+
+   - **Yes — create a branch** (recommended if on `main` or an unrelated branch)
+   - **No — use current branch** (only if they are already on the right feature branch)
+   - **I'll branch myself** — wait; do not edit until they confirm the branch name
+
+3. Do **not** start file edits until they answer (unless they already said in the
+   same message to create a branch or to use a named branch).
+
+## If they want a new branch
+
+1. `git fetch origin`
+2. Base from `origin/main` unless they specify another base.
+3. Branch name: `fix/<issue#>-<short-slug>` (e.g. `fix/19-account-settings-label-gap`).
+4. Prefer linking on GitHub when an issue number is known:
+
+   ```bash
+   gh issue develop <N> -R TortoiseWolfe/RescueDogs --checkout --name fix/<N>-<short-slug>
+   ```
+
+   Fall back to `git checkout -b fix/<N>-<short-slug> origin/main` if `gh` fails.
+
+5. Confirm the branch name in chat before implementing.
+
+## Guardrails
+
+- Never commit directly to `main`.
+- One issue per branch when possible; do not mix unrelated work.
+- Commits and pushes only when the user asks (per user rules).
