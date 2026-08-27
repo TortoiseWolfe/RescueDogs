@@ -11,6 +11,10 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import {
+  pickActiveMembership,
+  setLastShelterPreference,
+} from '@/lib/portal/shelter-preference';
+import {
   AlreadyAMemberError,
   ShelterApplicationService,
 } from '@/services/applications';
@@ -19,9 +23,10 @@ import type { ShelterMembershipInfo } from '@/services/applications';
 const ShelterContext = createContext<ShelterMembershipInfo | null>(null);
 
 /**
- * Shelter membership for pages under /shelter. Always non-null beneath a
- * mounted ShelterGate (the gate renders children only after membership
- * resolves).
+ * Active shelter membership for pages under /shelter. Always non-null beneath
+ * a mounted ShelterGate (the gate renders children only after membership
+ * resolves). When the user belongs to 2+ rescues, ShelterGate shows a
+ * switcher; callers still read a single active row (#261).
  */
 export function useShelterMembership(): ShelterMembershipInfo {
   const membership = useContext(ShelterContext);
@@ -35,8 +40,8 @@ export function useShelterMembership(): ShelterMembershipInfo {
  * ShelterGate
  *
  * Clone of AdminGate (src/app/admin/AdminGate.tsx) for shelter staff.
- * Layered inside ProtectedRoute. Resolves the user's shelter membership and
- * renders the shelter chrome + children only for confirmed staff. The
+ * Layered inside ProtectedRoute. Resolves the user's shelter membership(s)
+ * and renders the shelter chrome + children only for confirmed staff. The
  * safety properties are load-bearing — mirrored from AdminGate's pinned
  * regression cases:
  *
@@ -51,18 +56,31 @@ export function useShelterMembership(): ShelterMembershipInfo {
  */
 export function ShelterGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading: authLoading } = useAuth();
-  const [membership, setMembership] = useState<
-    ShelterMembershipInfo | null | undefined
+  const [memberships, setMemberships] = useState<
+    ShelterMembershipInfo[] | null | undefined
   >(undefined); // undefined = checking, null = confirmed non-staff
+  const [activeShelterId, setActiveShelterId] = useState<string | null>(null);
   const wasStaff = useRef(false);
   const lastMembership = useRef<ShelterMembershipInfo | null>(null);
+  const lastMemberships = useRef<ShelterMembershipInfo[]>([]);
+
+  const resolvedList = memberships ?? lastMemberships.current;
+  const activeMembership =
+    (activeShelterId
+      ? resolvedList.find((m) => m.shelterId === activeShelterId)
+      : null) ??
+    pickActiveMembership(resolvedList, activeShelterId) ??
+    lastMembership.current;
 
   useEffect(() => {
-    if (membership) {
+    if (activeMembership) {
       wasStaff.current = true;
-      lastMembership.current = membership;
+      lastMembership.current = activeMembership;
     }
-  }, [membership]);
+    if (resolvedList.length > 0) {
+      lastMemberships.current = resolvedList;
+    }
+  }, [activeMembership, resolvedList]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -70,16 +88,29 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       const service = new ShelterApplicationService(supabase);
-      const result = await service.getMyShelterMembership(user.id);
+      const list = await service.listMyShelterMemberships(user.id);
       if (cancelled) return;
-      setMembership(result);
+      if (list.length === 0) {
+        setMemberships(null);
+        setActiveShelterId(null);
+        return;
+      }
+      const picked = pickActiveMembership(list);
+      setMemberships(list);
+      setActiveShelterId(picked?.shelterId ?? list[0].shelterId);
+      if (picked) setLastShelterPreference(picked.shelterId);
     })();
     return () => {
       cancelled = true;
     };
   }, [user, authLoading]);
 
-  if (authLoading || membership === undefined) {
+  function handleShelterChange(shelterId: string) {
+    setActiveShelterId(shelterId);
+    setLastShelterPreference(shelterId);
+  }
+
+  if (authLoading || memberships === undefined) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex min-h-[50vh] items-center justify-center">
@@ -89,8 +120,7 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const effectiveMembership = membership ?? lastMembership.current;
-  if (!effectiveMembership) {
+  if (!activeMembership) {
     return (
       <div className="container mx-auto max-w-lg px-4 py-16">
         <div className="card bg-base-100 border-base-300 border shadow-xl">
@@ -103,8 +133,11 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
             <CreateRescueForm
               onCreated={async () => {
                 const service = new ShelterApplicationService(supabase);
-                const next = await service.getMyShelterMembership(user!.id);
-                setMembership(next);
+                const list = await service.listMyShelterMemberships(user!.id);
+                const picked = pickActiveMembership(list);
+                setMemberships(list.length > 0 ? list : null);
+                setActiveShelterId(picked?.shelterId ?? null);
+                if (picked) setLastShelterPreference(picked.shelterId);
               }}
             />
             <ul className="text-base-content/80 list-disc space-y-1 pl-5 text-sm">
@@ -151,14 +184,39 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <ShelterContext.Provider value={effectiveMembership}>
+    <ShelterContext.Provider value={activeMembership}>
       <div className="container mx-auto p-6">
         <header className="mb-6">
-          <h1 className="text-2xl font-bold">
-            {effectiveMembership.shelterName}
-          </h1>
+          {resolvedList.length > 1 ? (
+            <label className="form-control mb-2 max-w-md">
+              <span className="label-text mb-1 font-semibold">
+                Active rescue
+              </span>
+              <select
+                className="select select-bordered min-h-11 w-full"
+                aria-label="Active rescue"
+                value={activeMembership.shelterId}
+                onChange={(e) => handleShelterChange(e.target.value)}
+              >
+                {resolvedList.map((m) => (
+                  <option key={m.shelterId} value={m.shelterId}>
+                    {m.shelterName || m.shelterId}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <h1 className="text-2xl font-bold">
+              {activeMembership.shelterName}
+            </h1>
+          )}
+          {resolvedList.length > 1 ? (
+            <h1 className="text-2xl font-bold">
+              {activeMembership.shelterName}
+            </h1>
+          ) : null}
           <p className="text-sm opacity-70">
-            Signed in as shelter {effectiveMembership.role}
+            Signed in as shelter {activeMembership.role}
           </p>
           <nav
             className="mt-4 flex flex-wrap gap-2"
@@ -175,7 +233,8 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
             </Link>
           </nav>
         </header>
-        {children}
+        {/* Remount child pages when the active rescue changes so lists refetch. */}
+        <div key={activeMembership.shelterId}>{children}</div>
       </div>
     </ShelterContext.Provider>
   );

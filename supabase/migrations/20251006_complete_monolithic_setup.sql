@@ -2881,15 +2881,21 @@ COMMENT ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT) IS
 REVOKE ALL ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT) TO authenticated;
 
--- ─── Manager adds staff by email (#220) ────────────────────────────────────
+-- ─── Manager adds staff by email (#220 / #261) ─────────────────────────────
 -- shelter_members has no client INSERT policy, so this is the only self-serve
 -- path to a second volunteer. auth.users is read inside the definer body and
 -- never exposed to the client. The invitee must already have a confirmed
 -- account: staff can read applicant names, addresses, and phone numbers, so an
--- unverified address must not be granted that access. MVP keeps one membership
--- per user; #261 lifts that.
+-- unverified address must not be granted that access. #261 allows the same
+-- Auth user on multiple rescues (invite-only); create_my_shelter still blocks
+-- a second *self-serve created* org.
 
-CREATE OR REPLACE FUNCTION add_shelter_staff_by_email(p_email TEXT)
+DROP FUNCTION IF EXISTS add_shelter_staff_by_email(TEXT);
+
+CREATE OR REPLACE FUNCTION add_shelter_staff_by_email(
+  p_email TEXT,
+  p_shelter_id UUID
+)
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -2898,7 +2904,7 @@ AS $$
 DECLARE
   v_uid UUID := auth.uid();
   v_email TEXT := lower(nullif(btrim(COALESCE(p_email, '')), ''));
-  v_shelter_id UUID;
+  v_shelter_id UUID := p_shelter_id;
   v_target_id UUID;
   v_confirmed_at TIMESTAMPTZ;
 BEGIN
@@ -2906,16 +2912,21 @@ BEGIN
     RAISE EXCEPTION 'not authenticated';
   END IF;
 
+  IF v_shelter_id IS NULL THEN
+    RAISE EXCEPTION 'invalid_shelter';
+  END IF;
+
   IF v_email IS NULL OR length(v_email) > 255 OR v_email NOT LIKE '%_@_%' THEN
     RAISE EXCEPTION 'invalid_email';
   END IF;
 
-  SELECT shelter_id INTO v_shelter_id
-  FROM shelter_members
-  WHERE user_id = v_uid AND role = 'manager'
-  LIMIT 1;
-
-  IF v_shelter_id IS NULL THEN
+  -- Caller must be manager of the *active* rescue (not an arbitrary LIMIT 1).
+  IF NOT EXISTS (
+    SELECT 1 FROM shelter_members
+    WHERE user_id = v_uid
+      AND shelter_id = v_shelter_id
+      AND role = 'manager'
+  ) THEN
     RAISE EXCEPTION 'not_a_manager';
   END IF;
 
@@ -2941,20 +2952,16 @@ BEGIN
     RETURN;
   END IF;
 
-  IF EXISTS (SELECT 1 FROM shelter_members WHERE user_id = v_target_id) THEN
-    RAISE EXCEPTION 'user_on_another_rescue';
-  END IF;
-
   INSERT INTO shelter_members (shelter_id, user_id, role)
   VALUES (v_shelter_id, v_target_id, 'staff');
 END;
 $$;
 
-COMMENT ON FUNCTION add_shelter_staff_by_email(TEXT) IS
-  'Manager adds an existing confirmed Auth user as staff of their shelter (#220).';
+COMMENT ON FUNCTION add_shelter_staff_by_email(TEXT, UUID) IS
+  'Manager adds an existing confirmed Auth user as staff of the given shelter (#220/#261).';
 
-REVOKE ALL ON FUNCTION add_shelter_staff_by_email(TEXT) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION add_shelter_staff_by_email(TEXT) TO authenticated;
+REVOKE ALL ON FUNCTION add_shelter_staff_by_email(TEXT, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION add_shelter_staff_by_email(TEXT, UUID) TO authenticated;
 
 -- ─── Status transitions: SECURITY DEFINER RPCs (the only write path) ───────
 -- applications has NO client UPDATE/DELETE policies; with output:'export'
