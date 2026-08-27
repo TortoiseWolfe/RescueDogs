@@ -49,7 +49,7 @@ const STEPS = [
  * Desktop: slide the centered copy chunk toward the left edge (away from
  * the photo). Raise this number to go further left.
  */
-const HERO_COPY_NUDGE_LEFT_PX = 76;
+const HERO_COPY_NUDGE_LEFT_PX = 48;
 
 const HERO_SPECIES_PILL_CLASS =
   'font-friendly border-accent inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full border-2 bg-transparent px-3 py-1 text-xs font-bold text-white shadow-none transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] focus-visible:-translate-y-0.5 focus-visible:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base';
