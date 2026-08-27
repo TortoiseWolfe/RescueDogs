@@ -32,6 +32,29 @@ export class AlreadyAMemberError extends Error {
   }
 }
 
+/** Reasons add_shelter_staff_by_email can refuse (#220). */
+export const ADD_STAFF_ERROR_CODES = [
+  'invalid_email',
+  'not_a_manager',
+  'user_not_found',
+  'user_not_confirmed',
+  'user_on_another_rescue',
+] as const;
+
+export type AddStaffErrorCode =
+  | (typeof ADD_STAFF_ERROR_CODES)[number]
+  | 'unknown';
+
+export class AddStaffError extends Error {
+  readonly code: AddStaffErrorCode;
+
+  constructor(code: AddStaffErrorCode) {
+    super(code);
+    this.name = 'AddStaffError';
+    this.code = code;
+  }
+}
+
 /**
  * Shelter-staff-side data access. Reads are scoped by the
  * is_shelter_staff() RLS policies; the only mutation is the
@@ -96,6 +119,25 @@ export class ShelterApplicationService {
       throw new Error('create_my_shelter returned no id');
     }
     return data;
+  }
+
+  /**
+   * Add an existing Raised Paws user as staff of the caller's shelter (#220).
+   * SECURITY DEFINER RPC — Postgres checks that the caller is a manager and
+   * resolves the email against auth.users, which the client never sees.
+   * Adding someone who is already on the shelter succeeds silently.
+   */
+  async addStaffByEmail(email: string): Promise<void> {
+    const { error } = await this.supabase.rpc('add_shelter_staff_by_email', {
+      p_email: email,
+    });
+    if (!error) return;
+
+    const message = error.message ?? '';
+    const code = ADD_STAFF_ERROR_CODES.find((candidate) =>
+      message.includes(candidate)
+    );
+    throw new AddStaffError(code ?? 'unknown');
   }
 
   /** The shelter's pipeline, optionally filtered by status. */

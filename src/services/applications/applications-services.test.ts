@@ -296,6 +296,47 @@ describe('ShelterApplicationService', () => {
     ).rejects.toMatchObject({ name: 'AlreadyAMemberError' });
   });
 
+  it('addStaffByEmail calls the RPC with p_ argument names (#220)', async () => {
+    mock.rpc.mockResolvedValue({ data: null, error: null });
+
+    await service.addStaffByEmail('volunteer@example.com');
+
+    expect(mock.rpc).toHaveBeenCalledWith('add_shelter_staff_by_email', {
+      p_email: 'volunteer@example.com',
+    });
+  });
+
+  it.each([
+    ['user_not_found', 'user_not_found'],
+    ['user_not_confirmed', 'user_not_confirmed'],
+    ['user_on_another_rescue', 'user_on_another_rescue'],
+    ['not_a_manager', 'not_a_manager'],
+    ['invalid_email', 'invalid_email'],
+  ])(
+    'addStaffByEmail maps the %s RPC failure to a typed code (#220)',
+    async (message, code) => {
+      mock.rpc.mockResolvedValue({
+        data: null,
+        error: { message: `... ${message} ...` },
+      });
+
+      await expect(
+        service.addStaffByEmail('volunteer@example.com')
+      ).rejects.toMatchObject({ name: 'AddStaffError', code });
+    }
+  );
+
+  it('addStaffByEmail falls back to unknown for unrecognised failures (#220)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: null,
+      error: { message: 'connection reset by peer' },
+    });
+
+    await expect(
+      service.addStaffByEmail('volunteer@example.com')
+    ).rejects.toMatchObject({ name: 'AddStaffError', code: 'unknown' });
+  });
+
   it('listShelterApplications filters by status when provided', async () => {
     const builder = createQueryBuilder({ data: [], error: null });
     mock.from.mockReturnValue(builder);
