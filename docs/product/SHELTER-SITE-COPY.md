@@ -40,6 +40,14 @@ Aligns with [VISION.md](./VISION.md) (application portal framing) and [PILOT-AGR
 
 > To apply for this pet with [Shelter Name], use our adoption portal: [Apply URL] — you’ll get live updates on your application status.
 
+### Where to paste (Petfinder-first rescues)
+
+Many listings already ship Petfinder-native buttons (**Start Your Inquiry**, **See How You Match**, **Become a Sponsor**). Those stay. Put the Raised Paws blurb in the **story / description** for pilot pets — ideally right after the personality hook — so adopters who want a full application with status tracking have a clear path without fighting Petfinder’s UI.
+
+Do **not** tell the partner to remove Inquiry during the pilot (Pattern B: parallel). For pilot dogs, treat the Raised Paws link as the preferred full-application path when followed.
+
+Longer partner-facing wording: [FIRST-PARTNER-ZOOM-HANDOUT.md](./FIRST-PARTNER-ZOOM-HANDOUT.md).
+
 ---
 
 ## Facebook / Instagram / email

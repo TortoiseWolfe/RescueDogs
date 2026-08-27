@@ -51,19 +51,39 @@
 
 ### Once Upon A Prayer
 
-| Field                | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Type**             | Foster-based rescue (no shelter for pop-in visits)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| **Location**         | TBD (confirm on call)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| **Website**          | TBD                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| **How they apply**   | Long **prescreen** (form fields shared by contact) — tool unknown (Google Form / PDF / email?)                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| **Listing**          | TBD                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| **Shelter mgmt app** | Unknown                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| **Contact**          | Facebook connection (private — keep details off-repo)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| **Status**           | `pilot-talk` — Zoom scheduled; walk through account, 3 dogs, Petfinder links                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| **Last touch**       | 2026-08-26                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| **Fit**              | First pilot candidate — Pattern B (Raised Paws + existing email/PDF filing)                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| **Notes**            | Volunteer-run; respond evenings/weekends. Dogs only (no cats). Process: prescreen → review + call references → vet permission / records help → email Q&A → approve → Meet & Greet with foster → adopt at meet or pass → next applicant in line. Queue by order apps received & can be approved. Wants phone-first link instead of Word attachment; teaches full-time. Pilot scope: **3 dogs on Petfinder** with Raised Paws apply links; parallel to existing workflow. Handout: [FIRST-PARTNER-ZOOM-HANDOUT.md](./FIRST-PARTNER-ZOOM-HANDOUT.md). |
+| Field                | Value                                                                                                                                                                                                                                                                                                                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Type**             | Foster-based rescue (visits by appointment only)                                                                                                                                                                                                                                                                                                                                   |
+| **Location**         | O’Fallon, IL (Petfinder org profile)                                                                                                                                                                                                                                                                                                                                               |
+| **Website**          | No dedicated site required for pilot — listings live on Petfinder                                                                                                                                                                                                                                                                                                                  |
+| **How they apply**   | Mixed: Petfinder **Start Your Inquiry** + email/PDF attachment + (pilot) Raised Paws `/adopt?pet=`                                                                                                                                                                                                                                                                                 |
+| **Listing**          | [Petfinder — Once Upon A Prayer](https://www.petfinder.com/member/us/il/o-fallon/once-upon-a-prayer-il885/)                                                                                                                                                                                                                                                                        |
+| **Shelter mgmt app** | Email folders by month/year + hard-copy dog files + Word approved/denied list + microchip spreadsheet (no SMS / Shelterluv observed)                                                                                                                                                                                                                                               |
+| **Contact**          | Facebook connection (private — keep details off-repo); public Petfinder org also lists email / phone                                                                                                                                                                                                                                                                               |
+| **Status**           | `pilot-talk` — Zoom onboarding; 3 dogs + bio links                                                                                                                                                                                                                                                                                                                                 |
+| **Last touch**       | 2026-08-27                                                                                                                                                                                                                                                                                                                                                                         |
+| **Fit**              | First pilot — Pattern B (Raised Paws + keep Petfinder inquiry / email filing)                                                                                                                                                                                                                                                                                                      |
+| **Notes**            | See **Petfinder listing IA** below. Volunteer-run; evenings/weekends. Dogs only. Process: inquiry/prescreen → references → vet records → email Q&A → approve → Meet & Greet with foster → adopt or pass → next in line. Wants phone-first apply link instead of Word attachment. Pilot: **3 Petfinder dogs** with Raised Paws blurb in bio; leave Inquiry / Match / Sponsor alone. |
+
+#### Petfinder listing IA (captured 2026-08-26)
+
+**Profile fields they already publish (example dog pattern):** name; breed mix; age group + years; sex; size/weight; coat; spay/neuter; vaccinated; special needs; kids / dogs / cats compatibility flags; fixed adoption fee; multi-photo gallery.
+
+**Narrative pattern:** (1) personality hook, (2) background/origin, (3) hard requirements (e.g. cat-free home / prey drive).
+
+**Adopter conversion paths on the listing (all stay live during pilot):**
+
+```
+Petfinder search listing
+   ├── 1. "Start Your Inquiry"  → Petfinder embedded form → rescue reviews lead
+   ├── 2. "See How You Match"   → Petfinder match tool (pre-screen)
+   ├── 3. "Become a Sponsor"    → Petfinder sponsorship (not apply)
+   └── 4. Off-platform          → org profile / mailto / phone → direct contact
+```
+
+**Raised Paws insertion point:** story/bio text only — not replacing Petfinder’s primary CTA buttons. Handout: [FIRST-PARTNER-ZOOM-HANDOUT.md](./FIRST-PARTNER-ZOOM-HANDOUT.md).
+
+**Product ready for this pilot:** email on new app ([#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260)), add staff by email ([#220](https://github.com/TortoiseWolfe/RescueDogs/issues/220)), multi-rescue switcher for ops ([#261](https://github.com/TortoiseWolfe/RescueDogs/issues/261)).
 
 ---
 
@@ -93,15 +113,16 @@
 
 Update when you see the same thing 3+ times:
 
-- **Intake:** …
-- **Listings:** …
-- **Status / “any update?”:** …
-- **Common apps:** …
+- **Intake:** Petfinder Inquiry + email/PDF attachment (Once Upon A Prayer); want a single apply link with status
+- **Listings:** Petfinder-first foster rescue; bio carries personality + hard requirements; fee on listing
+- **Status / “any update?”:** Manual email / Word filing today → Raised Paws tracker for pilot cohort
+- **Common apps:** Petfinder native CTAs (Inquiry, Match, Sponsor) stay; portal link lives in bio text
 
 ---
 
 ## Changelog
 
-| Date       | Change                                                       |
-| ---------- | ------------------------------------------------------------ |
-| 2026-08-26 | File created; Once Upon A Prayer seeded from outreach thread |
+| Date       | Change                                                                                         |
+| ---------- | ---------------------------------------------------------------------------------------------- |
+| 2026-08-27 | Once Upon A Prayer: Petfinder IA + conversion paths; #260/#220/#261 noted as shipped for pilot |
+| 2026-08-26 | File created; Once Upon A Prayer seeded from outreach thread                                   |
