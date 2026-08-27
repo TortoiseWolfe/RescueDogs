@@ -32,13 +32,13 @@ export class AlreadyAMemberError extends Error {
   }
 }
 
-/** Reasons add_shelter_staff_by_email can refuse (#220). */
+/** Reasons add_shelter_staff_by_email can refuse (#220 / #261). */
 export const ADD_STAFF_ERROR_CODES = [
   'invalid_email',
+  'invalid_shelter',
   'not_a_manager',
   'user_not_found',
   'user_not_confirmed',
-  'user_on_another_rescue',
 ] as const;
 
 export type AddStaffErrorCode =
@@ -69,30 +69,45 @@ export class ShelterApplicationService {
   }
 
   /**
-   * The user's shelter membership, or null if they aren't staff anywhere.
-   * Powers ShelterGate. MVP: one membership per user (first row wins).
+   * Every shelter membership for this user (#261). Ordered by shelter name
+   * so the switcher is stable. Empty array when they aren't staff anywhere.
+   */
+  async listMyShelterMemberships(
+    userId: string
+  ): Promise<ShelterMembershipInfo[]> {
+    const { data, error } = await this.supabase
+      .from('shelter_members')
+      .select('shelter_id, role, shelters(name)')
+      .eq('user_id', userId);
+
+    if (error || !data) return [];
+    const rows = data as unknown as Array<{
+      shelter_id: string;
+      role: ShelterRole;
+      shelters: { name: string } | null;
+    }>;
+    return rows
+      .map((row) => ({
+        shelterId: row.shelter_id,
+        shelterName: row.shelters?.name ?? '',
+        role: row.role,
+      }))
+      .sort((a, b) =>
+        a.shelterName.localeCompare(b.shelterName, undefined, {
+          sensitivity: 'base',
+        })
+      );
+  }
+
+  /**
+   * One membership for "am I staff anywhere?" callers (post-login path).
+   * Prefer listMyShelterMemberships + pickActiveMembership under ShelterGate.
    */
   async getMyShelterMembership(
     userId: string
   ): Promise<ShelterMembershipInfo | null> {
-    const { data, error } = await this.supabase
-      .from('shelter_members')
-      .select('shelter_id, role, shelters(name)')
-      .eq('user_id', userId)
-      .limit(1)
-      .maybeSingle();
-
-    if (error || !data) return null;
-    const row = data as unknown as {
-      shelter_id: string;
-      role: ShelterRole;
-      shelters: { name: string } | null;
-    };
-    return {
-      shelterId: row.shelter_id,
-      shelterName: row.shelters?.name ?? '',
-      role: row.role,
-    };
+    const memberships = await this.listMyShelterMemberships(userId);
+    return memberships[0] ?? null;
   }
 
   /**
@@ -122,14 +137,15 @@ export class ShelterApplicationService {
   }
 
   /**
-   * Add an existing Raised Paws user as staff of the caller's shelter (#220).
-   * SECURITY DEFINER RPC — Postgres checks that the caller is a manager and
-   * resolves the email against auth.users, which the client never sees.
-   * Adding someone who is already on the shelter succeeds silently.
+   * Add an existing Raised Paws user as staff of the active shelter (#220/#261).
+   * SECURITY DEFINER RPC — Postgres checks that the caller is a manager of
+   * p_shelter_id and resolves the email against auth.users. Invitees may
+   * already belong to another rescue; same-shelter re-add is a no-op.
    */
-  async addStaffByEmail(email: string): Promise<void> {
+  async addStaffByEmail(email: string, shelterId: string): Promise<void> {
     const { error } = await this.supabase.rpc('add_shelter_staff_by_email', {
       p_email: email,
+      p_shelter_id: shelterId,
     });
     if (!error) return;
 
