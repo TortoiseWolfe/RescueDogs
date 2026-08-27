@@ -26,6 +26,7 @@ BEGIN;
 -- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
 
 -- ============================================================================
 -- PART 1: PAYMENT SYSTEM TABLES
@@ -3069,6 +3070,76 @@ CREATE TRIGGER on_application_created
   AFTER INSERT ON applications
   FOR EACH ROW
   EXECUTE FUNCTION log_application_submitted();
+
+-- ─── Shelter email on new application (#260) ─────────────────────────────────
+-- Ops: populate private.shelter_application_notify_config (edge URL + webhook
+-- secret matching APPLICATION_NOTIFY_WEBHOOK_SECRET on the Edge Function).
+-- Trigger no-ops when the row is missing or edge_function_url IS NULL.
+
+CREATE SCHEMA IF NOT EXISTS private;
+REVOKE ALL ON SCHEMA private FROM PUBLIC;
+
+CREATE TABLE IF NOT EXISTS private.shelter_application_notify_config (
+  id SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  edge_function_url TEXT,
+  webhook_secret TEXT,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+REVOKE ALL ON private.shelter_application_notify_config FROM PUBLIC;
+GRANT SELECT ON private.shelter_application_notify_config TO postgres;
+
+INSERT INTO private.shelter_application_notify_config (id, edge_function_url, webhook_secret)
+VALUES (1, NULL, NULL)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE OR REPLACE FUNCTION queue_shelter_application_notify()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+DECLARE
+  v_url TEXT;
+  v_secret TEXT;
+BEGIN
+  SELECT edge_function_url, webhook_secret
+  INTO v_url, v_secret
+  FROM private.shelter_application_notify_config
+  WHERE id = 1;
+
+  IF v_url IS NULL OR btrim(v_url) = '' OR v_secret IS NULL OR btrim(v_secret) = '' THEN
+    RETURN NEW;
+  END IF;
+
+  PERFORM net.http_post(
+    url := v_url,
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'X-Webhook-Secret', v_secret
+    ),
+    body := jsonb_build_object(
+      'application_id', NEW.id::text
+    )
+  );
+
+  RETURN NEW;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Never block application intake on notify failures.
+    RAISE WARNING 'queue_shelter_application_notify failed for %: %', NEW.id, SQLERRM;
+    RETURN NEW;
+END;
+$$;
+
+COMMENT ON FUNCTION queue_shelter_application_notify() IS
+  'AFTER INSERT on applications: async Edge Function invoke via pg_net (#260).';
+
+DROP TRIGGER IF EXISTS on_application_created_notify ON applications;
+CREATE TRIGGER on_application_created_notify
+  AFTER INSERT ON applications
+  FOR EACH ROW
+  EXECUTE FUNCTION queue_shelter_application_notify();
 
 -- ─── Row Level Security ─────────────────────────────────────────────────────
 
