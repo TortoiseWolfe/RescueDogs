@@ -140,12 +140,13 @@ you are on the wrong Auth user.
 ## Checklist (copy per partner)
 
 - [ ] Auth user exists for each staff email
-- [ ] `shelters` row (name, city, state, zip, contact)
-- [ ] `shelter_members` for each staff (`staff` or `manager`)
+- [ ] `shelters` row (name, city, state, zip, contact) — **contact email** receives [#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260) alerts
+- [ ] `shelter_members` for each staff (`staff` or `manager`) — prefer in-app **Add a teammate** ([#220](https://github.com/TortoiseWolfe/RescueDogs/issues/220)); multi-rescue OK ([#261](https://github.com/TortoiseWolfe/RescueDogs/issues/261))
 - [ ] At least one available pet + photo via `/shelter/pets`
 - [ ] Visible on `/dogs` or `/cats`
-- [ ] Staff can open `/shelter` pipeline
-- [ ] Shelter application email notify configured ([#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260))
+- [ ] Staff can open `/shelter` pipeline (and **Active rescue** if on 2+)
+- [ ] Petfinder bio paste for pilot dogs (Inquiry / Match / Sponsor left alone — Pattern B)
+- [ ] Shelter application email notify live on project ([#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260) — see below if re-wiring)
 - [ ] Partner packet / check-in scheduled
 
 ---
