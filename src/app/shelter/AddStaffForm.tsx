@@ -11,13 +11,13 @@ import { useShelterMembership } from './ShelterGate';
 
 const FAILURE_COPY: Record<AddStaffErrorCode, string> = {
   invalid_email: 'Enter a valid email address.',
+  invalid_shelter:
+    'Could not tell which rescue to add them to. Refresh and try again.',
   not_a_manager: 'Only a rescue manager can add teammates.',
   user_not_found:
     'No Raised Paws account uses that email. Ask them to create an account first, then add them again.',
   user_not_confirmed:
     'That account has not confirmed its email yet. Ask them to click the link in their confirmation email, then try again.',
-  user_on_another_rescue:
-    'That account already belongs to another rescue. One account can join one rescue for now.',
   unknown: 'Could not add that teammate. Please try again.',
 };
 
@@ -28,7 +28,7 @@ const FAILURE_COPY: Record<AddStaffErrorCode, string> = {
  * there is no server on GitHub Pages to send an invite email.
  */
 export default function AddStaffForm() {
-  const { role } = useShelterMembership();
+  const { role, shelterId } = useShelterMembership();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [added, setAdded] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export default function AddStaffForm() {
     setSubmitting(true);
     try {
       const service = new ShelterApplicationService(supabase);
-      await service.addStaffByEmail(email);
+      await service.addStaffByEmail(email, shelterId);
       setAdded(email.trim());
       setEmail('');
     } catch (err) {

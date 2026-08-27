@@ -234,11 +234,13 @@ describe('ShelterApplicationService', () => {
 
   it('getMyShelterMembership returns membership with shelter name', async () => {
     const builder = createQueryBuilder({
-      data: {
-        shelter_id: SHELTER_ID,
-        role: 'manager',
-        shelters: { name: 'Second Chance Rescue' },
-      },
+      data: [
+        {
+          shelter_id: SHELTER_ID,
+          role: 'manager',
+          shelters: { name: 'Second Chance Rescue' },
+        },
+      ],
       error: null,
     });
     mock.from.mockReturnValue(builder);
@@ -255,10 +257,45 @@ describe('ShelterApplicationService', () => {
   });
 
   it('getMyShelterMembership returns null for non-staff', async () => {
-    const builder = createQueryBuilder({ data: null, error: null });
+    const builder = createQueryBuilder({ data: [], error: null });
     mock.from.mockReturnValue(builder);
 
     expect(await service.getMyShelterMembership(USER_ID)).toBeNull();
+  });
+
+  it('listMyShelterMemberships returns every membership sorted by name (#261)', async () => {
+    const otherId = '22222222-2222-2222-2222-222222222299';
+    const builder = createQueryBuilder({
+      data: [
+        {
+          shelter_id: otherId,
+          role: 'staff',
+          shelters: { name: 'Zebra Rescue' },
+        },
+        {
+          shelter_id: SHELTER_ID,
+          role: 'manager',
+          shelters: { name: 'Alpha Rescue' },
+        },
+      ],
+      error: null,
+    });
+    mock.from.mockReturnValue(builder);
+
+    const result = await service.listMyShelterMemberships(STAFF_ID);
+
+    expect(result).toEqual([
+      {
+        shelterId: SHELTER_ID,
+        shelterName: 'Alpha Rescue',
+        role: 'manager',
+      },
+      {
+        shelterId: otherId,
+        shelterName: 'Zebra Rescue',
+        role: 'staff',
+      },
+    ]);
   });
 
   it('createMyShelter calls the RPC with p_ argument names (#218)', async () => {
@@ -296,22 +333,23 @@ describe('ShelterApplicationService', () => {
     ).rejects.toMatchObject({ name: 'AlreadyAMemberError' });
   });
 
-  it('addStaffByEmail calls the RPC with p_ argument names (#220)', async () => {
+  it('addStaffByEmail calls the RPC with p_ argument names (#220/#261)', async () => {
     mock.rpc.mockResolvedValue({ data: null, error: null });
 
-    await service.addStaffByEmail('volunteer@example.com');
+    await service.addStaffByEmail('volunteer@example.com', SHELTER_ID);
 
     expect(mock.rpc).toHaveBeenCalledWith('add_shelter_staff_by_email', {
       p_email: 'volunteer@example.com',
+      p_shelter_id: SHELTER_ID,
     });
   });
 
   it.each([
     ['user_not_found', 'user_not_found'],
     ['user_not_confirmed', 'user_not_confirmed'],
-    ['user_on_another_rescue', 'user_on_another_rescue'],
     ['not_a_manager', 'not_a_manager'],
     ['invalid_email', 'invalid_email'],
+    ['invalid_shelter', 'invalid_shelter'],
   ])(
     'addStaffByEmail maps the %s RPC failure to a typed code (#220)',
     async (message, code) => {
@@ -321,7 +359,7 @@ describe('ShelterApplicationService', () => {
       });
 
       await expect(
-        service.addStaffByEmail('volunteer@example.com')
+        service.addStaffByEmail('volunteer@example.com', SHELTER_ID)
       ).rejects.toMatchObject({ name: 'AddStaffError', code });
     }
   );
@@ -333,7 +371,7 @@ describe('ShelterApplicationService', () => {
     });
 
     await expect(
-      service.addStaffByEmail('volunteer@example.com')
+      service.addStaffByEmail('volunteer@example.com', SHELTER_ID)
     ).rejects.toMatchObject({ name: 'AddStaffError', code: 'unknown' });
   });
 
