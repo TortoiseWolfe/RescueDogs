@@ -86,7 +86,7 @@ docker compose exec rescuedogs pnpm run test:suite
 ![Docker Architecture](/blog-images/rescuedogs-intro/docker-architecture.svg)
 _Docker-first development environment with isolated containers_
 
-**⚠️ CRITICAL**: RescueDogs is Docker-only. Local npm/pnpm commands are NOT supported and WILL NOT WORK.
+**⚠️ CRITICAL**: Raised Paws is Docker-only. Local npm/pnpm commands are NOT supported and WILL NOT WORK.
 
 Everything MUST run in [Docker](https://www.docker.com/). No "works on my machine" problems:
 

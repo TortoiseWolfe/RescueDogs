@@ -162,7 +162,7 @@ function EditShelterPetContent() {
         <div role="alert" className="alert alert-error">
           <span>{error ?? 'Pet not found.'}</span>
           <Link href="/shelter/pets" className="btn btn-sm">
-            Back to pets
+            Back to Pets
           </Link>
         </div>
       ) : (
@@ -331,7 +331,7 @@ function EditShelterPetContent() {
                 {deleting ? (
                   <span className="loading loading-spinner loading-sm" />
                 ) : (
-                  'Delete pet'
+                  'Delete Pet'
                 )}
               </button>
             ) : (

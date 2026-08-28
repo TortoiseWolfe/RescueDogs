@@ -121,10 +121,10 @@ export default function ApplicationsTable({
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link href="/shelter/pets/new" className="btn btn-primary min-h-11">
-              Add a pet
+              Add a Pet
             </Link>
             <Link href="/shelter/pets" className="btn btn-ghost min-h-11">
-              View pets
+              View Pets
             </Link>
           </div>
         </div>
