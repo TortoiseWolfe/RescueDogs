@@ -13,6 +13,7 @@ import { validateEmail } from '@/lib/auth/email-validator';
 import { logAuthEvent } from '@/lib/auth/audit-logger';
 import { getInternalUrl } from '@/config/project.config';
 import { createLogger } from '@/lib/logger/logger';
+import { PasswordField } from '@/components/atomic/PasswordField';
 
 const logger = createLogger('components:auth:SignInForm');
 
@@ -316,12 +317,10 @@ export default function SignInForm({
         <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="password">
           <span className="label-text">Password</span>
         </label>
-        <input
+        <PasswordField
           id="password"
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="input input-bordered min-h-11 min-w-0 flex-1"
           placeholder="••••••••"
           autoComplete="current-password"
           required

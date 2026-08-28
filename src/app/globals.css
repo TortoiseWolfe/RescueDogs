@@ -182,27 +182,71 @@
     -1px 0 0 #1e3a8a;
 }
 
+/* Desktop role-menu triggers (#269): white + navy shadow; orange hover pill. */
+.site-header .nav-role-trigger {
+  color: #ffffff;
+}
+
+.site-header .nav-role-trigger .nav-role-prefix,
+.site-header .nav-role-trigger .nav-role-accent {
+  color: #ffffff;
+  -webkit-text-stroke: 0;
+  text-shadow: 0 1px 2px #1e3a8a;
+}
+
+.site-header .nav-role-trigger .nav-role-chevron {
+  color: #1e3a8a;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
+.site-header .nav-role-trigger:hover,
+.site-header .nav-role-trigger.nav-role-trigger-active {
+  background-color: transparent;
+}
+
+.site-header .nav-role-trigger:hover .nav-role-prefix,
+.site-header .nav-role-trigger:hover .nav-role-accent,
+.site-header .nav-role-trigger.nav-role-trigger-active .nav-role-prefix,
+.site-header .nav-role-trigger.nav-role-trigger-active .nav-role-accent {
+  color: #1e3a8a;
+  -webkit-text-stroke: 0.35px #172554;
+  paint-order: stroke fill;
+  text-shadow: none;
+}
+
+.site-header .nav-role-trigger:hover .nav-role-chevron,
+.site-header .nav-role-trigger.nav-role-trigger-active .nav-role-chevron {
+  color: #1e3a8a;
+}
+
+/* Desktop role dropdown panels (#269 / Lovable refinements). */
+.site-header .role-dropdown-panel.menu.dropdown-content {
+  padding: 0.625rem 0.5rem;
+}
+
+.site-header .role-dropdown-panel.menu > :where(li) {
+  margin: 0;
+  padding: 0;
+}
+
+.site-header .role-dropdown-panel.menu :where(li > .role-menu-item) {
+  color: #1e3a8a;
+}
+
+.site-header .role-dropdown-panel.menu :where(li > .role-menu-item:hover),
+.site-header
+  .role-dropdown-panel.menu
+  :where(li > .role-menu-item:focus-visible) {
+  background-color: rgb(249 115 22 / 0.12);
+  border-left-color: #f97316;
+  color: #1e3a8a;
+}
+
 /*
- * Wedged inserts in the orange header (#142).
- * Decorative background only (clip-path) so dropdown menus are not clipped.
- * Trapezoid is wider at the bottom — reads as driven into the bar.
+ * Chrome controls recessed into the orange header face (#142).
+ * Role menus sit directly on orange (#269) — no white wedge band.
  */
-.site-header .header-wedge {
-  position: relative;
-  isolation: isolate;
-}
-
-.site-header .header-wedge::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  /* Soft top shade stands in for inset shadow (clip-path would clip box-shadow). */
-  background: linear-gradient(to bottom, #dbe3f0 0%, #ffffff 22%, #ffffff 100%);
-  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 100%, 0 100%);
-}
-
-/* White chrome controls: recessed into the orange face */
 .site-header .header-wedge-btn {
   box-shadow:
     inset 0 3px 5px rgba(23, 37, 84, 0.28),

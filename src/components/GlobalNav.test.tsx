@@ -145,28 +145,28 @@ describe('GlobalNav role menus (#65)', () => {
     });
   });
 
-  it('wraps desktop role menus in a wedged white band (#79 / #142)', () => {
+  it('renders desktop role menus on the orange header without a white wedge (#269)', () => {
     render(<GlobalNav />);
 
     const browseTrigger = screen.getByRole('button', {
       name: /browse pets/i,
     });
-    const strip = browseTrigger.closest('div[class*="header-wedge"]');
-    expect(strip).toBeTruthy();
-    expect(strip?.className).toMatch(/header-wedge/);
-    expect(strip?.className).not.toMatch(/rounded-full/);
+    const wedge = browseTrigger.closest('div[class*="header-wedge"]');
+    expect(wedge).toBeFalsy();
 
+    const navBand = browseTrigger.parentElement?.parentElement;
+    expect(navBand?.className).not.toMatch(/header-wedge/);
     expect(
-      strip?.contains(screen.getByRole('button', { name: /for adopters/i }))
+      navBand?.contains(screen.getByRole('button', { name: /for adopters/i }))
     ).toBe(true);
     expect(
-      strip?.contains(screen.getByRole('button', { name: /for shelters/i }))
+      navBand?.contains(screen.getByRole('button', { name: /for shelters/i }))
     ).toBe(true);
 
     const login = screen
       .getAllByRole('link', { name: /^log in$/i })
       .find((el) => el.className.includes('btn'));
-    expect(login && strip?.contains(login)).toBe(false);
+    expect(login && navBand?.contains(login)).toBe(false);
   });
 
   it('does not show a Home text link (logo is home)', () => {
@@ -237,7 +237,7 @@ describe('GlobalNav role menus (#65)', () => {
     expect(apps[0]).toHaveAttribute('href', '/applications');
   });
 
-  it('shelter menu includes Shelter Dashboard, Blog, and omits dog/cat browse', () => {
+  it('shelter menu includes Dashboard, Blog, and omits dog/cat browse', () => {
     render(<GlobalNav />);
 
     const shelterTrigger = screen.getByRole('button', {
@@ -249,7 +249,7 @@ describe('GlobalNav role menus (#65)', () => {
     const labels = [...list!.querySelectorAll('a')].map(
       (a) => a.textContent?.trim() || ''
     );
-    expect(labels).toContain('Shelter Dashboard');
+    expect(labels).toContain('Dashboard');
     expect(labels).toContain('Blog');
     expect(labels).not.toContain('Browse Pets');
     expect(labels).not.toContain('Browse dogs');
