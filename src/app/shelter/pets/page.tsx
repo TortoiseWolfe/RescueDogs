@@ -56,7 +56,7 @@ export default function ShelterPetsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-semibold">Pets</h2>
         <Link href="/shelter/pets/new" className="btn btn-primary min-h-11">
-          Add pet
+          Add Pet
         </Link>
       </div>
 

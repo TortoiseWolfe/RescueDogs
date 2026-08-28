@@ -1,7 +1,7 @@
 ---
 title: 'Auto-Configuration: Use Template and Start Building'
 slug: 'auto-configuration-system'
-excerpt: "RescueDogs's auto-configuration eliminates setup friction. Use the template, run Docker, and watch your project automatically adapt with zero manual config."
+excerpt: "Raised Paws' auto-configuration eliminates setup friction. Use the template, run Docker, and watch your project automatically adapt with zero manual config."
 author: Development Team
 date: 2025-09-27
 status: scheduled
@@ -22,7 +22,7 @@ ogImage: /blog-images/auto-config/featured-og.png
 
 # Auto-Configuration: Use Template and Start Building
 
-RescueDogs automatically configures itself based on your new repository. Use this template, and everything adapts to your project name and settings with minimal setup.
+Raised Paws automatically configures itself based on your new repository. Use this template, and everything adapts to your project name and settings with minimal setup.
 
 ## ✅ Prerequisites
 
@@ -36,7 +36,7 @@ RescueDogs automatically configures itself based on your new repository. Use thi
 
 ### 1. Use Template on GitHub
 
-Click "Use this template" on [RescueDogs](https://github.com/TortoiseWolfe/RescueDogs) and create your repository with any name you like.
+Click "Use this template" on [Raised Paws](https://github.com/TortoiseWolfe/RescueDogs) and create your repository with any name you like.
 
 ### 2. Clone Your New Repository
 
@@ -109,7 +109,7 @@ All commands MUST be run inside Docker:
 
 ## 🔧 What Gets Auto-Configured
 
-When you create from template and clone, RescueDogs automatically detects and configures:
+When you create from template and clone, Raised Paws automatically detects and configures:
 
 - **Project Name**: From your repository name
 - **Owner Info**: From your GitHub username (not "Admin" or generic names)
@@ -167,7 +167,7 @@ Traditional templates require editing multiple files:
 - ❌ Edit PWA manifests
 - ❌ Update hardcoded references throughout codebase
 
-With RescueDogs, the process is dramatically simplified:
+With Raised Paws, the process is dramatically simplified:
 
 - ✅ Use template with any name
 - ✅ Create `.env` file (one-time, 30 seconds)
@@ -364,7 +364,7 @@ The project auto-detects your configuration from git, so you don't need differen
 
 ## 🧪 Try It Now
 
-1. **Use Template** [RescueDogs](https://github.com/TortoiseWolfe/RescueDogs) (30 seconds)
+1. **Use Template** [Raised Paws](https://github.com/TortoiseWolfe/RescueDogs) (30 seconds)
 2. **Clone** your new repository (30 seconds)
 3. **Create .env** with `cp .env.example .env` (30 seconds)
 4. **Run** `docker compose up` (5-10 minutes first build)
@@ -417,12 +417,12 @@ _The auto-configuration process: Use Template → Clone → Ready in 3 simple st
 
 The magic happens through our detection script that runs at build time, analyzing your git remote to extract project information and automatically generating all configuration files.
 
-## Traditional Setup vs RescueDogs
+## Traditional Setup vs Raised Paws
 
 ![Before and After Comparison](/blog-images/auto-config/before-after.svg)
 _Save 30-60 minutes of manual configuration with every new project_
 
-While traditional templates require editing 22+ files and configuration points, RescueDogs handles everything automatically. No more hunting for hardcoded values or broken references after using the template.
+While traditional templates require editing 22+ files and configuration points, Raised Paws handles everything automatically. No more hunting for hardcoded values or broken references after using the template.
 
 ## ⚠️ Troubleshooting
 
@@ -454,7 +454,7 @@ While traditional templates require editing 22+ files and configuration points, 
 
 ## ✅ The Bottom Line
 
-RescueDogs significantly reduces setup friction compared to traditional templates. While not completely "zero-config," it automates most configuration through git detection, requiring only minimal setup (creating the `.env` file).
+Raised Paws significantly reduces setup friction compared to traditional templates. While not completely "zero-config," it automates most configuration through git detection, requiring only minimal setup (creating the `.env` file).
 
 **Minimal configuration. Quick setup. Use template and build.**
 

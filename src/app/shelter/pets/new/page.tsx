@@ -78,7 +78,7 @@ export default function NewShelterPetPage() {
   return (
     <div className="mx-auto max-w-lg space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xl font-semibold">Add pet</h2>
+        <h2 className="text-xl font-semibold">Add Pet</h2>
         <Link href="/shelter/pets" className="btn btn-ghost btn-sm min-h-11">
           Cancel
         </Link>
@@ -213,7 +213,7 @@ export default function NewShelterPetPage() {
           {saving ? (
             <span className="loading loading-spinner loading-sm" />
           ) : (
-            'Save pet'
+            'Save Pet'
           )}
         </button>
       </form>

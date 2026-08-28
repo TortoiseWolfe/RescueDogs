@@ -60,7 +60,7 @@ export default function AddStaffForm() {
   return (
     <section className="card bg-base-100 border-base-300 mt-8 border">
       <div className="card-body gap-3">
-        <h2 className="card-title text-lg">Add a teammate</h2>
+        <h2 className="card-title text-lg">Add a Teammate</h2>
         <p className="text-base-content/80 text-sm">
           They need a Raised Paws account first. Once added, they can see this
           rescue&apos;s pets and applications.
@@ -71,7 +71,7 @@ export default function AddStaffForm() {
         >
           <label className="form-control flex-1">
             <span className="label-text mb-1 font-semibold">
-              Their account email
+              Their Account Email
             </span>
             <input
               required
@@ -89,7 +89,7 @@ export default function AddStaffForm() {
             className="btn btn-primary min-h-11"
             disabled={submitting}
           >
-            {submitting ? 'Adding…' : 'Add teammate'}
+            {submitting ? 'Adding…' : 'Add Teammate'}
           </button>
         </form>
         {error ? (

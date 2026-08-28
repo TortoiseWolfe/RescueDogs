@@ -74,7 +74,9 @@ function extractExcerpt(content, length = 200) {
 async function processMarkdownFile(filePath) {
   try {
     const content = await fs.readFile(filePath, 'utf-8');
-    const { data: frontMatter, content: markdownContent } = matter(content);
+    // Windows CRLF in stored JSON breaks markdown code-fence regex (```…\n).
+    const normalized = content.replace(/\r\n/g, '\n');
+    const { data: frontMatter, content: markdownContent } = matter(normalized);
 
     const fileName = path.basename(filePath, '.md');
     const stats = await fs.stat(filePath);

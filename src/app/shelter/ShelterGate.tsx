@@ -216,7 +216,9 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
             </h1>
           ) : null}
           <p className="text-sm opacity-70">
-            Signed in as shelter {activeMembership.role}
+            Signed in as Shelter{' '}
+            {activeMembership.role.charAt(0).toUpperCase() +
+              activeMembership.role.slice(1)}
           </p>
           <nav
             className="mt-4 flex flex-wrap gap-2"
