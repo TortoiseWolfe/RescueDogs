@@ -46,10 +46,10 @@ const STEPS = [
 ] as const;
 
 /**
- * Desktop: slide the centered copy chunk toward the left edge (away from
- * the photo). Raise this number to go further left.
+ * Desktop (xl+): slide the copy chunk left, away from the photo.
+ * Raise this number to go further left; lower to go right.
  */
-const HERO_COPY_NUDGE_LEFT_PX = 48;
+const HERO_COPY_NUDGE_LEFT_PX = 64;
 
 const HERO_SPECIES_PILL_CLASS =
   'font-friendly border-accent inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full border-2 bg-transparent px-3 py-1 text-xs font-bold text-white shadow-none transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] focus-visible:-translate-y-0.5 focus-visible:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base';
@@ -70,11 +70,11 @@ export default function Home() {
         aria-labelledby="hero-heading"
         className="relative bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-10 text-white sm:px-6 sm:py-16 lg:px-8 lg:py-24"
       >
-        <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-12">
-          <div className="w-full min-w-0 flex-1 lg:-translate-y-4">
-            {/* Centered copy stack, shifted left. Tweak HERO_COPY_NUDGE_LEFT_PX. */}
+        <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 xl:flex-row xl:items-center xl:gap-12">
+          <div className="w-full min-w-0 flex-1 xl:-translate-y-4">
+            {/* Centered copy stack, shifted left at xl+. Tweak HERO_COPY_NUDGE_LEFT_PX. */}
             <div
-              className="mx-auto max-w-xl text-center lg:mx-0 lg:translate-x-[var(--hero-copy-nudge)]"
+              className="mx-auto max-w-xl text-center xl:mx-0 xl:translate-x-[var(--hero-copy-nudge)]"
               style={
                 {
                   ['--hero-copy-nudge']: `-${HERO_COPY_NUDGE_LEFT_PX}px`,
@@ -111,7 +111,7 @@ export default function Home() {
               </div>
               <h1
                 id="hero-heading"
-                className="font-display mb-5 text-4xl leading-tight font-extrabold tracking-tight break-normal text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl sm:leading-none lg:text-7xl"
+                className="font-display mb-5 text-4xl leading-tight font-extrabold tracking-tight break-normal text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl sm:leading-none xl:text-7xl"
               >
                 Track your pet adoption applications.
               </h1>
@@ -140,12 +140,12 @@ export default function Home() {
 
           {/* Right column: hero image
               Tune these Tailwind knobs:
-              - Whole column up/down: `lg:-mt-*` on this outer div (negative = higher)
-              - Photo up/down: `lg:-mt-*` on the image wrapper
-              - Photo size: `max-w-md` / `lg:max-w-[640px]` on the column
+              - Whole column up/down: `xl:-mt-*` on this outer div (negative = higher)
+              - Photo up/down: `xl:-mt-*` on the image wrapper
+              - Photo size: `max-w-md` / `xl:max-w-[640px]` on the column
           */}
-          <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 lg:-mt-8 lg:max-w-[640px] lg:items-stretch">
-            <div className="relative aspect-[4/3] w-full animate-[floaty_5s_ease-in-out_infinite] lg:mt-2">
+          <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 xl:-mt-8 xl:max-w-[640px] xl:items-stretch">
+            <div className="relative aspect-[4/3] w-full animate-[floaty_5s_ease-in-out_infinite] xl:mt-2">
               <div className="absolute inset-0 rotate-1 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl sm:rotate-3" />
               <div className="absolute inset-2 rotate-1 overflow-hidden rounded-[1.625rem] sm:rotate-3">
                 <Image

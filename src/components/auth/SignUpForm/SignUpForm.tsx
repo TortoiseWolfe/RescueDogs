@@ -12,6 +12,7 @@ import {
 import { validateEmail } from '@/lib/auth/email-validator';
 import { logAuthEvent } from '@/lib/auth/audit-logger';
 import PasswordStrengthIndicator from '@/components/atomic/PasswordStrengthIndicator';
+import { PasswordField } from '@/components/atomic/PasswordField';
 import { createLogger } from '@/lib/logger/logger';
 
 const logger = createLogger('components:auth:SignUpForm');
@@ -205,12 +206,10 @@ export default function SignUpForm({
           <span className="label-text">Password</span>
         </label>
         <div className="min-w-0 flex-1">
-          <input
+          <PasswordField
             id="password"
-            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="input input-bordered min-h-11 w-full"
             placeholder="••••••••"
             required
             disabled={loading}
@@ -229,12 +228,10 @@ export default function SignUpForm({
         >
           <span className="label-text">Confirm Password</span>
         </label>
-        <input
+        <PasswordField
           id="confirm-password"
-          type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="input input-bordered min-h-11 min-w-0 flex-1"
           placeholder="••••••••"
           required
           disabled={loading}

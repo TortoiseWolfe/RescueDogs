@@ -53,16 +53,17 @@ export function Footer() {
     <footer className="mt-auto bg-[#1e3a8a] py-5 text-white shadow-[0_-8px_24px_rgba(30,58,138,0.35)] sm:py-6">
       {/*
         Mobile: brand → socials → credit → pills → legal.
-        md+: equal 1fr | auto | 1fr so logo + tagline sit on the true bar
+        lg+: equal 1fr | auto | 1fr so logo + tagline sit on the true bar
         center (#254). Side clusters are stacked columns (items-center) so
         Built by / legal center under their button rows, while the stacks
-        stay start/end on the edges.
+        stay start/end on the edges. Held at lg+ so ~912px tablets (Surface
+        Pro) keep the stacked layout and avoid credit/tagline overlap (#269).
       */}
-      <div className="mx-auto grid w-full grid-cols-1 items-center justify-items-center gap-3 px-2 sm:container sm:px-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:grid-rows-[auto_auto] md:gap-x-6 md:gap-y-1 md:px-4 lg:px-6">
+      <div className="mx-auto grid w-full grid-cols-1 items-center justify-items-center gap-3 px-2 sm:container sm:px-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:grid-rows-[auto_auto] lg:gap-x-6 lg:gap-y-1 lg:px-6">
         {/* Logo — center, row 1 */}
         <Link
           href="/"
-          className="inline-flex min-h-11 items-center justify-center transition-opacity hover:opacity-90 md:col-start-2 md:row-start-1"
+          className="inline-flex min-h-11 items-center justify-center transition-opacity hover:opacity-90 lg:col-start-2 lg:row-start-1"
           aria-label="Raised Paws"
         >
           <Image
@@ -75,7 +76,7 @@ export function Footer() {
         </Link>
 
         {/* Tagline + © — center, row 2 */}
-        <div className="flex flex-col items-center text-center md:col-start-2 md:row-start-2">
+        <div className="flex flex-col items-center text-center lg:col-start-2 lg:row-start-2">
           <p className="font-friendly text-xs leading-relaxed font-bold sm:text-sm">
             Raised Paws · Every pet deserves a happy tail.
           </p>
@@ -85,9 +86,9 @@ export function Footer() {
         </div>
 
         {/* Left cluster — socials + Built by centered as a unit */}
-        <div className="flex max-w-full flex-col items-center gap-3 md:col-start-1 md:row-span-2 md:translate-y-3 md:justify-self-start">
+        <div className="flex max-w-full flex-col items-center gap-3 lg:col-start-1 lg:row-span-2 lg:translate-y-3 lg:justify-self-start">
           <ul
-            className="m-0 flex list-none flex-wrap items-center justify-center gap-0.5 p-0 md:gap-2"
+            className="m-0 flex list-none flex-wrap items-center justify-center gap-0.5 p-0 lg:gap-2"
             aria-label="Raised Paws on social media"
           >
             {RAISED_PAWS_SOCIALS.map((social) => (
@@ -106,7 +107,7 @@ export function Footer() {
           </ul>
 
           {/* One line from md+; wraps on narrow phones (320px E2E) */}
-          <p className="max-w-full text-center text-xs text-white/90 md:whitespace-nowrap">
+          <p className="max-w-full text-center text-xs text-white/90 lg:whitespace-nowrap">
             Built by{' '}
             <a
               href="https://www.techstackdevs.com"
@@ -133,7 +134,7 @@ export function Footer() {
         </div>
 
         {/* Right cluster — pills + legal centered as a unit */}
-        <div className="flex max-w-full flex-col items-center gap-3 md:col-start-3 md:row-span-2 md:translate-y-3 md:gap-1 md:justify-self-end">
+        <div className="flex max-w-full flex-col items-center gap-3 lg:col-start-3 lg:row-span-2 lg:translate-y-3 lg:gap-1 lg:justify-self-end">
           <nav
             className="flex flex-wrap items-center justify-center gap-1"
             aria-label="Footer links"
