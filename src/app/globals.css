@@ -159,12 +159,14 @@
 [data-theme='trusted-care-light'] .site-header {
   --color-primary: #f97316;
   --color-primary-content: #ffffff;
+  --noise: 0; /* flat orange so axe contrast reads #f97316, not noise-darkened */
   box-shadow: 0 8px 24px rgba(30, 58, 138, 0.12);
 }
 
 [data-theme='trusted-care-dark'] .site-header {
   --color-primary: #f97316;
   --color-primary-content: #ffffff;
+  --noise: 0;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
@@ -182,20 +184,21 @@
     -1px 0 0 #1e3a8a;
 }
 
-/* Desktop role-menu triggers (#269): white + navy shadow; orange hover pill. */
+/* Desktop role-menu triggers (#269): accent-content on flat orange (AAA ≥7:1).
+ * Navy #1e3a8a is only ~3.7:1 on #f97316; theme accent-content is #040c14 at 7:1. */
 .site-header .nav-role-trigger {
-  color: #ffffff;
+  color: var(--color-accent-content);
 }
 
 .site-header .nav-role-trigger .nav-role-prefix,
 .site-header .nav-role-trigger .nav-role-accent {
-  color: #ffffff;
+  color: var(--color-accent-content);
   -webkit-text-stroke: 0;
-  text-shadow: 0 1px 2px #1e3a8a;
+  text-shadow: none;
 }
 
 .site-header .nav-role-trigger .nav-role-chevron {
-  color: #1e3a8a;
+  color: var(--color-accent-content);
   -webkit-text-stroke: 0;
   text-shadow: none;
 }
@@ -209,15 +212,18 @@
 .site-header .nav-role-trigger:hover .nav-role-accent,
 .site-header .nav-role-trigger.nav-role-trigger-active .nav-role-prefix,
 .site-header .nav-role-trigger.nav-role-trigger-active .nav-role-accent {
-  color: #1e3a8a;
-  -webkit-text-stroke: 0.35px #172554;
-  paint-order: stroke fill;
+  color: #000000;
+  -webkit-text-stroke: 0;
+  paint-order: initial;
+  text-decoration: underline;
+  text-decoration-color: #000000;
+  text-underline-offset: 3px;
   text-shadow: none;
 }
 
 .site-header .nav-role-trigger:hover .nav-role-chevron,
 .site-header .nav-role-trigger.nav-role-trigger-active .nav-role-chevron {
-  color: #1e3a8a;
+  color: #000000;
 }
 
 /* Desktop role dropdown panels (#269 / Lovable refinements). */
