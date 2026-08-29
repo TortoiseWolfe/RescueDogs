@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { ShelterPetService } from '@/services/applications';
 import { uploadPetPhoto } from '@/lib/pet-photos/upload';
+import { combineAgeYears, splitAgeYears } from '@/lib/pet-age';
 import { useShelterMembership } from '../../ShelterGate';
+import { PetAgeFields } from '../PetAgeFields';
 import type {
   Pet,
   PetSex,
@@ -31,7 +33,8 @@ function EditShelterPetContent() {
   const [species, setSpecies] = useState<PetSpecies>('dog');
   const [breed, setBreed] = useState('');
   const [sex, setSex] = useState<PetSex | ''>('');
-  const [ageYears, setAgeYears] = useState('');
+  const [ageYearsPart, setAgeYearsPart] = useState(0);
+  const [ageMonthsPart, setAgeMonthsPart] = useState(0);
   const [size, setSize] = useState<PetSize | ''>('');
   const [status, setStatus] = useState<PetStatus>('available');
   const [notes, setNotes] = useState('');
@@ -74,7 +77,9 @@ function EditShelterPetContent() {
         setSpecies(row.species);
         setBreed(row.breed ?? '');
         setSex(row.sex ?? '');
-        setAgeYears(row.age_years != null ? String(row.age_years) : '');
+        const ageParts = splitAgeYears(row.age_years);
+        setAgeYearsPart(ageParts?.years ?? 0);
+        setAgeMonthsPart(ageParts?.months ?? 0);
         setSize(row.size ?? '');
         setStatus(row.status);
         setNotes(row.notes ?? '');
@@ -116,7 +121,7 @@ function EditShelterPetContent() {
         species,
         breed: breed || null,
         sex: sex || null,
-        age_years: ageYears ? Number(ageYears) : null,
+        age_years: combineAgeYears(ageYearsPart, ageMonthsPart),
         size: size || null,
         status,
         photo_url: photoUrl,
@@ -234,18 +239,15 @@ function EditShelterPetContent() {
                 </select>
               </label>
 
-              <label className="form-control w-full">
-                <span className="label-text">Age (years)</span>
-                <input
-                  type="number"
-                  min={0}
-                  max={40}
-                  step={0.5}
-                  className="input input-bordered min-h-11 w-full"
-                  value={ageYears}
-                  onChange={(e) => setAgeYears(e.target.value)}
+              <div className="form-control w-full">
+                <span className="label-text">Age (optional)</span>
+                <PetAgeFields
+                  years={ageYearsPart}
+                  months={ageMonthsPart}
+                  onYearsChange={setAgeYearsPart}
+                  onMonthsChange={setAgeMonthsPart}
                 />
-              </label>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
