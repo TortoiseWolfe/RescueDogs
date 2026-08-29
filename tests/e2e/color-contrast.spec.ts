@@ -84,6 +84,10 @@ test.describe('WCAG AAA color-contrast-enhanced (violations only)', () => {
           axe.run(document, {
             runOnly: { type: 'rule', values: ['color-contrast-enhanced'] },
             resultTypes: ['violations', 'incomplete'],
+            // #269: owner-approved nav labels on orange — white fill + navy shadow /
+            // stroke at rest, navy on hover. Axe measures flat fg/bg and cannot
+            // credit the shadow/stroke (same class as .brand-logo).
+            exclude: ['.site-header .nav-role-trigger'],
           })
         );
 

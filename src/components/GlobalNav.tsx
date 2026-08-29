@@ -98,7 +98,7 @@ function blurActiveElement() {
 
 /**
  * Role dropdowns on the orange desktop header (#269).
- * White labels + navy shadow at rest; navy + thin outline on hover (Lovable).
+ * White labels + navy outline at rest; navy + thin outline on hover (Lovable).
  */
 function RoleDropdown({
   prefixWord,
