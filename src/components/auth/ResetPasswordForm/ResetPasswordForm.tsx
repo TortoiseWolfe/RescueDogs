@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { validatePassword } from '@/lib/auth/password-validator';
+import { PasswordField } from '@/components/atomic/PasswordField';
 
 export interface ResetPasswordFormProps {
   /** Callback on success */
@@ -66,12 +67,10 @@ export default function ResetPasswordForm({
         <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="password">
           <span className="label-text">New Password</span>
         </label>
-        <input
+        <PasswordField
           id="password"
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="input input-bordered min-h-11 min-w-0 flex-1"
           placeholder="••••••••"
           required
           disabled={loading}
@@ -85,12 +84,10 @@ export default function ResetPasswordForm({
         >
           <span className="label-text">Confirm Password</span>
         </label>
-        <input
+        <PasswordField
           id="confirm-password"
-          type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="input input-bordered min-h-11 min-w-0 flex-1"
           placeholder="••••••••"
           required
           disabled={loading}

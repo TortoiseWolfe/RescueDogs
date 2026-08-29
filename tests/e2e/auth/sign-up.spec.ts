@@ -336,7 +336,9 @@ test.describe('Sign-up with Admin Confirmation', () => {
       await waitForHydration(page);
       await dismissCookieBanner(page);
       await page.getByLabel('Email').fill(testEmail);
-      await page.getByLabel('Password').fill(DEFAULT_TEST_PASSWORD);
+      await page
+        .getByLabel('Password', { exact: true })
+        .fill(DEFAULT_TEST_PASSWORD);
       await page.getByRole('button', { name: 'Sign In' }).click();
 
       // Should redirect and authenticate

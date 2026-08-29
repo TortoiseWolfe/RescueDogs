@@ -6,7 +6,7 @@ describe('SignInForm', () => {
   it('renders without crashing', () => {
     render(<SignInForm />);
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/remember me/i)).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /sign in/i })

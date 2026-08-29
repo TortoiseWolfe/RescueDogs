@@ -13,6 +13,7 @@ import AccountDeletionModal from '@/components/molecular/AccountDeletionModal';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { validateDisplayName, validateBio } from '@/lib/profile/validation';
 import { createLogger } from '@/lib/logger/logger';
+import { PasswordField } from '@/components/atomic/PasswordField';
 
 const logger = createLogger('components:auth:AccountSettings');
 
@@ -385,12 +386,10 @@ export default function AccountSettings({
             >
               <span className="label-text">New Password</span>
             </label>
-            <input
+            <PasswordField
               id="new-password-input"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input input-bordered min-h-11 min-w-0 flex-1"
               disabled={loading || isUpdatingProfile}
             />
           </div>
@@ -401,12 +400,10 @@ export default function AccountSettings({
             >
               <span className="label-text">Confirm Password</span>
             </label>
-            <input
+            <PasswordField
               id="confirm-password-input"
-              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="input input-bordered min-h-11 min-w-0 flex-1"
               disabled={loading || isUpdatingProfile}
             />
           </div>

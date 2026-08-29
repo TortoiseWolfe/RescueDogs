@@ -45,15 +45,6 @@ const navChromeIconBtn =
 const navChromeIconBtnDark =
   'btn btn-circle min-h-11 min-w-11 border-0 !bg-[#1e3a8a] !text-white hover:!bg-[#172554] hover:!text-white active:!bg-[#172554] active:!text-white';
 
-/**
- * Role-menu colors on the white desktop strip (#79 / #115).
- * Prefix (Browse/For) = orange; accent (Pets/Adopters/Shelters) = navy →
- * orange on hover/open. Accent orange must be ≥7:1 on white (WCAG AAA) —
- * #c2410c was 5.17:1, so we keep #9a3412.
- */
-const NAV_NAVY = '#1e3a8a';
-const NAV_ACCENT = '#9a3412';
-
 const DEMO_ENTRY_HREF = '/get-started?demo=1&choose=1';
 const BROWSE_DOGS_HREF = '/dogs';
 const BROWSE_CATS_HREF = '/cats';
@@ -77,7 +68,7 @@ const shelterMenuLinks: NavLinkItem[] = [
   { href: '/for-shelters', label: 'Overview' },
   { href: buildSignInHref('shelter'), label: 'Log In' },
   { href: DEMO_ENTRY_HREF, label: 'Try Demo' },
-  { href: '/shelter', label: 'Shelter Dashboard' },
+  { href: '/shelter', label: 'Dashboard' },
   { href: '/blog', label: 'Blog' },
 ];
 
@@ -106,34 +97,31 @@ function blurActiveElement() {
 }
 
 /**
- * Split-label role menus on the white strip (#79 / #115):
- * orange prefix (Browse/For) + navy accent → orange on hover/open.
+ * Role dropdowns on the orange desktop header (#269).
+ * White labels + navy shadow at rest; navy + thin outline on hover (Lovable).
  */
 function RoleDropdown({
   prefixWord,
   accentWord,
   links,
+  className = '',
 }: {
-  /** Prefix — “For” or “Browse” (#65 / #91). */
+  /** Prefix — "For" or "Browse" (#65 / #91). */
   prefixWord: string;
-  /** Accent — “Adopters”, “Shelters”, or “Pets”. */
+  /** Accent — "Adopters", "Shelters", or "Pets". */
   accentWord: string;
   links: NavLinkItem[];
+  /** Optional wrapper class (e.g. optical spacing tweaks). */
+  className?: string;
 }) {
   const accessibleName = `${prefixWord} ${accentWord}`;
   const [hovered, setHovered] = useState(false);
   const [open, setOpen] = useState(false);
-  const roleAccent = hovered || open;
-  const prefixStyle = {
-    color: NAV_ACCENT,
-  } as const;
-  const accentStyle = {
-    color: roleAccent ? NAV_ACCENT : NAV_NAVY,
-  } as const;
+  const active = hovered || open;
 
   return (
     <div
-      className="dropdown"
+      className={`dropdown dropdown-start ${className}`.trim()}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setOpen(true)}
@@ -146,34 +134,30 @@ function RoleDropdown({
       <button
         type="button"
         tabIndex={0}
-        className="inline-flex min-h-11 items-center px-2 text-xs font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e3a8a]"
+        className={`nav-role-trigger relative inline-flex min-h-11 items-center rounded-full px-3 text-xs transition-[background-color,box-shadow] duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+          active ? 'nav-role-trigger-active' : ''
+        }`}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={accessibleName}
         onClick={() => setOpen((prev) => !prev)}
       >
-        <span className="transition-colors" style={prefixStyle}>
-          {prefixWord}&nbsp;
-        </span>
-        <span className="transition-colors" style={accentStyle}>
-          {accentWord}
-        </span>
-        <span className="transition-colors" style={accentStyle}>
-          <ChevronDown className="ml-1 h-3.5 w-3.5" />
-        </span>
+        <span className="nav-role-prefix font-bold">{prefixWord}&nbsp;</span>
+        <span className="nav-role-accent font-bold">{accentWord}</span>
+        <ChevronDown className="nav-role-chevron ml-0.5 h-3 w-3 shrink-0" />
       </button>
       <ul
         tabIndex={0}
         role="menu"
         aria-label={accessibleName}
-        className="menu dropdown-content bg-base-100 text-base-content rounded-box z-50 mt-3 w-56 p-2 text-sm font-medium shadow"
+        className="role-dropdown-panel menu dropdown-content z-50 mt-1.5 w-max min-w-full gap-0 rounded-lg border border-[#1e3a8a]/20 bg-[#fdfbf7] text-xs font-medium shadow-md shadow-[#1e3a8a]/10"
       >
         {links.map((item) => (
           <li key={`${accessibleName}-${item.href}-${item.label}`} role="none">
             <Link
               href={item.href}
               role="menuitem"
-              className="min-h-11 text-sm font-medium"
+              className="role-menu-item min-h-11 rounded-md border-l-2 border-transparent px-2 py-1 text-xs font-medium whitespace-nowrap text-[#1e3a8a]"
               onClick={() => {
                 setOpen(false);
                 blurActiveElement();
@@ -443,19 +427,17 @@ export function GlobalNav() {
               </Link>
             </div>
 
-            {/* White role band — desktop only (#79 / #127). */}
             <div
               className="hidden min-w-0 flex-1 self-stretch lg:block"
               aria-hidden="true"
             />
             <div className="hidden self-stretch lg:flex lg:items-center lg:pr-3">
-              {/* White role band wedged into orange (#142) — decorative
-                  clip-path on ::before so dropdown panels are not clipped. */}
-              <div className="header-wedge my-2.5 flex min-h-11 items-center gap-0.5 px-4 py-0.5">
+              <div className="-ml-5 flex min-h-11 items-center gap-1 px-2">
                 <RoleDropdown
                   prefixWord="Browse"
                   accentWord="Pets"
                   links={browseMenuLinks}
+                  className="mr-2 -ml-1"
                 />
                 <RoleDropdown
                   prefixWord="For"
