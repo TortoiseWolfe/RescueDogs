@@ -159,7 +159,7 @@
 [data-theme='trusted-care-light'] .site-header {
   --color-primary: #f97316;
   --color-primary-content: #ffffff;
-  --noise: 0; /* flat orange so axe contrast reads #f97316, not noise-darkened */
+  --noise: 0; /* flat orange header face — no grain on chrome band */
   box-shadow: 0 8px 24px rgba(30, 58, 138, 0.12);
 }
 
@@ -184,21 +184,26 @@
     -1px 0 0 #1e3a8a;
 }
 
-/* Desktop role-menu triggers (#269): accent-content on flat orange (AAA ≥7:1).
- * Navy #1e3a8a is only ~3.7:1 on #f97316; theme accent-content is #040c14 at 7:1. */
+/* Desktop role-menu triggers (#269): white + navy outline at rest; navy fill on hover. */
 .site-header .nav-role-trigger {
-  color: var(--color-accent-content);
+  color: #ffffff;
 }
 
 .site-header .nav-role-trigger .nav-role-prefix,
 .site-header .nav-role-trigger .nav-role-accent {
-  color: var(--color-accent-content);
-  -webkit-text-stroke: 0;
-  text-shadow: none;
+  color: #ffffff;
+  -webkit-text-stroke: 0.6px #1e3a8a;
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 1px #1e3a8a,
+    0 1px 0 #1e3a8a,
+    0 -1px 0 #1e3a8a,
+    1px 0 0 #1e3a8a,
+    -1px 0 0 #1e3a8a;
 }
 
 .site-header .nav-role-trigger .nav-role-chevron {
-  color: var(--color-accent-content);
+  color: #1e3a8a;
   -webkit-text-stroke: 0;
   text-shadow: none;
 }
@@ -212,18 +217,15 @@
 .site-header .nav-role-trigger:hover .nav-role-accent,
 .site-header .nav-role-trigger.nav-role-trigger-active .nav-role-prefix,
 .site-header .nav-role-trigger.nav-role-trigger-active .nav-role-accent {
-  color: #000000;
-  -webkit-text-stroke: 0;
-  paint-order: initial;
-  text-decoration: underline;
-  text-decoration-color: #000000;
-  text-underline-offset: 3px;
+  color: #1e3a8a;
+  -webkit-text-stroke: 0.35px #172554;
+  paint-order: stroke fill;
   text-shadow: none;
 }
 
 .site-header .nav-role-trigger:hover .nav-role-chevron,
 .site-header .nav-role-trigger.nav-role-trigger-active .nav-role-chevron {
-  color: #000000;
+  color: #1e3a8a;
 }
 
 /* Desktop role dropdown panels (#269 / Lovable refinements). */
