@@ -85,3 +85,49 @@ export async function uploadPetPhoto(
 
   return { url: urlData.publicUrl };
 }
+
+/**
+ * Upload a processed photo blob (e.g. after crop).
+ */
+export async function uploadPetPhotoBlob(
+  shelterId: string,
+  folderId: string,
+  blob: Blob,
+  contentType = 'image/webp'
+): Promise<PetPhotoUploadResult> {
+  if (blob.size > MAX_BYTES) {
+    const sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
+    return { url: '', error: `File size (${sizeMB}MB) exceeds the 5MB limit.` };
+  }
+
+  const supabase = createClient();
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+
+  if (sessionError || !session) {
+    return { url: '', error: 'Auth session missing — please sign in again' };
+  }
+
+  const ext = extensionForMime(contentType);
+  const filePath = `${shelterId}/${folderId}/${Date.now()}.${ext}`;
+
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from(BUCKET)
+    .upload(filePath, blob, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType,
+    });
+
+  if (uploadError) {
+    return { url: '', error: uploadError.message };
+  }
+
+  const { data: urlData } = supabase.storage
+    .from(BUCKET)
+    .getPublicUrl(uploadData.path);
+
+  return { url: urlData.publicUrl };
+}

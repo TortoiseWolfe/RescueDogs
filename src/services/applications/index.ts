@@ -13,3 +13,4 @@ export {
 } from './shelter-application-service';
 export { ShelterPetService } from './shelter-pet-service';
 export type { PetWriteInput } from './shelter-pet-service';
+export { PetPhotoService, MAX_PET_PHOTOS } from './pet-photo-service';
