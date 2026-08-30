@@ -49,7 +49,7 @@ function MyApplicationsContent() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">My Applications</h1>
         <Link href="/adopt" className="btn btn-primary btn-sm">
-          Apply to adopt
+          Apply to Adopt
         </Link>
       </div>
 
