@@ -7,12 +7,9 @@ import { supabase } from '@/lib/supabase/client';
 import { ShelterPetService } from '@/services/applications';
 import { uploadPetPhoto } from '@/lib/pet-photos/upload';
 import { useShelterMembership } from '../../ShelterGate';
-import type {
-  PetSex,
-  PetSize,
-  PetSpecies,
-  PetStatus,
-} from '@/types/applications';
+import type { PetSex, PetSize, PetSpecies } from '@/types/applications';
+import { combineAgeYears } from '@/lib/pet-age';
+import { PetAgeFields } from '../PetAgeFields';
 
 /**
  * Create a pet for the staff member's shelter (#110).
@@ -24,9 +21,9 @@ export default function NewShelterPetPage() {
   const [species, setSpecies] = useState<PetSpecies>('dog');
   const [breed, setBreed] = useState('');
   const [sex, setSex] = useState<PetSex | ''>('');
-  const [ageYears, setAgeYears] = useState('');
+  const [ageYearsPart, setAgeYearsPart] = useState(0);
+  const [ageMonthsPart, setAgeMonthsPart] = useState(0);
   const [size, setSize] = useState<PetSize | ''>('');
-  const [status, setStatus] = useState<PetStatus>('available');
   const [notes, setNotes] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -47,9 +44,8 @@ export default function NewShelterPetPage() {
         species,
         breed: breed || null,
         sex: sex || null,
-        age_years: ageYears ? Number(ageYears) : null,
+        age_years: combineAgeYears(ageYearsPart, ageMonthsPart),
         size: size || null,
-        status,
         notes: notes || null,
       });
 
@@ -132,48 +128,30 @@ export default function NewShelterPetPage() {
             </select>
           </label>
 
-          <label className="form-control w-full">
-            <span className="label-text">Age (years)</span>
-            <input
-              type="number"
-              min={0}
-              max={40}
-              step={0.5}
-              className="input input-bordered min-h-11 w-full"
-              value={ageYears}
-              onChange={(e) => setAgeYears(e.target.value)}
+          <div className="form-control w-full">
+            <span className="label-text">Age (optional)</span>
+            <PetAgeFields
+              years={ageYearsPart}
+              months={ageMonthsPart}
+              onYearsChange={setAgeYearsPart}
+              onMonthsChange={setAgeMonthsPart}
             />
-          </label>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <label className="form-control w-full">
-            <span className="label-text">Size</span>
-            <select
-              className="select select-bordered min-h-11 w-full"
-              value={size}
-              onChange={(e) => setSize(e.target.value as PetSize | '')}
-            >
-              <option value="">Unknown</option>
-              <option value="small">Small</option>
-              <option value="medium">Medium</option>
-              <option value="large">Large</option>
-            </select>
-          </label>
-
-          <label className="form-control w-full">
-            <span className="label-text">Status</span>
-            <select
-              className="select select-bordered min-h-11 w-full"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as PetStatus)}
-            >
-              <option value="available">Available</option>
-              <option value="pending">Pending</option>
-              <option value="adopted">Adopted</option>
-            </select>
-          </label>
-        </div>
+        <label className="form-control w-full">
+          <span className="label-text">Size</span>
+          <select
+            className="select select-bordered min-h-11 w-full"
+            value={size}
+            onChange={(e) => setSize(e.target.value as PetSize | '')}
+          >
+            <option value="">Unknown</option>
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </label>
 
         <label className="form-control w-full">
           <span className="label-text">Notes (optional)</span>

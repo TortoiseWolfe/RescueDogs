@@ -2650,7 +2650,7 @@ CREATE TABLE IF NOT EXISTS pets (
   species TEXT NOT NULL DEFAULT 'dog' CHECK (species IN ('dog', 'cat')),
   breed TEXT CHECK (length(breed) <= 100),
   sex TEXT CHECK (sex IN ('male', 'female')),
-  age_years NUMERIC(4,1) CHECK (age_years >= 0 AND age_years <= 40),
+  age_years NUMERIC(5,2) CHECK (age_years >= 0 AND age_years <= 40),
   size TEXT CHECK (size IN ('small', 'medium', 'large')),
   photo_url TEXT,
   status TEXT NOT NULL DEFAULT 'available'
@@ -2658,6 +2658,11 @@ CREATE TABLE IF NOT EXISTS pets (
   notes TEXT CHECK (notes IS NULL OR length(notes) <= 2000),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Widen age precision for years+months intake (#272); idempotent on existing DBs.
+ALTER TABLE pets
+  ALTER COLUMN age_years TYPE NUMERIC(5,2)
+  USING age_years::numeric(5,2);
 
 -- Idempotent for databases created before notes (#167)
 ALTER TABLE pets ADD COLUMN IF NOT EXISTS notes TEXT;

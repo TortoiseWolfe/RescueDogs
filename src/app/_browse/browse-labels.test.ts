@@ -46,6 +46,15 @@ describe('browse pet labels (#112)', () => {
     expect(basicsLabel(basePet)).toBe('Beagle mix · medium · 2 yr');
   });
 
+  it('formats months-only age (#272)', () => {
+    expect(
+      basicsLabel({
+        ...basePet,
+        age_years: 0.5,
+      })
+    ).toBe('Beagle mix · medium · 6 mo');
+  });
+
   it('uses placeholder when no basics', () => {
     expect(
       basicsLabel({

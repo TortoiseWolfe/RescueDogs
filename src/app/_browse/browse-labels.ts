@@ -1,4 +1,5 @@
 import type { BrowsePet } from '@/types/applications';
+import { formatPetAgeLabel } from '@/lib/pet-age';
 
 export function locationLabel(pet: BrowsePet): string | null {
   const city = pet.shelters?.city?.trim();
@@ -10,10 +11,8 @@ export function locationLabel(pet: BrowsePet): string | null {
 }
 
 export function basicsLabel(pet: BrowsePet): string {
-  const parts = [
-    pet.breed,
-    pet.size,
-    pet.age_years != null ? `${pet.age_years} yr` : null,
-  ].filter(Boolean);
+  const parts = [pet.breed, pet.size, formatPetAgeLabel(pet.age_years)].filter(
+    Boolean
+  );
   return parts.length > 0 ? parts.join(' · ') : 'Details coming soon';
 }
