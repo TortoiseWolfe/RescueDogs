@@ -108,8 +108,12 @@ describe('Migration Integration Test', () => {
   });
 
   afterEach(async () => {
-    await fs.rm(testBlogDir, { recursive: true, force: true });
-    await fs.rm(backupDir, { recursive: true, force: true });
+    try {
+      await fs.rm(testBlogDir, { recursive: true, force: true, maxRetries: 3 });
+      await fs.rm(backupDir, { recursive: true, force: true, maxRetries: 3 });
+    } catch {
+      // Ignore cleanup races when the full suite shares the container filesystem.
+    }
   });
 
   describe('Migration of Existing Blog Posts', () => {

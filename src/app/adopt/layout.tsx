@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Apply to adopt - Raised Paws',
+  title: 'Apply to Adopt - Raised Paws',
   description:
     'Submit your pet adoption application and track status live with Raised Paws.',
 };
