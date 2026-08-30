@@ -1,15 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { ShelterPetService } from '@/services/applications';
-import { uploadPetPhoto } from '@/lib/pet-photos/upload';
 import { useShelterMembership } from '../../ShelterGate';
 import type { PetSex, PetSize, PetSpecies } from '@/types/applications';
 import { combineAgeYears } from '@/lib/pet-age';
+import { PET_SEX_OPTIONS } from '@/lib/pet-sex';
 import { PetAgeFields } from '../PetAgeFields';
+import {
+  PetPhotoManager,
+  type PetPhotoManagerHandle,
+} from '../PetPhotoManager';
 
 /**
  * Create a pet for the staff member's shelter (#110).
@@ -25,9 +29,9 @@ export default function NewShelterPetPage() {
   const [ageMonthsPart, setAgeMonthsPart] = useState(0);
   const [size, setSize] = useState<PetSize | ''>('');
   const [notes, setNotes] = useState('');
-  const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const photoManagerRef = useRef<PetPhotoManagerHandle>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,17 +53,19 @@ export default function NewShelterPetPage() {
         notes: notes || null,
       });
 
-      if (file) {
-        const uploaded = await uploadPetPhoto(shelterId, pet.id, file);
-        if (uploaded.error) {
+      if (photoManagerRef.current?.hasStagedPhotos()) {
+        try {
+          await photoManagerRef.current.uploadStaged(pet.id);
+        } catch (photoErr) {
           setError(
-            `Pet saved, but photo failed: ${uploaded.error}. You can edit to retry.`
+            `Pet saved, but photos failed: ${
+              photoErr instanceof Error ? photoErr.message : 'upload error'
+            }. You can edit to retry.`
           );
           setSaving(false);
           router.push(`/shelter/pets/edit?id=${pet.id}`);
           return;
         }
-        await service.updatePet(pet.id, { photo_url: uploaded.url });
       }
 
       router.push('/shelter/pets');
@@ -123,20 +129,20 @@ export default function NewShelterPetPage() {
               onChange={(e) => setSex(e.target.value as PetSex | '')}
             >
               <option value="">Unknown</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
+              {PET_SEX_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </label>
 
-          <div className="form-control w-full">
-            <span className="label-text">Age (optional)</span>
-            <PetAgeFields
-              years={ageYearsPart}
-              months={ageMonthsPart}
-              onYearsChange={setAgeYearsPart}
-              onMonthsChange={setAgeMonthsPart}
-            />
-          </div>
+          <PetAgeFields
+            years={ageYearsPart}
+            months={ageMonthsPart}
+            onYearsChange={setAgeYearsPart}
+            onMonthsChange={setAgeMonthsPart}
+          />
         </div>
 
         <label className="form-control w-full">
@@ -165,17 +171,12 @@ export default function NewShelterPetPage() {
           />
         </label>
 
-        <label className="form-control w-full">
-          <span className="label-text">
-            Photo (JPEG, PNG, or WebP, max 5MB)
-          </span>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="file-input file-input-bordered min-h-11 w-full"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          />
-        </label>
+        <PetPhotoManager
+          ref={photoManagerRef}
+          shelterId={shelterId}
+          petId={null}
+          disabled={saving}
+        />
 
         {error && (
           <div role="alert" className="alert alert-error">

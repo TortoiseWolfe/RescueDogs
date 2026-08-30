@@ -25,12 +25,12 @@ export function PetAgeFields({
   return (
     <div className="grid grid-cols-2 gap-2">
       <label className="form-control w-full">
-        <span className="label-text">Age (years)</span>
+        <span className="label-text">Years</span>
         <select
           className="select select-bordered min-h-11 w-full"
           value={years}
           onChange={(e) => onYearsChange(Number(e.target.value))}
-          aria-label="Age in years"
+          aria-label="Years"
         >
           {YEAR_OPTIONS.map((y) => (
             <option key={y} value={y}>

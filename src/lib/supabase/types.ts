@@ -746,6 +746,38 @@ export type Database = {
           },
         ];
       };
+      pet_photos: {
+        Row: {
+          created_at: string;
+          id: string;
+          pet_id: string;
+          sort_order: number;
+          url: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          pet_id: string;
+          sort_order: number;
+          url: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          pet_id?: string;
+          sort_order?: number;
+          url?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'pet_photos_pet_id_fkey';
+            columns: ['pet_id'];
+            isOneToOne: false;
+            referencedRelation: 'pets';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       rate_limit_attempts: {
         Row: {
           attempt_count: number;

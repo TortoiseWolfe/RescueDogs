@@ -5,12 +5,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { ShelterPetService } from '@/services/applications';
-import { uploadPetPhoto } from '@/lib/pet-photos/upload';
+import { PetPhotoService } from '@/services/applications/pet-photo-service';
 import { combineAgeYears, splitAgeYears } from '@/lib/pet-age';
+import { PET_SEX_OPTIONS } from '@/lib/pet-sex';
 import { useShelterMembership } from '../../ShelterGate';
 import { PetAgeFields } from '../PetAgeFields';
+import { PetPhotoManager } from '../PetPhotoManager';
 import type {
   Pet,
+  PetPhoto,
   PetSex,
   PetSize,
   PetSpecies,
@@ -38,7 +41,7 @@ function EditShelterPetContent() {
   const [size, setSize] = useState<PetSize | ''>('');
   const [status, setStatus] = useState<PetStatus>('available');
   const [notes, setNotes] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [photos, setPhotos] = useState<PetPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -61,9 +64,11 @@ function EditShelterPetContent() {
     (async () => {
       try {
         const service = new ShelterPetService(supabase);
-        const [row, appCount] = await Promise.all([
+        const photoService = new PetPhotoService(supabase);
+        const [row, appCount, petPhotos] = await Promise.all([
           service.getPet(petId),
           service.getPetApplicationCount(petId),
+          photoService.listPhotos(petId),
         ]);
         if (cancelled) return;
         if (!row || row.shelter_id !== shelterId) {
@@ -83,6 +88,7 @@ function EditShelterPetContent() {
         setSize(row.size ?? '');
         setStatus(row.status);
         setNotes(row.notes ?? '');
+        setPhotos(petPhotos);
       } catch {
         if (!cancelled) setError('Could not load pet.');
       } finally {
@@ -104,18 +110,6 @@ function EditShelterPetContent() {
     setError(null);
     try {
       const service = new ShelterPetService(supabase);
-      let photoUrl = pet.photo_url;
-
-      if (file) {
-        const uploaded = await uploadPetPhoto(shelterId, pet.id, file);
-        if (uploaded.error) {
-          setError(uploaded.error);
-          setSaving(false);
-          return;
-        }
-        photoUrl = uploaded.url;
-      }
-
       await service.updatePet(pet.id, {
         name,
         species,
@@ -124,7 +118,6 @@ function EditShelterPetContent() {
         age_years: combineAgeYears(ageYearsPart, ageMonthsPart),
         size: size || null,
         status,
-        photo_url: photoUrl,
         notes: notes || null,
       });
 
@@ -182,14 +175,12 @@ function EditShelterPetContent() {
             </Link>
           </div>
 
-          {pet.photo_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={pet.photo_url}
-              alt=""
-              className="h-40 w-40 rounded-lg object-cover"
-            />
-          )}
+          <PetPhotoManager
+            shelterId={shelterId}
+            petId={pet.id}
+            initialPhotos={photos}
+            disabled={saving || deleting}
+          />
 
           <form onSubmit={onSubmit} className="flex flex-col gap-6">
             <label className="form-control w-full">
@@ -234,20 +225,20 @@ function EditShelterPetContent() {
                   onChange={(e) => setSex(e.target.value as PetSex | '')}
                 >
                   <option value="">Unknown</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
+                  {PET_SEX_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </label>
 
-              <div className="form-control w-full">
-                <span className="label-text">Age (optional)</span>
-                <PetAgeFields
-                  years={ageYearsPart}
-                  months={ageMonthsPart}
-                  onYearsChange={setAgeYearsPart}
-                  onMonthsChange={setAgeMonthsPart}
-                />
-              </div>
+              <PetAgeFields
+                years={ageYearsPart}
+                months={ageMonthsPart}
+                onYearsChange={setAgeYearsPart}
+                onMonthsChange={setAgeMonthsPart}
+              />
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -288,18 +279,6 @@ function EditShelterPetContent() {
                 maxLength={2000}
                 rows={4}
                 placeholder="e.g. Good with kids; needs a quiet home and daily walks."
-              />
-            </label>
-
-            <label className="form-control w-full">
-              <span className="label-text">
-                Replace photo (JPEG, PNG, or WebP, max 5MB)
-              </span>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="file-input file-input-bordered min-h-11 w-full"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               />
             </label>
 
