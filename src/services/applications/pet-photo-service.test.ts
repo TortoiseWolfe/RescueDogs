@@ -47,6 +47,17 @@ describe('PetPhotoService (#273)', () => {
     expect(supabase.from).toHaveBeenCalledWith('pet_photos');
   });
 
+  it('returns empty list when pet_photos table is unavailable', async () => {
+    const from = mockFrom({
+      data: null,
+      error: { message: 'relation pet_photos does not exist' },
+    });
+    const supabase = { from: vi.fn().mockReturnValue(from) } as any;
+    const service = new PetPhotoService(supabase);
+    const result = await service.listPhotos(petId);
+    expect(result).toEqual([]);
+  });
+
   it('syncs primary photo_url from first gallery row', async () => {
     const listFrom = mockFrom({
       data: [
