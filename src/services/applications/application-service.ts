@@ -8,6 +8,7 @@ import type {
   ApplicationWithPetAndHistory,
   AvailablePet,
   BrowsePet,
+  BrowsePetDetail,
   PetSpecies,
   ProfileSnapshot,
 } from '@/types/applications';
@@ -71,7 +72,7 @@ export class ApplicationService {
     species: PetSpecies,
     filters: BrowseLocationFilters = {}
   ): Promise<BrowsePet[]> {
-    const { state, zip } = normalizeBrowseLocationFilters(filters);
+    const { state, zip, shelterId } = normalizeBrowseLocationFilters(filters);
     const hasLocation = Boolean(state || zip);
     const shelterEmbed = hasLocation
       ? 'shelters!inner(name, city, state, zip)'
@@ -85,6 +86,9 @@ export class ApplicationService {
       .eq('status', 'available')
       .eq('species', species);
 
+    if (shelterId) {
+      query = query.eq('shelter_id', shelterId);
+    }
     if (state) {
       query = query.eq('shelters.state', state);
     }
@@ -97,6 +101,38 @@ export class ApplicationService {
     if (error) throw error;
     // Generated Database types treat FK embeds as arrays; PostgREST returns an object.
     return (data ?? []) as unknown as BrowsePet[];
+  }
+
+  /**
+   * Public pet detail (#274): available pet with shelter + gallery when available.
+   * Gallery query is separate so detail works before #273 migration is applied.
+   */
+  async getBrowsePet(petId: string): Promise<BrowsePetDetail | null> {
+    const { data, error } = await this.supabase
+      .from('pets')
+      .select(
+        `id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, created_at,
+        shelters(name, city, state, zip)`
+      )
+      .eq('id', petId)
+      .eq('status', 'available')
+      .maybeSingle();
+
+    if (error) throw error;
+    const pet = (data as unknown as BrowsePetDetail) ?? null;
+    if (!pet) return null;
+
+    const { data: photos, error: photosError } = await this.supabase
+      .from('pet_photos')
+      .select('url, sort_order')
+      .eq('pet_id', petId)
+      .order('sort_order', { ascending: true });
+
+    if (!photosError && photos && photos.length > 0) {
+      pet.pet_photos = photos;
+    }
+
+    return pet;
   }
 
   /** The user's saved universal-application answers, if any. */

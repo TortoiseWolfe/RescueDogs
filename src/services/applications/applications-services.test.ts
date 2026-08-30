@@ -129,6 +129,80 @@ describe('ApplicationService', () => {
     expect(builder.eq).toHaveBeenCalledWith('shelters.zip', '28801');
   });
 
+  it('getBrowsePets filters by shelter id (#274)', async () => {
+    const builder = createQueryBuilder({ data: [], error: null });
+    mock.from.mockReturnValue(builder);
+
+    await service.getBrowsePets('dog', {
+      shelterId: ' 22222222-2222-2222-2222-222222222201 ',
+    });
+
+    expect(builder.eq).toHaveBeenCalledWith(
+      'shelter_id',
+      '22222222-2222-2222-2222-222222222201'
+    );
+  });
+
+  it('getBrowsePet loads available pet with gallery when present (#274)', async () => {
+    const pet = {
+      id: PET_ID,
+      name: 'Biscuit',
+      species: 'dog',
+      status: 'available',
+      shelters: {
+        name: 'Second Chance',
+        city: 'Asheville',
+        state: 'NC',
+        zip: '28801',
+      },
+    };
+    const petBuilder = createQueryBuilder({ data: pet, error: null });
+    const photosBuilder = createQueryBuilder({
+      data: [{ url: 'https://example.com/a.webp', sort_order: 0 }],
+      error: null,
+    });
+    mock.from.mockImplementation((table: string) => {
+      if (table === 'pets') return petBuilder;
+      if (table === 'pet_photos') return photosBuilder;
+      throw new Error(`unexpected table ${table}`);
+    });
+
+    const result = await service.getBrowsePet(PET_ID);
+
+    expect(mock.from).toHaveBeenCalledWith('pets');
+    expect(mock.from).toHaveBeenCalledWith('pet_photos');
+    expect(petBuilder.eq).toHaveBeenCalledWith('id', PET_ID);
+    expect(petBuilder.eq).toHaveBeenCalledWith('status', 'available');
+    expect(result?.pet_photos).toHaveLength(1);
+    expect(result).toMatchObject(pet);
+  });
+
+  it('getBrowsePet returns pet without gallery when pet_photos unavailable (#274)', async () => {
+    const pet = {
+      id: PET_ID,
+      name: 'Biscuit',
+      species: 'dog',
+      status: 'available',
+      photo_url: 'https://example.com/legacy.jpg',
+      shelters: { name: 'Second Chance', city: null, state: null, zip: null },
+    };
+    const petBuilder = createQueryBuilder({ data: pet, error: null });
+    const photosBuilder = createQueryBuilder({
+      data: null,
+      error: { message: 'relation pet_photos does not exist' },
+    });
+    mock.from.mockImplementation((table: string) => {
+      if (table === 'pets') return petBuilder;
+      if (table === 'pet_photos') return photosBuilder;
+      throw new Error(`unexpected table ${table}`);
+    });
+
+    const result = await service.getBrowsePet(PET_ID);
+
+    expect(result).toMatchObject(pet);
+    expect(result?.pet_photos).toBeUndefined();
+  });
+
   it('getAdopterProfile returns null when no profile exists', async () => {
     const builder = createQueryBuilder({ data: null, error: null });
     mock.from.mockReturnValue(builder);

@@ -58,6 +58,8 @@ export interface BrowseLocationFilters {
   state?: string;
   /** Exact shelter ZIP (trimmed). */
   zip?: string;
+  /** Shelter UUID for rescue-scoped listing (#274). */
+  shelterId?: string;
 }
 
 /** Uppercase + trim 2-letter codes; drop empty. */
@@ -74,14 +76,23 @@ export function normalizeZip(raw?: string | null): string | undefined {
   return value;
 }
 
+/** Trim shelter id; drop empty. */
+export function normalizeShelterId(raw?: string | null): string | undefined {
+  const value = raw?.trim();
+  if (!value) return undefined;
+  return value;
+}
+
 export function normalizeBrowseLocationFilters(
   filters: BrowseLocationFilters
 ): BrowseLocationFilters {
   const state = normalizeState(filters.state);
   const zip = normalizeZip(filters.zip);
+  const shelterId = normalizeShelterId(filters.shelterId);
   return {
     ...(state ? { state } : {}),
     ...(zip ? { zip } : {}),
+    ...(shelterId ? { shelterId } : {}),
   };
 }
 
@@ -89,5 +100,5 @@ export function hasBrowseLocationFilters(
   filters: BrowseLocationFilters
 ): boolean {
   const normalized = normalizeBrowseLocationFilters(filters);
-  return Boolean(normalized.state || normalized.zip);
+  return Boolean(normalized.state || normalized.zip || normalized.shelterId);
 }

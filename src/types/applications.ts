@@ -153,6 +153,17 @@ export interface BrowsePet extends Pet {
   } | null;
 }
 
+/** Gallery row embedded on public pet detail (#274 / #273). */
+export interface BrowsePetPhotoEmbed {
+  url: string;
+  sort_order: number;
+}
+
+/** Public pet detail page payload (#274). */
+export interface BrowsePetDetail extends BrowsePet {
+  pet_photos?: BrowsePetPhotoEmbed[] | null;
+}
+
 export type HousingType =
   | 'own_house'
   | 'own_condo'
