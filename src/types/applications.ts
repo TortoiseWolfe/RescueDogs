@@ -103,7 +103,7 @@ export interface ShelterMembership {
 }
 
 export type PetSpecies = 'dog' | 'cat';
-export type PetSex = 'male' | 'female';
+export type PetSex = 'male' | 'female' | 'neutered_male' | 'neutered_female';
 export type PetSize = 'small' | 'medium' | 'large';
 export type PetStatus = 'available' | 'pending' | 'adopted';
 
@@ -120,6 +120,15 @@ export interface Pet {
   status: PetStatus;
   /** Public short bio; omit in UI when null/empty (#167). */
   notes: string | null;
+  created_at: string;
+}
+
+/** Gallery row for a pet (#273). */
+export interface PetPhoto {
+  id: string;
+  pet_id: string;
+  url: string;
+  sort_order: number;
   created_at: string;
 }
 

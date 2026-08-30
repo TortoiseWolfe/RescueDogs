@@ -2649,7 +2649,14 @@ CREATE TABLE IF NOT EXISTS pets (
   name TEXT NOT NULL CHECK (length(name) >= 1 AND length(name) <= 60),
   species TEXT NOT NULL DEFAULT 'dog' CHECK (species IN ('dog', 'cat')),
   breed TEXT CHECK (length(breed) <= 100),
-  sex TEXT CHECK (sex IN ('male', 'female')),
+  sex TEXT CHECK (
+    sex IS NULL OR sex IN (
+      'male',
+      'female',
+      'neutered_male',
+      'neutered_female'
+    )
+  ),
   age_years NUMERIC(5,2) CHECK (age_years >= 0 AND age_years <= 40),
   size TEXT CHECK (size IN ('small', 'medium', 'large')),
   photo_url TEXT,
@@ -2679,6 +2686,40 @@ CREATE INDEX IF NOT EXISTS idx_pets_shelter_available
 
 COMMENT ON TABLE pets IS 'Pet records for apply / browse / shelter staff. notes = public short bio (#167).';
 COMMENT ON COLUMN pets.notes IS 'Public short bio for browse cards; staff-editable; omit UI when null/empty (#167)';
+
+-- Pet sex options expanded for shelter intake (#273)
+ALTER TABLE pets DROP CONSTRAINT IF EXISTS pets_sex_check;
+ALTER TABLE pets ADD CONSTRAINT pets_sex_check CHECK (
+  sex IS NULL OR sex IN (
+    'male',
+    'female',
+    'neutered_male',
+    'neutered_female'
+  )
+);
+
+CREATE TABLE IF NOT EXISTS pet_photos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  pet_id UUID NOT NULL REFERENCES pets(id) ON DELETE CASCADE,
+  url TEXT NOT NULL,
+  sort_order SMALLINT NOT NULL DEFAULT 0
+    CHECK (sort_order >= 0 AND sort_order < 4),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (pet_id, sort_order)
+);
+
+CREATE INDEX IF NOT EXISTS idx_pet_photos_pet_id ON pet_photos(pet_id);
+
+COMMENT ON TABLE pet_photos IS 'Up to 4 gallery images per pet; sort_order 0 = primary browse photo (#273)';
+
+-- Backfill gallery from legacy photo_url (idempotent)
+INSERT INTO pet_photos (pet_id, url, sort_order)
+SELECT id, photo_url, 0
+FROM pets
+WHERE photo_url IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM pet_photos pp WHERE pp.pet_id = pets.id AND pp.sort_order = 0
+  );
 
 CREATE TABLE IF NOT EXISTS adopter_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -3279,6 +3320,39 @@ DROP POLICY IF EXISTS "Shelter staff delete pets" ON pets;
 CREATE POLICY "Shelter staff delete pets" ON pets
   FOR DELETE TO authenticated
   USING (is_shelter_staff(shelter_id));
+
+ALTER TABLE pet_photos ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public view pet photos for available pets" ON pet_photos;
+CREATE POLICY "Public view pet photos for available pets" ON pet_photos
+  FOR SELECT TO public
+  USING (
+    EXISTS (
+      SELECT 1 FROM pets p
+      WHERE p.id = pet_photos.pet_id AND p.status = 'available'
+    )
+  );
+
+DROP POLICY IF EXISTS "Authenticated view pet photos" ON pet_photos;
+CREATE POLICY "Authenticated view pet photos" ON pet_photos
+  FOR SELECT TO authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS "Shelter staff manage pet photos" ON pet_photos;
+CREATE POLICY "Shelter staff manage pet photos" ON pet_photos
+  FOR ALL TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM pets p
+      WHERE p.id = pet_photos.pet_id AND is_shelter_staff(p.shelter_id)
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM pets p
+      WHERE p.id = pet_photos.pet_id AND is_shelter_staff(p.shelter_id)
+    )
+  );
 
 -- pet-photos storage: first path segment = shelter_id (#110)
 -- Uses split_part (not storage.foldername) — same rationale as avatars.
