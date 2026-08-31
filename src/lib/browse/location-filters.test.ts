@@ -13,17 +13,26 @@ describe('browse location filters (#111)', () => {
     expect(normalizeState(null)).toBeUndefined();
   });
 
-  it('keeps exact ZIP after trim', () => {
+  it('normalizes ZIP to five digits for radius center (#280)', () => {
     expect(normalizeZip(' 28801 ')).toBe('28801');
-    expect(normalizeZip('28801-1234')).toBe('28801-1234');
+    expect(normalizeZip('28801-1234')).toBe('28801');
     expect(normalizeZip('   ')).toBeUndefined();
+    expect(normalizeZip('288')).toBeUndefined();
   });
 
   it('drops empty fields from filter objects', () => {
     expect(
-      normalizeBrowseLocationFilters({ state: ' nc ', zip: '  ' })
+      normalizeBrowseLocationFilters({ state: ' nc ', centerZip: '  ' })
     ).toEqual({ state: 'NC' });
-    expect(hasBrowseLocationFilters({ state: '', zip: '' })).toBe(false);
+    expect(
+      normalizeBrowseLocationFilters({
+        centerZip: '62269',
+        maxMiles: 50,
+        shelterId: 'abc',
+      })
+    ).toEqual({ centerZip: '62269', maxMiles: 50, shelterId: 'abc' });
+    expect(hasBrowseLocationFilters({ state: '', centerZip: '' })).toBe(false);
     expect(hasBrowseLocationFilters({ state: 'NC' })).toBe(true);
+    expect(hasBrowseLocationFilters({ maxMiles: 25 })).toBe(true);
   });
 });
