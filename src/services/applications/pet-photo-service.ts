@@ -25,7 +25,8 @@ export class PetPhotoService {
       .order('sort_order', { ascending: true });
 
     if (error) {
-      throw new Error(`Failed to list pet photos: ${error.message}`);
+      // Gallery table may not exist until #273 migration is applied on Cloud.
+      return [];
     }
     return (data ?? []) as PetPhoto[];
   }
