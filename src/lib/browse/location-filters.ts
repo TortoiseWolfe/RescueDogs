@@ -56,8 +56,10 @@ export const US_STATE_OPTIONS: ReadonlyArray<{ code: string; name: string }> = [
 export interface BrowseLocationFilters {
   /** Two-letter state/territory code, or empty for any. */
   state?: string;
-  /** Exact shelter ZIP (trimmed). */
-  zip?: string;
+  /** Adopter center ZIP for mile-radius filter (#280). */
+  centerZip?: string;
+  /** Max miles from centerZip; omit for any distance. */
+  maxMiles?: number;
   /** Shelter UUID for rescue-scoped listing (#274). */
   shelterId?: string;
 }
@@ -69,11 +71,11 @@ export function normalizeState(raw?: string | null): string | undefined {
   return value;
 }
 
-/** Exact ZIP match after trim (issue #111 — no radius). */
+/** Legacy exact ZIP (#111); URL ?zip= maps to centerZip in reader (#280). */
 export function normalizeZip(raw?: string | null): string | undefined {
-  const value = raw?.trim();
-  if (!value) return undefined;
-  return value;
+  const digits = raw?.replace(/\D/g, '') ?? '';
+  if (digits.length < 5) return undefined;
+  return digits.slice(0, 5);
 }
 
 /** Trim shelter id; drop empty. */
@@ -83,15 +85,25 @@ export function normalizeShelterId(raw?: string | null): string | undefined {
   return value;
 }
 
+function normalizeMaxMiles(raw?: number | string | null): number | undefined {
+  if (raw === '' || raw == null) return undefined;
+  const n = typeof raw === 'number' ? raw : Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return undefined;
+  return n;
+}
+
 export function normalizeBrowseLocationFilters(
-  filters: BrowseLocationFilters
+  filters: BrowseLocationFilters & { zip?: string }
 ): BrowseLocationFilters {
   const state = normalizeState(filters.state);
-  const zip = normalizeZip(filters.zip);
   const shelterId = normalizeShelterId(filters.shelterId);
+  const centerZip =
+    normalizeZip(filters.centerZip) ?? normalizeZip(filters.zip);
+  const maxMiles = normalizeMaxMiles(filters.maxMiles);
   return {
     ...(state ? { state } : {}),
-    ...(zip ? { zip } : {}),
+    ...(centerZip ? { centerZip } : {}),
+    ...(maxMiles ? { maxMiles } : {}),
     ...(shelterId ? { shelterId } : {}),
   };
 }
@@ -100,5 +112,10 @@ export function hasBrowseLocationFilters(
   filters: BrowseLocationFilters
 ): boolean {
   const normalized = normalizeBrowseLocationFilters(filters);
-  return Boolean(normalized.state || normalized.zip || normalized.shelterId);
+  return Boolean(
+    normalized.state ||
+      normalized.centerZip ||
+      normalized.maxMiles ||
+      normalized.shelterId
+  );
 }
