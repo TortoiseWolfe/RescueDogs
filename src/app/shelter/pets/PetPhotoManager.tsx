@@ -17,6 +17,12 @@ import {
   PET_PHOTO_ASPECT,
 } from '@/lib/pet-photos/image-processing';
 import {
+  clampPetPhotoZoom,
+  computeFitWholeImageZoom,
+  PET_PHOTO_MAX_ZOOM,
+  PET_PHOTO_MIN_ZOOM,
+} from '@/lib/pet-photos/crop-zoom';
+import {
   uploadPetPhotoBlob,
   validatePetPhotoFile,
 } from '@/lib/pet-photos/upload';
@@ -120,6 +126,19 @@ export const PetPhotoManager = forwardRef<
   const onCropComplete = useCallback((_area: Area, pixels: Area) => {
     setCroppedAreaPixels(pixels);
   }, []);
+
+  const onMediaLoaded = useCallback(
+    (mediaSize: { naturalWidth: number; naturalHeight: number }) => {
+      const fitZoom = computeFitWholeImageZoom(
+        mediaSize.naturalWidth,
+        mediaSize.naturalHeight,
+        PET_PHOTO_ASPECT
+      );
+      setZoom(fitZoom);
+      setCrop({ x: 0, y: 0 });
+    },
+    []
+  );
 
   function openFilePicker() {
     if (!canAddMore) return;
@@ -374,31 +393,39 @@ export const PetPhotoManager = forwardRef<
               Crop photo for listing
             </h3>
             <p className="text-base-content/70 mb-3 text-sm">
-              Drag to reposition. This matches how the photo appears on the
-              browse page.
+              Drag to reposition. Zoom out to include more of the photo — saved
+              images use the same 4:3 shape as browse cards.
             </p>
-            <div className="bg-base-200 relative mb-4 h-72 overflow-hidden rounded-lg sm:h-96">
+            <div className="bg-base-200 relative mb-4 h-80 overflow-hidden rounded-lg sm:h-[28rem]">
               <Cropper
                 image={imageSrc}
                 crop={crop}
                 zoom={zoom}
                 aspect={PET_PHOTO_ASPECT}
+                minZoom={PET_PHOTO_MIN_ZOOM}
+                maxZoom={PET_PHOTO_MAX_ZOOM}
                 onCropChange={setCrop}
-                onZoomChange={setZoom}
+                onZoomChange={(value) => setZoom(clampPetPhotoZoom(value))}
                 onCropComplete={onCropComplete}
+                onMediaLoaded={onMediaLoaded}
               />
             </div>
             <label className="mb-4 flex flex-col gap-2">
               <span className="text-sm font-medium">Zoom</span>
               <input
                 type="range"
-                min={1}
-                max={3}
-                step={0.1}
+                min={PET_PHOTO_MIN_ZOOM}
+                max={PET_PHOTO_MAX_ZOOM}
+                step={0.05}
                 value={zoom}
-                onChange={(e) => setZoom(Number(e.target.value))}
+                onChange={(e) =>
+                  setZoom(clampPetPhotoZoom(Number(e.target.value)))
+                }
                 className="range range-primary"
                 aria-label="Zoom"
+                aria-valuemin={PET_PHOTO_MIN_ZOOM}
+                aria-valuemax={PET_PHOTO_MAX_ZOOM}
+                aria-valuenow={zoom}
               />
             </label>
             <div className="modal-action flex flex-wrap gap-2">
