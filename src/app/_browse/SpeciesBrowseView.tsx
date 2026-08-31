@@ -2,9 +2,14 @@
 
 import { FormEvent, Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { ApplicationService } from '@/services/applications';
 import type { BrowsePet, PetSpecies } from '@/types/applications';
+import {
+  BROWSE_RADIUS_OPTIONS,
+  filterBrowsePetsByRadius,
+} from '@/lib/browse/distance';
 import {
   hasBrowseLocationFilters,
   normalizeBrowseLocationFilters,
@@ -25,7 +30,7 @@ const SPECIES_DB: Record<SpeciesBrowseKind, PetSpecies> = {
 const COPY: Record<
   SpeciesBrowseKind,
   {
-    title: string;
+    speciesLabel: string;
     emoji: string;
     description: string;
     emptyHeading: string;
@@ -35,58 +40,82 @@ const COPY: Record<
   }
 > = {
   dogs: {
-    title: 'Browse dogs',
+    speciesLabel: 'Dogs',
     emoji: '🐶',
     description:
       'Meet dogs available for adoption from partner shelters and rescues on Raised Paws.',
     emptyHeading: 'No dogs listed yet',
     emptyBody:
-      'When shelters and rescues add available dogs, you will find them here. Trait filters are coming later.',
+      'When shelters and rescues add available dogs, you will find them here.',
     listHeading: 'Dogs available now',
     petNoun: 'dog',
   },
   cats: {
-    title: 'Browse cats',
+    speciesLabel: 'Cats',
     emoji: '🐱',
     description:
       'Meet cats available for adoption from partner shelters and rescues on Raised Paws.',
     emptyHeading: 'No cats listed yet',
     emptyBody:
-      'When shelters and rescues add available cats, you will find them here. Trait filters are coming later.',
+      'When shelters and rescues add available cats, you will find them here.',
     listHeading: 'Cats available now',
     petNoun: 'cat',
   },
 };
 
-const heroCtaClassName =
-  'btn btn-lg min-h-11 border-0 bg-white px-8 font-bold text-[#1e3a8a] hover:bg-[#e8edf7]';
-
 function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
   const copy = COPY[species];
   const dbSpecies = SPECIES_DB[species];
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [pets, setPets] = useState<BrowsePet[]>([]);
+  const [shelterOptions, setShelterOptions] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filterError, setFilterError] = useState<string | null>(null);
+  const [draftShelterId, setDraftShelterId] = useState('');
   const [draftState, setDraftState] = useState('');
-  const [draftZip, setDraftZip] = useState('');
+  const [draftCenterZip, setDraftCenterZip] = useState('');
+  const [draftMaxMiles, setDraftMaxMiles] = useState<number | ''>('');
   const [filters, setFilters] = useState<BrowseLocationFilters>({});
   const [urlSynced, setUrlSynced] = useState(false);
   const filtersActive = hasBrowseLocationFilters(filters);
-  const shelterFilterActive = Boolean(
-    normalizeBrowseLocationFilters(filters).shelterId
-  );
-  const shelterName =
-    shelterFilterActive && pets[0]?.shelters?.name?.trim()
-      ? pets[0].shelters.name.trim()
-      : null;
+
+  const normalizedFilters = normalizeBrowseLocationFilters(filters);
+  const shelterName = normalizedFilters.shelterId
+    ? (shelterOptions.find((s) => s.id === normalizedFilters.shelterId)?.name ??
+      pets[0]?.shelters?.name?.trim() ??
+      null)
+    : null;
 
   const handleUrlParams = useCallback((urlFilters: BrowseLocationFilters) => {
     const normalized = normalizeBrowseLocationFilters(urlFilters);
     setFilters(normalized);
+    setDraftShelterId(normalized.shelterId ?? '');
     setDraftState(normalized.state ?? '');
-    setDraftZip(normalized.zip ?? '');
+    setDraftCenterZip(normalized.centerZip ?? '');
+    setDraftMaxMiles(normalized.maxMiles ?? '');
     setUrlSynced(true);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const service = new ApplicationService(supabase);
+        const options = await service.listBrowseShelters(dbSpecies);
+        if (!cancelled) setShelterOptions(options);
+      } catch {
+        if (!cancelled) setShelterOptions([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [dbSpecies]);
 
   useEffect(() => {
     if (!urlSynced) return;
@@ -95,7 +124,15 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
       setLoading(true);
       try {
         const service = new ApplicationService(supabase);
-        const rows = await service.getBrowsePets(dbSpecies, filters);
+        let rows = await service.getBrowsePets(dbSpecies, filters);
+        const normalized = normalizeBrowseLocationFilters(filters);
+        if (normalized.centerZip && normalized.maxMiles) {
+          rows = filterBrowsePetsByRadius(
+            rows,
+            normalized.centerZip,
+            normalized.maxMiles
+          );
+        }
         if (cancelled) return;
         setPets(rows);
         setError(null);
@@ -113,85 +150,106 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
     };
   }, [dbSpecies, filters, urlSynced]);
 
+  function syncFiltersToUrl(next: BrowseLocationFilters) {
+    const normalized = normalizeBrowseLocationFilters(next);
+    const params = new URLSearchParams();
+    if (normalized.shelterId) params.set('shelter', normalized.shelterId);
+    if (normalized.state) params.set('state', normalized.state);
+    if (normalized.centerZip) params.set('zip', normalized.centerZip);
+    if (normalized.maxMiles) params.set('miles', String(normalized.maxMiles));
+    const query = params.toString();
+    router.replace(query ? `${pathname ?? ''}?${query}` : (pathname ?? ''));
+  }
+
   function applyFilters(event: FormEvent) {
     event.preventDefault();
-    setFilters({
-      ...normalizeBrowseLocationFilters(filters),
-      state: draftState,
-      zip: draftZip,
-    });
+    setFilterError(null);
+
+    if (draftMaxMiles && !draftCenterZip.trim()) {
+      setFilterError('Enter your ZIP code to filter by distance.');
+      return;
+    }
+
+    const next: BrowseLocationFilters = {
+      ...(draftShelterId ? { shelterId: draftShelterId } : {}),
+      ...(draftState ? { state: draftState } : {}),
+      ...(draftCenterZip.trim() ? { centerZip: draftCenterZip } : {}),
+      ...(draftMaxMiles ? { maxMiles: draftMaxMiles } : {}),
+    };
+    setFilters(next);
+    syncFiltersToUrl(next);
   }
 
   function clearFilters() {
+    setDraftShelterId('');
     setDraftState('');
-    setDraftZip('');
-    setFilters(
-      normalizeBrowseLocationFilters(filters).shelterId
-        ? { shelterId: normalizeBrowseLocationFilters(filters).shelterId }
-        : {}
-    );
+    setDraftCenterZip('');
+    setDraftMaxMiles('');
+    setFilterError(null);
+    setFilters({});
+    router.replace(pathname ?? '');
   }
 
   const listTitle = shelterName
-    ? `${copy.petNoun === 'dog' ? 'Dogs' : 'Cats'} at ${shelterName}`
+    ? `${copy.speciesLabel} at ${shelterName}`
     : copy.listHeading;
 
   return (
     <>
       <BrowseSearchParamsReader onParams={handleUrlParams} />
       <main className="bg-base-100 min-h-full">
-        <section className="bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-14 text-white sm:px-6 lg:px-8 lg:py-16">
-          <div className="mx-auto max-w-3xl text-center lg:text-left">
-            <p className="font-friendly text-sm font-bold tracking-wide text-[#f97316] uppercase">
-              Browse pets
-            </p>
-            <h1 className="font-display mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl">
-              <span aria-hidden="true">{copy.emoji} </span>
-              {shelterName ? listTitle : copy.title}
-            </h1>
-            <p className="mt-4 text-lg leading-relaxed text-white/90 sm:text-xl">
+        <section className="bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-5 text-white sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl text-center lg:text-left">
+            {shelterName ? (
+              <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
+                <span aria-hidden="true">{copy.emoji} </span>
+                {listTitle}
+              </h1>
+            ) : (
+              <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
+                <span aria-hidden="true">{copy.emoji} </span>
+                Browse{' '}
+                <span className="text-[#f97316]">{copy.speciesLabel}</span>
+              </h1>
+            )}
+            <p className="mt-1 hidden text-sm leading-snug text-white/85 sm:block sm:text-base">
               {shelterName
                 ? `Available ${copy.petNoun}s from ${shelterName} on Raised Paws.`
                 : copy.description}
             </p>
-            <div className="mt-8">
-              <Link href="/adopt" className={heroCtaClassName}>
-                Apply to Adopt
-              </Link>
-            </div>
           </div>
         </section>
 
         <section
-          className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"
-          aria-labelledby="species-browse-heading"
+          className="border-base-300 bg-base-200 border-b px-4 py-3 sm:px-6 lg:px-8"
+          aria-label="Filter pets"
         >
-          <h2 id="species-browse-heading" className="sr-only">
-            {listTitle}
-          </h2>
-
-          {shelterFilterActive && (
-            <p className="text-base-content/80 mb-6 text-sm">
-              Showing pets from one rescue.{' '}
-              <Link
-                href={species === 'dogs' ? '/dogs' : '/cats'}
-                className="link link-primary"
-              >
-                Browse all {species}
-              </Link>
-            </p>
-          )}
-
-          <form
-            onSubmit={applyFilters}
-            className="bg-base-200 rounded-box mb-8 p-4"
-            aria-label="Filter by shelter location"
-          >
-            <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
+          <form onSubmit={applyFilters} className="mx-auto max-w-6xl">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,0.75fr)_minmax(0,1fr)_auto_auto] lg:items-end">
               <label className="form-control w-full">
-                <span className="label-text mb-1 font-medium">State</span>
+                <span className="label-text mb-1 text-xs font-medium sm:text-sm">
+                  Rescue / shelter
+                </span>
                 <select
-                  className="select select-bordered min-h-11 w-full"
+                  className="select select-bordered select-sm sm:select-md min-h-11 w-full"
+                  value={draftShelterId}
+                  onChange={(e) => setDraftShelterId(e.target.value)}
+                  aria-label="Rescue or shelter"
+                >
+                  <option value="">Any rescue</option>
+                  {shelterOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="form-control w-full">
+                <span className="label-text mb-1 text-xs font-medium sm:text-sm">
+                  State
+                </span>
+                <select
+                  className="select select-bordered select-sm sm:select-md min-h-11 w-full"
                   value={draftState}
                   onChange={(e) => setDraftState(e.target.value)}
                   aria-label="Shelter state"
@@ -205,44 +263,86 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                 </select>
               </label>
               <label className="form-control w-full">
-                <span className="label-text mb-1 font-medium">ZIP</span>
+                <span className="label-text mb-1 text-xs font-medium sm:text-sm">
+                  Your ZIP
+                </span>
                 <input
                   type="text"
                   inputMode="numeric"
                   autoComplete="postal-code"
-                  className="input input-bordered min-h-11 w-full"
-                  placeholder="Exact ZIP"
-                  value={draftZip}
-                  onChange={(e) => setDraftZip(e.target.value)}
-                  aria-label="Shelter ZIP code"
+                  className="input input-bordered input-sm sm:input-md min-h-11 w-full"
+                  placeholder="e.g. 62269"
+                  value={draftCenterZip}
+                  onChange={(e) => setDraftCenterZip(e.target.value)}
+                  aria-label="Your ZIP code"
                   maxLength={20}
                 />
               </label>
-              <button type="submit" className="btn btn-primary min-h-11">
-                Apply filters
+              <label className="form-control w-full">
+                <span className="label-text mb-1 text-xs font-medium sm:text-sm">
+                  Distance
+                </span>
+                <select
+                  className="select select-bordered select-sm sm:select-md min-h-11 w-full"
+                  value={draftMaxMiles === '' ? '' : String(draftMaxMiles)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setDraftMaxMiles(v === '' ? '' : Number(v));
+                  }}
+                  aria-label="Maximum distance"
+                >
+                  {BROWSE_RADIUS_OPTIONS.map((option) => (
+                    <option
+                      key={option.label}
+                      value={option.value === '' ? '' : String(option.value)}
+                    >
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="submit"
+                className="btn btn-primary btn-sm sm:btn-md min-h-11 w-full lg:w-auto"
+              >
+                Apply
               </button>
               <button
                 type="button"
-                className="btn btn-ghost min-h-11"
+                className="btn btn-ghost btn-sm sm:btn-md min-h-11 w-full lg:w-auto"
                 onClick={clearFilters}
                 disabled={
                   !filtersActive &&
+                  !draftShelterId &&
                   !draftState &&
-                  !draftZip &&
-                  !shelterFilterActive
+                  !draftCenterZip &&
+                  draftMaxMiles === ''
                 }
               >
                 Clear
               </button>
             </div>
-            <p className="text-base-content/70 mt-3 text-sm">
-              Matches the shelter&apos;s state and ZIP exactly — not a radius
-              search.
+            {filterError && (
+              <p role="alert" className="text-error mt-2 text-sm">
+                {filterError}
+              </p>
+            )}
+            <p className="text-base-content/60 mt-2 text-xs leading-snug">
+              Distance is approximate from your ZIP centroid, not driving miles.
             </p>
           </form>
+        </section>
+
+        <section
+          className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8"
+          aria-labelledby="species-browse-heading"
+        >
+          <h2 id="species-browse-heading" className="sr-only">
+            {listTitle}
+          </h2>
 
           {loading && (
-            <div className="flex min-h-[30vh] items-center justify-center">
+            <div className="flex min-h-[20vh] items-center justify-center">
               <span className="loading loading-spinner loading-lg" />
             </div>
           )}
@@ -260,8 +360,8 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                   No pets match these filters
                 </h2>
                 <p className="text-base-content/80 max-w-md">
-                  Try another state or ZIP, or clear the filters to see every
-                  available {copy.petNoun}.
+                  Try another rescue, state, or distance, or clear the filters
+                  to see every available {copy.petNoun}.
                 </p>
                 <button
                   type="button"
@@ -305,7 +405,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
           )}
 
           {!loading && !error && pets.length > 0 && (
-            <ul className="grid gap-4 sm:grid-cols-2">
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {pets.map((pet) => {
                 const place = locationLabel(pet);
                 const detailHref = petDetailPath(dbSpecies, pet.id);
@@ -373,7 +473,6 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
 
 /**
  * Shared browse chrome for /dogs and /cats (#112 / #111).
- * Lists available pets from Supabase; filters by shelter state/ZIP.
  */
 export default function SpeciesBrowseView({
   species,

@@ -65,15 +65,15 @@ export class ApplicationService {
 
   /**
    * Public browse list (#112 / #111): available pets for one species, with
-   * shelter city/state/zip. Optional filters join shelters and match exact
-   * state and/or zip (no radius).
+   * shelter city/state/zip. Server filters: state, shelterId. Mile radius applied
+   * client-side (#280) using shelter ZIP centroids.
    */
   async getBrowsePets(
     species: PetSpecies,
     filters: BrowseLocationFilters = {}
   ): Promise<BrowsePet[]> {
-    const { state, zip, shelterId } = normalizeBrowseLocationFilters(filters);
-    const hasLocation = Boolean(state || zip);
+    const { state, shelterId } = normalizeBrowseLocationFilters(filters);
+    const hasLocation = Boolean(state);
     const shelterEmbed = hasLocation
       ? 'shelters!inner(name, city, state, zip)'
       : 'shelters(name, city, state, zip)';
@@ -92,15 +92,42 @@ export class ApplicationService {
     if (state) {
       query = query.eq('shelters.state', state);
     }
-    if (zip) {
-      query = query.eq('shelters.zip', zip);
-    }
 
     const { data, error } = await query.order('name');
 
     if (error) throw error;
     // Generated Database types treat FK embeds as arrays; PostgREST returns an object.
     return (data ?? []) as unknown as BrowsePet[];
+  }
+
+  /** Shelters with at least one available pet for browse filter UI (#280). */
+  async listBrowseShelters(
+    species: PetSpecies
+  ): Promise<Array<{ id: string; name: string }>> {
+    const { data, error } = await this.supabase
+      .from('pets')
+      .select('shelter_id, shelters!inner(id, name)')
+      .eq('status', 'available')
+      .eq('species', species)
+      .order('name', { referencedTable: 'shelters' });
+
+    if (error) throw error;
+
+    const rows = (data ?? []) as unknown as Array<{
+      shelter_id: string;
+      shelters: { id: string; name: string };
+    }>;
+
+    const byId = new Map<string, string>();
+    for (const row of rows) {
+      const id = row.shelters?.id ?? row.shelter_id;
+      const name = row.shelters?.name?.trim();
+      if (id && name) byId.set(id, name);
+    }
+
+    return Array.from(byId.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /**

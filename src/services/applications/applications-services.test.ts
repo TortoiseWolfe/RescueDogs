@@ -116,17 +116,32 @@ describe('ApplicationService', () => {
     expect(result).toEqual(pets);
   });
 
-  it('getBrowsePets joins shelters and filters by state and ZIP (#111)', async () => {
+  it('getBrowsePets joins shelters and filters by state (#111)', async () => {
     const builder = createQueryBuilder({ data: [], error: null });
     mock.from.mockReturnValue(builder);
 
-    await service.getBrowsePets('dog', { state: ' nc ', zip: ' 28801 ' });
+    await service.getBrowsePets('dog', { state: ' nc ' });
 
     expect(builder.select).toHaveBeenCalledWith(
       expect.stringContaining('shelters!inner(name, city, state, zip)')
     );
     expect(builder.eq).toHaveBeenCalledWith('shelters.state', 'NC');
-    expect(builder.eq).toHaveBeenCalledWith('shelters.zip', '28801');
+  });
+
+  it('listBrowseShelters returns distinct shelters with available pets (#280)', async () => {
+    const rows = [
+      {
+        shelter_id: SHELTER_ID,
+        shelters: { id: SHELTER_ID, name: 'Second Chance' },
+      },
+    ];
+    const builder = createQueryBuilder({ data: rows, error: null });
+    mock.from.mockReturnValue(builder);
+
+    const result = await service.listBrowseShelters('dog');
+
+    expect(mock.from).toHaveBeenCalledWith('pets');
+    expect(result).toEqual([{ id: SHELTER_ID, name: 'Second Chance' }]);
   });
 
   it('getBrowsePets filters by shelter id (#274)', async () => {

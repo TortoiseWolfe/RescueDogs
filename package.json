@@ -137,6 +137,7 @@
     "to-vfile": "^8.0.0",
     "unified": "^11.0.5",
     "web-vitals": "^5.1.0",
+    "zipcodes": "^8.0.0",
     "zod": "^4.1.8"
   },
   "devDependencies": {
