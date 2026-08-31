@@ -2,7 +2,7 @@
 
 **Audience:** First pilot shelter staff (print, PDF, or Google Doc)  
 **Ops source:** [FIRST-PARTNER-ZOOM-RUNBOOK.md](./FIRST-PARTNER-ZOOM-RUNBOOK.md)  
-**Fill in:** `[Shelter Name]`, pet names, and per-pet Apply URLs after onboarding.
+**Fill in:** `[Shelter Name]`, pet names, per-dog detail URLs, and your rescue listing URL after onboarding.
 
 Copy everything below the line into a Doc for your partner. Keep Raised Paws
 internal notes out of their version.
@@ -30,6 +30,8 @@ internal notes out of their version.
 | **Applications** (check here for new apps) | https://raisedpaws.com/shelter                |
 | **Your pets**                              | https://raisedpaws.com/shelter/pets           |
 | **Add a pet**                              | https://raisedpaws.com/shelter/pets/new       |
+| **Browse dogs** (public)                   | https://raisedpaws.com/dogs                   |
+| **Browse cats** (public)                   | https://raisedpaws.com/cats                   |
 
 **Applicant track link** (give to adopters who already applied):  
 https://raisedpaws.com/applications
@@ -42,25 +44,37 @@ Petfinder still owns **Start Your Inquiry**, **See How You Match**, and
 **Become a Sponsor** — leave those alone. For **pilot dogs only**, add this
 block near the top of the narrative (after the hook sentence works well):
 
-> **Prefer to apply online with live status updates?** Use our adoption portal
-> for **[Dog Name]**:  
-> **https://raisedpaws.com/adopt?pet=_paste-uuid-here_**  
-> You’ll create an account, submit once, and see where your application stands.
+> **Prefer to apply online with live status updates?** Meet **[Dog Name]** on
+> Raised Paws — photos, story, and **Apply to Adopt** at the bottom:  
+> **https://raisedpaws.com/dogs/detail?id=_paste-pet-id-here_**
 
-**Where to get the Apply URL:** After you save a pet in Raised Paws, open
-**Edit** — the browser URL contains the pet id. Or ask your Raised Paws contact.
+**See all our dogs on Raised Paws** (Petfinder “view our other dogs” style link):  
+**https://raisedpaws.com/dogs?shelter=_paste-your-rescue-id-here_**
+
+Applicants click through to the pet page first, then **Apply to Adopt** on that
+page — they do not need a separate “apply” link.
+
+**Where to get these URLs**
+
+- **Per-dog page:** After you save a pet, open **Browse dogs** on raisedpaws.com,
+  tap **Meet [name]**, and copy the browser address. Or ask your Raised Paws
+  contact.
+- **All your dogs:** Your Raised Paws contact will send your rescue listing link
+  once onboarding is complete (same pattern as above with your rescue id).
+- You can add up to **four photos** per dog in Raised Paws; they all show on the
+  pet page when uploaded.
 
 ---
 
 ### Parallel workflow (pilot — don’t change everything at once)
 
-| How someone reaches you                                | What you do                                                                     |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| **Raised Paws link** in the Petfinder bio (pilot dogs) | Review in **Applications** on your phone — this is the queue for that pilot dog |
-| **Petfinder “Start Your Inquiry”** (built-in form)     | Handle as you do today — still a valid lead                                     |
-| **Petfinder “See How You Match”**                      | Their pre-screen; unchanged                                                     |
-| **Email / call** from the Petfinder listing            | Handle as you do today (Word/PDF attachment if that’s your current habit)       |
-| **Other dogs** not in the pilot                        | Your normal process unchanged                                                   |
+| How someone reaches you                                | What you do                                                                             |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| **Raised Paws link** in the Petfinder bio (pilot dogs) | Review in **Applications** on your phone — applicant used the pet page → Apply to Adopt |
+| **Petfinder “Start Your Inquiry”** (built-in form)     | Handle as you do today — still a valid lead                                             |
+| **Petfinder “See How You Match”**                      | Their pre-screen; unchanged                                                             |
+| **Email / call** from the Petfinder listing            | Handle as you do today (Word/PDF attachment if that’s your current habit)               |
+| **Other dogs** not in the pilot                        | Your normal process unchanged                                                           |
 
 For **pilot dogs**, we want the Raised Paws link to be the clear **full
 application** path. You keep email folders and paper files if you want — we’re
@@ -97,7 +111,7 @@ your whole filing system yet.
 
 Match what you already put on Petfinder when you can:
 
-- Photos (required for listings)
+- Photos (required for listings — up to four per dog on Raised Paws)
 - Name, age, breed, size / weight if you have it
 - Medical flags you already publish (spay/neuter, vaccines, special needs)
 - Kid / dog / cat compatibility notes

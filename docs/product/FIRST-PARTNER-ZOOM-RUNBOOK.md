@@ -45,9 +45,12 @@ Still out of scope: invite emails, remove staff, Petfinder API sync, custom pres
 
 1. **Pets** → **Add pet** for each dog: photo, name, age, breed, notes/temperament
    (pull from her Petfinder story: hook, hard requirements, fee if she wants it in notes).
-2. After each save, open **Edit** — copy pet UUID from URL for Petfinder link:  
-   `https://raisedpaws.com/adopt?pet=<uuid>`
-3. Confirm each dog appears on [raisedpaws.com/dogs](https://raisedpaws.com/dogs).
+2. After each save, open [raisedpaws.com/dogs](https://raisedpaws.com/dogs) → **Meet {name}** → copy the pet page URL for Petfinder:  
+   `https://raisedpaws.com/dogs/detail?id=<pet-uuid>`  
+   (Applicants use **Apply to Adopt** on that page — not a raw `/adopt?pet=` link in the bio.)
+3. Confirm each dog appears on [raisedpaws.com/dogs](https://raisedpaws.com/dogs) and the pet page loads.
+4. Send her the **rescue listing** link for “all our dogs on Raised Paws”:  
+   `https://raisedpaws.com/dogs?shelter=<shelter-uuid>`
 
 ### Part 3 — Petfinder (~10 min)
 
@@ -88,13 +91,14 @@ Walk through **Applications** and the handout **parallel workflow** table (Inqui
 
 ## When someone applies (product truth)
 
-| Step | Adopter                         | Staff                                                                                     |
-| ---- | ------------------------------- | ----------------------------------------------------------------------------------------- |
-| 1    | Clicks `/adopt?pet=<uuid>`      | —                                                                                         |
-| 2    | Signs up / signs in (**email**) | —                                                                                         |
-| 3    | Fills universal application     | Contact email gets alert ([#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260)) |
-| 4    | Lands on live status tracker    | Row appears in `/shelter` as **Submitted**                                                |
-| 5    | Checks **My Applications**      | Opens detail → email, answers, advance status, optional Message                           |
+| Step | Adopter                                   | Staff                                                                                     |
+| ---- | ----------------------------------------- | ----------------------------------------------------------------------------------------- |
+| 1    | Opens pet page (`/dogs/detail?id=<uuid>`) | —                                                                                         |
+| 2    | Clicks **Apply to Adopt** on the pet page | —                                                                                         |
+| 3    | Signs up / signs in (**email**)           | —                                                                                         |
+| 4    | Fills universal application               | Contact email gets alert ([#260](https://github.com/TortoiseWolfe/RescueDogs/issues/260)) |
+| 5    | Lands on live status tracker              | Row appears in `/shelter` as **Submitted**                                                |
+| 6    | Checks **My Applications**                | Opens detail → email, answers, advance status, optional Message                           |
 
 **Gaps today**
 

@@ -179,6 +179,7 @@ function EditShelterPetContent() {
             shelterId={shelterId}
             petId={pet.id}
             initialPhotos={photos}
+            legacyPhotoUrl={pet.photo_url}
             disabled={saving || deleting}
           />
 

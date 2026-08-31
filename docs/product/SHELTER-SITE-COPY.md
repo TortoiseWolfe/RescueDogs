@@ -3,7 +3,7 @@
 **Audience:** Pilot shelters pasting links on their website, Petfinder, social, or desk QR.  
 **Goal:** The handoff feels like _their_ adoption portal — not “go to another pet website.”
 
-Replace `[Shelter Name]`, `[Apply URL]` (e.g. `https://raisedpaws.com/adopt`), and `[Track URL]` (e.g. `https://raisedpaws.com/applications`).
+Replace `[Shelter Name]`, `[Pet URL]` (e.g. `https://raisedpaws.com/dogs/detail?id=…`), `[Listing URL]` (e.g. `https://raisedpaws.com/dogs?shelter=…`), `[Apply URL]` (e.g. `https://raisedpaws.com/adopt`), and `[Track URL]` (e.g. `https://raisedpaws.com/applications`).
 
 Aligns with [VISION.md](./VISION.md) (application portal framing) and [PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md).
 
@@ -38,7 +38,10 @@ Aligns with [VISION.md](./VISION.md) (application portal framing) and [PILOT-AGR
 
 ## Petfinder / Adopt-a-Pet bio
 
-> To apply for this pet with [Shelter Name], use our adoption portal: [Apply URL] — you’ll get live updates on your application status.
+> Meet this pet with [Shelter Name] on Raised Paws — photos, story, and **Apply to Adopt**: [Pet URL]  
+> See all our dogs on Raised Paws: [Listing URL]
+
+Applicants read the pet page first, then tap **Apply to Adopt** there (you do not need a separate raw apply link in the bio).
 
 ### Where to paste (Petfinder-first rescues)
 

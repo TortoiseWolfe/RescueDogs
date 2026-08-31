@@ -42,6 +42,8 @@ type PetPhotoManagerProps = {
   /** When null, photos are staged until parent creates the pet. */
   petId: string | null;
   initialPhotos?: PetPhoto[];
+  /** Shown when gallery rows are empty but pets.photo_url exists (pre-#273). */
+  legacyPhotoUrl?: string | null;
   onStagedChange?: (count: number) => void;
   disabled?: boolean;
 };
@@ -53,7 +55,14 @@ export const PetPhotoManager = forwardRef<
   PetPhotoManagerHandle,
   PetPhotoManagerProps
 >(function PetPhotoManager(
-  { shelterId, petId, initialPhotos = [], onStagedChange, disabled = false },
+  {
+    shelterId,
+    petId,
+    initialPhotos = [],
+    legacyPhotoUrl,
+    onStagedChange,
+    disabled = false,
+  },
   ref
 ) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -66,7 +75,11 @@ export const PetPhotoManager = forwardRef<
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const totalCount = petId ? photos.length : staged.length;
+  const showLegacyPhoto =
+    petId && photos.length === 0 && Boolean(legacyPhotoUrl?.trim());
+  const totalCount = petId
+    ? photos.length + (showLegacyPhoto ? 1 : 0)
+    : staged.length;
   const canAddMore = totalCount < MAX_PET_PHOTOS && !disabled && !busy;
 
   useEffect(() => {
@@ -255,8 +268,25 @@ export const PetPhotoManager = forwardRef<
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {petId
-          ? photos.map((photo, index) => (
+        {petId ? (
+          <>
+            {showLegacyPhoto && (
+              <div className="border-base-300 relative overflow-hidden rounded-lg border">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={legacyPhotoUrl!}
+                  alt=""
+                  className="aspect-[4/3] w-full object-cover"
+                />
+                <span className="badge badge-primary badge-sm absolute top-1 left-1">
+                  Profile
+                </span>
+                <p className="bg-base-100/90 text-base-content/70 p-2 text-xs">
+                  Add a photo below to manage the gallery.
+                </p>
+              </div>
+            )}
+            {photos.map((photo, index) => (
               <div
                 key={photo.id}
                 className="border-base-300 relative overflow-hidden rounded-lg border"
@@ -293,35 +323,38 @@ export const PetPhotoManager = forwardRef<
                   </button>
                 </div>
               </div>
-            ))
-          : staged.map((item, index) => (
-              <div
-                key={item.id}
-                className="border-base-300 relative overflow-hidden rounded-lg border"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.preview}
-                  alt=""
-                  className="aspect-[4/3] w-full object-cover"
-                />
-                {index === 0 && (
-                  <span className="badge badge-primary badge-sm absolute top-1 left-1">
-                    Profile
-                  </span>
-                )}
-                <div className="bg-base-100/90 p-1">
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-xs text-error min-h-8"
-                    onClick={() => removeStaged(item.id)}
-                    disabled={busy}
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
             ))}
+          </>
+        ) : (
+          staged.map((item, index) => (
+            <div
+              key={item.id}
+              className="border-base-300 relative overflow-hidden rounded-lg border"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.preview}
+                alt=""
+                className="aspect-[4/3] w-full object-cover"
+              />
+              {index === 0 && (
+                <span className="badge badge-primary badge-sm absolute top-1 left-1">
+                  Profile
+                </span>
+              )}
+              <div className="bg-base-100/90 p-1">
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-xs text-error min-h-8"
+                  onClick={() => removeStaged(item.id)}
+                  disabled={busy}
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {error && (

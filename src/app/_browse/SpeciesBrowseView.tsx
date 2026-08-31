@@ -30,8 +30,6 @@ const COPY: Record<
     description: string;
     emptyHeading: string;
     emptyBody: string;
-    otherHref: string;
-    otherLabel: string;
     listHeading: string;
     petNoun: string;
   }
@@ -44,8 +42,6 @@ const COPY: Record<
     emptyHeading: 'No dogs listed yet',
     emptyBody:
       'When shelters and rescues add available dogs, you will find them here. Trait filters are coming later.',
-    otherHref: '/cats',
-    otherLabel: 'Browse cats',
     listHeading: 'Dogs available now',
     petNoun: 'dog',
   },
@@ -57,8 +53,6 @@ const COPY: Record<
     emptyHeading: 'No cats listed yet',
     emptyBody:
       'When shelters and rescues add available cats, you will find them here. Trait filters are coming later.',
-    otherHref: '/dogs',
-    otherLabel: 'Browse dogs',
     listHeading: 'Cats available now',
     petNoun: 'cat',
   },
@@ -160,10 +154,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                 ? `Available ${copy.petNoun}s from ${shelterName} on Raised Paws.`
                 : copy.description}
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Link href={copy.otherHref} className={heroCtaClassName}>
-                {copy.otherLabel}
-              </Link>
+            <div className="mt-8">
               <Link href="/adopt" className={heroCtaClassName}>
                 Apply to Adopt
               </Link>
