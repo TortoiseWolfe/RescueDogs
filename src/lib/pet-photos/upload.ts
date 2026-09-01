@@ -4,10 +4,12 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
+import { withAsyncTimeout } from '@/lib/with-timeout';
 
 const BUCKET = 'pet-photos';
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const MAX_BYTES = 5 * 1024 * 1024;
+const UPLOAD_TIMEOUT_MS = 45_000;
 
 export type PetPhotoUploadResult =
   | { url: string; error?: undefined }
@@ -55,25 +57,18 @@ export async function uploadPetPhoto(
   }
 
   const supabase = createClient();
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
-
-  if (sessionError || !session) {
-    return { url: '', error: 'Auth session missing — please sign in again' };
-  }
-
   const ext = extensionForMime(file.type);
   const filePath = `${shelterId}/${folderId}/${Date.now()}.${ext}`;
 
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from(BUCKET)
-    .upload(filePath, file, {
+  const { data: uploadData, error: uploadError } = await withAsyncTimeout(
+    supabase.storage.from(BUCKET).upload(filePath, file, {
       cacheControl: '3600',
       upsert: false,
       contentType: file.type,
-    });
+    }),
+    UPLOAD_TIMEOUT_MS,
+    'Photo upload'
+  );
 
   if (uploadError) {
     return { url: '', error: uploadError.message };
@@ -101,25 +96,18 @@ export async function uploadPetPhotoBlob(
   }
 
   const supabase = createClient();
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
-
-  if (sessionError || !session) {
-    return { url: '', error: 'Auth session missing — please sign in again' };
-  }
-
   const ext = extensionForMime(contentType);
   const filePath = `${shelterId}/${folderId}/${Date.now()}.${ext}`;
 
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from(BUCKET)
-    .upload(filePath, blob, {
+  const { data: uploadData, error: uploadError } = await withAsyncTimeout(
+    supabase.storage.from(BUCKET).upload(filePath, blob, {
       cacheControl: '3600',
       upsert: false,
       contentType,
-    });
+    }),
+    UPLOAD_TIMEOUT_MS,
+    'Photo upload'
+  );
 
   if (uploadError) {
     return { url: '', error: uploadError.message };
