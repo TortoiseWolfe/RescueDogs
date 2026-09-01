@@ -167,8 +167,11 @@ test.describe('User Registration E2E', () => {
     await page.goto('/sign-up', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
 
-    // Footer line only — avoid For Adopters / For Shelters links in the same card
-    await page.getByRole('link', { name: 'Sign In', exact: true }).click();
+    // Footer line only — avoid header chrome and portal overview links
+    await page
+      .getByRole('main')
+      .getByRole('link', { name: 'Sign In', exact: true })
+      .click();
 
     // Verify navigated to sign-in (with optional trailing slash)
     await expect(page).toHaveURL(/\/sign-in\/?/);

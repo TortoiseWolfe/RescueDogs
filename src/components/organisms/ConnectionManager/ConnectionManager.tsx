@@ -101,10 +101,10 @@ export default function ConnectionManager({
         data-testid="connection-request"
       >
         <div className="card-body p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="avatar placeholder">
-                <div className="bg-neutral text-neutral-content w-12 rounded-full">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="avatar placeholder shrink-0">
+                <div className="bg-neutral text-neutral-content flex h-12 w-12 items-center justify-center rounded-full">
                   {otherUser.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -112,10 +112,11 @@ export default function ConnectionManager({
                       alt={
                         otherUser.display_name || otherUser.username || 'User'
                       }
+                      className="h-full w-full object-cover"
                       loading="lazy"
                     />
                   ) : (
-                    <span className="text-xl">
+                    <span className="text-lg leading-none font-semibold">
                       {(otherUser.display_name ||
                         otherUser.username ||
                         'U')[0].toUpperCase()}
@@ -123,7 +124,7 @@ export default function ConnectionManager({
                   )}
                 </div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="font-semibold">
                   {otherUser.display_name ||
                     otherUser.username ||
@@ -137,7 +138,7 @@ export default function ConnectionManager({
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
               {type === 'received' && (
                 <>
                   <button

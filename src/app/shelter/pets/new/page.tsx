@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { getInternalUrl } from '@/config/project.config';
 import { supabase } from '@/lib/supabase/client';
 import { ShelterPetService } from '@/services/applications';
 import { useShelterMembership } from '../../ShelterGate';
 import type { PetSex, PetSize, PetSpecies } from '@/types/applications';
 import { combineAgeYears } from '@/lib/pet-age';
+import { withAsyncTimeout } from '@/lib/with-timeout';
 import { PET_SEX_OPTIONS } from '@/lib/pet-sex';
 import { PetAgeFields } from '../PetAgeFields';
 import {
@@ -30,8 +32,39 @@ export default function NewShelterPetPage() {
   const [size, setSize] = useState<PetSize | ''>('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const photoManagerRef = useRef<PetPhotoManagerHandle>(null);
+  const hardNavTimerRef = useRef<number | null>(null);
+  const busy = saving || redirecting;
+
+  useEffect(() => {
+    return () => {
+      if (hardNavTimerRef.current !== null) {
+        clearTimeout(hardNavTimerRef.current);
+      }
+    };
+  }, []);
+
+  function scheduleHardNav(path: string) {
+    if (hardNavTimerRef.current !== null) {
+      clearTimeout(hardNavTimerRef.current);
+    }
+    hardNavTimerRef.current = window.setTimeout(() => {
+      window.location.assign(getInternalUrl(path));
+    }, 800);
+  }
+
+  function goToPetsList() {
+    router.push('/shelter/pets');
+    scheduleHardNav('/shelter/pets');
+  }
+
+  function goToEditPet(petId: string) {
+    const path = `/shelter/pets/edit?id=${petId}`;
+    router.push(path);
+    scheduleHardNav(path);
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,18 +73,23 @@ export default function NewShelterPetPage() {
       return;
     }
     setSaving(true);
+    setRedirecting(false);
     setError(null);
     try {
       const service = new ShelterPetService(supabase);
-      const pet = await service.createPet(shelterId, {
-        name,
-        species,
-        breed: breed || null,
-        sex: sex || null,
-        age_years: combineAgeYears(ageYearsPart, ageMonthsPart),
-        size: size || null,
-        notes: notes || null,
-      });
+      const pet = await withAsyncTimeout(
+        service.createPet(shelterId, {
+          name,
+          species,
+          breed: breed || null,
+          sex: sex || null,
+          age_years: combineAgeYears(ageYearsPart, ageMonthsPart),
+          size: size || null,
+          notes: notes || null,
+        }),
+        30_000,
+        'Save pet'
+      );
 
       if (photoManagerRef.current?.hasStagedPhotos()) {
         try {
@@ -62,18 +100,20 @@ export default function NewShelterPetPage() {
               photoErr instanceof Error ? photoErr.message : 'upload error'
             }. You can edit to retry.`
           );
-          setSaving(false);
-          router.push(`/shelter/pets/edit?id=${pet.id}`);
+          setRedirecting(true);
+          goToEditPet(pet.id);
           return;
         }
       }
 
-      router.push('/shelter/pets');
+      setRedirecting(true);
+      goToPetsList();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Could not save pet. Try again.'
       );
       setSaving(false);
+      setRedirecting(false);
     }
   }
 
@@ -160,14 +200,14 @@ export default function NewShelterPetPage() {
         </label>
 
         <label className="form-control w-full">
-          <span className="label-text">Notes (optional)</span>
+          <span className="label-text">Bio (optional)</span>
           <textarea
             className="textarea textarea-bordered min-h-24 w-full"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             maxLength={2000}
             rows={4}
-            placeholder="e.g. Good with kids; needs a quiet home and daily walks."
+            placeholder="Share this pet's story — personality, history, and what kind of home they need."
           />
         </label>
 
@@ -175,7 +215,7 @@ export default function NewShelterPetPage() {
           ref={photoManagerRef}
           shelterId={shelterId}
           petId={null}
-          disabled={saving}
+          disabled={busy}
         />
 
         {error && (
@@ -186,14 +226,10 @@ export default function NewShelterPetPage() {
 
         <button
           type="submit"
-          className="btn btn-primary min-h-11"
-          disabled={saving}
+          className={`btn btn-primary min-h-11${busy ? 'loading' : ''}`}
+          disabled={busy}
         >
-          {saving ? (
-            <span className="loading loading-spinner loading-sm" />
-          ) : (
-            'Save Pet'
-          )}
+          {redirecting ? 'Redirecting…' : saving ? 'Saving…' : 'Save Pet'}
         </button>
       </form>
     </div>

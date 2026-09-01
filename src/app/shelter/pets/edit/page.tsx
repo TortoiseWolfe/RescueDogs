@@ -272,14 +272,14 @@ function EditShelterPetContent() {
             </div>
 
             <label className="form-control w-full">
-              <span className="label-text">Notes (optional)</span>
+              <span className="label-text">Bio (optional)</span>
               <textarea
                 className="textarea textarea-bordered min-h-24 w-full"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 maxLength={2000}
                 rows={4}
-                placeholder="e.g. Good with kids; needs a quiet home and daily walks."
+                placeholder="Share this pet's story — personality, history, and what kind of home they need."
               />
             </label>
 

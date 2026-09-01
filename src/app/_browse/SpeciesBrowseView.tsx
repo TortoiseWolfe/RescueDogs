@@ -228,7 +228,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,0.75fr)_minmax(0,1fr)_auto_auto] lg:items-end">
               <label className="form-control w-full">
                 <span className="label-text mb-1 text-xs font-medium sm:text-sm">
-                  Rescue / shelter
+                  Rescue / Shelter
                 </span>
                 <select
                   className="select select-bordered select-sm sm:select-md min-h-11 w-full"
