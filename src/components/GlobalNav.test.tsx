@@ -103,11 +103,11 @@ describe('GlobalNav guest Messages (#118)', () => {
     await userEvent.click(screen.getByRole('button', { name: /^messages$/i }));
 
     expect(
-      screen.getByRole('heading', { name: /log in first to message/i })
+      screen.getByRole('heading', { name: /sign in first to message/i })
     ).toBeInTheDocument();
-    const logIns = screen.getAllByRole('link', { name: /^log in$/i });
+    const signIns = screen.getAllByRole('link', { name: /^sign in$/i });
     expect(
-      logIns.some((el) => el.getAttribute('href')?.includes('/sign-in'))
+      signIns.some((el) => el.getAttribute('href')?.includes('/sign-in'))
     ).toBe(true);
   });
 
@@ -163,10 +163,10 @@ describe('GlobalNav role menus (#65)', () => {
       navBand?.contains(screen.getByRole('button', { name: /for shelters/i }))
     ).toBe(true);
 
-    const login = screen
-      .getAllByRole('link', { name: /^log in$/i })
+    const signIn = screen
+      .getAllByRole('link', { name: /^sign in$/i })
       .find((el) => el.className.includes('btn'));
-    expect(login && navBand?.contains(login)).toBe(false);
+    expect(signIn && navBand?.contains(signIn)).toBe(false);
   });
 
   it('does not show a Home text link (logo is home)', () => {
@@ -277,11 +277,11 @@ describe('GlobalNav role menus (#65)', () => {
     expect(labels).not.toContain('Blog');
   });
 
-  it('keeps pill chrome on Log In for desktop only (#132)', () => {
+  it('keeps pill chrome on Sign In for desktop only (#132)', () => {
     const { container } = render(<GlobalNav />);
 
     const loginPills = screen
-      .getAllByRole('link', { name: /^log in$/i })
+      .getAllByRole('link', { name: /^sign in$/i })
       .filter((el) => el.className.includes('btn'));
     expect(loginPills.length).toBeGreaterThanOrEqual(1);
     expect(loginPills[0].className).toMatch(/bg-white/);
@@ -315,6 +315,35 @@ describe('GlobalNav role menus (#65)', () => {
     expect(list).toBeTruthy();
     expect(list!.className).toMatch(/menu-vertical/);
     expect(list!.className).not.toMatch(/grid-cols-2/);
+  });
+
+  it('lists Browse Pets first in the mobile hamburger menu', () => {
+    const { container } = render(<GlobalNav />);
+
+    const menuTrigger = container.querySelector(
+      '[aria-label="Navigation menu"]'
+    );
+    const panel =
+      menuTrigger!.parentElement?.querySelector('.dropdown-content');
+    expect(panel).toBeTruthy();
+
+    const titles = panel!.querySelectorAll('.menu-title span');
+    expect(titles[0]?.textContent).toBe('Browse Pets');
+    expect(titles[1]?.textContent).toBe('For Adopters');
+
+    const menuLinks = panel!.querySelectorAll('ul.menu a');
+    expect(
+      [...menuLinks].some(
+        (link) =>
+          link.getAttribute('href') === '/dogs' && link.textContent === 'Dogs'
+      )
+    ).toBe(true);
+    expect(
+      [...menuLinks].some(
+        (link) =>
+          link.getAttribute('href') === '/cats' && link.textContent === 'Cats'
+      )
+    ).toBe(true);
   });
 
   it('styles hamburger section titles orange and items with theme text', () => {

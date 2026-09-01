@@ -86,7 +86,7 @@ function MessagesLayout() {
           />
 
           <div className="drawer-content flex h-full flex-col overflow-hidden md:ml-80 lg:ml-96">
-            <div className="navbar bg-base-100 border-base-300 shrink-0 border-b md:hidden">
+            <div className="navbar bg-base-100 border-base-300 shrink-0 gap-3 border-b md:hidden">
               <div className="flex-none">
                 <label
                   htmlFor="sidebar-drawer"

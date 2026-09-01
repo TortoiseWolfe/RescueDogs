@@ -56,9 +56,11 @@ const browseMenuLinks: NavLinkItem[] = [
   { href: BROWSE_CATS_HREF, label: 'Cats' },
 ];
 
+const SIGN_IN_LABEL = 'Sign In';
+
 const adopterMenuLinks: NavLinkItem[] = [
   { href: '/for-adopters', label: 'Overview' },
-  { href: buildSignInHref('adopter'), label: 'Log In' },
+  { href: buildSignInHref('adopter'), label: SIGN_IN_LABEL },
   { href: DEMO_ENTRY_HREF, label: 'Try Demo' },
   { href: '/adopt', label: 'Apply to Adopt' },
   { href: '/applications', label: 'My Applications' },
@@ -66,7 +68,7 @@ const adopterMenuLinks: NavLinkItem[] = [
 
 const shelterMenuLinks: NavLinkItem[] = [
   { href: '/for-shelters', label: 'Overview' },
-  { href: buildSignInHref('shelter'), label: 'Log In' },
+  { href: buildSignInHref('shelter'), label: SIGN_IN_LABEL },
   { href: DEMO_ENTRY_HREF, label: 'Try Demo' },
   { href: '/shelter', label: 'Dashboard' },
   { href: '/blog', label: 'Blog' },
@@ -357,12 +359,12 @@ export function GlobalNav() {
   const guestAdopterLinks = adopterMenuLinks;
   const guestShelterLinks = shelterMenuLinks;
 
-  /** Signed-in menus omit Log In / Try Demo (account chrome covers auth). */
+  /** Signed-in menus omit Sign In / Try Demo (account chrome covers auth). */
   const signedInAdopterLinks = adopterMenuLinks.filter(
-    (item) => item.label !== 'Log In' && item.label !== 'Try Demo'
+    (item) => item.label !== SIGN_IN_LABEL && item.label !== 'Try Demo'
   );
   const signedInShelterLinks = shelterMenuLinks.filter(
-    (item) => item.label !== 'Log In' && item.label !== 'Try Demo'
+    (item) => item.label !== SIGN_IN_LABEL && item.label !== 'Try Demo'
   );
 
   const desktopAdopterLinks = user ? signedInAdopterLinks : guestAdopterLinks;
@@ -373,7 +375,7 @@ export function GlobalNav() {
     <>
       <header className="site-header bg-primary text-primary-content sticky top-0 z-50">
         {/* Below lg: logo + Raised Paws left; Messages / hamburger / theme right.
-            No chrome Log In (hamburger Account). lg+: role band unchanged (#132).
+            No chrome Sign In (hamburger Account). lg+: role band unchanged (#132).
             Desktop: no lg:container — full-width row with side buffer so brand
             stays left and chrome stays right on wide screens (#148). */}
         <nav
@@ -489,7 +491,7 @@ export function GlobalNav() {
                   className={`${navChromeBtn} hidden lg:inline-flex ${logInSelected ? navChromeBtnSelected : ''}`}
                   aria-current={logInSelected ? 'page' : undefined}
                 >
-                  Log In
+                  Sign In
                 </Link>
               )}
 
@@ -628,6 +630,20 @@ export function GlobalNav() {
                 >
                   <ul className="menu menu-vertical w-full p-2 text-base">
                     <li className="menu-title">
+                      <span className="!text-[#f97316]">Browse Pets</span>
+                    </li>
+                    {browseMenuLinks.map((item) => (
+                      <li key={`m-browse-${item.href}-${item.label}`}>
+                        <Link
+                          href={item.href}
+                          className="text-base-content min-h-11"
+                          onClick={blurActiveElement}
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                    <li className="menu-title mt-2">
                       <span className="!text-[#f97316]">For Adopters</span>
                     </li>
                     {(user ? signedInAdopterLinks : guestAdopterLinks).map(
@@ -764,7 +780,7 @@ export function GlobalNav() {
                             className="text-base-content min-h-11"
                             onClick={blurActiveElement}
                           >
-                            Log In
+                            Sign In
                           </Link>
                         </li>
                       </>
@@ -832,7 +848,7 @@ export function GlobalNav() {
         >
           <div className="modal-box bg-base-100 text-base-content">
             <h2 id="messages-signin-title" className="text-lg font-bold">
-              Log in first to message.
+              Sign in first to message.
             </h2>
             <p id="messages-signin-desc" className="py-3 text-sm opacity-80">
               Sign in to open Messages and chat with shelters or adopters.
@@ -843,7 +859,7 @@ export function GlobalNav() {
                 className="btn btn-primary min-h-11"
                 onClick={() => setMessagesSignInOpen(false)}
               >
-                Log In
+                Sign In
               </Link>
               <button
                 type="button"
