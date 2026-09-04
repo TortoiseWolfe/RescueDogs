@@ -71,6 +71,7 @@ export class ShelterApplicationService {
   /**
    * Every shelter membership for this user (#261). Ordered by shelter name
    * so the switcher is stable. Empty array when they aren't staff anywhere.
+   * Throws on query failure so callers can distinguish error from empty (#285).
    */
   async listMyShelterMemberships(
     userId: string
@@ -80,7 +81,10 @@ export class ShelterApplicationService {
       .select('shelter_id, role, shelters(name)')
       .eq('user_id', userId);
 
-    if (error || !data) return [];
+    if (error) {
+      throw error;
+    }
+    if (!data) return [];
     const rows = data as unknown as Array<{
       shelter_id: string;
       role: ShelterRole;
@@ -102,12 +106,17 @@ export class ShelterApplicationService {
   /**
    * One membership for "am I staff anywhere?" callers (post-login path).
    * Prefer listMyShelterMemberships + pickActiveMembership under ShelterGate.
+   * Soft-fails to null on query error so login still lands somewhere (#285).
    */
   async getMyShelterMembership(
     userId: string
   ): Promise<ShelterMembershipInfo | null> {
-    const memberships = await this.listMyShelterMemberships(userId);
-    return memberships[0] ?? null;
+    try {
+      const memberships = await this.listMyShelterMemberships(userId);
+      return memberships[0] ?? null;
+    } catch {
+      return null;
+    }
   }
 
   /**
