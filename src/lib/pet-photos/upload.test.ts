@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { extractPetPhotoPathFromUrl, validatePetPhotoFile } from './upload';
+import {
+  extractPetPhotoPathFromUrl,
+  PET_PHOTO_MAX_INPUT_BYTES,
+  PET_PHOTO_MAX_INPUT_MB,
+  validatePetPhotoFile,
+} from './upload';
 
 describe('pet-photos upload helpers', () => {
   it('rejects non-image MIME types', () => {
@@ -7,11 +12,23 @@ describe('pet-photos upload helpers', () => {
     expect(validatePetPhotoFile(file)).toMatch(/Invalid file type/i);
   });
 
-  it('accepts jpeg under 5MB', () => {
+  it('accepts jpeg under the input size limit', () => {
     const file = new File([new Uint8Array(100)], 'dog.jpg', {
       type: 'image/jpeg',
     });
     expect(validatePetPhotoFile(file)).toBeNull();
+  });
+
+  it(`rejects files over ${PET_PHOTO_MAX_INPUT_MB}MB (#284)`, () => {
+    const file = new File([new Uint8Array(100)], 'huge.jpg', {
+      type: 'image/jpeg',
+    });
+    Object.defineProperty(file, 'size', {
+      value: PET_PHOTO_MAX_INPUT_BYTES + 1,
+    });
+    expect(validatePetPhotoFile(file)).toMatch(
+      new RegExp(`${PET_PHOTO_MAX_INPUT_MB}MB limit`)
+    );
   });
 
   it('extracts path from public URL', () => {

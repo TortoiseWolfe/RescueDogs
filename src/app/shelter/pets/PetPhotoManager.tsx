@@ -13,7 +13,7 @@ import type { Area } from 'react-easy-crop';
 import { supabase } from '@/lib/supabase/client';
 import {
   createCroppedPetPhoto,
-  fileToDataURL,
+  preparePetPhotoForCrop,
   PET_PHOTO_ASPECT,
 } from '@/lib/pet-photos/image-processing';
 import {
@@ -23,6 +23,7 @@ import {
   PET_PHOTO_MIN_ZOOM,
 } from '@/lib/pet-photos/crop-zoom';
 import {
+  PET_PHOTO_MAX_INPUT_MB,
   uploadPetPhotoBlob,
   validatePetPhotoFile,
 } from '@/lib/pet-photos/upload';
@@ -72,6 +73,7 @@ export const PetPhotoManager = forwardRef<
   ref
 ) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const cropPreviewUrlRef = useRef<string | null>(null);
   const [photos, setPhotos] = useState<PetPhoto[]>(initialPhotos);
   const [staged, setStaged] = useState<StagedPhoto[]>([]);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -95,6 +97,22 @@ export const PetPhotoManager = forwardRef<
   useEffect(() => {
     onStagedChange?.(staged.length);
   }, [staged.length, onStagedChange]);
+
+  useEffect(() => {
+    return () => {
+      if (cropPreviewUrlRef.current?.startsWith('blob:')) {
+        URL.revokeObjectURL(cropPreviewUrlRef.current);
+        cropPreviewUrlRef.current = null;
+      }
+    };
+  }, []);
+
+  function revokeCropPreview() {
+    if (cropPreviewUrlRef.current?.startsWith('blob:')) {
+      URL.revokeObjectURL(cropPreviewUrlRef.current);
+    }
+    cropPreviewUrlRef.current = null;
+  }
 
   useImperativeHandle(
     ref,
@@ -157,14 +175,28 @@ export const PetPhotoManager = forwardRef<
     }
 
     setError(null);
-    const dataUrl = await fileToDataURL(file);
-    setImageSrc(dataUrl);
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
-    setCroppedAreaPixels(null);
+    setBusy(true);
+    try {
+      revokeCropPreview();
+      const previewUrl = await preparePetPhotoForCrop(file);
+      cropPreviewUrlRef.current = previewUrl;
+      setImageSrc(previewUrl);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setCroppedAreaPixels(null);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Could not open that photo. Try a smaller image.'
+      );
+    } finally {
+      setBusy(false);
+    }
   }
 
   function closeCropModal() {
+    revokeCropPreview();
     setImageSrc(null);
     setCroppedAreaPixels(null);
   }
@@ -264,7 +296,8 @@ export const PetPhotoManager = forwardRef<
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="label-text">
-          Photos ({totalCount}/{MAX_PET_PHOTOS}) — JPEG, PNG, or WebP, max 5MB
+          Photos ({totalCount}/{MAX_PET_PHOTOS}) — JPEG, PNG, or WebP, max{' '}
+          {PET_PHOTO_MAX_INPUT_MB}MB (large photos are resized automatically)
         </span>
         {canAddMore && (
           <button

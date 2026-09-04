@@ -8,7 +8,9 @@ import { withAsyncTimeout } from '@/lib/with-timeout';
 
 const BUCKET = 'pet-photos';
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
-const MAX_BYTES = 5 * 1024 * 1024;
+/** Input cap for phone camera JPEGs (#284). Crop still stores ~1200×900 WebP. */
+export const PET_PHOTO_MAX_INPUT_MB = 15;
+export const PET_PHOTO_MAX_INPUT_BYTES = PET_PHOTO_MAX_INPUT_MB * 1024 * 1024;
 const UPLOAD_TIMEOUT_MS = 45_000;
 
 export type PetPhotoUploadResult =
@@ -22,9 +24,9 @@ export function validatePetPhotoFile(file: File): string | null {
   if (!ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) {
     return 'Invalid file type. Please upload a JPEG, PNG, or WebP image.';
   }
-  if (file.size > MAX_BYTES) {
+  if (file.size > PET_PHOTO_MAX_INPUT_BYTES) {
     const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-    return `File size (${sizeMB}MB) exceeds the 5MB limit.`;
+    return `File size (${sizeMB}MB) exceeds the ${PET_PHOTO_MAX_INPUT_MB}MB limit.`;
   }
   return null;
 }
@@ -90,9 +92,12 @@ export async function uploadPetPhotoBlob(
   blob: Blob,
   contentType = 'image/webp'
 ): Promise<PetPhotoUploadResult> {
-  if (blob.size > MAX_BYTES) {
+  if (blob.size > PET_PHOTO_MAX_INPUT_BYTES) {
     const sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
-    return { url: '', error: `File size (${sizeMB}MB) exceeds the 5MB limit.` };
+    return {
+      url: '',
+      error: `File size (${sizeMB}MB) exceeds the ${PET_PHOTO_MAX_INPUT_MB}MB limit.`,
+    };
   }
 
   const supabase = createClient();
