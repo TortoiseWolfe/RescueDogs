@@ -387,6 +387,28 @@ describe('ShelterApplicationService', () => {
     ]);
   });
 
+  it('listMyShelterMemberships throws on query error (#285)', async () => {
+    const builder = createQueryBuilder({
+      data: null,
+      error: { message: 'jwt expired', code: 'PGRST301' },
+    });
+    mock.from.mockReturnValue(builder);
+
+    await expect(
+      service.listMyShelterMemberships(STAFF_ID)
+    ).rejects.toMatchObject({ message: 'jwt expired' });
+  });
+
+  it('getMyShelterMembership soft-fails to null on query error (#285)', async () => {
+    const builder = createQueryBuilder({
+      data: null,
+      error: { message: 'network', code: 'PGRST000' },
+    });
+    mock.from.mockReturnValue(builder);
+
+    expect(await service.getMyShelterMembership(STAFF_ID)).toBeNull();
+  });
+
   it('createMyShelter calls the RPC with p_ argument names (#218)', async () => {
     mock.rpc.mockResolvedValue({
       data: SHELTER_ID,

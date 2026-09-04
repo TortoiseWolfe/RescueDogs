@@ -60,6 +60,8 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
     ShelterMembershipInfo[] | null | undefined
   >(undefined); // undefined = checking, null = confirmed non-staff
   const [activeShelterId, setActiveShelterId] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
   const wasStaff = useRef(false);
   const lastMembership = useRef<ShelterMembershipInfo | null>(null);
   const lastMemberships = useRef<ShelterMembershipInfo[]>([]);
@@ -86,35 +88,85 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
     if (authLoading) return;
     if (!user) return; // ProtectedRoute renders the sign-in card path
     let cancelled = false;
+    setMemberships(undefined);
+    setFetchError(null);
     (async () => {
-      const service = new ShelterApplicationService(supabase);
-      const list = await service.listMyShelterMemberships(user.id);
-      if (cancelled) return;
-      if (list.length === 0) {
-        setMemberships(null);
-        setActiveShelterId(null);
-        return;
+      try {
+        const service = new ShelterApplicationService(supabase);
+        const list = await service.listMyShelterMemberships(user.id);
+        if (cancelled) return;
+        if (list.length === 0) {
+          setMemberships(null);
+          setActiveShelterId(null);
+          return;
+        }
+        const picked = pickActiveMembership(list);
+        setMemberships(list);
+        setActiveShelterId(picked?.shelterId ?? list[0].shelterId);
+        if (picked) setLastShelterPreference(picked.shelterId);
+      } catch {
+        if (cancelled) return;
+        // Do not treat a failed query as "no shelter" (#285).
+        setFetchError(
+          'We could not load your rescue membership. Check your connection and try again.'
+        );
+        setMemberships(undefined);
       }
-      const picked = pickActiveMembership(list);
-      setMemberships(list);
-      setActiveShelterId(picked?.shelterId ?? list[0].shelterId);
-      if (picked) setLastShelterPreference(picked.shelterId);
     })();
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading]);
+  }, [user, authLoading, retryNonce]);
 
   function handleShelterChange(shelterId: string) {
     setActiveShelterId(shelterId);
     setLastShelterPreference(shelterId);
   }
 
-  if (authLoading || memberships === undefined) {
+  function handleRetryMembership() {
+    setRetryNonce((n) => n + 1);
+  }
+
+  if (authLoading || (memberships === undefined && !fetchError)) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex min-h-[50vh] items-center justify-center">
           <span className="loading loading-spinner loading-lg" />
+        </div>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="container mx-auto max-w-lg px-4 py-16">
+        <div className="card bg-base-100 border-base-300 border shadow-xl">
+          <div className="card-body gap-4">
+            <h1 className="card-title text-2xl">Could not load your rescue</h1>
+            <p className="text-base-content/80">{fetchError}</p>
+            <p className="text-base-content/80 text-sm">
+              If you already belong to a rescue, do not create a new one. Retry
+              first, or contact us for help.
+            </p>
+            <div className="card-actions mt-2 flex flex-wrap gap-3">
+              <button
+                type="button"
+                className="btn btn-primary min-h-11"
+                onClick={handleRetryMembership}
+              >
+                Try again
+              </button>
+              <Link
+                href="/contact?role=shelter"
+                className="btn btn-ghost min-h-11"
+              >
+                Contact us
+              </Link>
+              <Link href="/" className="btn btn-ghost min-h-11">
+                Back home
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -132,12 +184,19 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
             </p>
             <CreateRescueForm
               onCreated={async () => {
-                const service = new ShelterApplicationService(supabase);
-                const list = await service.listMyShelterMemberships(user!.id);
-                const picked = pickActiveMembership(list);
-                setMemberships(list.length > 0 ? list : null);
-                setActiveShelterId(picked?.shelterId ?? null);
-                if (picked) setLastShelterPreference(picked.shelterId);
+                try {
+                  const service = new ShelterApplicationService(supabase);
+                  const list = await service.listMyShelterMemberships(user!.id);
+                  const picked = pickActiveMembership(list);
+                  setFetchError(null);
+                  setMemberships(list.length > 0 ? list : null);
+                  setActiveShelterId(picked?.shelterId ?? null);
+                  if (picked) setLastShelterPreference(picked.shelterId);
+                } catch {
+                  setFetchError(
+                    'Your rescue may have been created, but we could not reload membership. Try again or contact us.'
+                  );
+                }
               }}
             />
             <ul className="text-base-content/80 list-disc space-y-1 pl-5 text-sm">
