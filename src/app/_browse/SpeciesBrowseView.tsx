@@ -419,6 +419,10 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                             <img
                               src={pet.photo_url}
                               alt=""
+                              width={640}
+                              height={480}
+                              loading="lazy"
+                              decoding="async"
                               className="h-full w-full object-cover"
                             />
                           ) : (
