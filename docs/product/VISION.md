@@ -214,7 +214,7 @@ one `shelter_members` user, then loading currently available pets.
 | ------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | **Pilots (1–5 partners)** | Email / shared folder of photos + short fields → upload in `/shelter/pets` | Raised Paws operator and/or shelter staff on a linked membership ([#138](https://github.com/TortoiseWolfe/RescueDogs/issues/138)) |
 | **Growth**                | Shelter self-service day-to-day (membership already granted)               | Shelter / rescue staff                                                                                                            |
-| **Scale**                 | Sync with Petfinder, shelter management software, or website feeds         | Paid integrations (Tier B in business model)                                                                                      |
+| **Scale**                 | Import ladder rung 2+ (named connectors, then optional sync)               | Paid integrations (Tier B in business model)                                                                                      |
 
 **Pilot practical notes (locked):**
 
@@ -239,18 +239,36 @@ one `shelter_members` user, then loading currently available pets.
   first-partner onboarding —
   [FIRST-PARTNER-ONBOARDING.md](./FIRST-PARTNER-ONBOARDING.md).
 
-### Data integrations (what we are not building)
+### Data integrations (import ladder — not a universal scraper)
 
 We are **not** planning a universal scraper or an extractor that pulls
-everything from every shelter database. Early pilots use **manual upload** (or
-a one-time spreadsheet/Petfinder export copy) of currently available pets.
-Shelters can keep listing animals on Petfinder or their own website.
+everything from every shelter database. Early pilots use **manual upload** of
+currently available pets. Shelters can keep listing animals on Petfinder or
+their own website.
 
 Day-to-day pet management in Raised Paws already exists for linked staff
-(#110). Next we add **targeted official integrations** (Petfinder, shelter
-management software such as PetPoint or Shelterluv, website feeds) — built
-**one system at a time** through APIs and partnerships, not unauthorized
-scraping.
+(#110). Growth uses an **import ladder** — ship the bottom rung first; add
+connectors only when we have real API access or a partnership:
+
+| Rung                     | What                                                                  | When                                                               |
+| ------------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **1 — Guided import**    | CSV, JSON, or copy-paste with field mapping and a preview before save | After pilots prove the loop and pet-load is clearly the bottleneck |
+| **2 — Named connectors** | One official integration at a time (APIs / approved keys)             | When a partner needs a named system and access exists              |
+| **3 — Optional sync**    | Refresh from the source without silently overwriting shelter edits    | After connectors exist and field ownership is explicit             |
+
+**Early connector candidates (investigate, do not start until rung 1 ships):**
+
+- **RescueGroups.org** — documented API; common distribution hub for rescues
+- **ShelterBuddy** — API appears available; access often via their support team
+- **Shelterluv / PetPoint** — typically approved integration keys / partnership,
+  not an open DIY developer route
+- **Petfinder** — listing sync remains a scale/paid-integration option (Tier B)
+
+**Provenance (design for sync before you sync):** preserve original platform,
+source/external ID, import date, and which system controls each field. On
+refresh, **show conflicts** instead of silently overwriting a rescue’s
+corrections in Raised Paws.
+
 We do **not** need to mirror a shelter's full historical animal database — only
 the pets they are actively taking applications for. For **applications**, Raised
 Paws is the system of record for new intake and live status; we do not pull old
@@ -279,9 +297,10 @@ join `pets` → `shelters` (#111). Radius / map search is deferred.
 `/cats` (#112)~~ → ~~state/zip filters (#111)~~ → **first-partner membership +
 pet-load runbook ([#138](https://github.com/TortoiseWolfe/RescueDogs/issues/138))**.
 
-**Deferred (no tickets yet / parked):** bulk spreadsheet / Petfinder import,
-self-serve create-org, multi-photo galleries, foster zip overrides, geo/radius,
-migrating storage vendors, `/follow` early-interest list (#129).
+**Deferred (no tickets yet / parked):** import ladder rung 1 (guided CSV /
+paste + mapping/preview), then named connectors / sync; self-serve create-org,
+foster zip overrides, geo/radius, migrating storage vendors, `/follow`
+early-interest list (#129).
 
 ### Universal application vs shelter-specific forms
 
@@ -541,6 +560,7 @@ and must restate Principle V.
 
 | Date       | Change                                                                                                                                                                                     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-09-05 | Import ladder (CSV/paste → connectors → conflict-aware sync); RescueGroups / ShelterBuddy / Shelterluv as early candidates; provenance fields called out                                   |
 | 2026-08-18 | First partner = small foster/breed group; foster is GTM not next build; inventory vs in-flight cohort; apply-link channels (no webmaster / no bare homepage); founding-pilot cost language |
 | 2026-08-03 | Pilot pet load: staff portal upload + membership; next = #138 runbook; #110/#111/#112 marked shipped                                                                                       |
 | 2026-07-28 | Link first-partner pilot packet ([PILOT-AGREEMENT.md](./PILOT-AGREEMENT.md); #117)                                                                                                         |
