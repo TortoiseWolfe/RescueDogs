@@ -116,6 +116,25 @@
   --brand-ink: #f97316;
 }
 
+/*
+ * #291 — Adopter StatusTimeline steps (dark only).
+ * trusted-care-dark sets --color-base-300 and --color-primary to the same
+ * navy (#1e3a8a), so DaisyUI unfinished `.step` circles look identical to
+ * filled `step-primary` and the bar reads as complete.
+ * Keep light-theme navy primary as-is; on dark only: brighter fill for
+ * progress + muted track for future stages (scoped to this tracker).
+ */
+[data-theme='trusted-care-dark'] .status-timeline-steps {
+  --color-primary: #60a5fa;
+  --color-primary-content: #0c1929;
+  --color-base-300: #334155;
+}
+
+[data-theme='trusted-care-dark'] .status-timeline-steps .step-neutral:before {
+  background-color: #64748b;
+  color: #f8fafc;
+}
+
 /* RescueDogs visual polish — Trusted Care light + dark */
 [data-theme='trusted-care-light'] .card,
 [data-theme='trusted-care-dark'] .card {

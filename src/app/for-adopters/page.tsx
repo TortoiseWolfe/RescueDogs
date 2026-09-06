@@ -20,7 +20,7 @@ export default function ForAdoptersPage() {
             For Adopters
           </p>
           <h1 className="font-display mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Track your adoption—so you&apos;re never ghosted
+            Track your application, so you&apos;re never ghosted
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-white/90 sm:text-xl">
             Raised Paws is an adoption application tracker: apply once, watch

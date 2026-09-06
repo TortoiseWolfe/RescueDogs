@@ -24,9 +24,9 @@ export default function ForSheltersPage() {
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-white/90 sm:text-xl">
             Whether you run a brick-and-mortar shelter or a foster-based rescue,
-            Raised Paws is the anti-ghosting adoption platform: one application
-            in, a clear staff pipeline, and live status for applicants—so your
-            team spends less time on “any update?” emails.
+            Raised Paws is your anti-ghosting adoption platform: one application
+            in, a clear pipeline, and live status for applicants. So your team
+            spends less time answering update emails.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link href="/contact?role=shelter" className={heroCtaClassName}>
@@ -40,8 +40,8 @@ export default function ForSheltersPage() {
             </Link>
           </div>
           <p className="mt-4 text-sm text-white/80">
-            Founding pilots are at no charge. Create an account, then create
-            your shelter or rescue at the shelter portal to list pets. Or email{' '}
+            Create an account, then create your shelter or rescue at the shelter
+            portal to list pets. Or email{' '}
             <a
               href={`mailto:${projectConfig.contactEmail}`}
               className="underline"
