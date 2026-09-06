@@ -71,7 +71,6 @@ const shelterMenuLinks: NavLinkItem[] = [
   { href: buildSignInHref('shelter'), label: SIGN_IN_LABEL },
   { href: DEMO_ENTRY_HREF, label: 'Try Demo' },
   { href: '/shelter', label: 'Dashboard' },
-  { href: '/blog', label: 'Blog' },
 ];
 
 function ChevronDown({ className }: { className?: string }) {

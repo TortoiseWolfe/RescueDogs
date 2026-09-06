@@ -222,7 +222,7 @@ describe('GlobalNav role menus (#65)', () => {
     expect(adopterLabels).not.toContain('Cats');
 
     const blogPills = screen
-      .getAllByRole('link', { name: /^blog$/i, hidden: true })
+      .queryAllByRole('link', { name: /^blog$/i, hidden: true })
       .filter((el) => el.className.includes('btn'));
     expect(blogPills).toHaveLength(0);
   });
@@ -237,7 +237,7 @@ describe('GlobalNav role menus (#65)', () => {
     expect(apps[0]).toHaveAttribute('href', '/applications');
   });
 
-  it('shelter menu includes Dashboard, Blog, and omits dog/cat browse', () => {
+  it('shelter menu includes Dashboard and omits Blog and dog/cat browse', () => {
     render(<GlobalNav />);
 
     const shelterTrigger = screen.getByRole('button', {
@@ -250,7 +250,7 @@ describe('GlobalNav role menus (#65)', () => {
       (a) => a.textContent?.trim() || ''
     );
     expect(labels).toContain('Dashboard');
-    expect(labels).toContain('Blog');
+    expect(labels).not.toContain('Blog');
     expect(labels).not.toContain('Browse Pets');
     expect(labels).not.toContain('Browse dogs');
     expect(labels).not.toContain('Browse cats');

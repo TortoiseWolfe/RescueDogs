@@ -132,7 +132,7 @@ export default function StatusTimeline({
   return (
     <div className={`w-full ${className}`.trim()} data-testid="status-timeline">
       <ul
-        className="steps steps-vertical lg:steps-horizontal w-full"
+        className="status-timeline-steps steps steps-vertical lg:steps-horizontal w-full"
         aria-label="Application progress"
       >
         {steps.map((step) => (
