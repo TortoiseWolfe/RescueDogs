@@ -123,6 +123,30 @@ jobs:
             Cache-Control: public, max-age=31536000, immutable
           EOF
 
+      # KEEP THE PREVIOUS BUILD'S HASHED ASSETS (#237 / upstream #476, #548).
+      #
+      # GitHub Pages replaces the whole site per deploy, so the previous build's
+      # content-hashed CSS and JS are DELETED the moment this publishes. Pages
+      # serves HTML with `cache-control: max-age=600`, so for ten minutes after
+      # every deploy a visitor can hold the previous build's HTML while its
+      # stylesheets no longer exist — white page, no nav, logo at natural size.
+      #
+      # Retention is a MITIGATION. StylesheetGuard in layout.tsx self-heals; the
+      # actual cure is the Cloudflare Response Header Transform Rule (document
+      # `no-cache`) documented in docs/deployment/cache-contract.md.
+      #
+      # `continue-on-error`: shipping a new build is strictly better than not
+      # shipping, but a network failure must stay VISIBLE in the Actions UI.
+      - name: Retain previous builds' assets and write the manifest (#237)
+        continue-on-error: true
+        run: |
+          # No `:-` fallback: an unset URL must skip, not crawl another project's site.
+          node scripts/retain-previous-assets.mjs merged-output "$SITE_URL"
+        env:
+          SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || vars.NEXT_PUBLIC_DEPLOY_URL }}
+          # Duration (days), not deploy count — merge rate must not shrink the window.
+          RETAIN_DAYS: '14'
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
