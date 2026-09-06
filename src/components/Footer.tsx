@@ -86,7 +86,7 @@ export function Footer() {
         </div>
 
         {/* Left cluster — socials + Built by centered as a unit */}
-        <div className="flex max-w-full flex-col items-center gap-3 lg:col-start-1 lg:row-span-2 lg:translate-y-3 lg:justify-self-start">
+        <div className="flex max-w-full min-w-0 flex-col items-center gap-3 lg:col-start-1 lg:row-span-2 lg:translate-y-3 lg:justify-self-start">
           <ul
             className="m-0 flex list-none flex-wrap items-center justify-center gap-0.5 p-0 lg:gap-2"
             aria-label="Raised Paws on social media"
@@ -106,8 +106,9 @@ export function Footer() {
             ))}
           </ul>
 
-          {/* One line from md+; wraps on narrow phones (320px E2E) */}
-          <p className="max-w-full text-center text-xs text-white/90 lg:whitespace-nowrap">
+          {/* Wrap below lg so 320px E2E has no horizontal scroll (#249).
+              Nowrap only with the lg+ side-cluster layout. */}
+          <p className="max-w-full min-w-0 text-center text-xs break-words text-white/90 lg:whitespace-nowrap">
             Built by{' '}
             <a
               href="https://www.techstackdevs.com"
