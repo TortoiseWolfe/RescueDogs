@@ -17,6 +17,22 @@ const logger = createLogger('utils:backgroundSync');
 const SYNC_TAG = 'form-submission-sync';
 const MAX_RETRIES = 3;
 const RETRY_DELAY_BASE = 1000; // Start with 1 second
+const SW_READY_TIMEOUT = 2000; // ms
+
+/**
+ * `navigator.serviceWorker.ready` never resolves AND never rejects while no
+ * service worker controls the scope — and since #162 we deliberately register
+ * none. Awaiting it unbounded hangs the caller forever, so always go through
+ * this helper, which resolves null instead of hanging.
+ */
+async function readyRegistrationOrNull(): Promise<ServiceWorkerRegistration | null> {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), SW_READY_TIMEOUT)
+    ),
+  ]);
+}
 
 /**
  * Register background sync with Service Worker
@@ -28,7 +44,12 @@ export async function registerBackgroundSync(): Promise<boolean> {
   }
 
   try {
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await readyRegistrationOrNull();
+
+    if (!registration) {
+      logger.debug('No active service worker registration; skipping sync');
+      return false;
+    }
 
     // Type assertion for TypeScript - SyncManager is not in standard types yet
     const reg = registration as ServiceWorkerRegistration & {
@@ -144,22 +165,24 @@ export function isBackgroundSyncSupported(): boolean {
 }
 
 /**
- * Fallback queue flush for browsers WITHOUT the Background Sync API
- * (Firefox, Safari) — #32. The SyncManager path can't run there, so the queued
- * form submissions would never drain on their own. Install foreground listeners
- * that processQueue() when the browser comes back online or the tab is
- * refocused. On SyncManager-capable browsers this is a no-op (the SW owns
- * draining) so we don't double-process.
+ * Foreground queue flush — #32. Installs listeners that processQueue() when the
+ * browser comes back online or the tab is refocused.
+ *
+ * This used to skip SyncManager-capable browsers on the theory that the service
+ * worker owned draining. Since #162 no service worker is registered at all, so
+ * nothing owned it and queued submissions never drained on Chromium. The
+ * listeners now install everywhere. There is no double-processing risk: the
+ * only 'sync' handler lives in public/sw.js, which is never registered.
  *
  * Mirrors src/lib/payments/connection-listener.ts. Returns a cleanup function;
  * call it on unmount.
  */
 export function startFormQueueFallback(): () => void {
-  if (typeof window === 'undefined' || isBackgroundSyncSupported()) {
+  if (typeof window === 'undefined') {
     return () => {};
   }
 
-  logger.debug('Starting foreground form-queue fallback (no SyncManager)');
+  logger.debug('Starting foreground form-queue fallback');
 
   const flush = () => {
     void processQueue();
@@ -201,12 +224,14 @@ export async function getSyncStatus(): Promise<{
 
   if (supported) {
     try {
-      const registration = await navigator.serviceWorker.ready;
-      const reg = registration as ServiceWorkerRegistration & {
-        sync: { getTags: () => Promise<string[]> };
-      };
-      const tags = await reg.sync.getTags();
-      registered = tags.includes(SYNC_TAG);
+      const registration = await readyRegistrationOrNull();
+      if (registration) {
+        const reg = registration as ServiceWorkerRegistration & {
+          sync: { getTags: () => Promise<string[]> };
+        };
+        const tags = await reg.sync.getTags();
+        registered = tags.includes(SYNC_TAG);
+      }
     } catch (error) {
       logger.error('Error getting sync tags', { error });
     }
