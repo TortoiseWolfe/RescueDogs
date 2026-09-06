@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import ThemeScript from '@/components/ThemeScript';
+import StylesheetGuard from '@/components/subatomic/StylesheetGuard';
 import { GlobalNav } from '@/components/GlobalNav';
 import { Footer } from '@/components/Footer';
 import { AccessibilityProvider } from '@/contexts/AccessibilityContext';
@@ -170,6 +171,10 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ThemeScript />
+        {/* Recovers a visitor holding cached HTML whose stylesheets were deleted
+            by a later deploy (#237 / upstream #650) — white page, giant logo,
+            correct DOM. Waits for `load`, so it costs nothing on a healthy page. */}
+        <StylesheetGuard />
         <JsonLdScript data={generateJsonLd()} />
         <ConsentProvider>
           <GoogleAnalytics />

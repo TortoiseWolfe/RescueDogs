@@ -1,0 +1,71 @@
+# Post-deploy live probes for the unstyled-page failure (#237).
+#
+# GitHub Pages serves HTML with max-age=600 and deletes hashed CSS on every
+# deploy. Cloudflare rules (dashboard) + asset retention (deploy.yml) +
+# StylesheetGuard (layout) mitigate it. These checks assert the LIVE origin
+# still matches the contract — a dashboard-only rule is invisible to the repo,
+# so if the zone moves or a token rotates, only a live probe notices.
+#
+# No pull_request trigger: a PR is not deployed yet, so probing would assert
+# against the old site.
+
+name: Production Smoke
+
+on:
+  workflow_run:
+    workflows: ['Deploy to GitHub Pages']
+    types: [completed]
+  schedule:
+    - cron: '30 15 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Production smoke (live origin)
+    if: ${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && vars.NEXT_PUBLIC_DEPLOY_URL != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      # Mitigations: retained hashed assets still reachable after the deploy.
+      - name: Retained assets are still served (unstyled-production detector)
+        id: retained
+        if: ${{ !cancelled() }}
+        env:
+          SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
+          RETAINED_CHECK: reachability
+        run: node scripts/ci/check-retained-assets.mjs "$SITE"
+
+      - name: Retention window is as wide as it claims
+        id: window
+        if: ${{ !cancelled() }}
+        env:
+          SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
+          RETAINED_CHECK: window
+        run: node scripts/ci/check-retained-assets.mjs "$SITE"
+
+      # Cure: Cloudflare Response Header Transform + Cache Rule still in place.
+      # REQUIRE_EDGE is load-bearing — without it a missing Cloudflare proxy
+      # would not fail. check-cache-headers.test.js fails if this line disappears.
+      - name: Cache contract is still served (Cloudflare rules still in place)
+        id: cache
+        if: ${{ !cancelled() }}
+        env:
+          SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
+          REQUIRE_EDGE: 'true'
+          # Paths that exist on raisedpaws.com (both currently max-age=600 until
+          # the Transform Rule is applied — this step is expected red until then).
+          CHECK_PATHS: '/,/for-adopters/'
+        run: node scripts/ci/check-cache-headers.mjs "$SITE"
