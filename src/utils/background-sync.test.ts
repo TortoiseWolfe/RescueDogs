@@ -23,7 +23,10 @@ vi.mock('./offline-queue', () => ({
 }));
 vi.mock('./web3forms', () => ({ submitWithRetry: vi.fn() }));
 
-import { startFormQueueFallback } from './background-sync';
+import {
+  registerBackgroundSync,
+  startFormQueueFallback,
+} from './background-sync';
 
 function setSyncManager(present: boolean) {
   if (present) {
@@ -52,11 +55,11 @@ describe('startFormQueueFallback (#32)', () => {
     delete (window as unknown as { SyncManager?: unknown }).SyncManager;
   });
 
-  it('is a no-op when the Background Sync API is supported', () => {
+  it('still installs listeners when SyncManager exists (no SW registered)', () => {
     setSyncManager(true);
     const addSpy = vi.spyOn(window, 'addEventListener');
     const stop = startFormQueueFallback();
-    expect(addSpy).not.toHaveBeenCalledWith('online', expect.any(Function));
+    expect(addSpy).toHaveBeenCalledWith('online', expect.any(Function));
     stop();
     addSpy.mockRestore();
   });
@@ -90,5 +93,27 @@ describe('startFormQueueFallback (#32)', () => {
     window.dispatchEvent(new Event('online'));
     await vi.waitFor(() => expect(getQueuedItems).toHaveBeenCalled());
     stop();
+  });
+});
+
+describe('registerBackgroundSync', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    delete (window as unknown as { SyncManager?: unknown }).SyncManager;
+  });
+
+  it('resolves false instead of hanging when no service worker is registered', async () => {
+    vi.useFakeTimers();
+    (window as unknown as { SyncManager: unknown }).SyncManager =
+      function () {};
+    Object.defineProperty(navigator, 'serviceWorker', {
+      // ready never settles when nothing is registered — the #162 state
+      value: { ready: new Promise(() => {}) },
+      configurable: true,
+    });
+
+    const pending = registerBackgroundSync();
+    await vi.advanceTimersByTimeAsync(3000);
+    await expect(pending).resolves.toBe(false);
   });
 });
