@@ -505,6 +505,39 @@ retention—not merely because they want a listing.
 - Geographic coverage should expand only where listings and referrals can be
   kept trustworthy and useful
 
+### Horizon D — Local groomer / dog-walker listings (PARKED — do not build yet)
+
+TikTok and similar channels surface many independent groomers and dog walkers.
+A “near me” directory with eventual ads or featured placement is a real market
+opportunity — and a **different product** from the Raised Paws wedge (adoption
+application tracking).
+
+**Decision (2026-09):** do **not** start a groomers or dog-walkers section while
+pillar 3 is still being proven with pilots. It would compete for engineering
+time with deferred pillars 1, 2, 4, and 5, and would dilute “application
+tracker / portal” positioning into a generic pet-services marketplace
+(trust/safety, reviews, spam, support) before the anti-ghosting loop is
+inevitable for rescues.
+
+**How not to miss the audience in the meantime:**
+
+- Soft social CTAs and an interest waitlist (e.g. `/follow` or a short form:
+  role, city, social handle) — capture demand without shipping a vertical
+- Occasional content that mentions local services as a _possible_ later path,
+  without promising a ship date
+- Revisit only after 2–3 rescues actively use the loop, adopter traffic is
+  real, and a waitlist shows unsolicited demand
+
+**Relationship to Horizon C:** Horizon C is a mission-aligned **federated**
+network (workflows and outcomes). Horizon D is the opportunistic **consumer
+directory** idea. Do not collapse them into “list every pet business.” If
+groomers or walkers ever join, prefer partners who complete a meaningful care
+workflow over listing volume and ad inventory.
+
+**Risks if built too early:** half-built directory burns TikTok trust; paid
+placement pressure; moderation load; brand confusion with Petfinder/Yelp-class
+products we explicitly chose not to become.
+
 ### Long-term narrative and sequencing
 
 The possible arc is:
@@ -515,6 +548,8 @@ The possible arc is:
 3. **Reunite and connect** — microchip routing and qualified wellness partners
 4. **Federate the ecosystem** — become a trusted front door to animal services
    without becoming an advertising-driven directory
+5. **Only then** reconsider Horizon D (local services listings) if waitlist
+   demand and brand clarity still support it
 
 The long-term promise is not "every pet organization in one app" by itself. It
 is **one trusted place to finish adoptions, reunite lost animals, and find the
@@ -560,6 +595,7 @@ and must restate Principle V.
 
 | Date       | Change                                                                                                                                                                                     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-09-05 | Horizon D: park local groomer/dog-walker directory; waitlist/content only until pillar 3 is proven                                                                                         |
 | 2026-09-05 | Import ladder (CSV/paste → connectors → conflict-aware sync); RescueGroups / ShelterBuddy / Shelterluv as early candidates; provenance fields called out                                   |
 | 2026-08-18 | First partner = small foster/breed group; foster is GTM not next build; inventory vs in-flight cohort; apply-link channels (no webmaster / no bare homepage); founding-pilot cost language |
 | 2026-08-03 | Pilot pet load: staff portal upload + membership; next = #138 runbook; #110/#111/#112 marked shipped                                                                                       |
