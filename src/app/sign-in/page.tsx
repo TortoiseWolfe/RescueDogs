@@ -110,7 +110,7 @@ export default function SignInPage() {
             <span>{switchMessage}</span>
           </div>
         ) : portal ? null : (
-          <p className="text-base-content/70 mb-6 text-center text-xs whitespace-nowrap sm:mb-8 sm:text-sm">
+          <p className="text-base-content/70 mb-6 max-w-full text-center text-xs sm:mb-8 sm:text-sm md:whitespace-nowrap">
             New here?{' '}
             <Link href="/for-adopters" className="link link-primary">
               For Adopters
