@@ -13,7 +13,13 @@ jobs:
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # SUPABASE_SERVICE_ROLE_KEY deliberately NOT set here (#298) — see the
+      # longer note in ci.yml. This job runs `pnpm run build` and
+      # `pnpm run test:a11y:ci` (serve out + pa11y) plus three component a11y
+      # tests; none reads the key, and it is a required check with no
+      # paths-ignore, so it was handing a production RLS-bypassing credential to
+      # every PR including docs-only ones.
+      # SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
       TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
 

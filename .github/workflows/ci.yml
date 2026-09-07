@@ -15,7 +15,25 @@ jobs:
       NEXT_PUBLIC_DEPLOY_URL: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # SUPABASE_SERVICE_ROLE_KEY deliberately NOT set here (#298).
+      # This is a required check with no paths-ignore, so it ran on every PR —
+      # docs-only included — putting a production RLS-bypassing key into the
+      # environment of `pnpm test`, `pnpm build` and `pnpm build-storybook`,
+      # i.e. a large tree of dev-dependency code.
+      #
+      # Nothing in this job needs it. Every test file that reads the key is
+      # already in vitest's exclude list (vitest.config.ts:16-64): all of
+      # tests/e2e/**, tests/rls/**, the contract/integration auth + messaging
+      # suites, and tests/integration/avatar/upload-flow (the only importer of
+      # tests/helpers/real-supabase). src/config/payment.ts:40 defaults it to ''
+      # and only logger.warn()s when absent (:59-63) — it never throws — and
+      # deploy.yml does not set it either, so production already builds without
+      # it. Absent is also safer than a placeholder: getAdminClient() returns
+      # null and callers skip, whereas a fake value builds a client that fails
+      # with auth errors.
+      #
+      # E2E is where this key belongs; e2e.yml still sets it per-job.
+      # SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
       TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
 
