@@ -154,7 +154,15 @@ The repo-wide E2E mutex still cites it as its justification (`e2e.yml:36-41`):
 
 > every E2E run shares one Supabase project, and concurrent runs race each other's `beforeAll` cleanupOldMessages hooks
 
-**That hazard no longer exists.** The mutex serializes every E2E run in the repository — the same mutex that has been starving the CI queue for hours at a time (see [#210](https://github.com/TortoiseWolfe/RescueDogs/issues/210), [#214](https://github.com/TortoiseWolfe/RescueDogs/issues/214)). Moving CI off the shared project removes its remaining rationale entirely.
+**That hazard no longer exists.** The mutex serializes every E2E run in the repository — the same mutex that has been starving the CI queue for hours at a time (see [#210](https://github.com/TortoiseWolfe/RescueDogs/issues/210), [#214](https://github.com/TortoiseWolfe/RescueDogs/issues/214)).
+
+> ### ⚠️ Correction (2026-09-07): do NOT drop the mutex. Its _justification_ is stale; its _necessity_ is not.
+>
+> This section originally concluded that moving CI off the shared project "removes its remaining rationale entirely". That is wrong, and acting on it would break CI.
+>
+> `cleanupOldMessages` is indeed dead code. But another `beforeAll` performs a globally destructive write: **`clearAllRateLimits()`** (`tests/e2e/utils/rate-limit-admin.ts:47-50`) deletes **every row** of `rate_limit_attempts`, and `tests/e2e/security/brute-force.spec.ts:51-61` depends on the near-lockout rows it seeded surviving until its assertion. Two concurrent runs against one project: run 2's `beforeAll` wipes run 1's state and fails it. That is exactly the class of race the mutex was written for, and it outlives `cleanupOldMessages`.
+>
+> Fix that first (it is the same shared-project root cause), then reconsider the mutex.
 
 ---
 
@@ -182,7 +190,7 @@ The repo-wide E2E mutex still cites it as its justification (`e2e.yml:36-41`):
 >
 > Realistic cost: Phase A (make the stack boot: `docker-compose.yml`, `kong.yml`, `.env.example`) ~½–1 day. Phase B (make the existing suite pass — edge runtime, Kong `functions-v1` route, demo seeds for `anti-ghosting.spec.ts`, non-`@example.com` test emails) 2–4 days. **Phase C (CI) 1–2 weeks.** Phases A and B are worth doing on their own merits — the local dev stack has been broken since March — but this is **not** a deadline fix.
 
-Effect if fully done: CI's Realtime contribution → **zero**, and the mutex rationale in §7 disappears.
+Effect if fully done: CI's Realtime contribution → **zero**. (This originally also claimed it retires the §7 mutex — see the correction there; a second destructive `beforeAll` keeps the mutex necessary until it is fixed.)
 
 One hazard to plan for: `container_name` is **global**, not namespaced by `COMPOSE_PROJECT_NAME`. A local RescueDogs stack would collide with a running ScriptHammer one. Harmless in CI, which is isolated per runner.
 
@@ -204,7 +212,19 @@ If the local stack proves unstable in CI. Needs the migration and seeds kept in 
 >
 > **Supabase bills at the organization level, not per project.** Both Usage screenshots read _"Organization is on the Free Plan"_ with an _"All projects"_ selector, and the figures aggregate every project in `Tech by Schlajo`. A second project there moves CI's usage between projects inside one shared quota pool and changes the bill by nothing.
 >
-> For this option to do what the ticket intends, the CI project must live in a **different organization**. Two constraints on that: `ACCOUNTS.md` records a per-**user** active-project limit across every org a user owns or administers, so a free slot in some org is not sufficient on its own; and the local `SUPABASE_ACCESS_TOKEN` is `spoketowork@gmail.com` with **Developer** role in `Tech by Schlajo` (schlajo is Owner), so creation is not ours to do.
+> For this option to do what the ticket intends, the CI project must live in a **different organization**.
+>
+> **And that is currently blocked.** `ACCOUNTS.md` (workspace root, verified 2026-09-07 by live API call) states the binding rule, with Supabase's own refusal text quoted: the free limit is **2 ACTIVE projects per USER**, counted across every org where that user is Owner or Administrator — _not_ per org. _"Spreading across orgs does not raise it."_
+>
+> | account                  | owned-active           | headroom         |
+> | ------------------------ | ---------------------- | ---------------- |
+> | `spoketowork@gmail.com`  | 2 (SpokeToWork, runit) | **0 — at limit** |
+> | `jonpohlner@gmail.com`   | 1 (geoLARP)            | 1                |
+> | `waynepohlner@gmail.com` | 1 (ScriptHammer)       | 1                |
+>
+> So the real options are: use one of the other two accounts' single slot (against the file's own placement principle — a project belongs to the account matching its domain), or relocate `runit`, which `ACCOUNTS.md` names as _"the remaining thing standing between `spoketowork@gmail.com` and any headroom."_
+>
+> **Read `ACCOUNTS.md` before reasoning about this option again.** Two Supabase orgs are named `ScriptHammer` and two are named `geoLARP`, on different accounts — always disambiguate by org id.
 
 ### Rejected — Pro plan (ticket option D)
 
@@ -226,7 +246,7 @@ Send items 1-3 to ScriptHammer. The unfiltered `useUnreadCount` binding is byte-
 | 4     | Scope `useUnreadCount`                    | small PR           | largest production win         |
 | 5     | Local Supabase for CI (+ upstream #649)   | medium             | CI → zero                      |
 
-Steps 2-4 are cheap and can land before the deadline regardless of what step 1 reveals. Step 5 is the structural fix and also resolves the CI mutex problem.
+Steps 2-4 are cheap and can land before the deadline regardless of what step 1 reveals. Step 5 is the structural fix. (It does **not** resolve the CI mutex problem on its own — see the §7 correction.)
 
 **Open question this doc cannot close:** the CI estimate covers the overage but not the baseline. Do not treat step 5 as sufficient until the Usage dashboard confirms where the other ~2.2M originates.
 
