@@ -83,11 +83,16 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Only meaningful for pull_request. push/schedule/dispatch already run
-          # the full matrix, so report false and let the existing gate decide.
+          # Only meaningful for pull_request: schedule/dispatch already run the
+          # full matrix unconditionally, and since #294 a push to main runs
+          # chromium only. Report false and let the browser gate decide.
+          #
+          # Consequence worth knowing: a matrix-changing commit is validated on
+          # its PR, where this detector fires, and not again on the merge. That
+          # still satisfies #244 — it just moves where the check is enforced.
           if [ "${{ github.event_name }}" != "pull_request" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "not a pull_request — full matrix already runs"
+            echo "not a pull_request — gate decides by event type"
             exit 0
           fi
 
@@ -692,16 +697,27 @@ jobs:
     # Lever 1: depends only on the build/auth artifacts (same as e2e/chromium),
     # NOT on the chromium job — so all 3 browsers run in parallel.
     needs: [smoke, rate-limiting, auth-setup, ci-config-changed]
-    # Lever 2: chromium gates every PR; firefox + webkit run on push-to-main,
-    # the weekly cron, and workflow_dispatch — keeping PR feedback fast. A PR
-    # touching WebKit/Firefox-sensitive code can opt back in with the `full-e2e`
-    # label (e.g. messaging error-string handling — see the real Safari "Load
-    # failed" retry bug fixed in commit 7fb7563).
+    # Lever 2 (#294): chromium gates every PR *and* every push to main; firefox
+    # + webkit run on the weekly cron and workflow_dispatch. Pushes to main used
+    # to run all 24 shards, which was 71% of all shard-runs and the reason Supabase
+    # egress hit 108% of the free quota in the 26 Jul–25 Aug cycle. Dropping them
+    # to chromium cuts shard-runs 44% and takes egress to 58% at the same merge
+    # rate. E2E is deliberately not a required check and deploy.yml does not
+    # depend on it, so this gates nothing.
+    #
+    # A PR touching WebKit/Firefox-sensitive code can still opt in with the
+    # `full-e2e` label (e.g. messaging error-string handling — see the real Safari
+    # "Load failed" retry bug fixed in commit 7fb7563), and any PR that edits the
+    # browser matrix opts itself in via ci-config-changed above (#244).
+    #
+    # The cost: a cross-browser regression merged on a Tuesday is not seen until
+    # the Monday 06:00 UTC cron. Use the label when that matters.
     if: >-
       needs.smoke.result == 'success' &&
       needs['rate-limiting'].result == 'success' &&
       needs['auth-setup'].result == 'success' &&
-      (github.event_name != 'pull_request' ||
+      (github.event_name == 'schedule' ||
+       github.event_name == 'workflow_dispatch' ||
        contains(github.event.pull_request.labels.*.name, 'full-e2e') ||
        needs['ci-config-changed'].outputs.changed == 'true')
     timeout-minutes: 60
@@ -864,13 +880,15 @@ jobs:
     runs-on: ubuntu-latest
     # Lever 1: depends only on build/auth artifacts, NOT firefox — all 3 parallel.
     needs: [smoke, rate-limiting, auth-setup, ci-config-changed]
-    # Lever 2: see e2e-firefox above — skipped on PRs (chromium gates those)
-    # unless the PR carries the `full-e2e` label; runs on push-to-main + cron.
+    # Lever 2 (#294): see e2e-firefox above — skipped on PRs *and* on pushes to
+    # main (chromium gates both); runs on the weekly cron, workflow_dispatch, the
+    # `full-e2e` label, and any PR that edits the browser matrix.
     if: >-
       needs.smoke.result == 'success' &&
       needs['rate-limiting'].result == 'success' &&
       needs['auth-setup'].result == 'success' &&
-      (github.event_name != 'pull_request' ||
+      (github.event_name == 'schedule' ||
+       github.event_name == 'workflow_dispatch' ||
        contains(github.event.pull_request.labels.*.name, 'full-e2e') ||
        needs['ci-config-changed'].outputs.changed == 'true')
     timeout-minutes: 60
@@ -884,12 +902,7 @@ jobs:
           # msg runs as a single shard (see chromium matrix note above).
           - { project: webkit-msg, browser: webkit, shard: 1/1 }
           # #116 Phase 2 — per-test fixture-isolation slice at workers>1.
-          - {
-              project: webkit-msg-iso,
-              browser: webkit,
-              shard: 1/1,
-              workers: 2,
-            }
+          - { project: webkit-msg-iso, browser: webkit, shard: 1/1, workers: 2 }
           - { project: webkit-gen, browser: webkit, shard: 1/6 }
           - { project: webkit-gen, browser: webkit, shard: 2/6 }
           - { project: webkit-gen, browser: webkit, shard: 3/6 }
@@ -1072,15 +1085,16 @@ jobs:
       - name: Generate summary
         if: always()
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          HAS_FULL_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'full-e2e') }}
+          # Read the mode off the job that actually ran rather than re-deriving
+          # the gate here — the two drifted apart before (#294).
+          FIREFOX_RESULT: ${{ needs['e2e-firefox'].result }}
         run: |
           echo "## E2E Test Results" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          if [ "$EVENT_NAME" = "pull_request" ] && [ "$HAS_FULL_LABEL" != "true" ]; then
-            echo "**PR Mode**: Chromium only (8 jobs). Add the \`full-e2e\` label to also run Firefox + WebKit." >> "$GITHUB_STEP_SUMMARY"
+          if [ "$FIREFOX_RESULT" = "skipped" ]; then
+            echo "**Chromium only** (8 jobs). Firefox + WebKit run on the weekly Monday cron, on \`workflow_dispatch\`, on PRs labelled \`full-e2e\`, and on any PR that edits the browser matrix." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "**Full Mode**: Chromium + Firefox + WebKit (24 jobs total)" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Full matrix**: Chromium + Firefox + WebKit (24 jobs total)" >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Download the **playwright-report** artifact for detailed results." >> "$GITHUB_STEP_SUMMARY"

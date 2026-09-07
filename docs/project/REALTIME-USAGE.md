@@ -1,6 +1,6 @@
 # Supabase Realtime usage — investigation and recommendation
 
-**Issue:** [#224](https://github.com/TortoiseWolfe/RescueDogs/issues/224) · **Deadline:** dashboard says projects are **restricted from 18 Sep 2026**; the fair-use email cited 2026-09-19. Plan against the earlier date. · **Status:** decision doc, no code changes
+**Issue:** [#224](https://github.com/TortoiseWolfe/RescueDogs/issues/224) · **Deadline:** dashboard says projects are **restricted from 18 Sep 2026**; the fair-use email cited 2026-09-19. Plan against the earlier date. · **Status:** investigation superseded by §10 — the fixes landed and were measured on 2026-09-07. Read §10 first; §§1-9 are the August reasoning, corrected in place where it was wrong.
 
 Supabase's fair-use notice reports org **Tech by Schlajo** at **2,296,215** Realtime messages against a ~2.2M Free-plan quota — **96,215 over, 4.4%**. One-time grace for this billing period.
 
@@ -21,6 +21,8 @@ Reference: [Realtime messages usage](https://supabase.com/docs/guides/platform/m
 ---
 
 ## 2. What we could not measure, and why
+
+> **Resolved 2026-09-07.** `SUPABASE_ACCESS_TOKEN` is now present in local `.env`, so the Management API checks below are done and recorded in §10. @schlajo supplied the dashboard figures. The section is kept because it is what made §5's arithmetic an estimate rather than a measurement.
 
 **We do not have access to the Usage dashboard.** Recorded plainly so the numbers below are read as what they are — derived estimates, not measurements:
 
@@ -167,9 +169,20 @@ The repo-wide E2E mutex still cites it as its justification (`e2e.yml:36-41`):
 - the monolithic migration is applied automatically on first boot, via a deliberate single-file mount whose comment documents the two bugs that made a directory mount fail
 - `playwright.config.ts` only sets `baseURL` — the Supabase URL is pure env, so redirecting E2E is an env swap plus a compose step
 
-**One gap blocks it.** Realtime resolves its tenant from the _first label of the Host header_, and `docker/supabase/kong.yml:125,142` points at `http://supabase-realtime:4000` — a single-label host with no tenant, so the socket can never join. Upstream ScriptHammer fixed exactly this in **#649**: `realtime-dev.supabase-realtime` as both the Kong upstream and the `container_name`, plus a `command:` that runs the Ecto migrations and seeds the tenant. Our `kong.yml` has not changed since March. **It is a two-file cherry-pick.**
+**One gap blocks it.** Realtime resolves its tenant from the _first label of the Host header_, and `docker/supabase/kong.yml:125,142` points at `http://supabase-realtime:4000` — a single-label host with no tenant, so the socket can never join. Upstream ScriptHammer fixed exactly this in **#649**: `realtime-dev.supabase-realtime` as both the Kong upstream and the `container_name`, plus a `command:` that runs the Ecto migrations and seeds the tenant. Our `kong.yml` has not changed since March.
 
-Effect: CI's Realtime contribution → **zero**. No second project slot, no monthly cost, and the mutex rationale in §7 disappears.
+> ### Correction (2026-09-07): this said "**it is a two-file cherry-pick**". That was wrong by roughly an order of magnitude.
+>
+> The diagnosis holds — `kong.yml:125,142` is exact and the tenant mechanism is real. The **cost estimate** does not:
+>
+> - **Three bugs, not one.** Upstream's `15f18aae` also fixes an **anon-key/JWT-secret mismatch**, and this repo has it: `docker-compose.yml:264` (realtime healthcheck) and `:338` (studio) carry a key signed by a different secret than `x-supabase-env` at `:23`. Fix the Host label and the Ecto `command:` and the container still reports `unhealthy` forever. `.env.example:46-47` documents the wrong pair too, disagreeing with `.env.local-supabase:27-28`.
+> - **It will not `git cherry-pick`.** Upstream renamed the vars to `SUPABASE_LOCAL_ANON_KEY` / `SUPABASE_LOCAL_SERVICE_ROLE_KEY`; this repo still uses `SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY`. It is a hand-port.
+> - **"An env swap plus a compose step" is the real miss.** The env plumbing genuinely is as described — `switch-env.js`, `SUPABASE_ADMIN_URL`, `playwright.config.ts:100`. But `e2e.yml` is built around **one** build artifact (`NEXT_PUBLIC_SUPABASE_URL` is baked at build time) and **one** shared `auth-state` artifact handed to 24 shards. Per-runner databases invalidate both.
+> - **The empirical answer:** upstream needed a separate **777-line `e2e-local.yml`** across **ten commits** (#586 → #894), including a schema-fidelity gate and parity tooling built precisely because 24 jobs once went green while firefox and webkit executed zero tests. And having done all of that, upstream **still runs its own `e2e.yml` against its cloud project today**.
+>
+> Realistic cost: Phase A (make the stack boot: `docker-compose.yml`, `kong.yml`, `.env.example`) ~½–1 day. Phase B (make the existing suite pass — edge runtime, Kong `functions-v1` route, demo seeds for `anti-ghosting.spec.ts`, non-`@example.com` test emails) 2–4 days. **Phase C (CI) 1–2 weeks.** Phases A and B are worth doing on their own merits — the local dev stack has been broken since March — but this is **not** a deadline fix.
+
+Effect if fully done: CI's Realtime contribution → **zero**, and the mutex rationale in §7 disappears.
 
 One hazard to plan for: `container_name` is **global**, not namespaced by `COMPOSE_PROJECT_NAME`. A local RescueDogs stack would collide with a running ScriptHammer one. Harmless in CI, which is isolated per runner.
 
@@ -185,7 +198,13 @@ Independently valuable, because it cuts **production** fan-out rather than CI, a
 
 ### Fallback — dedicated CI Supabase project (ticket option A)
 
-If the local stack proves unstable in CI. Costs the second free project slot and needs the migration kept in sync, but it is simple and well understood.
+If the local stack proves unstable in CI. Needs the migration and seeds kept in sync, but it is simple and well understood.
+
+> ### Correction (2026-09-07): a second project in the **same org** does not help.
+>
+> **Supabase bills at the organization level, not per project.** Both Usage screenshots read _"Organization is on the Free Plan"_ with an _"All projects"_ selector, and the figures aggregate every project in `Tech by Schlajo`. A second project there moves CI's usage between projects inside one shared quota pool and changes the bill by nothing.
+>
+> For this option to do what the ticket intends, the CI project must live in a **different organization**. Two constraints on that: `ACCOUNTS.md` records a per-**user** active-project limit across every org a user owns or administers, so a free slot in some org is not sufficient on its own; and the local `SUPABASE_ACCESS_TOKEN` is `spoketowork@gmail.com` with **Developer** role in `Tech by Schlajo` (schlajo is Owner), so creation is not ours to do.
 
 ### Rejected — Pro plan (ticket option D)
 
@@ -210,3 +229,66 @@ Send items 1-3 to ScriptHammer. The unfiltered `useUnreadCount` binding is byte-
 Steps 2-4 are cheap and can land before the deadline regardless of what step 1 reveals. Step 5 is the structural fix and also resolves the CI mutex problem.
 
 **Open question this doc cannot close:** the CI estimate covers the overage but not the baseline. Do not treat step 5 as sufficient until the Usage dashboard confirms where the other ~2.2M originates.
+
+> **Closed 2026-09-07.** There was no production baseline — the database is effectively empty (2 messages, 78 `auth.users`). CI accounted for essentially the whole bill. Steps 2-4 landed as #227/#228 and are now measured in §10; step 5 is re-costed in the correction above.
+
+---
+
+## 10. Outcome — measured 2026-09-07
+
+Three PRs landed from §9: **#226** (this doc), **#227** (redundant `conversations` UPDATE deleted at three call sites; `typing_indicators` unpublished), **#228** (`useUnreadCount` scoped server-side). This section is the measurement §9 said to wait for.
+
+### The confound, and how it was removed
+
+@schlajo's figures — 2,859,882 Realtime messages in the 26 Jul–25 Aug cycle against 363,613 by day 12 of 26 Aug–26 Sep — do not on their own show the fix worked, because **CI volume also fell between the two cycles**. The effect has to be normalised against CI.
+
+E2E run counts from `gh run list --workflow=e2e.yml --created <range>`, converted to **shard-runs** (a push or cron run is 24 shards, a chromium-only PR run is 8):
+
+|                           | prev (26 Jul–25 Aug)           | curr (26 Aug–06 Sep) |
+| ------------------------- | ------------------------------ | -------------------- |
+| runs                      | 160 (67 push / 88 PR / 5 cron) | 45 (20 / 24 / 1)     |
+| **shard-runs**            | **2,432**                      | **696**              |
+| full-matrix share of runs | 45.0%                          | 46.7%                |
+
+The run _mix_ is nearly identical, so shard-runs is a fair denominator.
+
+### The result — MAU and egress are the control variables
+
+| metric                | prev / shard-run | curr / shard-run | change     |
+| --------------------- | ---------------- | ---------------- | ---------- |
+| **Realtime messages** | 1,175.9          | **522.4**        | **−55.6%** |
+| MAU (control)         | 19.0             | 18.6             | −2.4%      |
+| Egress MB (control)   | 2.28             | 2.19             | −3.8%      |
+
+**Two independent controls held flat while Realtime halved.** Three corroborations:
+
+- **Mechanism.** Implied fan-out — Realtime divided by published row-changes per run — falls **4.87× → 2.16×**. That is precisely what removing the table-wide `messages` binding every signed-in browser context held should do, and it matches §6's cross-shard argument.
+- **Cross-validation.** Predicting MAU from E2E fixture counts (~438 billable identities per full run, ~146 per chromium PR run) gives **12,702** against **12,934 billed** — 1.8% error. MAU is 100% CI churn; `auth.users` holds 78 rows, so none of it persists.
+- **Conservative.** Since #244, a PR touching `e2e.yml` or `playwright.config.ts` runs all 24 shards. Zero such PRs merged in the current cycle and five in the previous one, so the current shard count is if anything _under_-stated and the true reduction is larger.
+
+### Deadline verdict
+
+18 Sep is day 23 of the current cycle. Straight-line from day 12: Realtime ~35% of quota, MAU ~50%, egress ~58%. **Nothing was required before the restriction date**, and the dedicated CI project was not needed for it.
+
+### The constraint moved — see #294
+
+Realtime was never the only metric over the line, and #227/#228 cut only Realtime:
+
+| prev cycle actual | / quota               |                   |
+| ----------------- | --------------------- | ----------------- |
+| Realtime          | 2,859,882 / 2,000,000 | **143% — OVER**   |
+| **Egress**        | **5.417 / 5 GB**      | **108% — OVER**   |
+| MAU               | 46,284 / 50,000       | 93% — at the line |
+
+At post-fix rates, **egress trips first** — at 0.96× the busiest month on record, against 1.11× for MAU and 1.57× for Realtime. If CI volume merely returns to July/August levels, egress goes over again while Realtime stays comfortable. Tracked in [#294](https://github.com/TortoiseWolfe/RescueDogs/issues/294), along with the first lever: **chromium-only on pushes to `main`**, which cuts shard-runs 44% and takes Jul/Aug-pace egress from 104% to 58%.
+
+### Live state confirmed via the Management API
+
+| check                                                   | result                                                                                                                                               |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `typing_indicators` in `supabase_realtime`              | **gone** — #227's migration half was applied                                                                                                         |
+| `useUnreadCount` scoping on `origin/main`               | present; `filter: conversation_id=in.(…)`, byte-identical blob since `cf32f27d`                                                                      |
+| new `.channel()` in the 28 `src/` commits since the fix | **none** — shelter portal, browse and pet photos are all fetch-on-demand                                                                             |
+| `REPLICA IDENTITY FULL`                                 | still on 6 of 8 published tables (`payment_results`, `subscriptions` are `default`) — §3's third item, still open                                    |
+| unfiltered subscriptions                                | 5 remain (`conversations`, `conversation_members`, `user_connections`, `payment_results`, `subscriptions`) — all route-scoped, none globally mounted |
+| row counts                                              | 78 `auth.users`, 2 `messages`, 3 `conversations`, 5 `applications`, 17 `pets`                                                                        |
