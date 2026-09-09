@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   checkRateLimit,
@@ -13,6 +13,10 @@ import { validateEmail } from '@/lib/auth/email-validator';
 import { logAuthEvent } from '@/lib/auth/audit-logger';
 import PasswordStrengthIndicator from '@/components/atomic/PasswordStrengthIndicator';
 import { PasswordField } from '@/components/atomic/PasswordField';
+import CaptchaWidget, {
+  type CaptchaWidgetHandle,
+} from '@/components/auth/CaptchaWidget';
+import { captchaConfig } from '@/config/captcha.config';
 import { createLogger } from '@/lib/logger/logger';
 
 const logger = createLogger('components:auth:SignUpForm');
@@ -41,6 +45,8 @@ export default function SignUpForm({
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<CaptchaWidgetHandle>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,13 +90,26 @@ export default function SignUpForm({
       return;
     }
 
+    // Bot check (#231). Rate limit is keyed on email — fresh addresses bypass it.
+    if (captchaConfig.enabled && !captchaToken) {
+      setError('Please complete the bot check before signing up.');
+      return;
+    }
+
     setLoading(true);
 
-    const { error: signUpError } = await signUp(email, password);
+    const { error: signUpError } = await signUp(
+      email,
+      password,
+      captchaToken ?? undefined
+    );
 
     setLoading(false);
 
     if (signUpError) {
+      // Turnstile tokens are single-use — always re-solve after a failed submit.
+      captchaRef.current?.reset();
+
       if (isAuthRequestRateLimited(signUpError)) {
         await logAuthEvent({
           event_type: 'sign_up',
@@ -254,6 +273,8 @@ export default function SignUpForm({
           <span className="label-text">Remember me</span>
         </label>
       </div>
+
+      <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
 
       {error && (
         <div className="alert alert-error" role="alert" aria-live="assertive">
