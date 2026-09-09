@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   checkRateLimit,
@@ -14,6 +14,10 @@ import { logAuthEvent } from '@/lib/auth/audit-logger';
 import { getInternalUrl } from '@/config/project.config';
 import { createLogger } from '@/lib/logger/logger';
 import { PasswordField } from '@/components/atomic/PasswordField';
+import CaptchaWidget, {
+  type CaptchaWidgetHandle,
+} from '@/components/auth/CaptchaWidget';
+import { captchaConfig } from '@/config/captcha.config';
 
 const logger = createLogger('components:auth:SignInForm');
 
@@ -52,6 +56,8 @@ export default function SignInForm({
   const [remainingAttempts, setRemainingAttempts] = useState<number | null>(
     null
   );
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<CaptchaWidgetHandle>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,14 +100,25 @@ export default function SignInForm({
       return;
     }
 
+    if (captchaConfig.enabled && !captchaToken) {
+      setError('Please complete the bot check before signing in.');
+      return;
+    }
+
     setRemainingAttempts(rateLimit.remaining);
     setLoading(true);
 
-    const { error: signInError } = await signIn(email, password);
+    const { error: signInError } = await signIn(
+      email,
+      password,
+      captchaToken ?? undefined
+    );
 
     setLoading(false);
 
     if (signInError) {
+      captchaRef.current?.reset();
+
       // Check if email needs verification
       if (signInError.message.toLowerCase().includes('email not confirmed')) {
         window.location.href = getInternalUrl('/verify-email');
@@ -349,6 +366,8 @@ export default function SignInForm({
           <span className="label-text">Remember Me</span>
         </label>
       </div>
+
+      <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
 
       {error && (
         <div className="alert alert-error" role="alert" aria-live="assertive">
