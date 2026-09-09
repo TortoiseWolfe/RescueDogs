@@ -333,7 +333,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           password,
           options: {
             emailRedirectTo: getRedirectUrl('/auth/callback'),
-            captchaToken,
+            ...(captchaToken ? { captchaToken } : {}),
           },
         });
         return { error };
@@ -350,7 +350,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
-          options: { captchaToken },
+          ...(captchaToken ? { options: { captchaToken } } : {}),
         });
         return { error };
       } catch (error) {
