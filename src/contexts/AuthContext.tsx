@@ -97,8 +97,23 @@ export interface AuthState {
 }
 
 export interface AuthContextType extends AuthState {
-  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  /**
+   * Create an account. `captchaToken` is required once Supabase Auth has
+   * Bot Protection enabled (#231); optional until then so local/forks work.
+   */
+  signUp: (
+    email: string,
+    password: string,
+    captchaToken?: string
+  ) => Promise<{ error: Error | null }>;
+  /**
+   * Sign in. Same captchaToken rule as signUp when Bot Protection is on.
+   */
+  signIn: (
+    email: string,
+    password: string,
+    captchaToken?: string
+  ) => Promise<{ error: Error | null }>;
   /**
    * Sign out and hard-navigate. Pass `redirectTo` (same-origin path) to land
    * somewhere other than `/` — used by demo role switch (#68).
@@ -310,32 +325,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [seedDisplayNameIfNeeded]);
 
-  const signUp = useCallback(async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: getRedirectUrl('/auth/callback'),
-        },
-      });
-      return { error };
-    } catch (error) {
-      return { error: error as Error };
-    }
-  }, []);
+  const signUp = useCallback(
+    async (email: string, password: string, captchaToken?: string) => {
+      try {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: getRedirectUrl('/auth/callback'),
+            ...(captchaToken ? { captchaToken } : {}),
+          },
+        });
+        return { error };
+      } catch (error) {
+        return { error: error as Error };
+      }
+    },
+    []
+  );
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      return { error };
-    } catch (error) {
-      return { error: error as Error };
-    }
-  }, []);
+  const signIn = useCallback(
+    async (email: string, password: string, captchaToken?: string) => {
+      try {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+          ...(captchaToken ? { options: { captchaToken } } : {}),
+        });
+        return { error };
+      } catch (error) {
+        return { error: error as Error };
+      }
+    },
+    []
+  );
 
   const signOut = useCallback(async (options?: { redirectTo?: string }) => {
     // Mark as local sign-out to prevent double redirect from onAuthStateChange
