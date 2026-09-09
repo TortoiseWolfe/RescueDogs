@@ -166,6 +166,10 @@ jobs:
           # test.skip'd; the rest only assert UI render + consent flow.
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_e2e_dummy_not_a_real_key
           NEXT_PUBLIC_PAYPAL_CLIENT_ID: e2e_dummy_paypal_client_id
+          # Turnstile site key must be baked in once Supabase Bot Protection is
+          # on (#302). Without it the widget is absent, forms submit with no
+          # captcha_token, and every auth E2E fails the same way smoke did.
+          NEXT_PUBLIC_CAPTCHA_SITE_KEY: ${{ vars.NEXT_PUBLIC_CAPTCHA_SITE_KEY }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6

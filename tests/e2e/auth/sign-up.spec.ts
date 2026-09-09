@@ -21,6 +21,7 @@ import {
   waitForHydration,
   waitForAuthenticatedState,
 } from '../utils/test-user-factory';
+import { waitForCaptchaIfPresent } from '../utils/captcha-auth';
 
 /**
  * Generate a test email for sign-up tests.
@@ -109,7 +110,8 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
       .fill(DEFAULT_TEST_PASSWORD);
     await page.getByLabel('Confirm Password').fill(DEFAULT_TEST_PASSWORD);
 
-    // Submit form
+    // Submit form (wait for Turnstile when Bot Protection is on — #302)
+    await waitForCaptchaIfPresent(page);
     await page.getByRole('button', { name: /sign up/i }).click();
 
     // Wait for either redirect or error
@@ -171,6 +173,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
       .fill(DEFAULT_TEST_PASSWORD);
     await page.getByLabel('Confirm Password').fill(DEFAULT_TEST_PASSWORD);
 
+    await waitForCaptchaIfPresent(page);
     await page.getByRole('button', { name: /sign up/i }).click();
 
     // Wait for form to process

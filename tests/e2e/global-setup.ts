@@ -119,37 +119,42 @@ async function globalSetup(): Promise<void> {
     }
   }
 
-  // 4. Verify PRIMARY user password is correct
+  // 4. Verify PRIMARY can obtain a session. After Turnstile enforcement
+  //    (#302 / #231), anon password grant requires captcha_token, so we use
+  //    obtainAuthSession (password, then admin magic-link fallback).
   if (errors.length === 0) {
     console.log('\n🔑 Verifying PRIMARY user credentials...');
 
-    // Runs in the Node test process (in-container), so use the admin URL for
-    // local-sandbox reachability; falls back to the public URL on cloud/CI (#121).
-    const anonClient = createClient(
-      process.env.SUPABASE_ADMIN_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
+    const { obtainAuthSession, isCaptchaProtectionError } = await import(
+      './utils/captcha-auth'
     );
 
-    const { error: signInError } = await anonClient.auth.signInWithPassword({
-      email: process.env.TEST_USER_PRIMARY_EMAIL!,
-      password: process.env.TEST_USER_PRIMARY_PASSWORD!,
-    });
+    const result = await obtainAuthSession(
+      process.env.TEST_USER_PRIMARY_EMAIL!,
+      process.env.TEST_USER_PRIMARY_PASSWORD!
+    );
 
-    if (signInError) {
+    if (!result.ok) {
+      const message = result.error;
       errors.push({
         category: 'Test User Password',
-        message: `PRIMARY user sign-in failed: ${signInError.message}`,
-        fix: signInError.message.includes('Invalid login')
+        message: `PRIMARY user sign-in failed: ${message}`,
+        fix: message.toLowerCase().includes('invalid login')
           ? `TEST_USER_PRIMARY_PASSWORD in GitHub secrets does not match the password for ${process.env.TEST_USER_PRIMARY_EMAIL} in Supabase. Update the secret or reset the user's password.`
-          : signInError.message.includes('rate')
+          : message.toLowerCase().includes('rate')
             ? 'Rate limited - too many sign-in attempts. Wait 15 minutes or increase rate limits in Supabase.'
-            : `Check Supabase logs for details: ${signInError.message}`,
+            : isCaptchaProtectionError(message)
+              ? 'Supabase captcha is enabled; ensure SUPABASE_SERVICE_ROLE_KEY is set so E2E can fall back to admin magic-link sessions.'
+              : `Check Supabase logs for details: ${message}`,
       });
     } else {
-      console.log('✓ PRIMARY user credentials verified');
-      // Sign out to clean up
-      await anonClient.auth.signOut();
+      console.log(
+        `✓ PRIMARY user credentials verified (via ${result.via}${
+          result.via === 'admin-link'
+            ? '; password grant blocked by captcha'
+            : ''
+        })`
+      );
     }
   }
 

@@ -991,6 +991,10 @@ export async function performSignIn(
     await page.getByLabel('Remember Me').check();
   }
 
+  // Turnstile (#302): wait for a token before submit when the widget is present.
+  const { waitForCaptchaIfPresent } = await import('./captcha-auth');
+  await waitForCaptchaIfPresent(page);
+
   // Click sign in
   await page.getByRole('button', { name: 'Sign In' }).click();
 
@@ -1366,25 +1370,20 @@ export async function seedIsolatedConversation(
   const signInUser = async (
     user: TestUser
   ): Promise<InjectableSession | null> => {
-    const anon = createClient(anonUrl, anonKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
-    const { data, error } = await anon.auth.signInWithPassword({
-      email: user.email,
-      password: user.password,
-    });
-    if (error || !data.session) {
+    const { obtainAuthSession } = await import('./captcha-auth');
+    const result = await obtainAuthSession(user.email, user.password);
+    if (!result.ok) {
       console.warn(
         `seedIsolatedConversation: sign-in failed for ${user.email}:`,
-        error?.message
+        result.error
       );
       return null;
     }
     return {
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-      expires_at: data.session.expires_at ?? 0,
-      user: data.session.user,
+      access_token: result.session.access_token,
+      refresh_token: result.session.refresh_token,
+      expires_at: result.session.expires_at ?? 0,
+      user: result.session.user,
     };
   };
 
@@ -1716,17 +1715,12 @@ async function createKeyedUserWithSession(
     await deleteTestUser(user.id);
     return null;
   }
-  const anon = createClient(anonUrl, anonKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const { data, error } = await anon.auth.signInWithPassword({
-    email: user.email,
-    password: user.password,
-  });
-  if (error || !data.session) {
+  const { obtainAuthSession } = await import('./captcha-auth');
+  const result = await obtainAuthSession(user.email, user.password);
+  if (!result.ok) {
     console.warn(
       `createKeyedUserWithSession: sign-in failed for ${user.email}:`,
-      error?.message
+      result.error
     );
     await deleteTestUser(user.id);
     return null;
@@ -1735,10 +1729,10 @@ async function createKeyedUserWithSession(
     user,
     displayName,
     session: {
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-      expires_at: data.session.expires_at ?? 0,
-      user: data.session.user,
+      access_token: result.session.access_token,
+      refresh_token: result.session.refresh_token,
+      expires_at: result.session.expires_at ?? 0,
+      user: result.session.user,
     },
   };
 }
