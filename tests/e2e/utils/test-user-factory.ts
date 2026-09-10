@@ -14,6 +14,8 @@ import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { expect, type Page, type Browser } from '@playwright/test';
 import { KeyDerivationService } from '@/lib/messaging/key-derivation';
 import { findAuthUserByEmail } from './find-auth-user';
+import { obtainAuthSession, isSupabaseCaptchaEnforced } from './captcha-auth';
+import { waitForCaptchaIfPresent } from './captcha-ui';
 
 /**
  * Email domain for test users.
@@ -952,19 +954,95 @@ export async function waitForAuthenticatedState(
 }
 
 /**
- * Perform sign-in with proper error detection.
+ * Inject a Supabase session into the current page's localStorage and reload
+ * so AuthContext hydrates as signed-in. Used when UI password grant is
+ * blocked by Turnstile in CI (#302).
  *
- * Unlike just filling forms and clicking, this helper:
- * 1. Fills credentials
- * 2. Clicks sign-in
- * 3. Waits for EITHER success OR failure
- * 4. Returns detailed error if sign-in failed
- *
- * @param page - Playwright page object
- * @param email - User email
- * @param password - User password
- * @param options - Configuration options
- * @returns Object with success boolean and optional error message
+ * @param landingPath - Where to land after inject. Defaults to `/`. Pass
+ *   `/profile` or a `returnUrl` so tests that assert post-login location
+ *   still pass (inject must leave `/sign-in` for auth hydrate helpers).
+ */
+export async function injectAuthSessionOnPage(
+  page: Page,
+  session: InjectableSession,
+  landingPath: string = '/'
+): Promise<void> {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const browserUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_ADMIN_URL ||
+    '';
+  const supabaseHost = new URL(browserUrl).hostname.split('.')[0];
+  const sbStorageKey = `sb-${supabaseHost}-auth-token`;
+
+  const safeLanding =
+    landingPath.startsWith('/') && !landingPath.startsWith('//')
+      ? landingPath
+      : '/';
+
+  // Need an origin before localStorage writes work.
+  await page.goto(`${basePath}/`, { waitUntil: 'domcontentloaded' });
+
+  await page.evaluate(
+    ({ key, s, barrierKey }) => {
+      // Clear any leftover sign-out barrier from a prior tab (#296) so the
+      // injected session is not treated as a post-logout rewrite.
+      localStorage.removeItem(barrierKey);
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          access_token: s.access_token,
+          refresh_token: s.refresh_token,
+          expires_at: s.expires_at,
+          expires_in: 3600,
+          token_type: 'bearer',
+          user: s.user,
+        })
+      );
+    },
+    {
+      key: sbStorageKey,
+      s: session,
+      barrierKey: 'rd-auth-signout-barrier',
+    }
+  );
+  // A protected landing route can bounce back to /sign-in when its auth
+  // guard runs before AuthContext has read the freshly written session.
+  // Retry the navigation — the client is initialised by then.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.goto(`${basePath}${safeLanding}`, {
+      waitUntil: 'domcontentloaded',
+    });
+    if (!/\/sign-in/.test(page.url())) return;
+    await page.waitForTimeout(500);
+  }
+}
+
+/** Resolve where to land after a captcha-bypass session inject. */
+function resolvePostAuthLanding(pageUrl: string): string {
+  try {
+    const u = new URL(pageUrl);
+    if (u.pathname.includes('/sign-in')) {
+      const ru = u.searchParams.get('returnUrl');
+      if (ru) {
+        const decoded = decodeURIComponent(ru);
+        if (decoded.startsWith('/') && !decoded.startsWith('//')) {
+          return decoded;
+        }
+      }
+      // Match typical post-login default when no returnUrl.
+      return '/profile';
+    }
+  } catch {
+    /* ignore */
+  }
+  return '/';
+}
+
+/**
+ * Sign in via the UI when possible. When Supabase Bot Protection is on,
+ * production Turnstile does not solve on GitHub Actions IPs, so we obtain a
+ * session via admin magic-link and inject it instead (#302).
  *
  * @example
  * const result = await performSignIn(page, 'test@example.com', 'password');
@@ -978,7 +1056,35 @@ export async function performSignIn(
   password: string,
   options: { rememberMe?: boolean; timeout?: number } = {}
 ): Promise<{ success: boolean; error?: string }> {
-  const { rememberMe = false, timeout = 30000 } = options; // Increased from 15s to 30s for CI
+  const { rememberMe = false, timeout = 30000 } = options;
+
+  // Captcha-enforced environments: skip the doomed UI path.
+  if (await isSupabaseCaptchaEnforced()) {
+    const landing = resolvePostAuthLanding(page.url());
+    const obtained = await obtainAuthSession(email, password);
+    if (!obtained.ok) {
+      return { success: false, error: obtained.error };
+    }
+    await injectAuthSessionOnPage(
+      page,
+      {
+        access_token: obtained.session.access_token,
+        refresh_token: obtained.session.refresh_token,
+        expires_at: obtained.session.expires_at ?? 0,
+        user: obtained.session.user,
+      },
+      landing
+    );
+    try {
+      await waitForAuthenticatedState(page, timeout);
+      return { success: true };
+    } catch {
+      return {
+        success: false,
+        error: 'Session injected but authenticated UI did not hydrate',
+      };
+    }
+  }
 
   // Dismiss cookie banner first - it can block form interactions
   await dismissCookieBanner(page);
@@ -990,6 +1096,10 @@ export async function performSignIn(
   if (rememberMe) {
     await page.getByLabel('Remember Me').check();
   }
+
+  // Turnstile: wait for a token before submit when the widget is present
+  // (local runs with a working site key).
+  await waitForCaptchaIfPresent(page);
 
   // Click sign in
   await page.getByRole('button', { name: 'Sign In' }).click();
@@ -1366,25 +1476,19 @@ export async function seedIsolatedConversation(
   const signInUser = async (
     user: TestUser
   ): Promise<InjectableSession | null> => {
-    const anon = createClient(anonUrl, anonKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
-    const { data, error } = await anon.auth.signInWithPassword({
-      email: user.email,
-      password: user.password,
-    });
-    if (error || !data.session) {
+    const result = await obtainAuthSession(user.email, user.password);
+    if (!result.ok) {
       console.warn(
         `seedIsolatedConversation: sign-in failed for ${user.email}:`,
-        error?.message
+        result.error
       );
       return null;
     }
     return {
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-      expires_at: data.session.expires_at ?? 0,
-      user: data.session.user,
+      access_token: result.session.access_token,
+      refresh_token: result.session.refresh_token,
+      expires_at: result.session.expires_at ?? 0,
+      user: result.session.user,
     };
   };
 
@@ -1716,17 +1820,11 @@ async function createKeyedUserWithSession(
     await deleteTestUser(user.id);
     return null;
   }
-  const anon = createClient(anonUrl, anonKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const { data, error } = await anon.auth.signInWithPassword({
-    email: user.email,
-    password: user.password,
-  });
-  if (error || !data.session) {
+  const result = await obtainAuthSession(user.email, user.password);
+  if (!result.ok) {
     console.warn(
       `createKeyedUserWithSession: sign-in failed for ${user.email}:`,
-      error?.message
+      result.error
     );
     await deleteTestUser(user.id);
     return null;
@@ -1735,10 +1833,10 @@ async function createKeyedUserWithSession(
     user,
     displayName,
     session: {
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-      expires_at: data.session.expires_at ?? 0,
-      user: data.session.user,
+      access_token: result.session.access_token,
+      refresh_token: result.session.refresh_token,
+      expires_at: result.session.expires_at ?? 0,
+      user: result.session.user,
     },
   };
 }

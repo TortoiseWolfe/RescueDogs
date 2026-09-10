@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { clearAuthSignOutBarrier } from '@/lib/supabase/auth-storage';
 import { createLogger } from '@/lib/logger/logger';
 import { getRedirectUrl } from '@/config/project.config';
 
@@ -28,6 +29,8 @@ export default function OAuthButtons({ className = '' }: OAuthButtonsProps) {
     try {
       // Supabase handles CSRF protection via built-in state parameter (PKCE flow)
       // No need to manually manage state tokens
+      // Allow the OAuth callback session to persist after a prior sign-out (#296).
+      clearAuthSignOutBarrier();
       await supabase.auth.signInWithOAuth({
         provider,
         options: {

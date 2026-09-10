@@ -16,6 +16,11 @@ import React, {
 } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, setAllowAuthTokenRemoval } from '@/lib/supabase/client';
+import {
+  clearAuthSignOutBarrier,
+  markAuthSignOutBarrier,
+  purgeAuthTokenKeys,
+} from '@/lib/supabase/auth-storage';
 import { getInternalUrl, getRedirectUrl } from '@/config/project.config';
 import { useIdleTimeout } from '@/hooks/useIdleTimeout';
 import { retryWithBackoff } from '@/lib/auth/retry-utils';
@@ -328,6 +333,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = useCallback(
     async (email: string, password: string, captchaToken?: string) => {
       try {
+        // Allow the new session to persist after a prior sign-out (#296).
+        clearAuthSignOutBarrier();
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -347,6 +354,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = useCallback(
     async (email: string, password: string, captchaToken?: string) => {
       try {
+        // Allow the new session to persist after a prior sign-out (#296).
+        clearAuthSignOutBarrier();
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -372,17 +381,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // switching adopter ↔ shelter is one logout away (#48).
     clearPortalPreference();
 
-    // Allow the E2E storage adapter to remove auth tokens during sign-out
+    // FR-009 / #296: raise the shared barrier BEFORE clearing storage so a
+    // sibling tab's in-flight token refresh cannot rewrite the session into
+    // localStorage after we remove it.
+    markAuthSignOutBarrier();
+
+    // Allow the storage adapter to remove auth tokens during sign-out
     setAllowAuthTokenRemoval(true);
 
-    // Then attempt Supabase signOut (don't await, don't throw)
     try {
       await supabase.auth.signOut({ scope: 'local' });
+      // Belt-and-suspenders: purge any auth-token key that survived a raced
+      // or blocked removeItem so the next document load is unauthenticated.
+      purgeAuthTokenKeys();
     } catch (err) {
       // Log but don't throw - local state already cleared
       logger.error('Supabase signOut failed (local state cleared)', {
         error: err,
       });
+      try {
+        purgeAuthTokenKeys();
+      } catch {
+        /* ignore */
+      }
     } finally {
       setAllowAuthTokenRemoval(false);
     }
