@@ -166,6 +166,13 @@ jobs:
           # test.skip'd; the rest only assert UI render + consent flow.
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_e2e_dummy_not_a_real_key
           NEXT_PUBLIC_PAYPAL_CLIENT_ID: e2e_dummy_paypal_client_id
+          # Do NOT bake NEXT_PUBLIC_CAPTCHA_SITE_KEY into the E2E build.
+          # Production Turnstile never issues tokens on GitHub Actions
+          # datacenter IPs (hidden input stays ""), so a baked-in widget
+          # hangs every auth submit. Anon password/sign-up grants are
+          # covered via admin magic-link / session injection when captcha
+          # is enforced (#302). Live Turnstile is covered manually / on
+          # raisedpaws.com.
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6

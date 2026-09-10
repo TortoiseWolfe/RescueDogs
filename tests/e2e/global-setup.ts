@@ -12,6 +12,10 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { findAuthUserByEmail } from './utils/find-auth-user';
+import {
+  obtainAuthSession,
+  isCaptchaProtectionError,
+} from './utils/captcha-auth';
 
 interface PrerequisiteError {
   category: string;
@@ -119,37 +123,56 @@ async function globalSetup(): Promise<void> {
     }
   }
 
-  // 4. Verify PRIMARY user password is correct
+  // 4. Verify PRIMARY can obtain a session. After Turnstile enforcement
+  //    (#302 / #231), anon password grant requires captcha_token, so we use
+  //    obtainAuthSession (password, then admin magic-link fallback).
   if (errors.length === 0) {
     console.log('\n🔑 Verifying PRIMARY user credentials...');
 
-    // Runs in the Node test process (in-container), so use the admin URL for
-    // local-sandbox reachability; falls back to the public URL on cloud/CI (#121).
-    const anonClient = createClient(
-      process.env.SUPABASE_ADMIN_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
+    const result = await obtainAuthSession(
+      process.env.TEST_USER_PRIMARY_EMAIL!,
+      process.env.TEST_USER_PRIMARY_PASSWORD!
     );
 
-    const { error: signInError } = await anonClient.auth.signInWithPassword({
-      email: process.env.TEST_USER_PRIMARY_EMAIL!,
-      password: process.env.TEST_USER_PRIMARY_PASSWORD!,
-    });
+    if (!result.ok) {
+      const message = result.error;
 
-    if (signInError) {
-      errors.push({
-        category: 'Test User Password',
-        message: `PRIMARY user sign-in failed: ${signInError.message}`,
-        fix: signInError.message.includes('Invalid login')
-          ? `TEST_USER_PRIMARY_PASSWORD in GitHub secrets does not match the password for ${process.env.TEST_USER_PRIMARY_EMAIL} in Supabase. Update the secret or reset the user's password.`
-          : signInError.message.includes('rate')
-            ? 'Rate limited - too many sign-in attempts. Wait 15 minutes or increase rate limits in Supabase.'
-            : `Check Supabase logs for details: ${signInError.message}`,
-      });
+      // Every shard's global setup mints a magic link for the same PRIMARY
+      // email, and each new link invalidates the previous one. Losing that
+      // race is transient — obtainAuthSession already retries, and each test
+      // mints its own link — so it must not take down the whole shard.
+      // Genuine misconfiguration (bad password, missing service key) still
+      // fails fast here.
+      const isMagicLinkRace =
+        isCaptchaProtectionError(message) &&
+        /invalid or has expired|expired|invalid/i.test(message);
+
+      if (isMagicLinkRace) {
+        console.warn(
+          `⚠️  PRIMARY session could not be minted during setup (${message}).\n` +
+            '   This is usually parallel shards racing the same magic link; tests mint their own.'
+        );
+      } else {
+        errors.push({
+          category: 'Test User Password',
+          message: `PRIMARY user sign-in failed: ${message}`,
+          fix: message.toLowerCase().includes('invalid login')
+            ? `TEST_USER_PRIMARY_PASSWORD in GitHub secrets does not match the password for ${process.env.TEST_USER_PRIMARY_EMAIL} in Supabase. Update the secret or reset the user's password.`
+            : message.toLowerCase().includes('rate')
+              ? 'Rate limited - too many sign-in attempts. Wait 15 minutes or increase rate limits in Supabase.'
+              : isCaptchaProtectionError(message)
+                ? 'Supabase captcha is enabled; ensure SUPABASE_SERVICE_ROLE_KEY is set so E2E can fall back to admin magic-link sessions.'
+                : `Check Supabase logs for details: ${message}`,
+        });
+      }
     } else {
-      console.log('✓ PRIMARY user credentials verified');
-      // Sign out to clean up
-      await anonClient.auth.signOut();
+      console.log(
+        `✓ PRIMARY user credentials verified (via ${result.via}${
+          result.via === 'admin-link'
+            ? '; password grant blocked by captcha'
+            : ''
+        })`
+      );
     }
   }
 

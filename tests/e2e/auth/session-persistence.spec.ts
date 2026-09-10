@@ -289,7 +289,16 @@ test.describe('Session Persistence E2E', () => {
     // the (by-then cleared) shared storage from a fresh document, so a delayed event
     // is absorbed by the next reload — same 30s ceiling, spent deterministically.
     // Still HARD-fails if page2 can reach /profile after sign-out (token not cleared).
+    //
+    // #296: also assert shared localStorage has no access_token. If URL alone
+    // flaked from a stale client render while storage was empty, this would
+    // diverge; if both fail together, the session survived sign-out (reading 1).
     if (authSynced) {
+      const sharedStorage = await page1.evaluate(() =>
+        JSON.stringify(window.localStorage)
+      );
+      expect(sharedStorage).not.toMatch(/"access_token":"[^"]/);
+
       await expect(async () => {
         await page2.reload({ waitUntil: 'domcontentloaded' });
         await page2.waitForURL(

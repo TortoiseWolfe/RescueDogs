@@ -7,7 +7,7 @@
 
 import { test, expect } from '@playwright/test';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { dismissCookieBanner } from '../utils/test-user-factory';
+import { dismissCookieBanner, performSignIn } from '../utils/test-user-factory';
 
 const USER_A = {
   email: process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com',
@@ -80,18 +80,17 @@ test.describe('Capture Decryption Logs', () => {
         conversationId = existing?.id || null;
       }
 
-      // User A signs in
+      // User A signs in. performSignIn falls back to an injected session when
+      // Supabase Bot Protection is on, since production Turnstile does not
+      // solve on GitHub Actions IPs (#302).
       console.log('[Test] User A signing in...');
       await pageA.goto('/sign-in');
       await pageA.waitForLoadState('networkidle');
       await dismissCookieBanner(pageA);
-      await pageA.getByLabel('Email').fill(USER_A.email);
-      await pageA.getByLabel('Password', { exact: true }).fill(USER_A.password);
-      await pageA.getByRole('button', { name: 'Sign In' }).click();
-      // Bare log-in destinations: membership redirect (adopter/shelter) or legacy /profile
-      await pageA.waitForURL(/\/(profile|applications|shelter)\/?/, {
-        timeout: 15000,
-      });
+      const signInA = await performSignIn(pageA, USER_A.email, USER_A.password);
+      if (!signInA.success) {
+        throw new Error(`Sign-in failed for User A: ${signInA.error}`);
+      }
       console.log('[Test] User A signed in');
 
       // Navigate to conversation with messages

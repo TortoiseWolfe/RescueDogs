@@ -10,16 +10,13 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/supabase/types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import {
+  createGuardedAuthStorage,
+  setAllowAuthTokenRemoval,
+  clearAuthSignOutBarrier,
+} from '@/lib/supabase/auth-storage';
 
-/**
- * Flag for the E2E storage adapter: when true, auth-token removal is
- * allowed (intentional sign-out). When false, removeItem is blocked
- * for auth-token keys to prevent spurious session wipes.
- */
-let _allowAuthTokenRemoval = false;
-export function setAllowAuthTokenRemoval(value: boolean): void {
-  _allowAuthTokenRemoval = value;
-}
+export { setAllowAuthTokenRemoval } from '@/lib/supabase/auth-storage';
 
 /**
  * Creates a disabled mock client for when Supabase is not configured.
@@ -143,6 +140,20 @@ export function createClient(): SupabaseClient<Database> {
   }
 
   isConfigured = true;
+
+  // Auth return URLs (OAuth / magic-link / confirm) must be allowed to
+  // persist a session even if a prior tab raised the sign-out barrier (#296).
+  // Must run before createSupabaseClient so detectSessionInUrl can setItem.
+  const path = window.location.pathname;
+  const hash = window.location.hash;
+  if (
+    path.includes('/auth/callback') ||
+    hash.includes('access_token') ||
+    hash.includes('refresh_token')
+  ) {
+    clearAuthSignOutBarrier();
+  }
+
   supabaseInstance = createSupabaseClient<Database>(
     supabaseUrl,
     supabaseAnonKey,
@@ -150,28 +161,12 @@ export function createClient(): SupabaseClient<Database> {
       auth: {
         // Use implicit flow for static sites (no server-side code exchange)
         flowType: 'implicit',
-        // Custom storage adapter that prevents auth-token removal except
-        // during an explicit sign-out (toggled via setAllowAuthTokenRemoval).
-        // Supabase auth-js clears the session on transient 406/403 errors
-        // from Realtime / RLS — without this guard, that transient error
-        // wipes the auth-token, fires SIGNED_OUT, and forces the user back
-        // to /sign-in even though the access_token was still valid. With
-        // the guard, the token persists across the spurious event; the
-        // next TOKEN_REFRESHED / SIGNED_IN fires shortly and recovers.
-        // This applies in production AND E2E — the test path now exercises
-        // exactly the same auth flow real users see.
+        // Guarded storage: block spurious removeItem (Realtime/RLS hiccups)
+        // and block post-sign-out setItem from sibling tabs (#296 / FR-009).
+        // See auth-storage.ts. Same adapter in production and E2E.
         storage:
           typeof window !== 'undefined'
-            ? {
-                getItem: (key: string) => window.localStorage.getItem(key),
-                setItem: (key: string, value: string) =>
-                  window.localStorage.setItem(key, value),
-                removeItem: (key: string) => {
-                  if (key.includes('auth-token') && !_allowAuthTokenRemoval)
-                    return;
-                  window.localStorage.removeItem(key);
-                },
-              }
+            ? createGuardedAuthStorage(window.localStorage)
             : undefined,
         // Auto-refresh must stay on so Supabase Realtime can authenticate
         // its WebSocket connection — Realtime fetches the JWT from the
