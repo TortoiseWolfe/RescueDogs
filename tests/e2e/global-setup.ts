@@ -136,17 +136,35 @@ async function globalSetup(): Promise<void> {
 
     if (!result.ok) {
       const message = result.error;
-      errors.push({
-        category: 'Test User Password',
-        message: `PRIMARY user sign-in failed: ${message}`,
-        fix: message.toLowerCase().includes('invalid login')
-          ? `TEST_USER_PRIMARY_PASSWORD in GitHub secrets does not match the password for ${process.env.TEST_USER_PRIMARY_EMAIL} in Supabase. Update the secret or reset the user's password.`
-          : message.toLowerCase().includes('rate')
-            ? 'Rate limited - too many sign-in attempts. Wait 15 minutes or increase rate limits in Supabase.'
-            : isCaptchaProtectionError(message)
-              ? 'Supabase captcha is enabled; ensure SUPABASE_SERVICE_ROLE_KEY is set so E2E can fall back to admin magic-link sessions.'
-              : `Check Supabase logs for details: ${message}`,
-      });
+
+      // Every shard's global setup mints a magic link for the same PRIMARY
+      // email, and each new link invalidates the previous one. Losing that
+      // race is transient — obtainAuthSession already retries, and each test
+      // mints its own link — so it must not take down the whole shard.
+      // Genuine misconfiguration (bad password, missing service key) still
+      // fails fast here.
+      const isMagicLinkRace =
+        isCaptchaProtectionError(message) &&
+        /invalid or has expired|expired|invalid/i.test(message);
+
+      if (isMagicLinkRace) {
+        console.warn(
+          `⚠️  PRIMARY session could not be minted during setup (${message}).\n` +
+            '   This is usually parallel shards racing the same magic link; tests mint their own.'
+        );
+      } else {
+        errors.push({
+          category: 'Test User Password',
+          message: `PRIMARY user sign-in failed: ${message}`,
+          fix: message.toLowerCase().includes('invalid login')
+            ? `TEST_USER_PRIMARY_PASSWORD in GitHub secrets does not match the password for ${process.env.TEST_USER_PRIMARY_EMAIL} in Supabase. Update the secret or reset the user's password.`
+            : message.toLowerCase().includes('rate')
+              ? 'Rate limited - too many sign-in attempts. Wait 15 minutes or increase rate limits in Supabase.'
+              : isCaptchaProtectionError(message)
+                ? 'Supabase captcha is enabled; ensure SUPABASE_SERVICE_ROLE_KEY is set so E2E can fall back to admin magic-link sessions.'
+                : `Check Supabase logs for details: ${message}`,
+        });
+      }
     } else {
       console.log(
         `✓ PRIMARY user credentials verified (via ${result.via}${

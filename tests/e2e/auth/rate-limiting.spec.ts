@@ -11,6 +11,7 @@
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 import { clearAllRateLimits } from '../utils/rate-limit-admin';
+import { isSupabaseCaptchaEnforced } from '../utils/captcha-auth';
 
 // Run tests in serial - rate limiting is IP-based, so tests must coordinate
 test.describe.configure({ mode: 'serial' });
@@ -72,6 +73,19 @@ test.describe('Rate Limiting - User Experience', () => {
       testInfo.skip(
         true,
         'TEST_USER_PRIMARY_EMAIL not configured - rate limit tests require valid email domain'
+      );
+      return;
+    }
+
+    // With Supabase Bot Protection on, every UI attempt is rejected by the
+    // captcha check before credentials are evaluated, so the app's own
+    // rate limiter is never reached and the alert carries captcha copy
+    // instead of a credentials/lockout message (#302). Broadening the
+    // matcher here would make these tests pass while asserting nothing.
+    if (await isSupabaseCaptchaEnforced()) {
+      testInfo.skip(
+        true,
+        'Supabase captcha is enforced - UI sign-in never reaches app rate limiting'
       );
       return;
     }

@@ -54,10 +54,18 @@ type ObtainResult =
   | { ok: true; session: Session; user: User; via: 'password' | 'admin-link' }
   | { ok: false; error: string };
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
  * Obtain a Supabase session for E2E injection / prerequisite checks.
  * Prefers password sign-in; if captcha blocks the anon API, uses admin
  * `generateLink` + `verifyOtp` (requires SUPABASE_SERVICE_ROLE_KEY).
+ *
+ * Magic-link verify is retried: parallel CI shards generating links for the
+ * same PRIMARY email invalidate each other's tokens ("Email link is invalid
+ * or has expired").
  */
 export async function obtainAuthSession(
   email: string,
@@ -106,40 +114,48 @@ export async function obtainAuthSession(
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const { data: linkData, error: linkError } =
-    await admin.auth.admin.generateLink({
-      type: 'magiclink',
-      email,
+  let lastError = 'unknown';
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    if (attempt > 0) {
+      // Jitter so parallel shards don't stampede the same email.
+      await sleep(150 * attempt + Math.floor(Math.random() * 200));
+    }
+
+    const { data: linkData, error: linkError } =
+      await admin.auth.admin.generateLink({
+        type: 'magiclink',
+        email,
+      });
+
+    const hashedToken = linkData?.properties?.hashed_token;
+    if (linkError || !hashedToken) {
+      lastError = linkError?.message || 'no hashed_token';
+      continue;
+    }
+
+    const { data: otpData, error: otpError } = await anon.auth.verifyOtp({
+      token_hash: hashedToken,
+      type: 'email',
     });
 
-  const hashedToken = linkData?.properties?.hashed_token;
-  if (linkError || !hashedToken) {
-    return {
-      ok: false,
-      error: `captcha blocked password sign-in; admin magiclink failed: ${
-        linkError?.message || 'no hashed_token'
-      }`,
-    };
-  }
+    if (!otpError && otpData.session && otpData.user) {
+      return {
+        ok: true,
+        session: otpData.session,
+        user: otpData.user,
+        via: 'admin-link',
+      };
+    }
 
-  const { data: otpData, error: otpError } = await anon.auth.verifyOtp({
-    token_hash: hashedToken,
-    type: 'email',
-  });
-
-  if (otpError || !otpData.session || !otpData.user) {
-    return {
-      ok: false,
-      error: `captcha blocked password sign-in; verifyOtp failed: ${
-        otpError?.message || 'no session'
-      }`,
-    };
+    lastError = otpError?.message || 'no session';
+    const retryable =
+      /invalid|expired|otp/i.test(lastError) ||
+      lastError.toLowerCase().includes('link');
+    if (!retryable) break;
   }
 
   return {
-    ok: true,
-    session: otpData.session,
-    user: otpData.user,
-    via: 'admin-link',
+    ok: false,
+    error: `captcha blocked password sign-in; verifyOtp failed: ${lastError}`,
   };
 }

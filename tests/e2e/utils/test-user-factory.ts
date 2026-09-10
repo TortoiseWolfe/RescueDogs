@@ -958,13 +958,14 @@ export async function waitForAuthenticatedState(
  * so AuthContext hydrates as signed-in. Used when UI password grant is
  * blocked by Turnstile in CI (#302).
  *
- * Always finishes on `/` — `waitForAuthenticatedState` requires leaving
- * `/sign-in`, and the sign-in page does not reliably redirect after a
- * storage-only session inject.
+ * @param landingPath - Where to land after inject. Defaults to `/`. Pass
+ *   `/profile` or a `returnUrl` so tests that assert post-login location
+ *   still pass (inject must leave `/sign-in` for auth hydrate helpers).
  */
 export async function injectAuthSessionOnPage(
   page: Page,
-  session: InjectableSession
+  session: InjectableSession,
+  landingPath: string = '/'
 ): Promise<void> {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
   const browserUrl =
@@ -973,6 +974,11 @@ export async function injectAuthSessionOnPage(
     '';
   const supabaseHost = new URL(browserUrl).hostname.split('.')[0];
   const sbStorageKey = `sb-${supabaseHost}-auth-token`;
+
+  const safeLanding =
+    landingPath.startsWith('/') && !landingPath.startsWith('//')
+      ? landingPath
+      : '/';
 
   // Need an origin before localStorage writes work.
   await page.goto(`${basePath}/`, { waitUntil: 'domcontentloaded' });
@@ -1000,7 +1006,37 @@ export async function injectAuthSessionOnPage(
       barrierKey: 'rd-auth-signout-barrier',
     }
   );
-  await page.reload({ waitUntil: 'domcontentloaded' });
+  // A protected landing route can bounce back to /sign-in when its auth
+  // guard runs before AuthContext has read the freshly written session.
+  // Retry the navigation — the client is initialised by then.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.goto(`${basePath}${safeLanding}`, {
+      waitUntil: 'domcontentloaded',
+    });
+    if (!/\/sign-in/.test(page.url())) return;
+    await page.waitForTimeout(500);
+  }
+}
+
+/** Resolve where to land after a captcha-bypass session inject. */
+function resolvePostAuthLanding(pageUrl: string): string {
+  try {
+    const u = new URL(pageUrl);
+    if (u.pathname.includes('/sign-in')) {
+      const ru = u.searchParams.get('returnUrl');
+      if (ru) {
+        const decoded = decodeURIComponent(ru);
+        if (decoded.startsWith('/') && !decoded.startsWith('//')) {
+          return decoded;
+        }
+      }
+      // Match typical post-login default when no returnUrl.
+      return '/profile';
+    }
+  } catch {
+    /* ignore */
+  }
+  return '/';
 }
 
 /**
@@ -1024,16 +1060,21 @@ export async function performSignIn(
 
   // Captcha-enforced environments: skip the doomed UI path.
   if (await isSupabaseCaptchaEnforced()) {
+    const landing = resolvePostAuthLanding(page.url());
     const obtained = await obtainAuthSession(email, password);
     if (!obtained.ok) {
       return { success: false, error: obtained.error };
     }
-    await injectAuthSessionOnPage(page, {
-      access_token: obtained.session.access_token,
-      refresh_token: obtained.session.refresh_token,
-      expires_at: obtained.session.expires_at ?? 0,
-      user: obtained.session.user,
-    });
+    await injectAuthSessionOnPage(
+      page,
+      {
+        access_token: obtained.session.access_token,
+        refresh_token: obtained.session.refresh_token,
+        expires_at: obtained.session.expires_at ?? 0,
+        user: obtained.session.user,
+      },
+      landing
+    );
     try {
       await waitForAuthenticatedState(page, timeout);
       return { success: true };
