@@ -1,38 +1,22 @@
 /**
- * Auth helpers for E2E under Supabase Bot Protection (Turnstile).
+ * Node-side auth helpers for E2E under Supabase Bot Protection (Turnstile).
  *
- * After `security_captcha_enabled` is true, anon `signInWithPassword` /
- * `signUp` without a captcha_token are rejected. UI flows must wait for the
- * widget; Node helpers that only need a session fall back to an admin
- * magic-link (password is not re-checked on that path).
+ * After `security_captcha_enabled` is true, anon `signInWithPassword` without
+ * a captcha_token is rejected. Helpers that only need a session fall back to
+ * an admin magic-link (password is not re-checked on that path).
+ *
+ * UI wait helpers live in `captcha-ui.ts` so global-setup can import this
+ * file without pulling `@playwright/test`.
  *
  * @module tests/e2e/utils/captcha-auth
  */
 
-import { expect, type Page } from '@playwright/test';
 import { createClient, type Session, type User } from '@supabase/supabase-js';
 
 export function isCaptchaProtectionError(message: string | undefined): boolean {
   if (!message) return false;
   const lower = message.toLowerCase();
   return lower.includes('captcha');
-}
-
-/**
- * Wait for Cloudflare Turnstile to issue a token when the widget is present.
- * No-op when `NEXT_PUBLIC_CAPTCHA_SITE_KEY` was not baked into the build
- * (widget absent). Call after fill, before submit.
- */
-export async function waitForCaptchaIfPresent(
-  page: Page,
-  timeout = 45000
-): Promise<void> {
-  const widget = page.getByTestId('captcha-widget');
-  if ((await widget.count()) === 0) return;
-
-  // Managed Turnstile writes the token into a hidden response field.
-  const response = widget.locator('[name="cf-turnstile-response"]').first();
-  await expect(response).toHaveValue(/.+/, { timeout });
 }
 
 type ObtainResult =

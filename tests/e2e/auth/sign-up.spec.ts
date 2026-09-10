@@ -21,7 +21,7 @@ import {
   waitForHydration,
   waitForAuthenticatedState,
 } from '../utils/test-user-factory';
-import { waitForCaptchaIfPresent } from '../utils/captcha-auth';
+import { waitForCaptchaIfPresent } from '../utils/captcha-ui';
 
 /**
  * Generate a test email for sign-up tests.

@@ -14,6 +14,8 @@ import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { expect, type Page, type Browser } from '@playwright/test';
 import { KeyDerivationService } from '@/lib/messaging/key-derivation';
 import { findAuthUserByEmail } from './find-auth-user';
+import { obtainAuthSession } from './captcha-auth';
+import { waitForCaptchaIfPresent } from './captcha-ui';
 
 /**
  * Email domain for test users.
@@ -992,7 +994,6 @@ export async function performSignIn(
   }
 
   // Turnstile (#302): wait for a token before submit when the widget is present.
-  const { waitForCaptchaIfPresent } = await import('./captcha-auth');
   await waitForCaptchaIfPresent(page);
 
   // Click sign in
@@ -1370,7 +1371,6 @@ export async function seedIsolatedConversation(
   const signInUser = async (
     user: TestUser
   ): Promise<InjectableSession | null> => {
-    const { obtainAuthSession } = await import('./captcha-auth');
     const result = await obtainAuthSession(user.email, user.password);
     if (!result.ok) {
       console.warn(
@@ -1715,7 +1715,6 @@ async function createKeyedUserWithSession(
     await deleteTestUser(user.id);
     return null;
   }
-  const { obtainAuthSession } = await import('./captcha-auth');
   const result = await obtainAuthSession(user.email, user.password);
   if (!result.ok) {
     console.warn(

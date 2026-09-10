@@ -12,6 +12,10 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { findAuthUserByEmail } from './utils/find-auth-user';
+import {
+  obtainAuthSession,
+  isCaptchaProtectionError,
+} from './utils/captcha-auth';
 
 interface PrerequisiteError {
   category: string;
@@ -124,10 +128,6 @@ async function globalSetup(): Promise<void> {
   //    obtainAuthSession (password, then admin magic-link fallback).
   if (errors.length === 0) {
     console.log('\n🔑 Verifying PRIMARY user credentials...');
-
-    const { obtainAuthSession, isCaptchaProtectionError } = await import(
-      './utils/captcha-auth'
-    );
 
     const result = await obtainAuthSession(
       process.env.TEST_USER_PRIMARY_EMAIL!,
