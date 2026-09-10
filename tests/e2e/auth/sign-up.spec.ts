@@ -20,7 +20,12 @@ import {
   dismissCookieBanner,
   waitForHydration,
   waitForAuthenticatedState,
+  injectAuthSessionOnPage,
 } from '../utils/test-user-factory';
+import {
+  isSupabaseCaptchaEnforced,
+  obtainAuthSession,
+} from '../utils/captcha-auth';
 import { waitForCaptchaIfPresent } from '../utils/captcha-ui';
 
 /**
@@ -90,6 +95,16 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
   });
 
   test('should complete sign-up with valid credentials', async ({ page }) => {
+    // Production Turnstile does not solve on GitHub Actions IPs; anon signUp
+    // without a token is rejected once Bot Protection is on (#302).
+    if (await isSupabaseCaptchaEnforced()) {
+      test.skip(
+        true,
+        'Supabase captcha enforced — UI sign-up cannot complete in CI without a live Turnstile token'
+      );
+      return;
+    }
+
     // Generate email from TEST_USER_PRIMARY_EMAIL domain
     const testEmail = generateSignUpEmail('valid');
     createdEmails.push(testEmail);
@@ -145,6 +160,14 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
   test('should show error when signing up with existing email', async ({
     page,
   }) => {
+    if (await isSupabaseCaptchaEnforced()) {
+      test.skip(
+        true,
+        'Supabase captcha enforced — UI sign-up cannot complete in CI without a live Turnstile token'
+      );
+      return;
+    }
+
     // Skip if admin client not available
     if (!isAdminClientAvailable()) {
       test.skip(true, 'SUPABASE_SERVICE_ROLE_KEY not configured');
@@ -337,17 +360,26 @@ test.describe('Sign-up with Admin Confirmation', () => {
     }
 
     try {
-      // Now sign in with the created user
+      // UI password grant is blocked by captcha in CI — inject an admin
+      // magic-link session instead (#302). Still proves create → auth hydrate.
+      const obtained = await obtainAuthSession(
+        testEmail,
+        DEFAULT_TEST_PASSWORD
+      );
+      if (!obtained.ok) {
+        throw new Error(`Could not obtain session: ${obtained.error}`);
+      }
+
       await page.goto('/sign-in');
       await waitForHydration(page);
       await dismissCookieBanner(page);
-      await page.getByLabel('Email').fill(testEmail);
-      await page
-        .getByLabel('Password', { exact: true })
-        .fill(DEFAULT_TEST_PASSWORD);
-      await page.getByRole('button', { name: 'Sign In' }).click();
+      await injectAuthSessionOnPage(page, {
+        access_token: obtained.session.access_token,
+        refresh_token: obtained.session.refresh_token,
+        expires_at: obtained.session.expires_at ?? 0,
+        user: obtained.session.user,
+      });
 
-      // Should redirect and authenticate
       await waitForAuthenticatedState(page);
       console.log('Admin-created user signed in successfully');
     } finally {

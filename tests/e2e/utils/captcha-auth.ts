@@ -19,6 +19,37 @@ export function isCaptchaProtectionError(message: string | undefined): boolean {
   return lower.includes('captcha');
 }
 
+let captchaEnforcedCache: boolean | null = null;
+
+/**
+ * Probe whether Supabase Auth rejects password grants without a captcha
+ * token. Cached for the process — used to skip UI signup paths that CI
+ * cannot complete against production Turnstile.
+ */
+export async function isSupabaseCaptchaEnforced(): Promise<boolean> {
+  if (captchaEnforcedCache !== null) return captchaEnforcedCache;
+
+  const url =
+    process.env.SUPABASE_ADMIN_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) {
+    captchaEnforcedCache = false;
+    return false;
+  }
+
+  const anon = createClient(url, anonKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const { error } = await anon.auth.signInWithPassword({
+    email: 'captcha-probe-not-a-real-user@raisedpaws.com',
+    password: 'CaptchaProbeNotARealPassword1!',
+  });
+
+  captchaEnforcedCache = isCaptchaProtectionError(error?.message);
+  return captchaEnforcedCache;
+}
+
 type ObtainResult =
   | { ok: true; session: Session; user: User; via: 'password' | 'admin-link' }
   | { ok: false; error: string };
