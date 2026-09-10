@@ -370,9 +370,6 @@ test.describe('Sign-up with Admin Confirmation', () => {
         throw new Error(`Could not obtain session: ${obtained.error}`);
       }
 
-      await page.goto('/sign-in');
-      await waitForHydration(page);
-      await dismissCookieBanner(page);
       await injectAuthSessionOnPage(page, {
         access_token: obtained.session.access_token,
         refresh_token: obtained.session.refresh_token,

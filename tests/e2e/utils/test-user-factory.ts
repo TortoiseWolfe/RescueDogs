@@ -957,11 +957,16 @@ export async function waitForAuthenticatedState(
  * Inject a Supabase session into the current page's localStorage and reload
  * so AuthContext hydrates as signed-in. Used when UI password grant is
  * blocked by Turnstile in CI (#302).
+ *
+ * Always finishes on `/` — `waitForAuthenticatedState` requires leaving
+ * `/sign-in`, and the sign-in page does not reliably redirect after a
+ * storage-only session inject.
  */
 export async function injectAuthSessionOnPage(
   page: Page,
   session: InjectableSession
 ): Promise<void> {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
   const browserUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     process.env.SUPABASE_ADMIN_URL ||
@@ -969,8 +974,14 @@ export async function injectAuthSessionOnPage(
   const supabaseHost = new URL(browserUrl).hostname.split('.')[0];
   const sbStorageKey = `sb-${supabaseHost}-auth-token`;
 
+  // Need an origin before localStorage writes work.
+  await page.goto(`${basePath}/`, { waitUntil: 'domcontentloaded' });
+
   await page.evaluate(
-    ({ key, s }) => {
+    ({ key, s, barrierKey }) => {
+      // Clear any leftover sign-out barrier from a prior tab (#296) so the
+      // injected session is not treated as a post-logout rewrite.
+      localStorage.removeItem(barrierKey);
       localStorage.setItem(
         key,
         JSON.stringify({
@@ -983,7 +994,11 @@ export async function injectAuthSessionOnPage(
         })
       );
     },
-    { key: sbStorageKey, s: session }
+    {
+      key: sbStorageKey,
+      s: session,
+      barrierKey: 'rd-auth-signout-barrier',
+    }
   );
   await page.reload({ waitUntil: 'domcontentloaded' });
 }
