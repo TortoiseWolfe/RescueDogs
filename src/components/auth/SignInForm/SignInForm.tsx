@@ -367,7 +367,15 @@ export default function SignInForm({
         </label>
       </div>
 
-      <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
+      {/* Match the label+input row indent so compact Turnstile lines up with
+          the field column on sm+ (#303), not flush left under the labels. */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-x-6">
+        <div
+          className="hidden sm:block sm:w-36 sm:shrink-0"
+          aria-hidden="true"
+        />
+        <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
+      </div>
 
       {error && (
         <div className="alert alert-error" role="alert" aria-live="assertive">
