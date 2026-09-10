@@ -47,6 +47,23 @@ function isBruteForceEmailConfigValid(): boolean {
   return baseEmail.includes('@');
 }
 
+/**
+ * Matches any alert raised by a rejected sign-in attempt that is *not* a
+ * lockout.
+ *
+ * The pre-lockout attempts below exist to push the counter over the limit;
+ * all they need to prove is that the form surfaced a failure. Under Supabase
+ * Bot Protection the copy is captcha wording ("request disallowed") rather
+ * than "Invalid login credentials", because the captcha check rejects before
+ * the password is ever evaluated (#302).
+ *
+ * The lockout assertions stay strict: SignInForm checks its own rate limiter
+ * before calling Supabase, so that path is unaffected by captcha and still
+ * proves REQ-SEC-003.
+ */
+const ATTEMPT_REJECTED =
+  /failed|error|invalid|incorrect|attempts|captcha|disallowed/i;
+
 /** Seed at max-1 so one wrong-password UI attempt tips into lockout. */
 async function seedNearLockout(email: string): Promise<void> {
   const seeded = await seedFailedAttempts(
@@ -108,7 +125,7 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
     await attemptWrongPassword(page, testEmail, wrongPassword);
     await expect(
       page.getByRole('alert').filter({
-        hasText: /failed|error|locked|invalid|incorrect|attempts/i,
+        hasText: ATTEMPT_REJECTED,
       })
     ).toBeVisible({ timeout: 5000 });
 
@@ -141,7 +158,7 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
     await attemptWrongPassword(page1, sessionEmail, wrongPassword);
     await expect(
       page1.getByRole('alert').filter({
-        hasText: /failed|error|locked|invalid|incorrect|attempts/i,
+        hasText: ATTEMPT_REJECTED,
       })
     ).toBeVisible({ timeout: 5000 });
 
@@ -184,7 +201,7 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
 
     await expect(
       page.getByRole('alert').filter({
-        hasText: /failed|error|invalid|incorrect/i,
+        hasText: ATTEMPT_REJECTED,
       })
     ).toBeVisible({ timeout: 5000 });
 
@@ -198,7 +215,7 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
 
     await expect(
       page.getByRole('alert').filter({
-        hasText: /failed|error|invalid|incorrect/i,
+        hasText: ATTEMPT_REJECTED,
       })
     ).toBeVisible({ timeout: 5000 });
 
@@ -230,7 +247,7 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
     await attemptWrongPassword(pageA, userA, wrongPassword);
     await expect(
       pageA.getByRole('alert').filter({
-        hasText: /failed|error|locked|invalid|incorrect|attempts/i,
+        hasText: ATTEMPT_REJECTED,
       })
     ).toBeVisible({ timeout: 5000 });
 
@@ -248,7 +265,7 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
     const errorAlertB = pageB.getByRole('alert').filter({ hasText: /.+/ });
     await expect(errorAlertB).toBeVisible({ timeout: 5000 });
     const errorTextB = await errorAlertB.textContent();
-    expect(errorTextB).toMatch(/invalid|incorrect|failed/i);
+    expect(errorTextB).toMatch(ATTEMPT_REJECTED);
     expect(errorTextB).not.toMatch(/too many|locked|rate.*limit/i);
 
     await contextA.close();
@@ -267,7 +284,7 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
     await attemptWrongPassword(page, email, wrongPassword);
     await expect(
       page.getByRole('alert').filter({
-        hasText: /failed|error|locked|invalid|incorrect|attempts/i,
+        hasText: ATTEMPT_REJECTED,
       })
     ).toBeVisible({ timeout: 5000 });
 
@@ -310,7 +327,7 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
     await attemptWrongPassword(page, email, wrongPassword);
     await expect(
       page.getByRole('alert').filter({
-        hasText: /failed|error|locked|invalid|incorrect|attempts/i,
+        hasText: ATTEMPT_REJECTED,
       })
     ).toBeVisible({ timeout: 5000 });
 
@@ -344,7 +361,7 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
     await attemptWrongPassword(page, email, wrongPassword);
     await expect(
       page.getByRole('alert').filter({
-        hasText: /failed|error|locked|invalid|incorrect|attempts/i,
+        hasText: ATTEMPT_REJECTED,
       })
     ).toBeVisible({ timeout: 5000 });
 
