@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { createLogger } from '@/lib/logger';
+import type { Json } from '@/lib/supabase/types';
 
 const logger = createLogger('auth:audit');
 
@@ -184,7 +185,10 @@ export class AuditLogger {
   }
 
   /**
-   * Internal log method
+   * Internal log method — writes via log_auth_audit_event RPC (#304).
+   * Direct inserts are RLS-denied for browser roles; IP/UA come from
+   * PostgREST request.headers inside the function (client-supplied IP
+   * from extractRequestInfo is ignored on purpose).
    */
   private async log(entry: AuditLogEntry): Promise<void> {
     try {
@@ -192,9 +196,14 @@ export class AuditLogger {
         ...entry,
         event_data: this.stripCredentials(entry.event_data),
       };
-      const { error } = await this.supabase
-        .from('auth_audit_logs')
-        .insert(safeEntry);
+      const { error } = await this.supabase.rpc('log_auth_audit_event', {
+        p_event_type: safeEntry.event_type,
+        p_user_id: safeEntry.user_id,
+        p_event_data: (safeEntry.event_data ?? null) as Json | null,
+        p_success: safeEntry.event_type !== AuthEventType.SIGN_IN_FAILED,
+        p_error_message: null,
+        p_user_agent: safeEntry.user_agent ?? null,
+      });
 
       if (error) {
         logger.error('Audit log failed', { error: error.message });
