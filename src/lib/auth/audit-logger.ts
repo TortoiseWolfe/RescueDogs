@@ -2,6 +2,10 @@
  * Audit Logger
  * Logs authentication and security events to the audit trail
  * REQ-SEC-007: Audit logging for security events
+ *
+ * Writes go through `log_auth_audit_event` (#304) — a SECURITY DEFINER RPC —
+ * because RLS denies direct browser INSERTs on `auth_audit_logs` (42501).
+ * IP/UA are derived from PostgREST request headers inside the function.
  */
 
 import { supabase } from '@/lib/supabase/client';
@@ -25,10 +29,27 @@ export interface AuditLogEntry {
   user_id?: string;
   event_type: AuditEventType;
   event_data?: Record<string, unknown>;
+  /** Ignored on write — IP comes from PostgREST headers in the RPC (#304). */
   ip_address?: string;
   user_agent?: string;
   success?: boolean;
   error_message?: string;
+}
+
+/**
+ * Strip credential-ish keys before they leave the browser.
+ * The RPC also filters; this is defense in depth.
+ */
+function stripCredentials(
+  data: Record<string, unknown> | undefined
+): Record<string, unknown> | undefined {
+  if (!data) return data;
+  const stripped: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data)) {
+    if (/password|token|secret|key|credential/i.test(k)) continue;
+    stripped[k] = v;
+  }
+  return stripped;
 }
 
 /**
@@ -55,34 +76,21 @@ export interface AuditLogEntry {
  */
 export async function logAuthEvent(entry: AuditLogEntry): Promise<void> {
   try {
-    // Get user agent from browser
     const userAgent =
-      typeof navigator !== 'undefined' ? navigator.userAgent : undefined;
+      entry.user_agent ||
+      (typeof navigator !== 'undefined' ? navigator.userAgent : undefined);
 
-    // Prepare log entry
-    const logEntry = {
-      user_id: entry.user_id || null,
-      event_type: entry.event_type,
-      event_data: (entry.event_data as Json) || null,
-      ip_address: entry.ip_address || null,
-      user_agent: entry.user_agent || userAgent || null,
-      success: entry.success !== undefined ? entry.success : true,
-      error_message: entry.error_message || null,
-    };
-
-    // Insert audit log
-    const { error } = await supabase.from('auth_audit_logs').insert(logEntry);
+    const { error } = await supabase.rpc('log_auth_audit_event', {
+      p_event_type: entry.event_type,
+      p_user_id: entry.user_id || null,
+      p_event_data: (stripCredentials(entry.event_data) as Json) || null,
+      p_success: entry.success !== undefined ? entry.success : true,
+      p_error_message: entry.error_message || null,
+      p_user_agent: userAgent || null,
+    });
 
     if (error) {
-      // auth_audit_logs only allows service_role to INSERT (see the
-      // monolithic migration's RLS policies). Browser clients run as the
-      // `authenticated` role, so this direct insert is expected to be
-      // denied by RLS (Postgres code 42501). Treat that specific case as a
-      // quiet, expected outcome rather than an error so it doesn't surface
-      // in the dev console / error overlay on every sign-in.
-      const isExpectedRlsDenial = error.code === '42501';
-      const logFn = isExpectedRlsDenial ? logger.debug : logger.error;
-      logFn('Skipped client-side audit event (RLS-protected table)', {
+      logger.error('Failed to log audit event', {
         error,
         eventType: entry.event_type,
       });

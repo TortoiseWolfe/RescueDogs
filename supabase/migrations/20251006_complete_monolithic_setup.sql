@@ -448,6 +448,140 @@ BEGIN
 END;
 $$;
 
+-- log_auth_audit_event: client-callable write path for auth_audit_logs (#304)
+--
+-- Browser inserts into auth_audit_logs are RLS-denied (service_role INSERT only),
+-- so every logAuthEvent() call previously threw away the row (42501). This
+-- SECURITY DEFINER RPC is the insert path: PostgREST populates request.headers,
+-- we derive IP/UA server-side, and we insert as the function owner.
+--
+-- IP policy: prefer cf-connecting-ip / x-real-ip; else the LEFTMOST hop of
+-- x-forwarded-for (original client). Spoofable if a client invents XFF before
+-- a trusting proxy — still the best signal available without an Edge hop.
+-- Invalid IPs → NULL rather than failing the audit write.
+--
+-- Event normalize: sign_in + success=false → sign_in_failed (burst detector);
+-- sign_in + success=true → sign_in_success (admin_audit_trends totals).
+--
+-- Does NOT cover signup rows from the auth.users AFTER INSERT trigger — those
+-- still lack HTTP headers (Auth Hook follow-up).
+CREATE OR REPLACE FUNCTION log_auth_audit_event(
+  p_event_type    TEXT,
+  p_user_id       UUID    DEFAULT NULL,
+  p_event_data    JSONB   DEFAULT NULL,
+  p_success       BOOLEAN DEFAULT TRUE,
+  p_error_message TEXT    DEFAULT NULL,
+  p_user_agent    TEXT    DEFAULT NULL
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_headers     JSONB;
+  v_ip_raw      TEXT;
+  v_ip          INET;
+  v_ua          TEXT;
+  v_event       TEXT;
+  v_success     BOOLEAN;
+  v_event_data  JSONB;
+  v_id          UUID;
+  v_key         TEXT;
+  v_safe        JSONB := '{}'::jsonb;
+BEGIN
+  IF p_event_type IS NULL OR p_event_type NOT IN (
+    'sign_up',
+    'sign_in', 'sign_in_success', 'sign_in_failed',
+    'sign_out',
+    'password_change', 'password_reset_request', 'password_reset_complete',
+    'email_verification', 'email_verification_sent', 'email_verification_complete',
+    'token_refresh',
+    'account_delete',
+    'oauth_link', 'oauth_unlink',
+    'payment_retry'
+  ) THEN
+    RAISE EXCEPTION 'invalid event_type: %', p_event_type
+      USING ERRCODE = '22023';
+  END IF;
+
+  v_success := COALESCE(p_success, TRUE);
+  v_event := p_event_type;
+  IF v_event = 'sign_in' AND v_success IS FALSE THEN
+    v_event := 'sign_in_failed';
+  ELSIF v_event = 'sign_in' AND v_success IS TRUE THEN
+    v_event := 'sign_in_success';
+  END IF;
+
+  -- Strip credential-ish keys from event_data (defense in depth).
+  IF p_event_data IS NOT NULL AND jsonb_typeof(p_event_data) = 'object' THEN
+    FOR v_key IN SELECT jsonb_object_keys(p_event_data)
+    LOOP
+      IF v_key !~* '(password|token|secret|key|credential)' THEN
+        v_safe := v_safe || jsonb_build_object(v_key, p_event_data -> v_key);
+      END IF;
+    END LOOP;
+    v_event_data := NULLIF(v_safe, '{}'::jsonb);
+  ELSE
+    v_event_data := p_event_data;
+  END IF;
+
+  BEGIN
+    v_headers := NULLIF(current_setting('request.headers', true), '')::jsonb;
+  EXCEPTION WHEN OTHERS THEN
+    v_headers := NULL;
+  END;
+
+  v_ip_raw := NULLIF(trim(COALESCE(
+    v_headers ->> 'cf-connecting-ip',
+    v_headers ->> 'x-real-ip',
+    split_part(COALESCE(v_headers ->> 'x-forwarded-for', ''), ',', 1)
+  )), '');
+
+  IF v_ip_raw IS NOT NULL THEN
+    BEGIN
+      v_ip := v_ip_raw::inet;
+    EXCEPTION WHEN OTHERS THEN
+      v_ip := NULL;
+    END;
+  END IF;
+
+  v_ua := left(
+    NULLIF(trim(COALESCE(v_headers ->> 'user-agent', p_user_agent)), ''),
+    500
+  );
+
+  INSERT INTO auth_audit_logs (
+    user_id,
+    event_type,
+    event_data,
+    ip_address,
+    user_agent,
+    success,
+    error_message
+  ) VALUES (
+    p_user_id,
+    v_event,
+    v_event_data,
+    v_ip,
+    v_ua,
+    v_success,
+    NULLIF(p_error_message, '')
+  )
+  RETURNING id INTO v_id;
+
+  RETURN v_id;
+END;
+$$;
+
+COMMENT ON FUNCTION log_auth_audit_event(TEXT, UUID, JSONB, BOOLEAN, TEXT, TEXT) IS
+  'Client-callable auth audit insert (#304). Derives IP/UA from PostgREST request.headers; SECURITY DEFINER bypasses service_role-only INSERT RLS.';
+
+REVOKE ALL ON FUNCTION log_auth_audit_event(TEXT, UUID, JSONB, BOOLEAN, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION log_auth_audit_event(TEXT, UUID, JSONB, BOOLEAN, TEXT, TEXT) TO anon;
+GRANT EXECUTE ON FUNCTION log_auth_audit_event(TEXT, UUID, JSONB, BOOLEAN, TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION log_auth_audit_event(TEXT, UUID, JSONB, BOOLEAN, TEXT, TEXT) TO service_role;
+
 -- Rate limiting check (Feature 017)
 CREATE OR REPLACE FUNCTION check_rate_limit(
   p_identifier TEXT,
@@ -2415,7 +2549,7 @@ COMMENT ON TABLE group_keys IS 'Encrypted symmetric group keys per member per ve
 --   ✅ Messaging tables: user_connections, conversations, messages, user_encryption_keys, conversation_keys, typing_indicators
 --   ✅ Group chat tables: conversation_members, group_keys (Feature 010)
 --   ✅ Storage buckets: avatars (5MB limit, public read)
---   ✅ Functions: update_updated_at_column, create_user_profile, cleanup_old_audit_logs, check_rate_limit, record_failed_attempt, update_conversation_timestamp, assign_sequence_number
+--   ✅ Functions: update_updated_at_column, create_user_profile, cleanup_old_audit_logs, log_auth_audit_event, check_rate_limit, record_failed_attempt, update_conversation_timestamp, assign_sequence_number
 --   ✅ Admin RPC functions: admin_payment_stats, admin_auth_stats, admin_user_stats, admin_messaging_stats, admin_payment_trends, admin_audit_trends, admin_list_users, admin_messaging_trends, admin_overview
 --   ✅ Triggers: on_auth_user_created, update_user_profiles_updated_at, on_message_inserted, before_message_insert
 --   ✅ RLS policies: All tables + storage.objects protected with auth.uid() (35 + 9 admin policies)

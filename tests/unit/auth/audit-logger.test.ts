@@ -1,125 +1,107 @@
 /**
- * Unit Tests: Audit Logger
- * These tests define the expected behavior - they will FAIL until implementation
+ * Unit tests for lib/auth/audit-logger (form call sites → RPC #304)
  */
 
-import { describe, it, expect, vi } from 'vitest';
-import { AuditLogger, AuthEventType } from '@/services/auth/audit-logger';
-import { createClient } from '@/lib/supabase/client';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock Supabase client with singleton instance
-const mockInsert = vi.fn(() => Promise.resolve({ data: null, error: null }));
-const mockFrom = vi.fn(() => ({
-  insert: mockInsert,
-}));
-const mockSupabaseClient = {
-  from: mockFrom,
-};
+const mockRpc = vi.fn();
+const mockFrom = vi.fn();
 
 vi.mock('@/lib/supabase/client', () => ({
-  createClient: vi.fn(() => mockSupabaseClient),
+  supabase: {
+    rpc: (...args: unknown[]) => mockRpc(...args),
+    from: (...args: unknown[]) => mockFrom(...args),
+  },
 }));
 
-describe('AuditLogger', () => {
-  let logger: AuditLogger;
+const mockLoggerFns = vi.hoisted(() => ({
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+}));
 
+vi.mock('@/lib/logger', () => ({
+  createLogger: vi.fn(() => mockLoggerFns),
+}));
+
+const { logAuthEvent, getUserAuditLogs } = await import(
+  '@/lib/auth/audit-logger'
+);
+
+describe('logAuthEvent', () => {
   beforeEach(() => {
-    logger = new AuditLogger();
     vi.clearAllMocks();
-    mockFrom.mockReturnValue({ insert: mockInsert });
-    mockInsert.mockResolvedValue({ data: null, error: null });
+    mockRpc.mockResolvedValue({ data: 'uuid', error: null });
   });
 
-  it('should log sign-up event', async () => {
-    await logger.logSignUp('user-123', 'user@example.com');
-
-    expect(mockFrom).toHaveBeenCalledWith('auth_audit_logs');
-  });
-
-  it('should log successful sign-in', async () => {
-    await logger.logSignIn('user-123', 'user@example.com', true);
-
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        user_id: 'user-123',
-        event_type: AuthEventType.SIGN_IN_SUCCESS,
-      })
-    );
-  });
-
-  it('should log failed sign-in with email only', async () => {
-    await logger.logSignIn(null, 'user@example.com', false);
-
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        user_id: null,
-        event_type: AuthEventType.SIGN_IN_FAILED,
-        event_data: expect.objectContaining({
-          email: 'user@example.com',
-        }),
-      })
-    );
-  });
-
-  it('should log sign-out event', async () => {
-    await logger.logSignOut('user-123');
-
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        user_id: 'user-123',
-        event_type: AuthEventType.SIGN_OUT,
-      })
-    );
-  });
-
-  it('should log password change', async () => {
-    await logger.logPasswordChange('user-123');
-
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        user_id: 'user-123',
-        event_type: AuthEventType.PASSWORD_CHANGE,
-      })
-    );
-  });
-
-  it('should include IP address and user agent if available', async () => {
-    const mockRequest = {
-      headers: {
-        get: (name: string) => {
-          if (name === 'x-forwarded-for') return '192.168.1.1';
-          if (name === 'user-agent') return 'Mozilla/5.0';
-          return null;
-        },
-      },
-    };
-
-    await logger.logSignIn(
-      'user-123',
-      'user@example.com',
-      true,
-      mockRequest as any
-    );
-
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ip_address: '192.168.1.1',
-        user_agent: 'Mozilla/5.0',
-      })
-    );
-  });
-
-  it('should handle logging errors gracefully', async () => {
-    const mockError = new Error('Database error');
-    mockFrom.mockReturnValue({
-      insert: vi.fn(() =>
-        Promise.resolve({ data: null, error: mockError })
-      ) as any,
+  it('calls log_auth_audit_event with the event payload', async () => {
+    await logAuthEvent({
+      user_id: '00000000-0000-0000-0000-000000000001',
+      event_type: 'sign_in',
+      event_data: { provider: 'email' },
+      success: true,
     });
 
-    // Should not throw
+    expect(mockRpc).toHaveBeenCalledWith(
+      'log_auth_audit_event',
+      expect.objectContaining({
+        p_event_type: 'sign_in',
+        p_user_id: '00000000-0000-0000-0000-000000000001',
+        p_event_data: { provider: 'email' },
+        p_success: true,
+      })
+    );
+  });
+
+  it('strips credential-ish keys from event_data', async () => {
+    await logAuthEvent({
+      event_type: 'sign_in',
+      success: false,
+      event_data: {
+        email: 'a@b.com',
+        password: 'secret',
+        reason: 'bad_password',
+      },
+    });
+
+    expect(mockRpc.mock.calls[0][1].p_event_data).toEqual({
+      email: 'a@b.com',
+      reason: 'bad_password',
+    });
+  });
+
+  it('does not throw when the RPC returns an error', async () => {
+    mockRpc.mockResolvedValue({
+      data: null,
+      error: { message: 'boom', code: 'XX000' },
+    });
+
     await expect(
-      logger.logSignUp('user-123', 'user@example.com')
-    ).resolves.not.toThrow();
+      logAuthEvent({ event_type: 'sign_out' })
+    ).resolves.toBeUndefined();
+    expect(mockLoggerFns.error).toHaveBeenCalled();
+  });
+});
+
+describe('getUserAuditLogs', () => {
+  it('returns rows from auth_audit_logs', async () => {
+    const rows = [
+      {
+        user_id: 'u1',
+        event_type: 'sign_in',
+        success: true,
+      },
+    ];
+    const limit = vi.fn().mockResolvedValue({ data: rows, error: null });
+    const order = vi.fn(() => ({ limit }));
+    const eq = vi.fn(() => ({ order }));
+    const select = vi.fn(() => ({ eq }));
+    mockFrom.mockReturnValue({ select });
+
+    const result = await getUserAuditLogs('u1', 10);
+
+    expect(mockFrom).toHaveBeenCalledWith('auth_audit_logs');
+    expect(result).toEqual(rows);
   });
 });
