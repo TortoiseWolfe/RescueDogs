@@ -1268,6 +1268,17 @@ export type Database = {
         Returns: Json;
       };
       cleanup_old_audit_logs: { Args: never; Returns: undefined };
+      log_auth_audit_event: {
+        Args: {
+          p_event_type: string;
+          p_user_id?: string | null;
+          p_event_data?: Json | null;
+          p_success?: boolean;
+          p_error_message?: string | null;
+          p_user_agent?: string | null;
+        };
+        Returns: string;
+      };
       is_conversation_member: {
         Args: { check_user_id?: string; conv_id: string };
         Returns: boolean;
