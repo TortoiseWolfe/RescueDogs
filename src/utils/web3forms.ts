@@ -332,13 +332,22 @@ export const formatErrorMessage = (error: Error): string => {
   // every visitor to "try again later" — advice that could not work, on the only
   // channel for reporting that it did not work. The `access key` branch that used
   // to live here was unreachable, because EmailService replaces the provider's
-  // message with its own "No email providers available" wording. Match on all
-  // three shapes, and point at the fallback that actually delivers rather than
-  // at "support", which is reached through this very form.
+  // message with its own wording. Point at the fallback that actually delivers
+  // rather than at "support", which is reached through this very form.
+  //
+  // MATCH `email providers`, NOT `no email providers`. EmailService has TWO
+  // aggregate messages and they differ by one word: "**No** email providers
+  // available" when none is configured, and "**All** email providers failed" once
+  // one has been tried and thrown. The narrower match caught the first and missed
+  // the second — so the moment the Edge Function was live in the bundle but not yet
+  // deployed, every visitor was back to "An error occurred. Please try again
+  // later." Verified against production: the function answered 404 and the form
+  // showed the same sentence Annie reported.
   if (
     message.includes('access key') ||
-    message.includes('no email providers') ||
-    message.includes('not configured')
+    message.includes('email providers') ||
+    message.includes('not configured') ||
+    message.includes('contact function')
   ) {
     return `Our contact form is not working right now. Please email ${projectConfig.contactEmail} directly and we will get back to you.`;
   }
