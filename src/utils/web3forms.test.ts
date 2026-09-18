@@ -552,6 +552,11 @@ describe('formatErrorMessage', () => {
       // The aggregate EmailService throws once every provider has failed at
       // send-time — the path a misconfigured Edge Function actually takes.
       'All email providers failed: Contact delivery is not configured',
+      // The shape production ACTUALLY produced while the function was referenced
+      // by the bundle but not yet deployed. It contains neither "access key" nor
+      // "no email providers" nor "not configured", so the first version of this
+      // guard missed it and the visitor got the generic sentence again.
+      'All email providers failed: Contact function returned 404',
     ]) {
       const message = formatErrorMessage(new Error(raw));
       expect(message).not.toContain('try again later');
