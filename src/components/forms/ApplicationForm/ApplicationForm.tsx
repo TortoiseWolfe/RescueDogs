@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useFormDraft } from '@/hooks/useFormDraft';
 import type { z } from 'zod';
 import {
   applicationSchema,
@@ -28,6 +29,13 @@ export interface ApplicationFormProps {
   submitting?: boolean;
   /** Additional CSS classes for the form element. */
   className?: string;
+  /**
+   * Persist an in-progress application against this key (#310). Pass null to disable.
+   *
+   * Key it per user — a shared browser must not offer one adopter's half-filled
+   * application, complete with home address, to the next person who signs in.
+   */
+  draftKey?: string | null;
 }
 
 /**
@@ -177,6 +185,7 @@ export default function ApplicationForm({
   preselectedPetId,
   onSubmit,
   onPetIdChange,
+  draftKey = null,
   submitting = false,
   className = '',
 }: ApplicationFormProps) {
@@ -185,6 +194,7 @@ export default function ApplicationForm({
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<ApplicationFormInput, unknown, ApplicationFormData>({
     resolver: zodResolver(applicationSchema),
@@ -230,6 +240,34 @@ export default function ApplicationForm({
       setValue('pet_id', preselectedPetId);
     }
   }, [preselectedPetId, setValue]);
+
+  // #310: seventeen fields, and leaving the page to look up a vet's phone number or a
+  // landlord's contact used to blank all of them.
+  //
+  // `sensitive` forces sessionStorage regardless of consent. This form carries a home
+  // address, a phone number and a vet's details; a draft that outlives the tab on a
+  // shared or library computer is a worse outcome than retyping the form.
+  const draftValues = watch();
+  const {
+    restored: restoredDraft,
+    savedAt: draftSavedAt,
+    clearDraft,
+  } = useFormDraft(draftKey ?? 'adopt:application:anonymous', draftValues, {
+    enabled: Boolean(draftKey),
+    sensitive: true,
+  });
+
+  const appliedDraft = useRef(false);
+  const [restoredFromDraft, setRestoredFromDraft] = useState(false);
+
+  useEffect(() => {
+    if (!restoredDraft || appliedDraft.current) return;
+    appliedDraft.current = true;
+    // `keepDefaultValues` so a field absent from an older draft falls back to its
+    // default rather than becoming undefined and detaching its input.
+    reset(restoredDraft as ApplicationFormInput, { keepDefaultValues: true });
+    setRestoredFromDraft(true);
+  }, [restoredDraft, reset]);
 
   const petId = watch('pet_id');
   useEffect(() => {
@@ -495,6 +533,35 @@ export default function ApplicationForm({
           />
         </div>
       </fieldset>
+
+      {draftKey && draftSavedAt !== null && (
+        <div
+          className="text-base-content/70 flex flex-wrap items-center justify-between gap-2 text-sm"
+          data-testid="draft-notice"
+        >
+          <span>
+            {restoredFromDraft
+              ? 'Restored your unfinished application from '
+              : 'Draft saved '}
+            <time dateTime={new Date(draftSavedAt).toISOString()}>
+              {new Date(draftSavedAt).toLocaleTimeString([], {
+                hour: 'numeric',
+                minute: '2-digit',
+              })}
+            </time>
+          </span>
+          <button
+            type="button"
+            className="btn btn-ghost btn-xs min-h-11 min-w-11"
+            onClick={() => {
+              clearDraft();
+              setRestoredFromDraft(false);
+            }}
+          >
+            Discard draft
+          </button>
+        </div>
+      )}
 
       <button
         type="submit"

@@ -92,6 +92,27 @@ function pickStorage(sensitive: boolean): Storage | null {
   }
 }
 
+/**
+ * Clear a draft from outside the component that owns the hook.
+ *
+ * Needed because success is not always known where the form lives. `/adopt` submits
+ * through a parent whose handler CATCHES its own errors and sets a message — so a
+ * form that cleared the draft after awaiting that handler would throw away a
+ * seventeen-field application precisely when submission had failed. The parent clears
+ * on its own success path instead.
+ */
+export function clearFormDraft(key: string): void {
+  if (typeof window === 'undefined') return;
+  const storageKey = `${KEY_PREFIX}${key}`;
+  for (const store of [window.localStorage, window.sessionStorage]) {
+    try {
+      store.removeItem(storageKey);
+    } catch {
+      /* private mode / blocked site data */
+    }
+  }
+}
+
 export function useFormDraft<T>(
   key: string,
   value: T,
