@@ -265,9 +265,22 @@ export default function ApplicationForm({
     appliedDraft.current = true;
     // `keepDefaultValues` so a field absent from an older draft falls back to its
     // default rather than becoming undefined and detaching its input.
-    reset(restoredDraft as ApplicationFormInput, { keepDefaultValues: true });
+    //
+    // An explicit ?pet= ALWAYS wins over the draft's pet_id. The draft is keyed per
+    // user, not per pet, so one abandoned application serves every pet: without this,
+    // an adopter who half-filled an application for Biscuit and then clicked Apply on
+    // Mochi's page would get their own answers back with the pet still set to Biscuit.
+    // This effect runs after the preselect effect above in the same flush, so a plain
+    // reset would have the last word.
+    reset(
+      {
+        ...(restoredDraft as ApplicationFormInput),
+        ...(preselectedPetId ? { pet_id: preselectedPetId } : {}),
+      },
+      { keepDefaultValues: true }
+    );
     setRestoredFromDraft(true);
-  }, [restoredDraft, reset]);
+  }, [restoredDraft, preselectedPetId, reset]);
 
   const petId = watch('pet_id');
   useEffect(() => {
