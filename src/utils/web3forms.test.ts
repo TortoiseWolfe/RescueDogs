@@ -9,11 +9,13 @@ import {
   clearRateLimitHistory,
   sanitizeFormData,
   validateWeb3FormsResponse,
+  formatErrorMessage,
   WEB3FORMS_CONFIG,
   RETRY_CONFIG,
   RATE_LIMIT_CONFIG,
 } from './web3forms';
 import type { ContactFormData } from '@/schemas/contact.schema';
+import { projectConfig } from '@/config/project.config';
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -527,5 +529,62 @@ describe('Web3Forms Utilities', () => {
       expect(() => validateWeb3FormsResponse(undefined)).toThrow();
       expect(() => validateWeb3FormsResponse('string')).toThrow();
     });
+  });
+});
+
+/**
+ * `formatErrorMessage` had NO tests, which is how a dead contact form stayed quiet.
+ *
+ * The function owns every sentence a visitor reads when a submission fails. One of
+ * its branches — the one that would have named a configuration fault — was
+ * unreachable for months because EmailService rewrites the provider's message, so
+ * every misconfigured deploy rendered "An error occurred. Please try again later."
+ * on the only channel anyone had for reporting that it did not work.
+ */
+describe('formatErrorMessage', () => {
+  it('names a configuration fault rather than blaming the network', () => {
+    // The three shapes this can arrive in: the provider's own wording, the
+    // EmailService aggregate that replaces it, and the Edge Function's 500 body.
+    for (const raw of [
+      'Web3Forms access key is not configured',
+      'No email providers available. Please check configuration.',
+      'Contact delivery is not configured',
+      // The aggregate EmailService throws once every provider has failed at
+      // send-time — the path a misconfigured Edge Function actually takes.
+      'All email providers failed: Contact delivery is not configured',
+    ]) {
+      const message = formatErrorMessage(new Error(raw));
+      expect(message).not.toContain('try again later');
+      expect(message).toContain('@');
+    }
+  });
+
+  it('does not tell a visitor to contact support through the broken form', () => {
+    const message = formatErrorMessage(
+      new Error('No email providers available. Please check configuration.')
+    );
+    // Circular advice: "contact support" was reachable only through the form that
+    // had just failed. The replacement must name a channel that still works, so
+    // assert BOTH halves — otherwise this passes on the old generic message too.
+    expect(message.toLowerCase()).not.toContain('contact support');
+    expect(message).toContain(projectConfig.contactEmail);
+  });
+
+  it('still distinguishes genuinely transient failures', () => {
+    expect(formatErrorMessage(new Error('Network request failed'))).toContain(
+      'Network error'
+    );
+    expect(formatErrorMessage(new Error('Request timeout'))).toContain(
+      'timed out'
+    );
+    expect(formatErrorMessage(new Error('rate limit exceeded'))).toContain(
+      'Too many requests'
+    );
+  });
+
+  it('falls back to the generic message only for genuinely unknown errors', () => {
+    expect(formatErrorMessage(new Error('kaboom'))).toBe(
+      'An error occurred. Please try again later.'
+    );
   });
 });

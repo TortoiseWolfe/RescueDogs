@@ -93,53 +93,88 @@ test.describe('Form Submission', () => {
     }
   });
 
-  test('form submission with valid data', async ({ page }) => {
-    // Look for a form with submit button
-    const submitButton = page.locator('button[type="submit"]').first();
-    const hasSubmitButton = (await submitButton.count()) > 0;
+  /**
+   * Fill every required field on the contact form.
+   *
+   * The previous version of this spec filled only text and email inputs, leaving
+   * the role select, the subject and the message empty — so validation blocked the
+   * submit and the test never exercised delivery at all.
+   */
+  async function fillContactForm(page: import('@playwright/test').Page) {
+    await page.locator('#name').fill('Playwright Probe');
+    await page.locator('#email').fill('probe@example.com');
+    await page.locator('#role').selectOption({ index: 1 });
+    await page.locator('#subject').fill('E2E delivery check');
+    await page
+      .locator('#message')
+      .fill('Automated end-to-end check that the form attempts delivery.');
+  }
 
-    if (hasSubmitButton) {
-      // Fill any text inputs
-      const textInputs = page.locator(
-        'input[type="text"], input[type="email"]'
-      );
-      const inputCount = await textInputs.count();
+  /**
+   * The contact path posts to this project's own Supabase Edge Function. Routes are
+   * intercepted so CI never delivers real mail, and so the ASSERTION IS THAT THE
+   * REQUEST HAPPENED — which is precisely what was broken: the form threw before any
+   * network call and told the visitor to "try again later".
+   */
+  const CONTACT_ENDPOINTS = [
+    '**/functions/v1/contact-message',
+    '**/api.web3forms.com/**',
+  ];
 
-      for (let i = 0; i < inputCount; i++) {
-        const input = textInputs.nth(i);
-
-        // Skip honeypot fields (bot traps)
-        if (await isHoneypotField(input)) {
-          continue;
-        }
-
-        const inputType = await input.getAttribute('type');
-
-        if (inputType === 'email') {
-          await input.fill('test@example.com');
-        } else {
-          await input.fill('Test Value');
-        }
-      }
-
-      // Submit form
-      await submitButton.click();
-
-      // Wait for form response - loading state, success message, or error
-      await expect(async () => {
-        const buttonDisabled = await submitButton.isDisabled();
-        const hasAlert =
-          (await page.locator('[role="alert"], .alert').count()) > 0;
-        const hasLoadingClass = (
-          await submitButton.getAttribute('class')
-        )?.includes('loading');
-        expect(buttonDisabled || hasAlert || hasLoadingClass).toBeTruthy();
-      })
-        .toPass({ timeout: 5000 })
-        .catch(() => {
-          // Form may not have async behavior - that's acceptable
+  test('valid submission actually reaches the delivery endpoint', async ({
+    page,
+  }) => {
+    let requests = 0;
+    for (const pattern of CONTACT_ENDPOINTS) {
+      await page.route(pattern, async (route) => {
+        requests += 1;
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ success: true, id: 'e2e-stub' }),
         });
+      });
     }
+
+    await fillContactForm(page);
+    await page.locator('button[type="submit"]').first().click();
+
+    // The success alert specifically — NOT `[role="alert"]`, which the error alert
+    // satisfies just as well. That ambiguity is why a fully dead contact form
+    // reported green for months.
+    await expect(page.locator('.alert-success')).toBeVisible({
+      timeout: 15000,
+    });
+    expect(
+      requests,
+      'the form must issue a delivery request, not fail before the network'
+    ).toBeGreaterThan(0);
+  });
+
+  test('a misconfigured backend tells the visitor how to reach us', async ({
+    page,
+  }) => {
+    for (const pattern of CONTACT_ENDPOINTS) {
+      await page.route(pattern, async (route) => {
+        await route.fulfill({
+          status: 500,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'Contact delivery is not configured' }),
+        });
+      });
+    }
+
+    await fillContactForm(page);
+    await page.locator('button[type="submit"]').first().click();
+
+    const alert = page.locator('.alert-error');
+    await expect(alert).toBeVisible({ timeout: 15000 });
+
+    // A configuration fault must never masquerade as a transient one. "Try again
+    // later" is advice that cannot work, offered on the only channel a visitor has
+    // for telling us it does not work.
+    await expect(alert).not.toContainText('try again later');
+    await expect(alert).toContainText('@');
   });
 
   test('form validation prevents submission with invalid data', async ({

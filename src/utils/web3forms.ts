@@ -3,6 +3,7 @@ import type {
   Web3FormsResponse,
 } from '@/schemas/contact.schema';
 import { CONTACT_ROLE_LABELS } from '@/schemas/contact.schema';
+import { projectConfig } from '@/config/project.config';
 
 // Re-export the Web3FormsResponse type for external use
 export type { Web3FormsResponse };
@@ -325,8 +326,21 @@ export const formatErrorMessage = (error: Error): string => {
     return 'Too many requests. Please wait a moment and try again.';
   }
 
-  if (message.includes('access key')) {
-    return 'Configuration error. Please contact support.';
+  // A misconfigured deploy must never read as a transient glitch.
+  //
+  // `/contact` and `/follow` shipped with NO email provider configured and told
+  // every visitor to "try again later" — advice that could not work, on the only
+  // channel for reporting that it did not work. The `access key` branch that used
+  // to live here was unreachable, because EmailService replaces the provider's
+  // message with its own "No email providers available" wording. Match on all
+  // three shapes, and point at the fallback that actually delivers rather than
+  // at "support", which is reached through this very form.
+  if (
+    message.includes('access key') ||
+    message.includes('no email providers') ||
+    message.includes('not configured')
+  ) {
+    return `Our contact form is not working right now. Please email ${projectConfig.contactEmail} directly and we will get back to you.`;
   }
 
   if (message.includes('validation')) {

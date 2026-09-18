@@ -7,6 +7,7 @@ import { emailService } from '@/utils/email/email-service';
 import type { ContactFormData as EmailContactFormData } from '@/utils/email/types';
 import {
   contactSchema,
+  CONTACT_ROLE_LABELS,
   type ContactFormData,
   type Web3FormsResponse,
 } from '@/schemas/contact.schema';
@@ -215,11 +216,19 @@ export const useWeb3Forms = (
           return;
         }
 
-        // Submit form through email service (with failover and retry)
+        // Submit form through email service (with failover and retry).
+        //
+        // The role is folded into the SUBJECT rather than sent as its own field.
+        // `EmailContactFormData` is shared with upstream ScriptHammer, which has
+        // no `role` concept, and the ops inbox triages on the subject line anyway
+        // (#128). Until now the live path dropped `role` on the floor, so every
+        // submission arrived untriaged — while the unreachable Web3Forms path in
+        // utils/web3forms.ts built the label correctly and nobody noticed.
+        const roleLabel = CONTACT_ROLE_LABELS[data.role];
         const emailData: EmailContactFormData = {
           name: data.name,
           email: data.email,
-          subject: data.subject,
+          subject: `[${roleLabel}] ${data.subject}`,
           message: data.message,
         };
 

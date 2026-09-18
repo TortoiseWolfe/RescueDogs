@@ -1,4 +1,5 @@
-# Post-deploy live probes for the unstyled-page failure (#237).
+# Post-deploy live probes for production defects that only the LIVE origin can
+# reveal: the unstyled-page failure (#237) and the silent contact-channel outage.
 #
 # GitHub Pages serves HTML with max-age=600 and deletes hashed CSS on every
 # deploy. Cloudflare rules (dashboard) + asset retention (deploy.yml) +
@@ -69,3 +70,14 @@ jobs:
           # the Transform Rule is applied — this step is expected red until then).
           CHECK_PATHS: '/,/for-adopters/'
         run: node scripts/ci/check-cache-headers.mjs "$SITE"
+
+      # The site's only inbound channel delivered nothing for months and no check
+      # noticed, because every test mocks the provider layer. This is the one probe
+      # that talks to the real thing. A 400 is the pass — see the script's header.
+      - name: Contact channel can actually deliver
+        id: contact
+        if: ${{ !cancelled() }}
+        env:
+          SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: node scripts/ci/check-contact-channel.mjs
