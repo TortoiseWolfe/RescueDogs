@@ -42,16 +42,12 @@ describe('staged photo drafts', () => {
     expect(loaded.map((p) => p.photoId)).toEqual(['a', 'b', 'c']);
     expect(loaded).toHaveLength(3);
 
-    // DELIBERATELY NOT ASSERTED HERE: that the Blob itself survives.
-    //
-    // `fake-indexeddb` does not structured-clone a Blob — it hands back a bare `{}`
-    // with no `size` and no `type`. Real browsers do clone Blobs into IndexedDB, and
-    // that is verified separately against Chromium
-    // (`scripts/ci/check-indexeddb-blob.mjs`). Asserting it here would either fail
-    // against a working implementation, or tempt someone into weakening the assertion
-    // until it passed — which would leave the binary round-trip untested while
-    // looking tested. This file covers the module's LOGIC: ordering, replacement,
-    // key isolation, TTL, pruning and the quota guard.
+    // The bytes now round-trip here, because the module stores an ArrayBuffer rather
+    // than a Blob — WebKit refuses a Blob in IndexedDB entirely, and fake-indexeddb
+    // would not have cloned one either. The Blob is rebuilt on read.
+    expect(loaded[0].blob).toBeInstanceOf(Blob);
+    expect(loaded[0].blob.type).toBe('image/webp');
+    expect(loaded[0].blob.size).toBe(11);
   });
 
   it('replaces rather than merges, so a removed photo cannot come back', async () => {

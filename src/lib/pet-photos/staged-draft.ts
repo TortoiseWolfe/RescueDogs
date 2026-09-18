@@ -14,6 +14,19 @@ const logger = createLogger('pet-photos:staged-draft');
  * structured-clones a `Blob` directly, and Dexie is already a dependency here — so
  * this adds a table, not a technology.
  *
+ * BYTES ARE STORED, NOT BLOBS — and that is not a style choice.
+ *
+ * WebKit cannot put a `Blob` (or a `File`) into IndexedDB at all. The write
+ * transaction fails with `tx.onerror` and a NULL `tx.error`, so it does not even
+ * announce itself as a clone failure. Verified directly against Playwright's WebKit
+ * build: plain objects, `ArrayBuffer` and `Uint8Array` all round-trip fine; `Blob` and
+ * `File` both fail. Chromium and Firefox store Blobs happily, which is exactly what
+ * makes this dangerous — it would have worked everywhere except the iPhone, and an
+ * iPhone is what a rescue volunteer is holding when they photograph a dog.
+ *
+ * So each photo is stored as its `ArrayBuffer` plus its MIME type, and the `Blob` is
+ * rebuilt on read. `scripts/ci/check-indexeddb-blob.mjs` holds that finding in place.
+ *
  * WHAT THIS DELIBERATELY DOES NOT STORE. Not the object URL. It is meaningless in the
  * next document and restoring it would produce four silently broken thumbnails, which
  * is worse than losing the photos outright. Callers regenerate previews with
@@ -37,7 +50,10 @@ export interface StagedPhotoRecord {
   draftKey: string;
   photoId: string;
   order: number;
-  blob: Blob;
+  /** Raw bytes. NOT a Blob — WebKit refuses to store one. See the note above. */
+  bytes: ArrayBuffer;
+  /** Carried separately because an ArrayBuffer has no MIME type of its own. */
+  type: string;
   createdAt: number;
 }
 
@@ -67,6 +83,26 @@ function getDb(): PetPhotoDraftDb | null {
   }
 }
 
+/**
+ * Blob -> ArrayBuffer, without assuming `Blob.prototype.arrayBuffer` exists.
+ *
+ * Two environments lack it: jsdom (so without this fallback the unit suite cannot
+ * exercise the save path AT ALL — it throws, gets swallowed, and stores nothing while
+ * every test still passes), and older Safari, which is once again the iPhone a
+ * volunteer is holding. FileReader is available in both.
+ */
+async function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
+  if (typeof blob.arrayBuffer === 'function') return blob.arrayBuffer();
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as ArrayBuffer);
+    reader.onerror = () =>
+      reject(reader.error ?? new Error('FileReader failed'));
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
 export interface StagedPhotoDraft {
   photoId: string;
   blob: Blob;
@@ -94,14 +130,17 @@ export async function saveStagedPhotos(
     }
 
     const now = Date.now();
-    const rows: StagedPhotoRecord[] = photos.map((photo, order) => ({
-      id: `${draftKey}::${photo.photoId}`,
-      draftKey,
-      photoId: photo.photoId,
-      order,
-      blob: photo.blob,
-      createdAt: now,
-    }));
+    const rows: StagedPhotoRecord[] = await Promise.all(
+      photos.map(async (photo, order) => ({
+        id: `${draftKey}::${photo.photoId}`,
+        draftKey,
+        photoId: photo.photoId,
+        order,
+        bytes: await blobToArrayBuffer(photo.blob),
+        type: photo.blob.type || 'image/webp',
+        createdAt: now,
+      }))
+    );
 
     await database.transaction('rw', database.staged, async () => {
       await database.staged.where('draftKey').equals(draftKey).delete();
@@ -135,7 +174,12 @@ export async function loadStagedPhotos(
 
     return rows
       .sort((a, b) => a.order - b.order)
-      .map((row) => ({ photoId: row.photoId, blob: row.blob }));
+      .filter((row) => row.bytes)
+      .map((row) => ({
+        photoId: row.photoId,
+        // Rebuilt here; it was never stored as a Blob. See the WebKit note above.
+        blob: new Blob([row.bytes], { type: row.type || 'image/webp' }),
+      }));
   } catch (error) {
     logger.debug('Could not read photo draft', { draftKey, error });
     return [];
