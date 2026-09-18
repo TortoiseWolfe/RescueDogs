@@ -104,6 +104,25 @@ describe('EmailService', () => {
       );
     });
 
+    it('preserves the underlying provider cause so the visitor gets real advice', async () => {
+      // Replacing the cause with "please try again later" is what made a
+      // misconfigured deploy read as a transient one. The caller formats this
+      // message for a human, so the diagnostic has to survive the aggregation.
+      vi.mocked(mockWeb3Forms.send).mockRejectedValue(
+        new Error('Web3Forms access key not configured')
+      );
+      vi.mocked(mockEmailJS.send).mockRejectedValue(
+        new Error('Contact delivery is not configured')
+      );
+
+      await expect(emailService.send(testData)).rejects.toThrow(
+        /not configured/
+      );
+      await expect(emailService.send(testData)).rejects.not.toThrow(
+        /try again later/
+      );
+    });
+
     it('should throw error when no providers are available', async () => {
       vi.mocked(mockWeb3Forms.isAvailable).mockResolvedValue(false);
       vi.mocked(mockEmailJS.isAvailable).mockResolvedValue(false);

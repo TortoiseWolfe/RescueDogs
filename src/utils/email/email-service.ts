@@ -117,9 +117,22 @@ export class EmailService {
       }
     }
 
-    // All providers failed
+    // All providers failed.
+    //
+    // Carry the underlying provider errors into the message rather than replacing
+    // them. Discarding them is what made a misconfigured deploy indistinguishable
+    // from a bad moment: the caller formats this string for the visitor, and
+    // "please try again later" is advice that cannot work when the cause is
+    // configuration. `lastErrorLog` already holds each provider's latest failure,
+    // so the diagnostic is right here and was simply being thrown away.
+    const causes = failedProviders
+      .map((name) => this.lastErrorLog.get(name))
+      .filter((message): message is string => Boolean(message));
+
     throw new EmailServiceError(
-      'All email providers failed. Please try again later.',
+      causes.length > 0
+        ? `All email providers failed: ${causes.join('; ')}`
+        : 'All email providers failed. Please try again later.',
       failedProviders
     );
   }

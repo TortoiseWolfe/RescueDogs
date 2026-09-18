@@ -549,6 +549,9 @@ describe('formatErrorMessage', () => {
       'Web3Forms access key is not configured',
       'No email providers available. Please check configuration.',
       'Contact delivery is not configured',
+      // The aggregate EmailService throws once every provider has failed at
+      // send-time — the path a misconfigured Edge Function actually takes.
+      'All email providers failed: Contact delivery is not configured',
     ]) {
       const message = formatErrorMessage(new Error(raw));
       expect(message).not.toContain('try again later');
