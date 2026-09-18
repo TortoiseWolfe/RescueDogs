@@ -16,6 +16,21 @@ import {
   PetPhotoManager,
   type PetPhotoManagerHandle,
 } from '../PetPhotoManager';
+import { useFormDraft } from '@/hooks/useFormDraft';
+import { DraftNotice } from '../DraftNotice';
+import { clearStagedPhotos } from '@/lib/pet-photos/staged-draft';
+
+/** The user-entered half of this form. Transient UI state is deliberately excluded. */
+interface PetDraft {
+  name: string;
+  species: PetSpecies;
+  breed: string;
+  sex: PetSex | '';
+  ageYearsPart: number;
+  ageMonthsPart: number;
+  size: PetSize | '';
+  notes: string;
+}
 
 /**
  * Create a pet for the staff member's shelter (#110).
@@ -37,6 +52,42 @@ export default function NewShelterPetPage() {
   const photoManagerRef = useRef<PetPhotoManagerHandle>(null);
   const hardNavTimerRef = useRef<number | null>(null);
   const busy = saving || redirecting;
+
+  // #310: leaving this page to fetch a photo, a bio or medical details used to throw
+  // away everything already typed. Keyed by shelter so two rescues sharing a browser
+  // never see each other's half-finished listing.
+  const draftValue: PetDraft = {
+    name,
+    species,
+    breed,
+    sex,
+    ageYearsPart,
+    ageMonthsPart,
+    size,
+    notes,
+  };
+  const { restored, savedAt, clearDraft } = useFormDraft(
+    `shelter:${shelterId}:pet:new`,
+    draftValue
+  );
+  const [restoredFromDraft, setRestoredFromDraft] = useState(false);
+  const appliedDraft = useRef(false);
+
+  // Apply the restored draft exactly once. `restored` is a one-shot handoff, so this
+  // cannot fight the user's own typing on later renders.
+  useEffect(() => {
+    if (!restored || appliedDraft.current) return;
+    appliedDraft.current = true;
+    setName(restored.name ?? '');
+    setSpecies(restored.species ?? 'dog');
+    setBreed(restored.breed ?? '');
+    setSex(restored.sex ?? '');
+    setAgeYearsPart(restored.ageYearsPart ?? 0);
+    setAgeMonthsPart(restored.ageMonthsPart ?? 0);
+    setSize(restored.size ?? '');
+    setNotes(restored.notes ?? '');
+    setRestoredFromDraft(true);
+  }, [restored]);
 
   useEffect(() => {
     return () => {
@@ -100,12 +151,16 @@ export default function NewShelterPetPage() {
               photoErr instanceof Error ? photoErr.message : 'upload error'
             }. You can edit to retry.`
           );
+          // The pet row exists, so the typed fields are now on the server and the
+          // draft would only resurrect them as a duplicate.
+          clearDraft();
           setRedirecting(true);
           goToEditPet(pet.id);
           return;
         }
       }
 
+      clearDraft();
       setRedirecting(true);
       goToPetsList();
     } catch (err) {
@@ -216,6 +271,7 @@ export default function NewShelterPetPage() {
           shelterId={shelterId}
           petId={null}
           disabled={busy}
+          draftKey={`shelter:${shelterId}:pet:new`}
         />
 
         {error && (
@@ -223,6 +279,26 @@ export default function NewShelterPetPage() {
             <span>{error}</span>
           </div>
         )}
+
+        <DraftNotice
+          savedAt={savedAt}
+          restored={restoredFromDraft}
+          onDiscard={() => {
+            clearDraft();
+            // The photos are half the draft; discarding only the text would leave
+            // images attached to a listing the user just cleared.
+            void clearStagedPhotos(`shelter:${shelterId}:pet:new`);
+            setRestoredFromDraft(false);
+            setName('');
+            setSpecies('dog');
+            setBreed('');
+            setSex('');
+            setAgeYearsPart(0);
+            setAgeMonthsPart(0);
+            setSize('');
+            setNotes('');
+          }}
+        />
 
         <button
           type="submit"

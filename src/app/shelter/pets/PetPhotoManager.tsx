@@ -32,6 +32,12 @@ import {
   PetPhotoService,
 } from '@/services/applications/pet-photo-service';
 import type { PetPhoto } from '@/types/applications';
+import {
+  clearStagedPhotos,
+  loadStagedPhotos,
+  pruneExpiredStagedPhotos,
+  saveStagedPhotos,
+} from '@/lib/pet-photos/staged-draft';
 
 type StagedPhoto = {
   id: string;
@@ -53,6 +59,11 @@ type PetPhotoManagerProps = {
   legacyPhotoUrl?: string | null;
   onStagedChange?: (count: number) => void;
   disabled?: boolean;
+  /**
+   * Persist staged photos against this key while the pet does not exist yet (#310).
+   * Omit to keep the old in-memory-only behaviour.
+   */
+  draftKey?: string | null;
 };
 
 /**
@@ -69,6 +80,7 @@ export const PetPhotoManager = forwardRef<
     legacyPhotoUrl,
     onStagedChange,
     disabled = false,
+    draftKey = null,
   },
   ref
 ) {
@@ -97,6 +109,50 @@ export const PetPhotoManager = forwardRef<
   useEffect(() => {
     onStagedChange?.(staged.length);
   }, [staged.length, onStagedChange]);
+
+  /**
+   * #310: staged photos are binary and used to die with the document, so leaving the
+   * page to fetch a second photo destroyed the first. Only meaningful before the pet
+   * exists — once `petId` is set, photos upload immediately and live on the server.
+   */
+  const restoredPhotoDraft = useRef(false);
+  const persistDraft = Boolean(draftKey) && petId === null;
+
+  useEffect(() => {
+    if (!persistDraft || !draftKey || restoredPhotoDraft.current) return;
+    restoredPhotoDraft.current = true;
+    let cancelled = false;
+    const created: string[] = [];
+
+    void (async () => {
+      await pruneExpiredStagedPhotos();
+      const rows = await loadStagedPhotos(draftKey);
+      if (cancelled || rows.length === 0) return;
+      // The stored object URL is dead in this document; mint a fresh one per blob.
+      const revived = rows.map((row) => {
+        const preview = URL.createObjectURL(row.blob);
+        created.push(preview);
+        return { id: row.photoId, preview, blob: row.blob };
+      });
+      if (cancelled) {
+        created.forEach((url) => URL.revokeObjectURL(url));
+        return;
+      }
+      setStaged((prev) => (prev.length > 0 ? prev : revived));
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [persistDraft, draftKey, petId]);
+
+  useEffect(() => {
+    if (!persistDraft || !draftKey || !restoredPhotoDraft.current) return;
+    void saveStagedPhotos(
+      draftKey,
+      staged.map((item) => ({ photoId: item.id, blob: item.blob }))
+    );
+  }, [persistDraft, draftKey, staged]);
 
   useEffect(() => {
     return () => {
@@ -135,10 +191,12 @@ export const PetPhotoManager = forwardRef<
           URL.revokeObjectURL(item.preview);
         }
         await service.syncPrimaryPhotoUrl(newPetId);
+        // On the server now — a surviving draft would re-add them as duplicates.
+        if (draftKey) await clearStagedPhotos(draftKey);
         setStaged([]);
       },
     }),
-    [shelterId, staged]
+    [shelterId, staged, draftKey]
   );
 
   const onCropComplete = useCallback((_area: Area, pixels: Area) => {
