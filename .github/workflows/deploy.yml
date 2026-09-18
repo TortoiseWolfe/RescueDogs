@@ -48,6 +48,31 @@ jobs:
         env:
           NEXT_PUBLIC_PAGESPEED_API_KEY: ${{ secrets.NEXT_PUBLIC_PAGESPEED_API_KEY }}
 
+      - name: Verify the contact channel has a delivery path
+        # `/contact` and `/follow` shipped for months with NO provider configured.
+        # Web3Forms was the only path, its secret was never created, and GitHub
+        # substitutes an empty string for an unset secret without failing — so the
+        # build stayed green while the site's only inbound channel delivered
+        # nothing. This is the guard that was missing.
+        #
+        # Contact now runs through our own Supabase Edge Function (Resend), so
+        # NEXT_PUBLIC_SUPABASE_URL is what the primary provider requires: without it
+        # SupabaseResendProvider.isAvailable() is false and we are back to relying on
+        # a fallback that may itself be unset. That is a hard failure.
+        #
+        # Whether the function is CONFIGURED (RESEND_API_KEY / CONTACT_TO /
+        # CONTACT_FROM are Supabase secrets, invisible to CI) is asserted after
+        # deploy by smoke.yml -> scripts/ci/check-contact-channel.mjs.
+        run: |
+          if [ -z "${{ vars.NEXT_PUBLIC_SUPABASE_URL }}" ]; then
+            echo "::error::NEXT_PUBLIC_SUPABASE_URL is empty — the contact Edge Function has no address, so /contact and /follow would ship unable to deliver."
+            exit 1
+          fi
+          echo "::notice::Primary contact provider (Supabase Edge Function) has an endpoint"
+          if [ -z "${{ secrets.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY }}" ]; then
+            echo "::warning::NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY is unset — the Web3Forms fallback is unavailable. Optional: the Supabase path is primary."
+          fi
+
       - name: Build Next.js app
         run: pnpm run build
         env:
