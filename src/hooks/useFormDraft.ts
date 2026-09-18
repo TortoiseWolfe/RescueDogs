@@ -159,8 +159,17 @@ export function useFormDraft<T>(
     }
   }, [storageKey]);
 
-  // Read once at mount.
+  // Read when the key becomes available, and again if it changes.
+  //
+  // NOT mount-only: /shelter/pets/edit reads its pet id from ?id= AFTER mount (static
+  // export has no dynamic segment), so the draft key does not exist on the first
+  // render. A mount-only read would silently never find that pet's draft.
   useEffect(() => {
+    readDone.current = false;
+    setRestored(null);
+    setSavedAt(null);
+    lastWritten.current = null;
+
     if (!enabled) {
       readDone.current = true;
       return;
@@ -200,9 +209,10 @@ export function useFormDraft<T>(
     } finally {
       readDone.current = true;
     }
-    // Mount-only by design: `restored` is a one-shot handoff, not live state.
+    // `ttlMs`/`validate` are read-only inputs to this pass; re-running on their
+    // identity would re-read the draft on every render for an inline validator.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [storageKey, enabled, sensitive]);
 
   // Debounced write whenever the serialised value changes.
   const serialized = (() => {

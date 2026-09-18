@@ -224,6 +224,42 @@ describe('useFormDraft', () => {
     });
   });
 
+  describe('a key that arrives late', () => {
+    it('reads the draft when the key changes after mount', () => {
+      // /shelter/pets/edit gets its pet id from ?id= AFTER mount, so the draft key
+      // does not exist on the first render. A mount-only read would never find it.
+      sessionStorage.setItem(
+        'draft:v1:pet-42',
+        JSON.stringify({ v: 1, savedAt: Date.now(), data: { name: 'Rocky' } })
+      );
+
+      const { result, rerender } = renderHook(
+        ({ k }) => useFormDraft(k, { name: '' }),
+        { initialProps: { k: 'pending' } }
+      );
+      expect(result.current.restored).toBeNull();
+
+      rerender({ k: 'pet-42' });
+      expect(result.current.restored).toEqual({ name: 'Rocky' });
+    });
+
+    it("drops a previous key's draft when the key changes", () => {
+      sessionStorage.setItem(
+        'draft:v1:pet-1',
+        JSON.stringify({ v: 1, savedAt: Date.now(), data: { name: 'First' } })
+      );
+      const { result, rerender } = renderHook(
+        ({ k }) => useFormDraft(k, { name: '' }),
+        { initialProps: { k: 'pet-1' } }
+      );
+      expect(result.current.restored).toEqual({ name: 'First' });
+
+      // Switching pets must not leave the previous pet's draft on screen.
+      rerender({ k: 'pet-2' });
+      expect(result.current.restored).toBeNull();
+    });
+  });
+
   describe('clearDraft', () => {
     it('removes the draft from both stores', () => {
       // Consent can change between the write and the clear; a draft stranded in the
