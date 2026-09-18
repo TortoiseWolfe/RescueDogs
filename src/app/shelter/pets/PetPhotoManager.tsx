@@ -48,6 +48,13 @@ type StagedPhoto = {
 export type PetPhotoManagerHandle = {
   uploadStaged: (petId: string) => Promise<void>;
   hasStagedPhotos: () => boolean;
+  /**
+   * Drop everything staged, on screen and in IndexedDB (#310).
+   *
+   * "Discard draft" used to clear only the stored rows, so the photos stayed visible
+   * and the save effect immediately wrote them back — the discard undid itself.
+   */
+  clearStaged: () => Promise<void>;
 };
 
 type PetPhotoManagerProps = {
@@ -115,44 +122,53 @@ export const PetPhotoManager = forwardRef<
    * page to fetch a second photo destroyed the first. Only meaningful before the pet
    * exists — once `petId` is set, photos upload immediately and live on the server.
    */
-  const restoredPhotoDraft = useRef(false);
+  const startedPhotoRestore = useRef(false);
+  // State, not a ref: the save effect below must re-run once the read finishes, and
+  // it must NOT run before then or it would save `[]` over the rows being read.
+  const [photoDraftRead, setPhotoDraftRead] = useState(false);
   const persistDraft = Boolean(draftKey) && petId === null;
 
   useEffect(() => {
-    if (!persistDraft || !draftKey || restoredPhotoDraft.current) return;
-    restoredPhotoDraft.current = true;
+    if (!persistDraft || !draftKey || startedPhotoRestore.current) return;
+    startedPhotoRestore.current = true;
     let cancelled = false;
     const created: string[] = [];
 
     void (async () => {
       await pruneExpiredStagedPhotos();
       const rows = await loadStagedPhotos(draftKey);
-      if (cancelled || rows.length === 0) return;
-      // The stored object URL is dead in this document; mint a fresh one per blob.
-      const revived = rows.map((row) => {
-        const preview = URL.createObjectURL(row.blob);
-        created.push(preview);
-        return { id: row.photoId, preview, blob: row.blob };
-      });
-      if (cancelled) {
-        created.forEach((url) => URL.revokeObjectURL(url));
-        return;
+      if (cancelled) return;
+      if (rows.length > 0) {
+        // The stored object URL is dead in this document; mint a fresh one per blob.
+        const revived = rows.map((row) => {
+          const preview = URL.createObjectURL(row.blob);
+          created.push(preview);
+          return { id: row.photoId, preview, blob: row.blob };
+        });
+        if (cancelled) {
+          created.forEach((url) => URL.revokeObjectURL(url));
+          return;
+        }
+        setStaged((prev) => (prev.length > 0 ? prev : revived));
       }
-      setStaged((prev) => (prev.length > 0 ? prev : revived));
+      setPhotoDraftRead(true);
     })();
 
     return () => {
       cancelled = true;
+      // Previews minted here are owned by this effect. Without this they leak for the
+      // life of the document every time the page is revisited.
+      created.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [persistDraft, draftKey, petId]);
 
   useEffect(() => {
-    if (!persistDraft || !draftKey || !restoredPhotoDraft.current) return;
+    if (!persistDraft || !draftKey || !photoDraftRead) return;
     void saveStagedPhotos(
       draftKey,
       staged.map((item) => ({ photoId: item.id, blob: item.blob }))
     );
-  }, [persistDraft, draftKey, staged]);
+  }, [persistDraft, draftKey, photoDraftRead, staged]);
 
   useEffect(() => {
     return () => {
@@ -174,6 +190,11 @@ export const PetPhotoManager = forwardRef<
     ref,
     () => ({
       hasStagedPhotos: () => staged.length > 0,
+      clearStaged: async () => {
+        staged.forEach((item) => URL.revokeObjectURL(item.preview));
+        setStaged([]);
+        if (draftKey) await clearStagedPhotos(draftKey);
+      },
       uploadStaged: async (newPetId: string) => {
         if (staged.length === 0) return;
         const service = new PetPhotoService(supabase);

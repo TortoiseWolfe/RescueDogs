@@ -122,11 +122,22 @@ export async function saveStagedPhotos(
   if (!database) return;
 
   try {
-    if (photos.length > 0 && (await isStorageNearQuota())) {
-      logger.debug('Skipping photo draft write — storage near quota', {
-        draftKey,
-      });
-      return;
+    // Near quota, skip only writes that would GROW the store. Skipping wholesale
+    // meant a removal never persisted, so a photo the user deleted came back on the
+    // next restore — a storage guard that silently resurrects deleted content.
+    if (await isStorageNearQuota()) {
+      const existing = await database.staged
+        .where('draftKey')
+        .equals(draftKey)
+        .count();
+      if (photos.length >= existing) {
+        logger.debug('Skipping photo draft growth — storage near quota', {
+          draftKey,
+          existing,
+          incoming: photos.length,
+        });
+        return;
+      }
     }
 
     const now = Date.now();

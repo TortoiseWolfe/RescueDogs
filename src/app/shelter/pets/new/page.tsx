@@ -152,8 +152,11 @@ export default function NewShelterPetPage() {
             }. You can edit to retry.`
           );
           // The pet row exists, so the typed fields are now on the server and the
-          // draft would only resurrect them as a duplicate.
+          // draft would only resurrect them as a duplicate. The photos must go too:
+          // this key is shared by every new listing, so anything left behind would
+          // reappear attached to the NEXT pet the rescue adds.
           clearDraft();
+          void clearStagedPhotos(`shelter:${shelterId}:pet:new`);
           setRedirecting(true);
           goToEditPet(pet.id);
           return;
@@ -285,9 +288,10 @@ export default function NewShelterPetPage() {
           restored={restoredFromDraft}
           onDiscard={() => {
             clearDraft();
-            // The photos are half the draft; discarding only the text would leave
-            // images attached to a listing the user just cleared.
-            void clearStagedPhotos(`shelter:${shelterId}:pet:new`);
+            // The photos are half the draft. Clearing only the STORED rows left the
+            // images on screen, and the save effect wrote them straight back — the
+            // discard undid itself. clearStaged drops both.
+            void photoManagerRef.current?.clearStaged();
             setRestoredFromDraft(false);
             setName('');
             setSpecies('dog');

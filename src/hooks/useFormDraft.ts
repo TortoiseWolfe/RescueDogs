@@ -138,6 +138,8 @@ export function useFormDraft<T>(
   /** Last payload actually written, so restoring a draft does not rewrite it. */
   const lastWritten = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Form value at the moment the read ran: hydration, not typing. Never persisted. */
+  const baseline = useRef<string | null>(null);
 
   const clearDraft = useCallback(() => {
     if (timer.current) {
@@ -159,6 +161,15 @@ export function useFormDraft<T>(
     }
   }, [storageKey]);
 
+  // Debounced write whenever the serialised value changes.
+  const serialized = (() => {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return null; // non-serialisable (a File, a cycle) — never persisted
+    }
+  })();
+
   // Read when the key becomes available, and again if it changes.
   //
   // NOT mount-only: /shelter/pets/edit reads its pet id from ?id= AFTER mount (static
@@ -166,6 +177,7 @@ export function useFormDraft<T>(
   // render. A mount-only read would silently never find that pet's draft.
   useEffect(() => {
     readDone.current = false;
+    baseline.current = serialized;
     setRestored(null);
     setSavedAt(null);
     lastWritten.current = null;
@@ -214,18 +226,10 @@ export function useFormDraft<T>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey, enabled, sensitive]);
 
-  // Debounced write whenever the serialised value changes.
-  const serialized = (() => {
-    try {
-      return JSON.stringify(value);
-    } catch {
-      return null; // non-serialisable (a File, a cycle) — never persisted
-    }
-  })();
-
   useEffect(() => {
     if (!enabled || !readDone.current || serialized == null) return;
     if (serialized === lastWritten.current) return;
+    if (serialized === baseline.current) return;
 
     const keep = shouldSave ? shouldSave(value) : hasContent(value);
     if (!keep) return;
@@ -242,6 +246,7 @@ export function useFormDraft<T>(
       try {
         store.setItem(storageKey, JSON.stringify(envelope));
         lastWritten.current = serialized;
+        baseline.current = null;
         setSavedAt(envelope.savedAt);
       } catch (error) {
         // Quota is the realistic case. Do not retry and do not surface it: the form
