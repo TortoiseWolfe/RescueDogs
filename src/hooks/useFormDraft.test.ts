@@ -260,6 +260,35 @@ describe('useFormDraft', () => {
     });
   });
 
+  describe('unmounting mid-debounce', () => {
+    it('lands the pending write instead of dropping it', () => {
+      // The whole point of the feature: type a sentence, click a link within the
+      // debounce window. Cancelling the timer on unmount loses exactly the keystrokes
+      // the draft exists to protect.
+      const { rerender, unmount } = renderHook(
+        ({ v }) => useFormDraft('test-form', v),
+        { initialProps: { v: { name: '' } } }
+      );
+
+      rerender({ v: { name: 'Rocky' } });
+      // Navigate away BEFORE the debounce fires.
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+      unmount();
+
+      expect(storedIn(sessionStorage)?.data).toEqual({ name: 'Rocky' });
+    });
+
+    it('writes nothing on unmount when there was nothing pending', () => {
+      const { unmount } = renderHook(() =>
+        useFormDraft('test-form', { name: '' })
+      );
+      unmount();
+      expect(sessionStorage.getItem(KEY)).toBeNull();
+    });
+  });
+
   describe('clearDraft', () => {
     it('removes the draft from both stores', () => {
       // Consent can change between the write and the clear; a draft stranded in the

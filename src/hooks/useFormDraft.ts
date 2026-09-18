@@ -140,6 +140,12 @@ export function useFormDraft<T>(
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Form value at the moment the read ran: hydration, not typing. Never persisted. */
   const baseline = useRef<string | null>(null);
+  /** The debounced write that has not happened yet, so unmount can still land it. */
+  const pending = useRef<{
+    key: string;
+    sensitive: boolean;
+    data: unknown;
+  } | null>(null);
 
   const clearDraft = useCallback(() => {
     if (timer.current) {
@@ -235,6 +241,7 @@ export function useFormDraft<T>(
     if (!keep) return;
 
     if (timer.current) clearTimeout(timer.current);
+    pending.current = { key: storageKey, sensitive, data: value };
     timer.current = setTimeout(() => {
       const store = pickStorage(sensitive);
       if (!store) return;
@@ -247,6 +254,7 @@ export function useFormDraft<T>(
         store.setItem(storageKey, JSON.stringify(envelope));
         lastWritten.current = serialized;
         baseline.current = null;
+        pending.current = null;
         setSavedAt(envelope.savedAt);
       } catch (error) {
         // Quota is the realistic case. Do not retry and do not surface it: the form
@@ -263,6 +271,44 @@ export function useFormDraft<T>(
     // re-run on every render for a literal.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serialized, enabled, sensitive, storageKey, debounceMs]);
+
+  /**
+   * Land a pending write when the component goes away.
+   *
+   * The debounce means the last keystrokes live only in a timer. Navigating away
+   * inside that window — type a sentence, click a link — used to drop them, which is
+   * the exact journey this hook exists to protect against. Storage writes are
+   * synchronous, so the cleanup can still complete one; it deliberately does not
+   * setState, because nothing is mounted to receive it.
+   *
+   * Mount-only on purpose: a cleanup that ran on every value change would fire on
+   * each keystroke and defeat the debounce entirely.
+   */
+  useEffect(() => {
+    return () => {
+      if (timer.current) {
+        clearTimeout(timer.current);
+        timer.current = null;
+      }
+      const due = pending.current;
+      pending.current = null;
+      if (!due || typeof window === 'undefined') return;
+      try {
+        const store = pickStorage(due.sensitive);
+        if (!store) return;
+        store.setItem(
+          due.key,
+          JSON.stringify({
+            v: ENVELOPE_VERSION,
+            savedAt: Date.now(),
+            data: due.data,
+          })
+        );
+      } catch {
+        /* quota or blocked storage — the draft is lost, but nothing breaks */
+      }
+    };
+  }, []);
 
   return { restored, savedAt, clearDraft };
 }
