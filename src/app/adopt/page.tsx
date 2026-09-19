@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
+import { clearFormDraft } from '@/hooks/useFormDraft';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/auth/ProtectedRoute/ProtectedRoute';
 import SoftCoBrand from '@/components/molecular/SoftCoBrand';
@@ -117,6 +118,10 @@ function AdoptContent() {
           profile: toProfileSnapshot(data),
           whyThisPet: data.why_this_pet,
         });
+        // Clear HERE, not in the form: the catch below swallows failures, so a form
+        // that cleared after awaiting this handler would destroy a seventeen-field
+        // application at precisely the moment submission had failed (#310).
+        if (user) clearFormDraft(`adopt:application:${user.id}`);
         router.push(`/applications/status?id=${application.id}`);
       } catch (err) {
         const code = (err as { code?: string })?.code;
@@ -177,6 +182,7 @@ function AdoptContent() {
           preselectedPetId={preselectedPetId ?? undefined}
           onPetIdChange={handlePetIdChange}
           onSubmit={handleSubmit}
+          draftKey={user ? `adopt:application:${user.id}` : null}
           submitting={submitting}
         />
       )}
