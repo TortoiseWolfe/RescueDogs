@@ -20,6 +20,7 @@ import type {
   PetStatus,
 } from '@/types/applications';
 import SearchParamsReader from './SearchParamsReader';
+import { useFormDraft } from '@/hooks/useFormDraft';
 
 /**
  * Edit an existing shelter pet + optional new photo (#110).
@@ -47,6 +48,64 @@ function EditShelterPetContent() {
   const [deleting, setDeleting] = useState(false);
   const [applicationCount, setApplicationCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * #310: a draft here must NOT silently win.
+   *
+   * Unlike Add Pet, this form has a server row behind it. Auto-applying a stored
+   * draft would present stale local text as if it were saved, and the user would have
+   * no way to tell which they were looking at. So the draft is offered, not applied.
+   *
+   * `enabled` waits for the load: the pet id arrives from ?id= after mount (static
+   * export has no dynamic segment), and persisting before hydration would capture the
+   * empty form and overwrite a real draft with blanks.
+   */
+  const draftReady = !loading && Boolean(petId) && Boolean(pet);
+  const draftValue = {
+    name,
+    species,
+    breed,
+    sex,
+    ageYearsPart,
+    ageMonthsPart,
+    size,
+    status,
+    notes,
+  };
+  const {
+    restored: pendingDraft,
+    savedAt: draftSavedAt,
+    clearDraft,
+  } = useFormDraft(
+    `shelter:${shelterId}:pet:${petId ?? 'pending'}`,
+    draftValue,
+    {
+      enabled: draftReady,
+    }
+  );
+
+  const [draftDismissed, setDraftDismissed] = useState(false);
+
+  // Only worth offering if it actually differs from what the server returned —
+  // otherwise the prompt is noise about changes that are already saved.
+  const draftDiffers =
+    pendingDraft !== null &&
+    JSON.stringify(pendingDraft) !== JSON.stringify(draftValue);
+  const offerDraft = draftReady && draftDiffers && !draftDismissed;
+
+  function applyDraft() {
+    if (!pendingDraft) return;
+    setName(pendingDraft.name ?? '');
+    setSpecies(pendingDraft.species ?? 'dog');
+    setBreed(pendingDraft.breed ?? '');
+    setSex(pendingDraft.sex ?? '');
+    setAgeYearsPart(pendingDraft.ageYearsPart ?? 0);
+    setAgeMonthsPart(pendingDraft.ageMonthsPart ?? 0);
+    setSize(pendingDraft.size ?? '');
+    setStatus(pendingDraft.status ?? 'available');
+    setNotes(pendingDraft.notes ?? '');
+    setDraftDismissed(true);
+  }
 
   const handleParams = useCallback((id: string | null) => {
     setPetId(id);
@@ -121,6 +180,7 @@ function EditShelterPetContent() {
         notes: notes || null,
       });
 
+      clearDraft();
       router.push('/shelter/pets');
     } catch (err) {
       setError(
@@ -286,6 +346,42 @@ function EditShelterPetContent() {
             {error && (
               <div role="alert" className="alert alert-error">
                 <span>{error}</span>
+              </div>
+            )}
+
+            {offerDraft && draftSavedAt !== null && (
+              <div
+                role="status"
+                className="alert alert-info flex flex-wrap items-center gap-2"
+                data-testid="draft-offer"
+              >
+                <span className="grow">
+                  You have unsaved changes to this pet from{' '}
+                  <time dateTime={new Date(draftSavedAt).toISOString()}>
+                    {new Date(draftSavedAt).toLocaleTimeString([], {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })}
+                  </time>
+                  . They have not been saved.
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-sm min-h-11"
+                  onClick={applyDraft}
+                >
+                  Restore them
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm min-h-11"
+                  onClick={() => {
+                    clearDraft();
+                    setDraftDismissed(true);
+                  }}
+                >
+                  Discard
+                </button>
               </div>
             )}
 

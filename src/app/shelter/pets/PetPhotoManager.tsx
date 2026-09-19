@@ -32,6 +32,12 @@ import {
   PetPhotoService,
 } from '@/services/applications/pet-photo-service';
 import type { PetPhoto } from '@/types/applications';
+import {
+  clearStagedPhotos,
+  loadStagedPhotos,
+  pruneExpiredStagedPhotos,
+  saveStagedPhotos,
+} from '@/lib/pet-photos/staged-draft';
 
 type StagedPhoto = {
   id: string;
@@ -42,6 +48,13 @@ type StagedPhoto = {
 export type PetPhotoManagerHandle = {
   uploadStaged: (petId: string) => Promise<void>;
   hasStagedPhotos: () => boolean;
+  /**
+   * Drop everything staged, on screen and in IndexedDB (#310).
+   *
+   * "Discard draft" used to clear only the stored rows, so the photos stayed visible
+   * and the save effect immediately wrote them back — the discard undid itself.
+   */
+  clearStaged: () => Promise<void>;
 };
 
 type PetPhotoManagerProps = {
@@ -53,6 +66,11 @@ type PetPhotoManagerProps = {
   legacyPhotoUrl?: string | null;
   onStagedChange?: (count: number) => void;
   disabled?: boolean;
+  /**
+   * Persist staged photos against this key while the pet does not exist yet (#310).
+   * Omit to keep the old in-memory-only behaviour.
+   */
+  draftKey?: string | null;
 };
 
 /**
@@ -69,6 +87,7 @@ export const PetPhotoManager = forwardRef<
     legacyPhotoUrl,
     onStagedChange,
     disabled = false,
+    draftKey = null,
   },
   ref
 ) {
@@ -98,6 +117,59 @@ export const PetPhotoManager = forwardRef<
     onStagedChange?.(staged.length);
   }, [staged.length, onStagedChange]);
 
+  /**
+   * #310: staged photos are binary and used to die with the document, so leaving the
+   * page to fetch a second photo destroyed the first. Only meaningful before the pet
+   * exists — once `petId` is set, photos upload immediately and live on the server.
+   */
+  const startedPhotoRestore = useRef(false);
+  // State, not a ref: the save effect below must re-run once the read finishes, and
+  // it must NOT run before then or it would save `[]` over the rows being read.
+  const [photoDraftRead, setPhotoDraftRead] = useState(false);
+  const persistDraft = Boolean(draftKey) && petId === null;
+
+  useEffect(() => {
+    if (!persistDraft || !draftKey || startedPhotoRestore.current) return;
+    startedPhotoRestore.current = true;
+    let cancelled = false;
+    const created: string[] = [];
+
+    void (async () => {
+      await pruneExpiredStagedPhotos();
+      const rows = await loadStagedPhotos(draftKey);
+      if (cancelled) return;
+      if (rows.length > 0) {
+        // The stored object URL is dead in this document; mint a fresh one per blob.
+        const revived = rows.map((row) => {
+          const preview = URL.createObjectURL(row.blob);
+          created.push(preview);
+          return { id: row.photoId, preview, blob: row.blob };
+        });
+        if (cancelled) {
+          created.forEach((url) => URL.revokeObjectURL(url));
+          return;
+        }
+        setStaged((prev) => (prev.length > 0 ? prev : revived));
+      }
+      setPhotoDraftRead(true);
+    })();
+
+    return () => {
+      cancelled = true;
+      // Previews minted here are owned by this effect. Without this they leak for the
+      // life of the document every time the page is revisited.
+      created.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [persistDraft, draftKey, petId]);
+
+  useEffect(() => {
+    if (!persistDraft || !draftKey || !photoDraftRead) return;
+    void saveStagedPhotos(
+      draftKey,
+      staged.map((item) => ({ photoId: item.id, blob: item.blob }))
+    );
+  }, [persistDraft, draftKey, photoDraftRead, staged]);
+
   useEffect(() => {
     return () => {
       if (cropPreviewUrlRef.current?.startsWith('blob:')) {
@@ -118,6 +190,11 @@ export const PetPhotoManager = forwardRef<
     ref,
     () => ({
       hasStagedPhotos: () => staged.length > 0,
+      clearStaged: async () => {
+        staged.forEach((item) => URL.revokeObjectURL(item.preview));
+        setStaged([]);
+        if (draftKey) await clearStagedPhotos(draftKey);
+      },
       uploadStaged: async (newPetId: string) => {
         if (staged.length === 0) return;
         const service = new PetPhotoService(supabase);
@@ -135,10 +212,12 @@ export const PetPhotoManager = forwardRef<
           URL.revokeObjectURL(item.preview);
         }
         await service.syncPrimaryPhotoUrl(newPetId);
+        // On the server now — a surviving draft would re-add them as duplicates.
+        if (draftKey) await clearStagedPhotos(draftKey);
         setStaged([]);
       },
     }),
-    [shelterId, staged]
+    [shelterId, staged, draftKey]
   );
 
   const onCropComplete = useCallback((_area: Area, pixels: Area) => {

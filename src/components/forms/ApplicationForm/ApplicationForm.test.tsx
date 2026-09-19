@@ -1,4 +1,5 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
+import React, { useEffect } from 'react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ApplicationForm from './ApplicationForm';
@@ -42,6 +43,20 @@ const pets: Pet[] = [
 
 const onSubmit = vi.fn();
 
+/** Mirrors src/app/adopt/SearchParamsReader.tsx: reports ?pet= from an effect. */
+function ParamReaderStub({
+  petId,
+  onParams,
+}: {
+  petId: string | null;
+  onParams: (petId: string | null) => void;
+}) {
+  useEffect(() => {
+    onParams(petId);
+  }, [petId, onParams]);
+  return null;
+}
+
 function renderForm(
   props: Partial<React.ComponentProps<typeof ApplicationForm>> = {}
 ) {
@@ -71,6 +86,8 @@ async function fillValidOwnerData(user: ReturnType<typeof userEvent.setup>) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  sessionStorage.clear();
+  localStorage.clear();
 });
 
 describe('ApplicationForm', () => {
@@ -156,6 +173,65 @@ describe('ApplicationForm', () => {
     it('defaults to the placeholder when no pet is preselected', () => {
       renderForm();
       expect(petSelect()).toHaveValue('');
+    });
+
+    it('lets an explicit preselectedPetId beat a stale draft for another pet', async () => {
+      // #310 regression. The draft is keyed per user, NOT per pet, so one abandoned
+      // application serves every pet. An adopter half-fills an application for
+      // Biscuit, browses on, then clicks Apply on Mochi's page: the restore must give
+      // back their answers WITHOUT dragging Biscuit along, or they submit for the
+      // wrong animal — and onPetIdChange mis-brands the header with Biscuit's shelter.
+      //
+      // The harness mirrors /adopt: SearchParamsReader and the form mount in the SAME
+      // commit, so the stored draft and the ?pet= id land on the same re-render. The
+      // draft-apply effect runs after the preselect effect in that flush, so a plain
+      // reset(draft) would have the last word.
+      sessionStorage.setItem(
+        'draft:v1:adopt:application:user-1',
+        JSON.stringify({
+          v: 1,
+          savedAt: Date.now() - 60_000,
+          data: {
+            pet_id: BISCUIT_ID,
+            full_name: 'Jane Doe',
+            housing_type: 'own_house',
+            why_this_pet: 'because Biscuit',
+          },
+        })
+      );
+      const onPetIdChange = vi.fn();
+
+      function AdoptHarness() {
+        const [preselected, setPreselected] = React.useState<string | null>(
+          null
+        );
+        const report = React.useCallback(
+          (id: string | null) => setPreselected(id),
+          []
+        );
+        return (
+          <>
+            <ParamReaderStub petId={MOCHI_ID} onParams={report} />
+            <ApplicationForm
+              pets={pets}
+              onSubmit={onSubmit}
+              preselectedPetId={preselected ?? undefined}
+              onPetIdChange={onPetIdChange}
+              draftKey="adopt:application:user-1"
+            />
+          </>
+        );
+      }
+
+      render(<AdoptHarness />);
+
+      // The rest of the draft is restored...
+      await waitFor(() =>
+        expect(screen.getByLabelText(/full name/i)).toHaveValue('Jane Doe')
+      );
+      // ...but the pet is the one they clicked Apply on.
+      expect(petSelect()).toHaveValue(MOCHI_ID);
+      expect(onPetIdChange).not.toHaveBeenCalledWith(BISCUIT_ID);
     });
   });
 

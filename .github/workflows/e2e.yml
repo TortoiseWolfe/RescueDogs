@@ -184,6 +184,49 @@ jobs:
   # ============================================
   # STEP 2: Smoke tests (~2 min) - FAST FEEDBACK
   # ============================================
+  blob-capability:
+    # Staged pet photos (#310) are Blobs in IndexedDB, and `fake-indexeddb` does not
+    # structured-clone a Blob — it returns a bare `{}`. So the unit suite proves the
+    # module's logic and nothing about whether the image bytes survive. This is the
+    # only place that round trip is actually exercised.
+    #
+    # Cross-browser on purpose. Safari has a long history of IndexedDB Blob defects,
+    # and an iPhone is what a volunteer is most likely holding when they photograph a
+    # dog — a webkit-only failure would mean photo drafts silently lose images for
+    # exactly the users they were built for. Needs no Supabase and no build.
+    name: IndexedDB Blob capability
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: |
+          for i in 1 2 3; do
+            pnpm exec playwright install --with-deps chromium firefox webkit && break
+            echo "Retry $i: playwright install failed, retrying in 10s..."
+            sleep 10
+          done
+
+      - name: A Blob survives an IndexedDB round trip
+        run: node scripts/ci/check-indexeddb-blob.mjs
+
   smoke:
     name: Smoke Tests
     runs-on: ubuntu-latest
