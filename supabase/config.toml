@@ -327,6 +327,9 @@ deno_version = 2
 [functions.notify-shelter-application]
 verify_jwt = false
 
+[functions.send-rescue-welcome-email]
+verify_jwt = false
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

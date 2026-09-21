@@ -1071,6 +1071,7 @@ export type Database = {
           is_admin: boolean;
           updated_at: string;
           username: string | null;
+          welcome_email_sent: boolean;
           welcome_message_sent: boolean;
         };
         Insert: {
@@ -1082,6 +1083,7 @@ export type Database = {
           is_admin?: boolean;
           updated_at?: string;
           username?: string | null;
+          welcome_email_sent?: boolean;
           welcome_message_sent?: boolean;
         };
         Update: {
@@ -1093,6 +1095,7 @@ export type Database = {
           is_admin?: boolean;
           updated_at?: string;
           username?: string | null;
+          welcome_email_sent?: boolean;
           welcome_message_sent?: boolean;
         };
         Relationships: [];
