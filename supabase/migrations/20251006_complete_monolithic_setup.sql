@@ -286,7 +286,7 @@ ALTER TABLE auth_audit_logs ADD CONSTRAINT auth_audit_logs_event_type_check
 CREATE TABLE IF NOT EXISTS rate_limit_attempts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   identifier TEXT NOT NULL,  -- Email or IP
-  attempt_type TEXT NOT NULL CHECK (attempt_type IN ('sign_in', 'sign_up', 'password_reset')),
+  attempt_type TEXT NOT NULL CHECK (attempt_type IN ('sign_in', 'sign_up', 'password_reset', 'contact_form')),
   ip_address INET,
   user_agent TEXT,
   window_start TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -302,6 +302,12 @@ CREATE INDEX IF NOT EXISTS idx_rate_limit_locked ON rate_limit_attempts(locked_u
 CREATE UNIQUE INDEX IF NOT EXISTS idx_rate_limit_unique ON rate_limit_attempts(identifier, attempt_type);
 
 COMMENT ON TABLE rate_limit_attempts IS 'Server-side rate limiting - prevents brute force';
+
+-- Allow contact-form submissions to share the rate_limit_attempts limiter (#309).
+-- Fresh DBs pick this up from CREATE TABLE above; existing DBs need DROP + ADD.
+ALTER TABLE rate_limit_attempts DROP CONSTRAINT IF EXISTS rate_limit_attempts_attempt_type_check;
+ALTER TABLE rate_limit_attempts ADD CONSTRAINT rate_limit_attempts_attempt_type_check
+  CHECK (attempt_type IN ('sign_in', 'sign_up', 'password_reset', 'contact_form'));
 
 -- Enable RLS on rate_limit_attempts (system-managed, service role only)
 ALTER TABLE rate_limit_attempts ENABLE ROW LEVEL SECURITY;
