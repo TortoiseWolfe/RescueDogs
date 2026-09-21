@@ -196,6 +196,53 @@ Until step 3 is done, the trigger no-ops safely; staff still use `/shelter`.
 
 ---
 
+## Rescue welcome email after verify (#316)
+
+When a new user confirms their email, they receive a Raised Paws onboarding
+email (profile → first pet → how the tracker works) via the
+`send-rescue-welcome-email` Edge Function (Resend + pg_net on `auth.users`).
+
+Idempotency flag: `user_profiles.welcome_email_sent` (separate from the
+in-app `welcome_message_sent` DM).
+
+### One-time deploy (ops)
+
+1. Deploy the function (from repo root, inside Docker):
+
+```bash
+docker compose exec rescuedogs supabase functions deploy send-rescue-welcome-email --project-ref "$NEXT_PUBLIC_SUPABASE_PROJECT_REF"
+```
+
+Ensure project secrets include `RESEND_API_KEY`, `NEXT_PUBLIC_DEPLOY_URL=https://raisedpaws.com`,
+and either `RESCUE_WELCOME_WEBHOOK_SECRET` or reuse `APPLICATION_NOTIFY_WEBHOOK_SECRET`.
+
+2. Apply monolithic SQL for `welcome_email_sent`,
+   `private.rescue_welcome_email_config`, and `queue_rescue_welcome_email`
+   triggers via Management API if not already on the project.
+
+3. Wire the trigger config:
+
+```bash
+EDGE_URL="https://${NEXT_PUBLIC_SUPABASE_PROJECT_REF}.supabase.co/functions/v1/send-rescue-welcome-email"
+WEBHOOK_SECRET="…same as RESCUE_WELCOME_WEBHOOK_SECRET (or APPLICATION_NOTIFY_WEBHOOK_SECRET)…"
+
+sb_query "
+UPDATE private.rescue_welcome_email_config
+SET
+  edge_function_url = '${EDGE_URL}',
+  webhook_secret = '${WEBHOOK_SECRET}',
+  updated_at = NOW()
+WHERE id = 1;
+"
+```
+
+4. Smoke test: sign up a fresh rescue account → confirm email → welcome
+   message arrives (subject: “Welcome to Raised Paws — next steps for your rescue”).
+
+Until step 3 is done, the trigger no-ops safely.
+
+---
+
 ## Out of scope (still deferred)
 
 - Self-serve create/join shelter
@@ -209,4 +256,5 @@ Until step 3 is done, the trigger no-ops safely; staff still use `/shelter`.
 
 | Date       | Change                                                         |
 | ---------- | -------------------------------------------------------------- |
+| 2026-09-21 | Rescue welcome email after verify (#316) ops section           |
 | 2026-08-03 | Initial runbook + Raised Paws Pilot Shelter provisioned (#138) |
