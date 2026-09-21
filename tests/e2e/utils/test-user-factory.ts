@@ -150,12 +150,15 @@ export async function createTestUser(
     await deleteTestUser(existingUser.id);
   }
 
-  // Create user with email confirmed
+  // Create user with email confirmed.
+  // app_metadata.e2e stops the #316 rescue-welcome trigger/Edge Function from
+  // calling Resend on the shared Cloud project (E2E would burn the free quota).
   const { data, error } = await client.auth.admin.createUser({
     email,
     password,
     email_confirm: true, // Auto-confirm email
     user_metadata: options?.metadata,
+    app_metadata: { e2e: true },
   });
 
   if (error) {

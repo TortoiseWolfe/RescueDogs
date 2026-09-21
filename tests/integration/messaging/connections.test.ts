@@ -33,16 +33,19 @@ describe('ConnectionService Integration Tests', () => {
       email: 'connection-test-user1@example.com',
       password: 'TestPassword123!',
       email_confirm: true,
+      app_metadata: { e2e: true },
     });
     const { data: user2 } = await supabaseAdmin.auth.admin.createUser({
       email: 'connection-test-user2@example.com',
       password: 'TestPassword123!',
       email_confirm: true,
+      app_metadata: { e2e: true },
     });
     const { data: user3 } = await supabaseAdmin.auth.admin.createUser({
       email: 'connection-test-user3@example.com',
       password: 'TestPassword123!',
       email_confirm: true,
+      app_metadata: { e2e: true },
     });
 
     testUser1Id = user1?.user?.id || '';
