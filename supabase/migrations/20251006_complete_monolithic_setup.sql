@@ -219,6 +219,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   avatar_url TEXT,
   bio TEXT CHECK (length(bio) <= 500),
   welcome_message_sent BOOLEAN NOT NULL DEFAULT FALSE,
+  welcome_email_sent BOOLEAN NOT NULL DEFAULT FALSE,
   is_admin BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -227,6 +228,16 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 CREATE INDEX IF NOT EXISTS idx_user_profiles_username ON user_profiles(username);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_updated_at ON user_profiles(updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_welcome_pending ON user_profiles(id) WHERE welcome_message_sent = FALSE;
+
+-- #316: transactional rescue onboarding email (Resend) — distinct from in-app welcome_message_sent
+ALTER TABLE user_profiles
+  ADD COLUMN IF NOT EXISTS welcome_email_sent BOOLEAN NOT NULL DEFAULT FALSE;
+
+CREATE INDEX IF NOT EXISTS idx_user_profiles_welcome_email_pending
+  ON user_profiles(id) WHERE welcome_email_sent = FALSE;
+
+COMMENT ON COLUMN user_profiles.welcome_email_sent IS
+  'True after the post-verify rescue onboarding email was sent (#316). Separate from welcome_message_sent (in-app DM).';
 
 COMMENT ON TABLE user_profiles IS 'User profile information 1:1 with auth.users';
 
@@ -3408,6 +3419,90 @@ CREATE TRIGGER on_application_created_notify
   AFTER INSERT ON applications
   FOR EACH ROW
   EXECUTE FUNCTION queue_shelter_application_notify();
+
+-- ─── Rescue welcome email after email verify (#316) ───────────────────────────
+-- Ops: set private.rescue_welcome_email_config.edge_function_url to
+--   https://<ref>.supabase.co/functions/v1/send-rescue-welcome-email
+-- and webhook_secret to match RESCUE_WELCOME_WEBHOOK_SECRET on the function
+-- (may reuse APPLICATION_NOTIFY_WEBHOOK_SECRET). No-op until configured.
+
+CREATE TABLE IF NOT EXISTS private.rescue_welcome_email_config (
+  id SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  edge_function_url TEXT,
+  webhook_secret TEXT,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+REVOKE ALL ON private.rescue_welcome_email_config FROM PUBLIC;
+GRANT SELECT ON private.rescue_welcome_email_config TO postgres;
+
+INSERT INTO private.rescue_welcome_email_config (id, edge_function_url, webhook_secret)
+VALUES (1, NULL, NULL)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE OR REPLACE FUNCTION queue_rescue_welcome_email()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+DECLARE
+  v_url TEXT;
+  v_secret TEXT;
+BEGIN
+  -- Fire only when email flips from unconfirmed → confirmed.
+  IF TG_OP = 'UPDATE' THEN
+    IF OLD.email_confirmed_at IS NOT NULL OR NEW.email_confirmed_at IS NULL THEN
+      RETURN NEW;
+    END IF;
+  ELSIF TG_OP = 'INSERT' THEN
+    IF NEW.email_confirmed_at IS NULL THEN
+      RETURN NEW;
+    END IF;
+  END IF;
+
+  SELECT edge_function_url, webhook_secret
+  INTO v_url, v_secret
+  FROM private.rescue_welcome_email_config
+  WHERE id = 1;
+
+  IF v_url IS NULL OR btrim(v_url) = '' OR v_secret IS NULL OR btrim(v_secret) = '' THEN
+    RETURN NEW;
+  END IF;
+
+  PERFORM net.http_post(
+    url := v_url,
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'X-Webhook-Secret', v_secret
+    ),
+    body := jsonb_build_object(
+      'user_id', NEW.id::text
+    )
+  );
+
+  RETURN NEW;
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE WARNING 'queue_rescue_welcome_email failed for %: %', NEW.id, SQLERRM;
+    RETURN NEW;
+END;
+$$;
+
+COMMENT ON FUNCTION queue_rescue_welcome_email() IS
+  'On email confirm: async send-rescue-welcome-email Edge Function via pg_net (#316).';
+
+DROP TRIGGER IF EXISTS on_auth_user_email_confirmed_welcome ON auth.users;
+CREATE TRIGGER on_auth_user_email_confirmed_welcome
+  AFTER UPDATE OF email_confirmed_at ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION queue_rescue_welcome_email();
+
+DROP TRIGGER IF EXISTS on_auth_user_created_welcome_if_confirmed ON auth.users;
+CREATE TRIGGER on_auth_user_created_welcome_if_confirmed
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION queue_rescue_welcome_email();
 
 -- ─── Row Level Security ─────────────────────────────────────────────────────
 
