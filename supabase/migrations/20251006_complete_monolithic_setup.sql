@@ -3449,6 +3449,7 @@ AS $$
 DECLARE
   v_url TEXT;
   v_secret TEXT;
+  v_email TEXT;
 BEGIN
   -- Fire only when email flips from unconfirmed → confirmed.
   IF TG_OP = 'UPDATE' THEN
@@ -3459,6 +3460,22 @@ BEGIN
     IF NEW.email_confirmed_at IS NULL THEN
       RETURN NEW;
     END IF;
+  END IF;
+
+  -- Skip E2E / fixture users so CI createUser(email_confirm := true) does not
+  -- invoke Resend (shared Cloud project + free-tier quota).
+  IF COALESCE((NEW.raw_app_meta_data->>'e2e')::boolean, false)
+     OR COALESCE((NEW.raw_user_meta_data->>'e2e')::boolean, false) THEN
+    RETURN NEW;
+  END IF;
+
+  v_email := lower(coalesce(NEW.email, ''));
+  IF v_email LIKE '%@example.com'
+     OR v_email LIKE '%.demo'
+     OR v_email LIKE '%+e2e%'
+     OR v_email LIKE '%+playwright%'
+     OR v_email LIKE '%+ci-%' THEN
+    RETURN NEW;
   END IF;
 
   SELECT edge_function_url, webhook_secret
@@ -3490,7 +3507,7 @@ END;
 $$;
 
 COMMENT ON FUNCTION queue_rescue_welcome_email() IS
-  'On email confirm: async send-rescue-welcome-email Edge Function via pg_net (#316).';
+  'On email confirm: async send-rescue-welcome-email via pg_net (#316). Skips e2e/test recipients.';
 
 DROP TRIGGER IF EXISTS on_auth_user_email_confirmed_welcome ON auth.users;
 CREATE TRIGGER on_auth_user_email_confirmed_welcome

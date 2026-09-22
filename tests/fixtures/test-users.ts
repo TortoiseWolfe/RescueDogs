@@ -166,6 +166,7 @@ export async function createTestUser(
     email,
     password,
     email_confirm: true,
+    app_metadata: { e2e: true },
   });
 
   if (error) {
@@ -186,6 +187,7 @@ export async function createTestUser(
           email,
           password,
           email_confirm: true,
+          app_metadata: { e2e: true },
         });
       if (retryError) {
         throw new Error(
