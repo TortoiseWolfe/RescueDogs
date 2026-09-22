@@ -70,7 +70,10 @@ after the build merge. It crawls the **live** site (`NEXT_PUBLIC_SITE_URL` or
 `NEXT_PUBLIC_DEPLOY_URL`), copies any hashed assets the new build lacks into
 `merged-output`, and writes `asset-ledger/` for the next deploy.
 
-- `RETAIN_DAYS: '14'` — duration, not deploy count
+- `RETAIN_DAYS: '21'` on deploy — carry buffer so multi-day quiet stretches
+  between merges do not collapse the ledger when an old cohort ages out (#319)
+- Smoke asserts a **14-day visitor promise** (`RETAIN_DAYS: '14'` on the window
+  step) with two days of slack for cohort notches
 - `continue-on-error: true` — network failure must not block shipping, but stays
   visible in Actions
 
@@ -87,7 +90,7 @@ and navigates to a cache-busting URL (at most once per hour per tab).
 | step             | script                                 | what it proves                                    |
 | ---------------- | -------------------------------------- | ------------------------------------------------- |
 | retained assets  | `scripts/ci/check-retained-assets.mjs` | ledger entries still HTTP 200                     |
-| retention window | same, `RETAINED_CHECK=window`          | ledger spans ~`RETAIN_DAYS`                       |
+| retention window | same, `RETAINED_CHECK=window`          | ledger spans ~14d visitor promise (±2d slack)     |
 | cache contract   | `scripts/ci/check-cache-headers.mjs`   | documents revalidate, assets long-lived, `cf-ray` |
 
 `REQUIRE_EDGE: 'true'` is required so a missing Cloudflare proxy fails the job.
