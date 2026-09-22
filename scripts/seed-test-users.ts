@@ -135,7 +135,7 @@ async function setupAdminUser(): Promise<boolean> {
       // admin_* RPC guards check. updateUserById merges into
       // raw_app_meta_data, so this is safe to re-run.
       await supabase.auth.admin.updateUserById(existingAdmin.id, {
-        app_metadata: { is_admin: true },
+        app_metadata: { is_admin: true, e2e: true },
       });
     } else {
       // Create admin auth user with fixed UUID
@@ -149,7 +149,7 @@ async function setupAdminUser(): Promise<boolean> {
           // Lands in auth.users.raw_app_meta_data → JWT app_metadata claim →
           // COALESCE((auth.jwt()->'app_metadata'->>'is_admin')::bool, false).
           // Without this the admin_* RPCs silently return '{}' to this user.
-          app_metadata: { is_admin: true },
+          app_metadata: { is_admin: true, e2e: true },
         });
 
       if (authError) {
@@ -164,7 +164,7 @@ async function setupAdminUser(): Promise<boolean> {
           if (existing) {
             adminUserId = existing.id;
             await supabase.auth.admin.updateUserById(existing.id, {
-              app_metadata: { is_admin: true },
+              app_metadata: { is_admin: true, e2e: true },
             });
           }
         } else {
@@ -359,6 +359,7 @@ async function createTestUser(user: TestUser): Promise<boolean> {
         password,
         email_confirm: true,
         user_metadata: { username },
+        app_metadata: { e2e: true },
       });
 
     if (authError) {

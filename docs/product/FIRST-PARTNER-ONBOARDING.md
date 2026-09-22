@@ -205,6 +205,12 @@ email (profile → first pet → how the tracker works) via the
 Idempotency flag: `user_profiles.welcome_email_sent` (separate from the
 in-app `welcome_message_sent` DM).
 
+**E2E / quota guard:** CI `createUser({ email_confirm: true })` must set
+`app_metadata.e2e = true`. The DB trigger and Edge Function skip those users
+(and `@example.com` / `*.demo` / `+e2e` addresses). On Resend daily-quota
+errors the claim stays locked so retries cannot push usage past 100%. Ops
+kill switch: Edge secret `RESCUE_WELCOME_EMAIL_ENABLED=false`.
+
 ### One-time deploy (ops)
 
 1. Deploy the function (from repo root, inside Docker):
@@ -256,5 +262,6 @@ Until step 3 is done, the trigger no-ops safely.
 
 | Date       | Change                                                         |
 | ---------- | -------------------------------------------------------------- |
+| 2026-09-21 | #316 welcome email: E2E skip + quota claim lock                |
 | 2026-09-21 | Rescue welcome email after verify (#316) ops section           |
 | 2026-08-03 | Initial runbook + Raised Paws Pilot Shelter provisioned (#138) |

@@ -4,6 +4,10 @@
  * Invoked by pg_net from queue_rescue_welcome_email() when auth.users
  * email_confirmed_at flips to set (or INSERT already confirmed). Idempotent
  * via user_profiles.welcome_email_sent (claim-then-send).
+ *
+ * Skips E2E/test recipients so CI createUser(email_confirm: true) cannot
+ * burn the Resend daily quota. Quota/rate-limit failures keep the claim
+ * locked so retries cannot amplify overage.
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -13,6 +17,10 @@ import {
   getEmailHtml,
   getEmailText,
 } from '../_shared/email-templates.ts';
+import {
+  isResendQuotaError,
+  shouldSkipRescueWelcomeEmail,
+} from '../_shared/rescue-welcome-guards.ts';
 
 const supabaseUrl =
   Deno.env.get('NEXT_PUBLIC_SUPABASE_URL') ??
@@ -28,6 +36,9 @@ const siteUrl = (
 ).replace(/\/$/, '');
 const fromEmail =
   Deno.env.get('RESEND_FROM_EMAIL') ?? 'Raised Paws <noreply@raisedpaws.com>';
+const sendingEnabled =
+  (Deno.env.get('RESCUE_WELCOME_EMAIL_ENABLED') ?? 'true').toLowerCase() !==
+  'false';
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -58,9 +69,8 @@ serve(async (req) => {
       return json({ error: 'Unauthorized' }, 401);
     }
 
-    if (!resendApiKey || !supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       console.error('send-rescue-welcome-email misconfigured', {
-        hasResend: Boolean(resendApiKey),
         hasUrl: Boolean(supabaseUrl),
         hasServiceKey: Boolean(supabaseServiceKey),
       });
@@ -86,7 +96,38 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Claim idempotency first so concurrent invokes cannot double-send.
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.admin.getUserById(userId);
+
+    if (userError || !user?.email) {
+      console.error('User lookup failed', userError);
+      return json({ error: 'Could not load user' }, 500);
+    }
+
+    const skip = shouldSkipRescueWelcomeEmail(user);
+    if (skip.skip || !sendingEnabled) {
+      const reason = !sendingEnabled
+        ? 'disabled'
+        : skip.skip
+          ? skip.reason
+          : 'skip';
+      // Mark sent so future confirms / retries do not call Resend.
+      await supabase
+        .from('user_profiles')
+        .update({ welcome_email_sent: true })
+        .eq('id', userId)
+        .eq('welcome_email_sent', false);
+      return json({ sent: false, skipped: reason }, 200);
+    }
+
+    if (!resendApiKey) {
+      console.error('RESEND_API_KEY missing');
+      return json({ error: 'Welcome email is not configured' }, 500);
+    }
+
+    // Claim idempotency so concurrent invokes cannot double-send.
     const { data: claimed, error: claimError } = await supabase
       .from('user_profiles')
       .update({ welcome_email_sent: true })
@@ -102,21 +143,6 @@ serve(async (req) => {
 
     if (!claimed) {
       return json({ sent: false, cached: true }, 200);
-    }
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.admin.getUserById(userId);
-
-    if (userError || !user?.email) {
-      console.error('User lookup failed', userError);
-      // Roll back claim so a later retry can succeed.
-      await supabase
-        .from('user_profiles')
-        .update({ welcome_email_sent: false })
-        .eq('id', userId);
-      return json({ error: 'Could not load user' }, 500);
     }
 
     const displayName =
@@ -158,12 +184,25 @@ serve(async (req) => {
     const resendBody = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      console.error('Resend rejected rescue welcome', resendBody);
-      await supabase
-        .from('user_profiles')
-        .update({ welcome_email_sent: false })
-        .eq('id', userId);
-      return json({ error: 'Could not send welcome email' }, 502);
+      console.error('Resend rejected rescue welcome', {
+        status: res.status,
+        body: resendBody,
+      });
+      // Keep claim locked on quota/rate-limit so retry storms cannot push
+      // reported usage to 200%+. Unlock only for other transient failures.
+      if (!isResendQuotaError(res.status, resendBody)) {
+        await supabase
+          .from('user_profiles')
+          .update({ welcome_email_sent: false })
+          .eq('id', userId);
+      }
+      return json(
+        {
+          error: 'Could not send welcome email',
+          quota: isResendQuotaError(res.status, resendBody),
+        },
+        502
+      );
     }
 
     return json({
