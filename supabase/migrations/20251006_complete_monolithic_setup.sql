@@ -3594,5 +3594,153 @@ BEGIN
   END IF;
 END $$;
 
+-- ============================================================================
+-- CUSTOMER FEEDBACK — what somebody tells us when the product is wrong
+-- Ported from TortoiseWolfe/runit (#77), where it replaced a channel that only
+-- existed for TestFlight builds. The shape survives; three things had to change
+-- for this repo and each is noted where it happens.
+--
+-- WHY IT IS NOT `/contact`. That form is for a person writing to the RESCUE --
+-- it reaches a human inbox through the `contact-message` Edge Function, and it
+-- asks for a name and an email because somebody is going to write back. This is
+-- a person telling US the software is broken: no name, no address, no reply
+-- path, and it becomes a tracked issue within the hour without anybody reading
+-- a mailbox. Two different conversations that a single form would blur.
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS feedback (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- WHO, ONLY AS AN OPAQUE IDENTITY. Never a name, never an address. It exists
+  -- so the six-an-hour cap below has something to count and so a screenshot can
+  -- be tied to its row -- not so anybody can be looked up.
+  auth_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+  body TEXT NOT NULL CHECK (btrim(body) <> '' AND length(body) <= 2000),
+
+  -- Device, build, locale, timezone and the route they were on. EVIDENCE, not
+  -- state: nothing reads it in a policy or a trigger, and the sheet PRINTS it
+  -- before sending, because a report that quietly harvests is a different
+  -- product from one that says what it collects.
+  context JSONB NOT NULL DEFAULT '{}'::jsonb,
+
+  -- GUARDED IN TWO PLACES, AND NEITHER GUARD CATCHES THE OTHER'S CASE.
+  --
+  -- `scripts/ci/feedback-to-issues.mjs` interpolates this into a storage URL and
+  -- fetches it AS THE SERVICE ROLE, which reads every folder in every bucket
+  -- whatever RLS tells a client. Left as free text, a reporter could write
+  -- `../pet-photos/<shelter>/<pet>.jpg` -- or worse, a path out of `avatars` --
+  -- and have us fetch somebody else's file.
+  --
+  -- THE STORAGE POLICY DOES NOT COVER THIS. It constrains where bytes may be
+  -- WRITTEN; this is a string in a different table, and they are different
+  -- questions. This CHECK polices the SHAPE (two uuids and a known extension),
+  -- which catches a traversal from inside a correct prefix. The trigger below
+  -- compares the prefix to the caller, which catches a well-formed path
+  -- belonging to somebody else. A BEFORE trigger runs ahead of a CHECK, so a
+  -- single test case would only ever exercise whichever fires first -- the RLS
+  -- suite tests each against the case only it can catch.
+  screenshot_path TEXT CHECK (
+    screenshot_path IS NULL OR
+    screenshot_path ~ '^[0-9a-fA-F-]{36}/[0-9a-fA-F-]{36}\.(jpg|png|webp)$'
+  ),
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+
+-- INSERT-ONLY, AS YOURSELF. There is deliberately NO select, update or delete
+-- policy for any client role: a queue a signed-in visitor could read is a list
+-- of other people's complaints. The filer reads it with the service role.
+DROP POLICY IF EXISTS "Users insert own feedback" ON feedback;
+CREATE POLICY "Users insert own feedback" ON feedback
+  FOR INSERT TO authenticated
+  WITH CHECK (auth_user_id = auth.uid());
+
+-- AUTHENTICATED ONLY, AND THIS IS THE CHANGE THAT MATTERS MOST IN THE PORT.
+--
+-- Upstream this table accepts anonymous identities, because the person it most
+-- needs to hear from is the one who cannot get into the party. THIS REPO CANNOT
+-- TAKE THAT. `enable_anonymous_sign_ins = false` in config.toml, and an
+-- anonymous Supabase user IS the `authenticated` Postgres role -- so turning it
+-- on would hand any drive-by a JWT that satisfies all 39 `TO authenticated`
+-- policies in this file, including "Authenticated users can search profiles"
+-- (line ~884), which is `USING (true)` over every user profile.
+--
+-- Flipping that switch is a 39-policy audit, not a line item. A signed-out
+-- visitor keeps `/contact`, which already works.
+CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_feedback_user_hour ON feedback (auth_user_id, created_at DESC);
+
+-- SIX AN HOUR, IN THE DATABASE RATHER THAN THE CLIENT. The publishable key is
+-- compiled into every bundle, so an attacker is not obliged to run our rate
+-- limiting. SIX, not one: a person hitting a real bug reports it, tries
+-- something, and reports what happened next.
+CREATE OR REPLACE FUNCTION feedback_guard()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF (
+    SELECT COUNT(*) FROM feedback
+    WHERE auth_user_id = NEW.auth_user_id
+      AND created_at > NOW() - INTERVAL '1 hour'
+  ) >= 6 THEN
+    RAISE EXCEPTION 'feedback_too_often' USING ERRCODE = '54023';
+  END IF;
+
+  -- The second of the two screenshot guards. The CHECK above polices shape; a
+  -- CHECK cannot compare one column to another's MEANING, which is what this is.
+  IF NEW.screenshot_path IS NOT NULL
+     AND split_part(NEW.screenshot_path, '/', 1) <> NEW.auth_user_id::text THEN
+    RAISE EXCEPTION 'feedback_screenshot_not_yours' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION feedback_guard() FROM PUBLIC, anon, authenticated;
+
+DROP TRIGGER IF EXISTS feedback_guard_trigger ON feedback;
+CREATE TRIGGER feedback_guard_trigger
+  BEFORE INSERT ON feedback
+  FOR EACH ROW EXECUTE FUNCTION feedback_guard();
+
+-- PRIVATE, 5MB, images only. Private is not a detail: a folder any authenticated
+-- caller could list is every screenshot anybody ever sent us.
+INSERT INTO storage.buckets (
+  id,
+  name,
+  public,
+  file_size_limit,
+  allowed_mime_types
+)
+VALUES (
+  'feedback',
+  'feedback',
+  false,                                             -- PRIVATE, unlike avatars
+  5242880,                                           -- 5MB max file size
+  ARRAY['image/jpeg', 'image/png', 'image/webp']    -- Allowed formats
+)
+ON CONFLICT (id) DO NOTHING;                         -- Idempotent
+
+-- `split_part`, NOT `storage.foldername` -- the same rationale the avatar
+-- policies give at length around line 741: `storage.foldername(text)` creates a
+-- pg_depend edge that stops Supabase replacing its own function, and storage-api
+-- crash-loops on "cannot drop function foldername(text) because other objects
+-- depend on it" forever. Upstream uses foldername; it must not cross.
+DROP POLICY IF EXISTS "Users upload own feedback screenshot" ON storage.objects;
+CREATE POLICY "Users upload own feedback screenshot"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+  bucket_id = 'feedback' AND
+  auth.uid()::text = split_part(name, '/', 1)
+);
+
 -- Commit the transaction - everything succeeded
 COMMIT;

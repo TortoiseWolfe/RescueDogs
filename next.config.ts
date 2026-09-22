@@ -63,6 +63,15 @@ const nextConfig: NextConfig = {
     // Jan 1, which React reports as a hydration mismatch. Inline the year once
     // here so the server HTML and the client bundle always agree.
     NEXT_PUBLIC_BUILD_YEAR: String(new Date().getFullYear()),
+    // WHICH BUILD A BUG REPORT CAME FROM. Without it every report from `/feedback` says
+    // "build unknown", which is exactly the defect the upstream version of that
+    // instrumentation was rewritten to fix: it read the build number out of config, where
+    // it was absent, and six unit tests over the pure function all passed because the pure
+    // function was never wrong. There is no server to ask at request time -- this is a
+    // static export -- so it has to be inlined here, the same way BUILD_YEAR is.
+    // `deploy.yml` supplies it from `github.sha`; locally it is simply absent, and
+    // `factsFrom` omits what it does not have rather than writing "undefined".
+    NEXT_PUBLIC_BUILD_SHA: process.env.NEXT_PUBLIC_BUILD_SHA,
   },
   webpack: (config, { isServer }) => {
     // Optimize code splitting for better performance
