@@ -1097,6 +1097,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      // HAND-WRITTEN until the migration is applied to the project (#feedback loop).
+      // This file is normally regenerated from the live database; the `feedback` table
+      // cannot be read back from it yet, so this entry was written by hand to match the
+      // CUSTOMER FEEDBACK section of the monolithic migration. REGENERATE THIS FILE once
+      // the migration has been applied, and delete this comment -- a hand-written entry in
+      // a generated file is a copy that can drift from the schema it describes.
+      feedback: {
+        Row: {
+          auth_user_id: string;
+          body: string;
+          context: Json;
+          created_at: string;
+          id: string;
+          screenshot_path: string | null;
+        };
+        Insert: {
+          auth_user_id: string;
+          body: string;
+          context?: Json;
+          created_at?: string;
+          id?: string;
+          screenshot_path?: string | null;
+        };
+        Update: {
+          auth_user_id?: string;
+          body?: string;
+          context?: Json;
+          created_at?: string;
+          id?: string;
+          screenshot_path?: string | null;
+        };
+        Relationships: [];
+      };
       webhook_events: {
         Row: {
           created_at: string;

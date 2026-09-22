@@ -357,6 +357,7 @@ collaborator's branch — it erases their authorship).
 | Authentication      | `docs/AUTH-SETUP.md`                   |
 | Messaging System    | `docs/messaging/QUICKSTART.md`         |
 | Payment Integration | `docs/features/payment-integration.md` |
+| Customer Feedback   | `docs/features/feedback-loop.md`       |
 | Security            | `docs/project/SECURITY.md`             |
 | Mobile-First Design | `docs/MOBILE-FIRST.md`                 |
 | Component Creation  | `docs/CREATING_COMPONENTS.md`          |

@@ -4,9 +4,11 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import FeedbackLink from '@/components/atomic/FeedbackLink';
 import SocialIcon from '@/components/atomic/SocialIcon';
 import { projectConfig } from '@/config/project.config';
 import { RAISED_PAWS_SOCIALS } from '@/config/raised-paws-socials';
+import { useAuth } from '@/contexts/AuthContext';
 
 /** Same white/navy pill chrome as the header — invert when pressed / current. */
 const footerNavPill =
@@ -34,6 +36,7 @@ export function Footer() {
   const pathname = usePathname();
   const blogSelected = Boolean(pathname?.startsWith('/blog'));
   const followSelected = Boolean(pathname?.startsWith('/follow'));
+  const { user } = useAuth();
   const contactSelected = Boolean(pathname?.startsWith('/contact'));
   const blogClass = `${footerNavPill} ${blogSelected ? footerNavPillSelected : ''}`;
   const followClass = `${footerNavPill} ${followSelected ? footerNavPillSelected : ''}`;
@@ -161,6 +164,23 @@ export function Footer() {
             >
               Contact
             </Link>
+            {/*
+              BESIDE Contact, NOT INSTEAD OF IT, because they are two different
+              conversations. Contact is for a person writing TO THE RESCUE -- it asks for a
+              name and an email because somebody writes back. This is a person telling US
+              the software is broken, and it becomes a tracked issue with nothing
+              identifying attached.
+
+              SIGNED-IN ONLY, and that is a database constraint rather than a preference:
+              `feedback_insert_self` is `TO authenticated`, and this repo cannot enable
+              anonymous sign-ins to widen it -- an anonymous user IS the `authenticated`
+              role here, which would satisfy 39 policies including one that reads every user
+              profile. A signed-out visitor has Contact, one pill to the left.
+              docs/features/feedback-loop.md.
+            */}
+            {user && (
+              <FeedbackLink className="inline-flex h-11 shrink-0 items-center px-2.5 text-xs sm:px-3 sm:text-sm" />
+            )}
           </nav>
 
           <nav
