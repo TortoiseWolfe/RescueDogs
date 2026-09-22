@@ -134,32 +134,38 @@ describe('extractOAuthDisplayName', () => {
     expect(extractOAuthDisplayName(user)).toBe('Jon Pohlner');
   });
 
-  it('returns email prefix when no full_name or name available', () => {
+  it('never returns the email local-part when metadata is empty', () => {
     const user = createMockUser({
+      id: '1a2b3c4d-5e6f-7890-abcd-ef1234567890',
       email: 'user@example.com',
       user_metadata: {},
     });
-    expect(extractOAuthDisplayName(user)).toBe('user');
+    const name = extractOAuthDisplayName(user);
+    expect(name).toBe('User-1a2b3c4d');
+    expect(name).not.toContain('user@');
+    expect(name).not.toBe('user');
   });
 
   it('returns "Anonymous User" when user is null', () => {
     expect(extractOAuthDisplayName(null)).toBe('Anonymous User');
   });
 
-  it('returns "Anonymous User" when user has no metadata and no email', () => {
+  it('returns an opaque handle when user has no metadata and no email', () => {
     const user = createMockUser({
+      id: 'abcdef01-2345-6789-abcd-ef0123456789',
       email: undefined,
       user_metadata: {},
     });
-    expect(extractOAuthDisplayName(user)).toBe('Anonymous User');
+    expect(extractOAuthDisplayName(user)).toBe('User-abcdef01');
   });
 
-  it('returns "Anonymous User" when email prefix is empty', () => {
+  it('returns an opaque handle when email local-part would be empty', () => {
     const user = createMockUser({
+      id: 'fedcba98-7654-3210-fedc-ba9876543210',
       email: '@example.com',
       user_metadata: {},
     });
-    expect(extractOAuthDisplayName(user)).toBe('Anonymous User');
+    expect(extractOAuthDisplayName(user)).toBe('User-fedcba98');
   });
 
   it('preserves special characters in full_name', () => {
@@ -205,8 +211,9 @@ describe('extractOAuthDisplayName', () => {
       expect(extractOAuthDisplayName(user)).toBe('octocat');
     });
 
-    it('skips whitespace-only metadata fields and falls through', () => {
+    it('skips whitespace-only metadata fields and falls through to opaque handle', () => {
       const user = createMockUser({
+        id: 'abcdef01-2345-6789-abcd-ef0123456789',
         email: 'jsmith@example.com',
         user_metadata: {
           full_name: '   ',
@@ -214,7 +221,8 @@ describe('extractOAuthDisplayName', () => {
           user_name: '   ',
         },
       });
-      expect(extractOAuthDisplayName(user)).toBe('jsmith');
+      expect(extractOAuthDisplayName(user)).toBe('User-abcdef01');
+      expect(extractOAuthDisplayName(user)).not.toBe('jsmith');
     });
 
     it('trims surrounding whitespace from a populated tier', () => {
@@ -265,6 +273,7 @@ describe('extractOAuthDisplayName', () => {
 
     it('ignores non-string metadata values without throwing', () => {
       const user = createMockUser({
+        id: 'fedcba98-7654-3210-fedc-ba9876543210',
         email: 'jsmith@example.com',
         user_metadata: {
           full_name: 42 as unknown as string,
@@ -272,7 +281,8 @@ describe('extractOAuthDisplayName', () => {
           user_name: undefined as unknown as string,
         },
       });
-      expect(extractOAuthDisplayName(user)).toBe('jsmith');
+      expect(extractOAuthDisplayName(user)).toBe('User-fedcba98');
+      expect(extractOAuthDisplayName(user)).not.toBe('jsmith');
     });
   });
 });
@@ -357,9 +367,9 @@ describe('ensureDisplayNameSeeded', () => {
     vi.clearAllMocks();
   });
 
-  it('seeds display_name from email local-part when blank', async () => {
+  it('seeds an opaque handle, never the email local-part, when blank', async () => {
     const user = createMockUser({
-      id: 'seed-user',
+      id: '11111111-2222-3333-4444-555555555555',
       email: 'ada.lovelace@example.com',
       user_metadata: {},
     });
@@ -381,7 +391,8 @@ describe('ensureDisplayNameSeeded', () => {
 
     const result = await ensureDisplayNameSeeded(user);
     expect(result).toBe(true);
-    expect(update).toHaveBeenCalledWith({ display_name: 'ada.lovelace' });
+    expect(update).not.toHaveBeenCalledWith({ display_name: 'ada.lovelace' });
+    expect(update).toHaveBeenCalledWith({ display_name: 'User-11111111' });
   });
 
   it('does not overwrite an existing display_name', async () => {
