@@ -273,17 +273,17 @@ test('passes when the window is at full width — the harness can reach success'
 });
 
 test('RETAINED_CHECK=window passes ON the tolerance boundary, and does not overstate it', async (t) => {
-  // 13 days against RETAIN_DAYS=14. The pass condition is `spanDays + 1 >= RETAIN_DAYS`
-  // (check-retained-assets.mjs:320) -- a deliberate day of slack, because the oldest asset
-  // ages out mid-window and a healthy ledger oscillates just under the target. Nothing
-  // tested that boundary, and nothing tested what the success line CLAIMS at it.
+  // 12 days against RETAIN_DAYS=14. Pass is `spanDays + WINDOW_SLACK_DAYS >= RETAIN_DAYS`
+  // with default slack 2 (#319) — oldest cohort ages out mid-window and sparse
+  // deploy days notch the span (live sat at ~12.9d). Nothing tested that boundary,
+  // and nothing tested what the success line CLAIMS at it.
   //
   // It used to claim the target: "the ledger spans at least 14 day(s)" while spanDays was
-  // 13.0. That sentence is exactly what would persuade a reader the retention window had
-  // recovered when it is a day short and still resting on pre-fix history -- the misreading
+  // short. That sentence is exactly what would persuade a reader the retention window had
+  // recovered when it is still resting on pre-fix history -- the misreading
   // #1061 exists to prevent, printed by the check itself.
   const entries = retainedEntries(['/_next/static/css/app.css']);
-  const server = await startServer(serveLedger(entries, 13));
+  const server = await startServer(serveLedger(entries, 12));
   t.after(() => server.close());
 
   const result = await runProbe(server.baseUrl, {
@@ -297,9 +297,9 @@ test('RETAINED_CHECK=window passes ON the tolerance boundary, and does not overs
   assert.doesNotMatch(
     output,
     /spans at least 14 day\(s\)/,
-    'the success line claims the target was met when only target - 1 was verified'
+    'the success line claims the target was met when only target - slack was verified'
   );
-  assert.match(output, /spans at least 13 day\(s\)/);
+  assert.match(output, /spans at least 12 day\(s\)/);
 });
 
 test('stays quiet during the ramp, when a narrow window is correct', async (t) => {

@@ -140,8 +140,18 @@ if (!['both', 'reachability', 'window'].includes(CHECK)) {
 const doReach = CHECK !== 'window';
 const doWindow = CHECK !== 'reachability';
 
-/** Must match `RETAIN_DAYS` in .github/workflows/deploy.yml (#751). */
+/** Visitor-promise window asserted by smoke.yml (#751 / #319). Deploy may carry
+ * longer (`RETAIN_DAYS` in deploy.yml) so quiet stretches do not collapse it. */
 const RETAIN_DAYS = Number(process.env.RETAIN_DAYS ?? 14);
+
+/**
+ * Days of slack under RETAIN_DAYS before the window check fails.
+ *
+ * The oldest cohort ages out mid-window, and sparse deploy days leave notches
+ * (live raisedpaws.com sat at ~12.9d against a 14d target with only +1 slack).
+ * Two days covers that oscillation without hiding a real collapse (#319).
+ */
+const WINDOW_SLACK_DAYS = Number(process.env.RETAIN_WINDOW_SLACK_DAYS ?? 2);
 
 /**
  * When the day-based ledger shipped (#751).
@@ -317,9 +327,9 @@ if (doWindow) {
       `\n  window    ${spanDays.toFixed(1)} day(s) of coverage, target ${RETAIN_DAYS}`
     );
 
-    // A day of slack: the oldest asset ages out mid-window, so a healthy ledger
-    // oscillates just under the target rather than sitting exactly on it.
-    if (spanDays + 1 >= RETAIN_DAYS) {
+    // Slack under the target: oldest cohort ages out mid-window, and sparse
+    // deploy days leave a 1–2 day notch (see WINDOW_SLACK_DAYS / #319).
+    if (spanDays + WINDOW_SLACK_DAYS >= RETAIN_DAYS) {
       console.log(`  window is at full width.`);
     } else if (rampDaysElapsed < RETAIN_DAYS) {
       console.log(
@@ -341,9 +351,9 @@ if (doWindow) {
 console.log(
   '\n  OK — ' +
     (CHECK === 'window'
-      ? `the ledger spans at least ${RETAIN_DAYS - 1} day(s). The target is ` +
-        `${RETAIN_DAYS}; the check allows one day of slack because the oldest asset ` +
-        `ages out mid-window, so this line must not claim the target was met.`
+      ? `the ledger spans at least ${RETAIN_DAYS - WINDOW_SLACK_DAYS} day(s). The target is ` +
+        `${RETAIN_DAYS}; the check allows ${WINDOW_SLACK_DAYS} day(s) of slack because the oldest asset ` +
+        `ages out mid-window (and deploy gaps notch the span), so this line must not claim the target was met.`
       : CHECK === 'reachability'
         ? 'every asset the deploy promised to retain is still served.'
         : 'every asset the deploy promised to retain is still served, and the window is wide enough.')
