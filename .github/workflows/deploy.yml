@@ -170,8 +170,10 @@ jobs:
           node scripts/retain-previous-assets.mjs merged-output "$SITE_URL"
         env:
           SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || vars.NEXT_PUBLIC_DEPLOY_URL }}
-          # Duration (days), not deploy count — merge rate must not shrink the window.
-          RETAIN_DAYS: '14'
+          # Carry buffer (days), not deploy count. Smoke asserts a 14-day visitor
+          # window; we retain longer so multi-day quiet stretches between deploys
+          # do not collapse the ledger when an old cohort ages out (#319 / #237).
+          RETAIN_DAYS: '21'
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

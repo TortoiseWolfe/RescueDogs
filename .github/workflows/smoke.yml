@@ -39,6 +39,9 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '22'
+          # smoke only runs plain `node` scripts; package.json declares pnpm and
+          # setup-node's default package-manager-cache tries to invoke it (#319).
+          package-manager-cache: false
 
       # Mitigations: retained hashed assets still reachable after the deploy.
       - name: Retained assets are still served (unstyled-production detector)
@@ -55,6 +58,9 @@ jobs:
         env:
           SITE: ${{ vars.NEXT_PUBLIC_DEPLOY_URL }}
           RETAINED_CHECK: window
+          # Visitor promise (14d). Deploy carries longer (RETAIN_DAYS=21) so quiet
+          # merge stretches do not collapse this window (#319).
+          RETAIN_DAYS: '14'
         run: node scripts/ci/check-retained-assets.mjs "$SITE"
 
       # Cure: Cloudflare Response Header Transform + Cache Rule still in place.
