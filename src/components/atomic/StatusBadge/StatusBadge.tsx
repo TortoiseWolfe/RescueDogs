@@ -33,8 +33,10 @@ export default function StatusBadge({
   status,
   className = '',
 }: StatusBadgeProps) {
+  // whitespace-nowrap: multi-word labels (e.g. Under Review) wrap inside narrow
+  // table cells and DaisyUI’s default badge height crowds the text (#324).
   const badgeClasses =
-    `badge ${STATUS_BADGE_VARIANTS[status]} ${className}`.trim();
+    `badge ${STATUS_BADGE_VARIANTS[status]} whitespace-nowrap ${className}`.trim();
 
   return (
     <span className={badgeClasses} data-testid="status-badge">

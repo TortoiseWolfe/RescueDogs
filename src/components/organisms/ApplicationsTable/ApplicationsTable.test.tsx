@@ -84,7 +84,8 @@ describe('ApplicationsTable', () => {
       />
     );
 
-    const row = screen.getByTestId('application-row-app-1');
+    const table = screen.getByRole('table');
+    const row = within(table).getByTestId('application-row-app-1');
     expect(within(row).getByText('Rex')).toBeInTheDocument();
     expect(within(row).getByText('Labrador')).toBeInTheDocument();
     expect(within(row).getByText('Alex Adopter')).toBeInTheDocument();
@@ -92,14 +93,39 @@ describe('ApplicationsTable', () => {
       'Submitted'
     );
 
-    const reviewRow = screen.getByTestId('application-row-app-3');
+    const reviewRow = within(table).getByTestId('application-row-app-3');
     expect(within(reviewRow).getByTestId('status-badge')).toHaveTextContent(
       'Under Review'
     );
 
-    expect(screen.getByTestId('application-row-app-2')).toBeInTheDocument();
-    expect(screen.getByText('Whiskers')).toBeInTheDocument();
-    expect(screen.getByText('Bella Browser')).toBeInTheDocument();
+    expect(
+      within(table).getByTestId('application-row-app-2')
+    ).toBeInTheDocument();
+    expect(within(table).getByText('Whiskers')).toBeInTheDocument();
+    expect(within(table).getByText('Bella Browser')).toBeInTheDocument();
+  });
+
+  it('stacks applications on a mobile list (not a clipped table) (#324)', () => {
+    render(
+      <ApplicationsTable
+        applications={applications}
+        statusFilter="all"
+        onFilterChange={vi.fn()}
+      />
+    );
+
+    const mobileList = screen.getByTestId('applications-mobile-list');
+    expect(mobileList).toHaveClass('md:hidden');
+    const mobileCard = within(mobileList).getByTestId(
+      'application-mobile-app-3'
+    );
+    expect(within(mobileCard).getByText('Rex')).toBeInTheDocument();
+    expect(within(mobileCard).getByTestId('status-badge')).toHaveTextContent(
+      'Under Review'
+    );
+    expect(
+      within(mobileCard).getByRole('link', { name: /review/i })
+    ).toHaveAttribute('href', '/shelter/application?id=app-3');
   });
 
   it('renders the last update as a short date', () => {
@@ -111,7 +137,9 @@ describe('ApplicationsTable', () => {
       />
     );
 
-    const row = screen.getByTestId('application-row-app-3');
+    const row = within(screen.getByRole('table')).getByTestId(
+      'application-row-app-3'
+    );
     expect(within(row).getByText('Jun 5, 2026')).toBeInTheDocument();
   });
 
@@ -234,7 +262,9 @@ describe('ApplicationsTable', () => {
       />
     );
 
-    const row = screen.getByTestId('application-row-app-2');
+    const row = within(screen.getByRole('table')).getByTestId(
+      'application-row-app-2'
+    );
     const link = within(row).getByRole('link', { name: /review/i });
     expect(link).toHaveAttribute('href', '/shelter/application?id=app-2');
   });

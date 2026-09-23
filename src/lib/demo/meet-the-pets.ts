@@ -2,14 +2,23 @@
  * Homepage Meet-the-Pets pool (#165).
  * Identity lock — name ↔ species ↔ breed ↔ portrait never cross
  * (same lock as seed / #164). Rocky = German Shepherd (#254).
+ *
+ * Live listings (#324): prefer real available pets with photos over
+ * cartoon demos; keep dog | cat | dog. Seed UUID pets (4444…) stay out
+ * of the “real” pool so demo storage cartoons don’t crowd out Bubba/Duke.
  */
+
+import { petDetailPath } from '@/lib/browse/pet-links';
 
 export type MeetPetSpecies = 'dog' | 'cat';
 
 export interface MeetPetCard {
+  /** Present for live browse pets; demo cartoons omit this. */
+  id?: string;
   name: string;
   species: MeetPetSpecies;
-  portrait: `/${string}`;
+  /** Local `/demo-pets/…` path or absolute Supabase photo URL. */
+  portrait: string;
   portraitAlt: string;
   detail: string;
   bg: string;
@@ -17,6 +26,26 @@ export interface MeetPetCard {
   image: string;
   title: string;
   cta: string;
+  /** Where “Meet {name}” goes — detail page for live, /adopt for demo. */
+  href: string;
+  source: 'live' | 'demo';
+}
+
+/** Minimal browse fields needed to build a homepage card. */
+export type LiveMeetPetInput = {
+  id: string;
+  name: string;
+  species: MeetPetSpecies;
+  breed: string | null;
+  age_years: number | null;
+  photo_url: string | null;
+  notes: string | null;
+  status: string;
+};
+
+/** Demo seed pets from `seed-rescue-demo.sql` (cartoon files in storage). */
+export function isSeedDemoPetId(id: string): boolean {
+  return id.startsWith('44444444-4444-4444-4444-');
 }
 
 /**
@@ -48,9 +77,15 @@ export const HOMEPAGE_SLOT_THEMES = [
   },
 ] as const;
 
+const DEMO_HREF = '/adopt';
+
+function demoCard(partial: Omit<MeetPetCard, 'href' | 'source'>): MeetPetCard {
+  return { ...partial, href: DEMO_HREF, source: 'demo' };
+}
+
 /** Available demo pets with local cartoon portraits (exclude adopted). */
 export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
-  {
+  demoCard({
     name: 'Lola',
     species: 'dog',
     portrait: '/demo-pets/lola.webp',
@@ -62,8 +97,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#7a94c4] to-[#e8edf7]',
     title: 'text-[#1e3a8a]',
     cta: 'btn-primary',
-  },
-  {
+  }),
+  demoCard({
     name: 'Pepper',
     species: 'cat',
     portrait: '/demo-pets/pepper.webp',
@@ -74,8 +109,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#ffedd5] to-[#fff7ed]',
     title: 'text-[#c2410c]',
     cta: 'btn-secondary',
-  },
-  {
+  }),
+  demoCard({
     name: 'Tiger',
     species: 'dog',
     portrait: '/demo-pets/tiger.webp',
@@ -86,8 +121,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#d7e6ff] to-[#e9f1ff]',
     title: 'text-[#27408f]',
     cta: 'border-[#cfe0ff] bg-[#d7e6ff] text-[#27408f] hover:border-[#a8c4f5] hover:bg-[#cfe0ff]',
-  },
-  {
+  }),
+  demoCard({
     name: 'Tank',
     species: 'dog',
     portrait: '/demo-pets/tank.webp',
@@ -98,8 +133,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#ede9fe] to-[#f5f3ff]',
     title: 'text-[#5b21b6]',
     cta: 'btn-primary',
-  },
-  {
+  }),
+  demoCard({
     name: 'Zeus',
     species: 'dog',
     portrait: '/demo-pets/zeus.webp',
@@ -110,8 +145,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#cffafe] to-[#ecfeff]',
     title: 'text-[#0e7490]',
     cta: 'btn-secondary',
-  },
-  {
+  }),
+  demoCard({
     name: 'Scout',
     species: 'dog',
     portrait: '/demo-pets/scout.webp',
@@ -122,8 +157,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#dcfce7] to-[#f0fdf4]',
     title: 'text-[#166534]',
     cta: 'border-[#bbf7d0] bg-[#dcfce7] text-[#166534] hover:border-[#86efac] hover:bg-[#bbf7d0]',
-  },
-  {
+  }),
+  demoCard({
     name: 'Rocky',
     species: 'dog',
     portrait: '/demo-pets/rocky.webp',
@@ -134,8 +169,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#f3e8ff] to-[#faf5ff]',
     title: 'text-[#6b21a8]',
     cta: 'btn-primary',
-  },
-  {
+  }),
+  demoCard({
     name: 'Noodle',
     species: 'dog',
     portrait: '/demo-pets/noodle.webp',
@@ -146,8 +181,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#fef9c3] to-[#fefce8]',
     title: 'text-[#a16207]',
     cta: 'btn-primary',
-  },
-  {
+  }),
+  demoCard({
     name: 'Miso',
     species: 'cat',
     portrait: '/demo-pets/miso.webp',
@@ -158,8 +193,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#ffedd5] to-[#fff7ed]',
     title: 'text-[#c2410c]',
     cta: 'btn-secondary',
-  },
-  {
+  }),
+  demoCard({
     name: 'Pickles',
     species: 'cat',
     portrait: '/demo-pets/pickles.webp',
@@ -170,8 +205,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#dcfce7] to-[#f0fdf4]',
     title: 'text-[#166534]',
     cta: 'btn-primary',
-  },
-  {
+  }),
+  demoCard({
     name: 'Ink',
     species: 'cat',
     portrait: '/demo-pets/ink.webp',
@@ -182,8 +217,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#ede9fe] to-[#f5f3ff]',
     title: 'text-[#5b21b6]',
     cta: 'btn-secondary',
-  },
-  {
+  }),
+  demoCard({
     name: 'Cloud',
     species: 'cat',
     portrait: '/demo-pets/cloud.webp',
@@ -194,8 +229,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#d7e6ff] to-[#e9f1ff]',
     title: 'text-[#27408f]',
     cta: 'border-[#cfe0ff] bg-[#d7e6ff] text-[#27408f] hover:border-[#a8c4f5] hover:bg-[#cfe0ff]',
-  },
-  {
+  }),
+  demoCard({
     name: 'Chili',
     species: 'cat',
     portrait: '/demo-pets/chili.webp',
@@ -206,8 +241,8 @@ export const MEET_THE_PETS_POOL: readonly MeetPetCard[] = [
     image: 'from-[#ffe4e6] to-[#fff1f2]',
     title: 'text-[#be123c]',
     cta: 'btn-primary',
-  },
-] as const;
+  }),
+];
 
 /** Default SSR / first-paint lineup (#164): dog | cat | dog. */
 export const DEFAULT_MEET_THE_PETS: readonly MeetPetCard[] = [
@@ -246,4 +281,72 @@ export function pickMeetThePets(
   }
 
   return [dogs[0], cats[0], dogs[1]];
+}
+
+function formatLiveDetail(pet: LiveMeetPetInput): string {
+  const age =
+    pet.age_years != null && pet.age_years > 0
+      ? `${pet.age_years} yr${pet.age_years === 1 ? '' : 's'}`
+      : null;
+  const breed = pet.breed?.trim() || (pet.species === 'dog' ? 'dog' : 'cat');
+  const head = [age, breed].filter(Boolean).join(' · ');
+  const bio = pet.notes?.trim();
+  if (bio) {
+    const short = bio.length > 48 ? `${bio.slice(0, 45)}…` : bio;
+    return `${head} · ${short}`;
+  }
+  return `${head} · looking for a home`;
+}
+
+/** Map a live browse pet into a homepage card (detail CTA). */
+export function browsePetToMeetCard(pet: LiveMeetPetInput): MeetPetCard {
+  const theme = HOMEPAGE_SLOT_THEMES[0];
+  return {
+    id: pet.id,
+    name: pet.name,
+    species: pet.species,
+    portrait: pet.photo_url!.trim(),
+    portraitAlt: `Photo of ${pet.name}`,
+    detail: formatLiveDetail(pet),
+    bg: theme.bg,
+    border: theme.border,
+    image: theme.image,
+    title: theme.title,
+    cta: theme.cta,
+    href: petDetailPath(pet.species, pet.id),
+    source: 'live',
+  };
+}
+
+/**
+ * Prefer real available pets with photos; fill dog|cat|dog gaps from
+ * the cartoon pool. Seed UUID pets are excluded so demo storage art
+ * does not displace real listings (#324).
+ */
+export function composeMeetThePets(
+  livePets: readonly LiveMeetPetInput[],
+  options: {
+    demoPool?: readonly MeetPetCard[];
+    random?: () => number;
+  } = {}
+): MeetPetCard[] {
+  const pool = options.demoPool ?? MEET_THE_PETS_POOL;
+  const random = options.random ?? Math.random;
+
+  const real = livePets.filter(
+    (p) =>
+      p.status === 'available' &&
+      Boolean(p.photo_url?.trim()) &&
+      !isSeedDemoPetId(p.id)
+  );
+
+  const dogs = real.filter((p) => p.species === 'dog');
+  const cats = real.filter((p) => p.species === 'cat');
+  const demo = pickMeetThePets(pool, random);
+
+  return [
+    dogs[0] ? browsePetToMeetCard(dogs[0]) : demo[0],
+    cats[0] ? browsePetToMeetCard(cats[0]) : demo[1],
+    dogs[1] ? browsePetToMeetCard(dogs[1]) : demo[2],
+  ];
 }

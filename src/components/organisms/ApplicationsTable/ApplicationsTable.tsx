@@ -38,15 +38,28 @@ function formatShortDate(isoDate: string): string {
   });
 }
 
+function ApplicationReviewLink({
+  application,
+}: {
+  application: ApplicationWithPet;
+}) {
+  return (
+    <Link
+      href={`/shelter/application?id=${application.id}`}
+      className="btn btn-ghost btn-sm min-h-11"
+      aria-label={`Review application for ${application.pets.name} from ${application.profile_snapshot.full_name}`}
+    >
+      Review
+    </Link>
+  );
+}
+
 /**
  * ApplicationsTable component - shelter staff pipeline list.
  *
- * Renders status filter tabs (with per-status counts) above a DaisyUI
- * table of applications: pet, applicant snapshot name, status badge,
- * last update date, and a "Review" link to the application detail page.
- *
- * Presentational only: filtering is performed by the parent; this
- * component renders what it is given plus the tab state.
+ * Renders status filter tabs (with per-status counts) above applications:
+ * stacked rows on mobile (#324), DaisyUI table from md up. Presentational
+ * only — filtering is performed by the parent.
  *
  * @category organisms
  */
@@ -129,54 +142,88 @@ export default function ApplicationsTable({
           </div>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Pet</th>
-                <th>Applicant</th>
-                <th>Status</th>
-                <th>Last update</th>
-                <th>
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {applications.map((application) => (
-                <tr
-                  key={application.id}
-                  data-testid={`application-row-${application.id}`}
-                >
-                  <td>
-                    <div className="font-medium">{application.pets.name}</div>
-                    {application.pets.breed && (
-                      <div className="text-base-content/60 text-xs">
-                        {application.pets.breed}
+        <>
+          {/* Mobile: stack so Status / Review are never clipped (#324) */}
+          <ul
+            className="flex flex-col gap-3 md:hidden"
+            data-testid="applications-mobile-list"
+          >
+            {applications.map((application) => (
+              <li
+                key={application.id}
+                className="border-base-300 bg-base-100 rounded-lg border p-4"
+                data-testid={`application-mobile-${application.id}`}
+              >
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="font-medium">{application.pets.name}</div>
+                      {application.pets.breed ? (
+                        <div className="text-base-content/60 text-xs">
+                          {application.pets.breed}
+                        </div>
+                      ) : null}
+                      <div className="text-base-content/80 mt-1 text-sm">
+                        {application.profile_snapshot.full_name}
                       </div>
-                    )}
-                  </td>
-                  <td>{application.profile_snapshot.full_name}</td>
-                  <td>
+                    </div>
                     <StatusBadge status={application.status} />
-                  </td>
-                  <td className="whitespace-nowrap">
-                    {formatShortDate(application.status_changed_at)}
-                  </td>
-                  <td className="text-right">
-                    <Link
-                      href={`/shelter/application?id=${application.id}`}
-                      className="btn btn-ghost btn-sm min-h-11"
-                      aria-label={`Review application for ${application.pets.name} from ${application.profile_snapshot.full_name}`}
-                    >
-                      Review
-                    </Link>
-                  </td>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-base-content/60 text-sm whitespace-nowrap">
+                      Updated {formatShortDate(application.status_changed_at)}
+                    </span>
+                    <ApplicationReviewLink application={application} />
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* md+: keep the dense pipeline table */}
+          <div className="hidden overflow-x-auto md:block">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Pet</th>
+                  <th>Applicant</th>
+                  <th>Status</th>
+                  <th>Last update</th>
+                  <th>
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {applications.map((application) => (
+                  <tr
+                    key={application.id}
+                    data-testid={`application-row-${application.id}`}
+                  >
+                    <td>
+                      <div className="font-medium">{application.pets.name}</div>
+                      {application.pets.breed && (
+                        <div className="text-base-content/60 text-xs">
+                          {application.pets.breed}
+                        </div>
+                      )}
+                    </td>
+                    <td>{application.profile_snapshot.full_name}</td>
+                    <td>
+                      <StatusBadge status={application.status} />
+                    </td>
+                    <td className="whitespace-nowrap">
+                      {formatShortDate(application.status_changed_at)}
+                    </td>
+                    <td className="text-right">
+                      <ApplicationReviewLink application={application} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
