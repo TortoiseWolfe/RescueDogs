@@ -17,6 +17,11 @@ describe('StatusBadge', () => {
     expect(screen.getByTestId('status-badge')).toHaveClass('badge');
   });
 
+  it('keeps multi-word labels on one line (#324)', () => {
+    render(<StatusBadge status="under_review" />);
+    expect(screen.getByTestId('status-badge')).toHaveClass('whitespace-nowrap');
+  });
+
   it('applies badge-info for submitted', () => {
     render(<StatusBadge status="submitted" />);
     expect(screen.getByTestId('status-badge')).toHaveClass('badge-info');

@@ -137,7 +137,9 @@ test.describe('anti-ghosting loop', () => {
     await expect(
       staffPage.getByRole('heading', { name: /second chance rescue/i })
     ).toBeVisible({ timeout: 20000 });
-    await expect(staffPage.getByText('Noodle').first()).toBeVisible({
+    // Mobile list + desktop table both render the pet name (#324); .first()
+    // hits the md:hidden copy and stays "hidden" on the default viewport.
+    await expect(staffPage.getByRole('row', { name: /Noodle/ })).toBeVisible({
       timeout: 20000,
     });
 
