@@ -16,12 +16,11 @@ test.describe('Homepage Navigation', () => {
     await expect(heading).toBeVisible();
   });
 
-  test('navigate to the adopt page', async ({ page }) => {
+  test('navigate from a Meet-the-Pets CTA', async ({ page }) => {
     // Prefer visible pet-card CTAs — #65 hid Apply to Adopt inside For Adopters.
-    // Rotation-agnostic (#165): MeetThePetsSection SSRs Lola/Pepper/Tiger, then
-    // a mount effect swaps in a random 2-dogs + 1-cat trio. Pinning the selector
-    // to those three names missed ~1 attempt in 3. Scope to the section and take
-    // whichever "Meet <name>" CTA is rendered — every pet card links to /adopt.
+    // Live listings (#324) link to /dogs/detail or /cats/detail; cartoon demos
+    // still go to /adopt. Scope to the section and take whichever "Meet <name>"
+    // CTA is rendered.
     const petSection = page.locator(
       'section[aria-labelledby="meet-pets-heading"]'
     );
@@ -30,7 +29,9 @@ test.describe('Homepage Navigation', () => {
 
     await petCtas.first().click();
 
-    await expect(page).toHaveURL(/.*adopt/);
+    await expect(page).toHaveURL(
+      /\/(adopt|dogs\/detail|cats\/detail)(\/|\?|$)/
+    );
   });
 
   test('navigate to demo login tips from the homepage', async ({ page }) => {
