@@ -58,7 +58,10 @@ export function parseAuthErrorFromUrl(
 
 /**
  * Extract display name from OAuth user metadata using fallback cascade.
- * Priority: full_name > name > user_name > preferred_username > email prefix > "Anonymous User"
+ * Priority: full_name > name > user_name > preferred_username > "User-<8 hex of id>"
+ *
+ * The email address is deliberately NOT part of the cascade: the result is stored
+ * in the publicly searchable user_profiles.display_name column.
  *
  * Provider-specific notes:
  * - Google sets `full_name` and `name`
@@ -90,14 +93,13 @@ export function extractOAuthDisplayName(user: User | null): string {
     }
   }
 
-  // Email prefix fallback
-  const email = user.email;
-  if (email) {
-    const prefix = email.split('@')[0];
-    if (prefix && prefix.length > 0) return prefix;
-  }
-
-  return 'Anonymous User';
+  // No email fallback. The return value is written to user_profiles.display_name,
+  // which every authenticated user can read (RLS "Authenticated users can search
+  // profiles" ... USING (true)), so an email-derived name publishes part of the
+  // user's address to the whole directory. Fall back to an opaque, per-user handle
+  // that the user can replace from Account Settings. Format must stay in sync with
+  // create_user_profile() in the monolithic migration.
+  return `User-${user.id.replace(/-/g, '').slice(0, 8)}`;
 }
 
 /**
@@ -166,8 +168,9 @@ const logger = createLogger('lib:auth:oauth-utils');
 
 /**
  * Seed display_name when it is null/blank (#105).
- * Uses the same cascade as extractOAuthDisplayName (works for email/password
- * and OAuth). Never overwrites a name the user already set.
+ * Uses the same cascade as extractOAuthDisplayName — OAuth provider metadata,
+ * else an opaque "User-<8 hex>" handle, never the email address. Never
+ * overwrites a name the user already set.
  *
  * @returns true if display_name was written
  */

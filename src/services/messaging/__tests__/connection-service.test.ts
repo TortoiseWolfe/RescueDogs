@@ -118,6 +118,25 @@ describe('ConnectionService', () => {
       expect(result.users).toEqual(profiles);
       expect(result.already_connected).toEqual([]);
     });
+
+    it('escapes ILIKE wildcards so ___ does not match every profile', async () => {
+      const profileBuilder = createMockQueryBuilder([]);
+      const connectionBuilder = createMockQueryBuilder([]);
+
+      vi.mocked(mockSupabase.from).mockImplementation((table: string) => {
+        if (table === 'user_profiles') return profileBuilder as any;
+        return connectionBuilder as any;
+      });
+
+      await connectionService.searchUsers({
+        query: '___',
+        limit: 10,
+      });
+
+      expect(profileBuilder.or).toHaveBeenCalledWith(
+        'display_name.ilike."%\\\\_\\\\_\\\\_%",username.ilike."%\\\\_\\\\_\\\\_%"'
+      );
+    });
   });
 
   describe('sendFriendRequest', () => {

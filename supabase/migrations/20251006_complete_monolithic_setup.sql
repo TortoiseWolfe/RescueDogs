@@ -399,8 +399,12 @@ END;
 $$;
 
 -- Auto-create user profile on signup
--- #105: seed display_name so messaging search can find new users (OAuth
--- metadata first, else email local-part). Never leave NULL when we have a seed.
+-- #105: seed display_name so messaging search can find new users. OAuth provider
+-- metadata only — NEVER the email local-part. user_profiles is readable by every
+-- authenticated user (RLS "Authenticated users can search profiles" ... USING (true)),
+-- so an email-derived name publishes part of the user's address to the whole
+-- directory. Fall back to an opaque handle the user can replace in Account Settings.
+-- Format must stay in sync with extractOAuthDisplayName() in src/lib/auth/oauth-utils.ts.
 CREATE OR REPLACE FUNCTION create_user_profile()
 RETURNS TRIGGER
 SECURITY DEFINER
@@ -415,7 +419,7 @@ BEGIN
     NULLIF(TRIM(NEW.raw_user_meta_data->>'name'), ''),
     NULLIF(TRIM(NEW.raw_user_meta_data->>'user_name'), ''),
     NULLIF(TRIM(NEW.raw_user_meta_data->>'preferred_username'), ''),
-    NULLIF(split_part(COALESCE(NEW.email, ''), '@', 1), '')
+    'User-' || left(replace(NEW.id::text, '-', ''), 8)
   );
   IF v_display IS NOT NULL AND char_length(v_display) > 100 THEN
     v_display := left(v_display, 100);
@@ -2616,22 +2620,25 @@ $seed_admin_profile$;
 -- Idempotent: Safe to run multiple times (FR-006).
 --
 -- Cascade mirrors src/lib/auth/oauth-utils.ts extractOAuthDisplayName():
---   full_name > name > user_name > preferred_username > email prefix > 'Anonymous User'
+--   full_name > name > user_name > preferred_username > 'User-<8 hex of id>'
+-- The email address is NOT in the cascade — display_name is world-readable to
+-- every authenticated account.
 --
 -- Provider notes:
 --   - Google sets full_name AND name
 --   - GitHub sets name (display name) AND user_name (the @handle) — without
 --     user_name in the cascade, GitHub users with no GitHub display name
---     would fall through to email prefix even though the @handle is a
+--     would fall through to the opaque handle even though the @handle is a
 --     better identifier
 --   - Other OIDC providers may set preferred_username
 --
--- Note on runtime behavior: create_user_profile() (the on_auth_user_created
--- trigger) does NOT set display_name — it inserts only (id, created_at,
--- updated_at). So at signup display_name is NULL, and the runtime
--- populateOAuthProfile() in src/lib/auth/oauth-utils.ts is the sole
--- authoritative populator going forward. This UPDATE handles only the
--- one-time bootstrap for users who existed before that runtime path landed.
+-- Note on runtime behavior: since #105 create_user_profile() (the
+-- on_auth_user_created trigger) DOES set display_name, from OAuth provider
+-- metadata else an opaque 'User-<8 hex>' handle. It never derives the value
+-- from the email address. The runtime seeders in src/lib/auth/oauth-utils.ts
+-- (ensureDisplayNameSeeded / populateOAuthProfile) use the same cascade and
+-- only fill a blank value. This UPDATE handles only the one-time bootstrap
+-- for users who existed before that runtime path landed.
 -- ============================================================================
 UPDATE public.user_profiles p
 SET
@@ -2640,14 +2647,45 @@ SET
     NULLIF(TRIM(u.raw_user_meta_data->>'name'), ''),
     NULLIF(TRIM(u.raw_user_meta_data->>'user_name'), ''),
     NULLIF(TRIM(u.raw_user_meta_data->>'preferred_username'), ''),
-    NULLIF(split_part(u.email, '@', 1), ''),
-    'Anonymous User'
+    'User-' || left(replace(p.id::text, '-', ''), 8)
   ),
   avatar_url = COALESCE(p.avatar_url, u.raw_user_meta_data->>'avatar_url')
 FROM auth.users u
 WHERE p.id = u.id
   AND p.display_name IS NULL
   AND u.raw_app_meta_data->>'provider' IS DISTINCT FROM 'email';
+
+-- ============================================================================
+-- Issue #105 follow-up: un-publish email-derived display names
+-- ============================================================================
+-- The #105 trigger + runtime seeder wrote split_part(email, '@', 1) into
+-- user_profiles.display_name for email/password accounts. That column is readable
+-- by every authenticated user, so those rows published part of each user's email
+-- address. Reset the rows that were auto-seeded back to the opaque handle.
+--
+-- Match condition: display_name still equals the email local-part exactly AND the
+-- account has no provider-metadata name that would have won the cascade — i.e. the
+-- value can only have come from the email tier.
+--
+-- Idempotent: after the first run no row matches (display_name no longer equals the
+-- local-part).
+--
+-- Accepted tradeoff: a user who deliberately typed their own email local-part as a
+-- display name is reset too and must re-enter it in Account Settings. That value is
+-- indistinguishable from the auto-seed and is already disclosed either way.
+UPDATE public.user_profiles p
+SET display_name = 'User-' || left(replace(p.id::text, '-', ''), 8),
+    updated_at = NOW()
+FROM auth.users u
+WHERE p.id = u.id
+  AND u.email IS NOT NULL
+  AND p.display_name = left(split_part(u.email, '@', 1), 100)
+  AND COALESCE(
+        NULLIF(TRIM(u.raw_user_meta_data->>'full_name'), ''),
+        NULLIF(TRIM(u.raw_user_meta_data->>'name'), ''),
+        NULLIF(TRIM(u.raw_user_meta_data->>'user_name'), ''),
+        NULLIF(TRIM(u.raw_user_meta_data->>'preferred_username'), '')
+      ) IS NULL;
 
 -- ============================================================================
 -- PART 10: REALTIME CONFIGURATION

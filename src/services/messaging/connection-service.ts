@@ -300,12 +300,17 @@ export class ConnectionService {
       );
     }
 
-    // Escape PostgREST filter / ILIKE metacharacters so commas and wildcards
-    // in the query cannot break .or() or broaden the match unexpectedly.
+    // Escape ILIKE metacharacters, then double every backslash. PostgREST strips
+    // one level of backslash escaping inside a "quoted" filter value, so a single
+    // backslash reaches ILIKE as a bare wildcard and a query of `___` matches every
+    // profile in the table. Verified against postgrest v12.2.12.
     const escaped = query
+      // ILIKE level
       .replace(/\\/g, '\\\\')
       .replace(/%/g, '\\%')
       .replace(/_/g, '\\_')
+      // PostgREST quoted-value level: double every backslash produced above
+      .replace(/\\/g, '\\\\')
       .replace(/,/g, '')
       .replace(/"/g, '');
     const searchPattern = `%${escaped}%`;
