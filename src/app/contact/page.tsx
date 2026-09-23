@@ -29,6 +29,8 @@ export const metadata: Metadata = {
  */
 export default function ContactPage() {
   const publicEmail = projectConfig.contactEmail;
+  const publicPhoneDisplay = projectConfig.contactPhoneDisplay;
+  const publicPhoneTel = projectConfig.contactPhoneTel;
 
   return (
     <main className="relative container mx-auto min-h-screen overflow-hidden px-4 py-6 sm:py-8 md:py-12">
@@ -96,6 +98,23 @@ export default function ContactPage() {
                     className="link font-semibold text-[var(--brand-ink)]"
                   >
                     {publicEmail}
+                  </a>
+                </p>
+              </div>
+            ) : null}
+
+            {publicPhoneDisplay && publicPhoneTel ? (
+              <div>
+                <h3 className="mb-2 text-lg font-semibold sm:text-xl">
+                  Call or text
+                </h3>
+                <p className="text-base-content/80 text-sm sm:text-base">
+                  Prefer the phone?{' '}
+                  <a
+                    href={`tel:${publicPhoneTel}`}
+                    className="link font-semibold text-[var(--brand-ink)]"
+                  >
+                    {publicPhoneDisplay}
                   </a>
                 </p>
               </div>

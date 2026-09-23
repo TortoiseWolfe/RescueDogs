@@ -23,6 +23,9 @@ const defaultConfig = {
   basePath: '',
   /** Public contact address shown on /contact (mailto). */
   contactEmail: 'contact@raisedpaws.com',
+  /** Public phone shown on /contact (display + tel:). */
+  contactPhoneDisplay: '(314) 514-5204',
+  contactPhoneTel: '+13145145204',
 };
 
 /**
@@ -47,6 +50,13 @@ export function getProjectConfig() {
     basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? defaultConfig.basePath,
     contactEmail: (
       process.env.NEXT_PUBLIC_CONTACT_EMAIL || defaultConfig.contactEmail
+    ).trim(),
+    contactPhoneDisplay: (
+      process.env.NEXT_PUBLIC_CONTACT_PHONE_DISPLAY ||
+      defaultConfig.contactPhoneDisplay
+    ).trim(),
+    contactPhoneTel: (
+      process.env.NEXT_PUBLIC_CONTACT_PHONE_TEL || defaultConfig.contactPhoneTel
     ).trim(),
   };
 

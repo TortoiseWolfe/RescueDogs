@@ -4,16 +4,19 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { detectedConfig } from '@/config/project-detected';
+import { supabase } from '@/lib/supabase/client';
+import { ApplicationService } from '@/services/applications';
 import {
+  composeMeetThePets,
   DEFAULT_MEET_THE_PETS,
   HOMEPAGE_SLOT_THEMES,
-  pickMeetThePets,
   type MeetPetCard,
 } from '@/lib/demo/meet-the-pets';
 
 /**
- * Homepage Meet-the-Pets (#165): SSR shows the default 2 dogs + 1 cat
- * trio; after mount, shuffle from the demo pool while keeping that mix.
+ * Homepage Meet-the-Pets (#165 / #324): SSR shows the default cartoon
+ * trio; after mount, prefer live available listings with photos
+ * (2 dogs + 1 cat), filling gaps from the demo cartoon pool.
  */
 export default function MeetThePetsSection() {
   const [pets, setPets] = useState<readonly MeetPetCard[]>(
@@ -21,8 +24,28 @@ export default function MeetThePetsSection() {
   );
 
   useEffect(() => {
-    setPets(pickMeetThePets());
+    let cancelled = false;
+    (async () => {
+      try {
+        const service = new ApplicationService(supabase);
+        const [dogs, cats] = await Promise.all([
+          service.getBrowsePets('dog'),
+          service.getBrowsePets('cat'),
+        ]);
+        if (cancelled) return;
+        setPets(composeMeetThePets([...dogs, ...cats]));
+      } catch {
+        if (!cancelled) {
+          setPets(composeMeetThePets([]));
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  const hasLive = pets.some((p) => p.source === 'live');
 
   return (
     <section
@@ -37,28 +60,41 @@ export default function MeetThePetsSection() {
           Say hello!
         </h2>
         <p className="text-base-content/95 mt-2 mb-8 text-lg font-semibold">
-          A few demo pets are ready for your tour.
+          {hasLive
+            ? 'Meet a few pets looking for homes right now.'
+            : 'A few demo pets are ready for your tour.'}
         </p>
 
         <div className="grid gap-7 md:grid-cols-3">
           {pets.map((pet, slot) => {
             const theme = HOMEPAGE_SLOT_THEMES[slot] ?? HOMEPAGE_SLOT_THEMES[0];
+            const isRemote = /^https?:\/\//i.test(pet.portrait);
             return (
               <article
-                key={pet.name}
+                key={pet.id ?? pet.name}
                 className={`card h-full border-[3px] text-left ${theme.bg} ${theme.border}`}
               >
                 <div className="card-body flex h-full flex-col gap-4 p-4">
                   <div
                     className={`relative grid h-52 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br ${theme.image}`}
                   >
-                    <Image
-                      src={`${detectedConfig.basePath}${pet.portrait}`}
-                      alt={pet.portraitAlt}
-                      width={180}
-                      height={180}
-                      className="h-44 w-44 object-contain drop-shadow-lg"
-                    />
+                    {isRemote ? (
+                      // Remote Supabase photos — same pattern as browse cards.
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={pet.portrait}
+                        alt={pet.portraitAlt}
+                        className="h-44 w-44 rounded-2xl object-cover drop-shadow-lg"
+                      />
+                    ) : (
+                      <Image
+                        src={`${detectedConfig.basePath}${pet.portrait}`}
+                        alt={pet.portraitAlt}
+                        width={180}
+                        height={180}
+                        className="h-44 w-44 object-contain drop-shadow-lg"
+                      />
+                    )}
                   </div>
                   <div className="flex-1 px-2">
                     <h3
@@ -71,7 +107,7 @@ export default function MeetThePetsSection() {
                     </p>
                   </div>
                   <Link
-                    href="/adopt"
+                    href={pet.href}
                     className={`btn ${theme.cta} mt-auto min-h-11 w-full`}
                   >
                     Meet {pet.name}
