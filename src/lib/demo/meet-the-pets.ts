@@ -52,6 +52,11 @@ export function isSeedDemoPetId(id: string): boolean {
  * Homepage row is always navy | orange | baby blue (#215), regardless of
  * which three pets `pickMeetThePets` drew. Per-pet theme fields on the pool
  * are leftovers and must not drive the homepage.
+ *
+ * Slot `title` colors are for the large bold pet name (AAA large-text).
+ * Body/detail copy under the photo must use {@link MEET_PET_DETAIL_TEXT}:
+ * reusing `title` on the orange slot (#c2410c on #fff7ed ≈ 4.87:1) fails
+ * AAA normal-text 7:1 (#326 contrast gate).
  */
 export const HOMEPAGE_SLOT_THEMES = [
   {
@@ -76,6 +81,12 @@ export const HOMEPAGE_SLOT_THEMES = [
     cta: 'border-[#cfe0ff] bg-[#d7e6ff] text-[#27408f] hover:border-[#a8c4f5] hover:bg-[#cfe0ff]',
   },
 ] as const;
+
+/**
+ * Fixed navy for detail lines on pastel cards — stays readable in dark mode
+ * (cards keep light fills) and clears WCAG AAA vs every HOMEPAGE_SLOT_THEMES bg.
+ */
+export const MEET_PET_DETAIL_TEXT = 'text-[#0c1929]';
 
 const DEMO_HREF = '/adopt';
 

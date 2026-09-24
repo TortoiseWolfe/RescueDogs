@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase/client';
 import { ShelterPetService } from '@/services/applications';
 import { PetPhotoService } from '@/services/applications/pet-photo-service';
 import { combineAgeYears, splitAgeYears } from '@/lib/pet-age';
+import { normalizePetVideoUrl } from '@/lib/pet-video-url';
 import { PET_SEX_OPTIONS } from '@/lib/pet-sex';
 import { useShelterMembership } from '../../ShelterGate';
 import { PetAgeFields } from '../PetAgeFields';
@@ -42,6 +43,7 @@ function EditShelterPetContent() {
   const [size, setSize] = useState<PetSize | ''>('');
   const [status, setStatus] = useState<PetStatus>('available');
   const [notes, setNotes] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
   const [photos, setPhotos] = useState<PetPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -71,6 +73,7 @@ function EditShelterPetContent() {
     size,
     status,
     notes,
+    videoUrl,
   };
   const {
     restored: pendingDraft,
@@ -104,6 +107,7 @@ function EditShelterPetContent() {
     setSize(pendingDraft.size ?? '');
     setStatus(pendingDraft.status ?? 'available');
     setNotes(pendingDraft.notes ?? '');
+    setVideoUrl(pendingDraft.videoUrl ?? '');
     setDraftDismissed(true);
   }
 
@@ -147,6 +151,7 @@ function EditShelterPetContent() {
         setSize(row.size ?? '');
         setStatus(row.status);
         setNotes(row.notes ?? '');
+        setVideoUrl(row.video_url ?? '');
         setPhotos(petPhotos);
       } catch {
         if (!cancelled) setError('Could not load pet.');
@@ -168,6 +173,7 @@ function EditShelterPetContent() {
     setSaving(true);
     setError(null);
     try {
+      const normalizedVideo = normalizePetVideoUrl(videoUrl);
       const service = new ShelterPetService(supabase);
       await service.updatePet(pet.id, {
         name,
@@ -178,6 +184,7 @@ function EditShelterPetContent() {
         size: size || null,
         status,
         notes: notes || null,
+        video_url: normalizedVideo,
       });
 
       clearDraft();
@@ -341,6 +348,23 @@ function EditShelterPetContent() {
                 rows={4}
                 placeholder="Share this pet's story — personality, history, and what kind of home they need."
               />
+            </label>
+
+            <label className="form-control w-full">
+              <span className="label-text">Video link (optional)</span>
+              <input
+                type="url"
+                className="input input-bordered min-h-11 w-full"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                maxLength={2048}
+                placeholder="https://www.youtube.com/watch?v=…"
+                inputMode="url"
+                autoComplete="off"
+              />
+              <span className="label-text-alt text-base-content/60 mt-1">
+                YouTube, TikTok, Vimeo, or any public video URL.
+              </span>
             </label>
 
             {error && (

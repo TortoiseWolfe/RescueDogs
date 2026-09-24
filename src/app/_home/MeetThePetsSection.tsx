@@ -10,6 +10,7 @@ import {
   composeMeetThePets,
   DEFAULT_MEET_THE_PETS,
   HOMEPAGE_SLOT_THEMES,
+  MEET_PET_DETAIL_TEXT,
   type MeetPetCard,
 } from '@/lib/demo/meet-the-pets';
 
@@ -102,7 +103,7 @@ export default function MeetThePetsSection() {
                     >
                       {pet.name}
                     </h3>
-                    <p className="text-base-content/95 font-semibold">
+                    <p className={`font-semibold ${MEET_PET_DETAIL_TEXT}`}>
                       {pet.detail}
                     </p>
                   </div>
