@@ -55,11 +55,15 @@ export default function SignUpPage() {
   return (
     <main className="container mx-auto px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <div className="mx-auto max-w-md">
-        <h1 className="mb-2 text-center text-2xl font-bold whitespace-nowrap sm:mb-3 sm:text-3xl">
+        <h1
+          className={`text-center text-2xl font-bold whitespace-nowrap sm:text-3xl ${
+            portal === 'shelter' ? 'mb-2 sm:mb-3' : 'mb-4 sm:mb-5'
+          }`}
+        >
           {heading}
         </h1>
         {portal === 'shelter' ? (
-          <p className="text-base-content/70 mb-4 text-center text-sm">
+          <p className="text-base-content/70 mb-4 text-center text-sm sm:mb-5">
             This creates a login. After you sign in, open the shelter portal to
             create your shelter or rescue — or{' '}
             <Link href="/contact?role=shelter" className="link link-primary">
@@ -68,31 +72,6 @@ export default function SignUpPage() {
             if you need a hand.
           </p>
         ) : null}
-        {portal ? (
-          <p className="text-base-content/70 mb-6 text-center text-sm sm:mb-8">
-            Wrong audience?{' '}
-            <Link href="/for-adopters" className="link link-primary">
-              For Adopters
-            </Link>
-            {' · '}
-            <Link href="/for-shelters" className="link link-primary">
-              For Shelters
-            </Link>
-            .
-          </p>
-        ) : (
-          <p className="text-base-content/70 mb-6 text-center text-sm sm:mb-8">
-            Not sure which door?{' '}
-            <Link href="/for-adopters" className="link link-primary">
-              For Adopters
-            </Link>
-            {' · '}
-            <Link href="/for-shelters" className="link link-primary">
-              For Shelters
-            </Link>
-            .
-          </p>
-        )}
 
         <SignUpForm
           onSuccess={() =>

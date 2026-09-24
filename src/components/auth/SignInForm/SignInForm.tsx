@@ -298,7 +298,7 @@ export default function SignInForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`space-y-4${className ? ` ${className}` : ''}`}
+      className={`space-y-6${className ? ` ${className}` : ''}`}
     >
       {showDemoBanner ? (
         <div
@@ -313,7 +313,7 @@ export default function SignInForm({
         </div>
       ) : null}
 
-      <label className="form-control w-full" htmlFor="email">
+      <label className="flex w-full flex-col" htmlFor="email">
         <span className="label-text mb-1">Email</span>
         <input
           id="email"
@@ -328,7 +328,7 @@ export default function SignInForm({
         />
       </label>
 
-      <label className="form-control w-full" htmlFor="password">
+      <label className="flex w-full flex-col" htmlFor="password">
         <span className="label-text mb-1">Password</span>
         <PasswordField
           id="password"
@@ -344,7 +344,7 @@ export default function SignInForm({
 
       <label
         htmlFor="remember-me"
-        className="label cursor-pointer justify-start gap-3 p-0"
+        className="label flex cursor-pointer justify-start gap-3 p-0"
       >
         <input
           id="remember-me"

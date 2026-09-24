@@ -199,9 +199,9 @@ export default function SignUpForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`space-y-4${className ? ` ${className}` : ''}`}
+      className={`space-y-6${className ? ` ${className}` : ''}`}
     >
-      <label className="form-control w-full" htmlFor="email">
+      <label className="flex w-full flex-col" htmlFor="email">
         <span className="label-text mb-1">Email</span>
         <input
           id="email"
@@ -215,7 +215,7 @@ export default function SignUpForm({
         />
       </label>
 
-      <div className="form-control w-full">
+      <div className="flex w-full flex-col">
         <label className="label-text mb-1" htmlFor="password">
           Password
         </label>
@@ -228,12 +228,12 @@ export default function SignUpForm({
           disabled={loading}
           className="w-full"
         />
-        <div className="mt-2">
-          <PasswordStrengthIndicator password={password} />
-        </div>
+        {password ? (
+          <PasswordStrengthIndicator password={password} className="mt-2" />
+        ) : null}
       </div>
 
-      <label className="form-control w-full" htmlFor="confirm-password">
+      <label className="flex w-full flex-col" htmlFor="confirm-password">
         <span className="label-text mb-1">Confirm Password</span>
         <PasswordField
           id="confirm-password"
@@ -246,12 +246,12 @@ export default function SignUpForm({
         />
       </label>
 
-      <label className="label cursor-pointer justify-start gap-2 p-0">
+      <label className="label flex min-h-11 cursor-pointer items-center justify-start gap-3 p-0">
         <input
           type="checkbox"
           checked={rememberMe}
           onChange={(e) => setRememberMe(e.target.checked)}
-          className="checkbox min-h-11 min-w-11"
+          className="checkbox checkbox-primary"
           disabled={loading}
         />
         <span className="label-text">Remember me</span>
