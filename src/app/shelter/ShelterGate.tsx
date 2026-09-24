@@ -19,6 +19,12 @@ import {
   ShelterApplicationService,
 } from '@/services/applications';
 import type { ShelterMembershipInfo } from '@/services/applications';
+import {
+  EMPTY_RESCUE_PROFILE,
+  RescueIdentityFields,
+  RescueTransportFields,
+  type RescueProfileDraft,
+} from './RescueProfileFields';
 
 const ShelterContext = createContext<ShelterMembershipInfo | null>(null);
 
@@ -292,6 +298,12 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
             >
               Pets
             </Link>
+            <Link
+              href="/shelter/settings"
+              className="btn btn-sm btn-ghost min-h-11"
+            >
+              Settings
+            </Link>
           </nav>
         </header>
         {/* Remount child pages when the active rescue changes so lists refetch. */}
@@ -302,24 +314,31 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
 }
 
 function CreateRescueForm({ onCreated }: { onCreated: () => Promise<void> }) {
-  const [name, setName] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [zip, setZip] = useState('');
+  const [profile, setProfile] =
+    useState<RescueProfileDraft>(EMPTY_RESCUE_PROFILE);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+
+    if (profile.transports && profile.transportStates.length === 0) {
+      setError('Pick at least one state you transport to.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const service = new ShelterApplicationService(supabase);
       await service.createMyShelter({
-        name,
-        city: city || undefined,
-        state: state || undefined,
-        zip: zip || undefined,
+        name: profile.name,
+        city: profile.city || undefined,
+        state: profile.state || undefined,
+        zip: profile.zip || undefined,
+        transports: profile.transports,
+        transportStates: profile.transportStates,
+        transportNote: profile.transportNote || undefined,
       });
       await onCreated();
     } catch (err) {
@@ -335,56 +354,18 @@ function CreateRescueForm({ onCreated }: { onCreated: () => Promise<void> }) {
     }
   }
 
-  const fieldClass = 'input input-bordered min-h-11 w-full';
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <label className="form-control">
-        <span className="label-text mb-1 font-semibold">
-          Shelter or Rescue Name
-        </span>
-        <input
-          required
-          minLength={2}
-          maxLength={120}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className={fieldClass}
-          autoComplete="organization"
-        />
-      </label>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <label className="form-control">
-          <span className="label-text mb-1 font-semibold">City</span>
-          <input
-            maxLength={100}
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className={fieldClass}
-            autoComplete="address-level2"
-          />
-        </label>
-        <label className="form-control">
-          <span className="label-text mb-1 font-semibold">State</span>
-          <input
-            maxLength={50}
-            value={state}
-            onChange={(e) => setState(e.target.value)}
-            className={fieldClass}
-            autoComplete="address-level1"
-          />
-        </label>
-        <label className="form-control">
-          <span className="label-text mb-1 font-semibold">ZIP</span>
-          <input
-            maxLength={20}
-            value={zip}
-            onChange={(e) => setZip(e.target.value)}
-            className={fieldClass}
-            autoComplete="postal-code"
-          />
-        </label>
-      </div>
+      <RescueIdentityFields
+        value={profile}
+        onChange={setProfile}
+        disabled={submitting}
+      />
+      <RescueTransportFields
+        value={profile}
+        onChange={setProfile}
+        disabled={submitting}
+      />
       {error ? (
         <p role="alert" className="text-error text-sm">
           {error}
@@ -397,6 +378,9 @@ function CreateRescueForm({ onCreated }: { onCreated: () => Promise<void> }) {
       >
         {submitting ? 'Creating…' : 'Create Shelter or Rescue'}
       </button>
+      <p className="text-base-content/60 text-xs">
+        You can change any of this later under Settings.
+      </p>
     </form>
   );
 }

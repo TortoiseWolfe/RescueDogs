@@ -86,11 +86,25 @@ export interface Shelter {
   id: string;
   name: string;
   city: string | null;
+  /** Two-letter US state/DC code; browse filters match it exactly (#331). */
   state: string | null;
   /** Postal code for browse location filters (#110/#111). */
   zip: string | null;
   contact_email: string | null;
+  /** Rescue-wide switch: transports animals out of state (#331). */
+  transports: boolean;
+  /** State codes this rescue transports to; empty unless transports (#331). */
+  transport_states: string[];
+  /** Optional public transport details — fees, cadence (#331). */
+  transport_note: string | null;
   created_at: string;
+}
+
+/** Transport fields embedded on browse rows and read by the badge (#331). */
+export interface ShelterTransportInfo {
+  transports?: boolean | null;
+  transport_states?: string[] | null;
+  transport_note?: string | null;
 }
 
 export type ShelterRole = 'staff' | 'manager';
@@ -122,6 +136,11 @@ export interface Pet {
   notes: string | null;
   /** Optional https video URL; omit UI when null/empty (#326). */
   video_url: string | null;
+  /**
+   * Per-pet opt-out of the rescue's transport offer (#331). Only meaningful
+   * alongside `shelters.transports` — never a copy of it.
+   */
+  transportable: boolean;
   created_at: string;
 }
 
@@ -147,12 +166,14 @@ export interface AvailablePet extends Pet {
 
 /** Available pet row for public /dogs and /cats browse (#112 / #111). */
 export interface BrowsePet extends Pet {
-  shelters: {
-    name: string;
-    city: string | null;
-    state: string | null;
-    zip: string | null;
-  } | null;
+  shelters:
+    | ({
+        name: string;
+        city: string | null;
+        state: string | null;
+        zip: string | null;
+      } & ShelterTransportInfo)
+    | null;
 }
 
 /** Gallery row embedded on public pet detail (#274 / #273). */

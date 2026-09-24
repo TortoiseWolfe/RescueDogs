@@ -14,14 +14,32 @@ import type {
 } from '@/types/applications';
 import {
   normalizeBrowseLocationFilters,
+  transportIncluded,
   type BrowseLocationFilters,
 } from '@/lib/browse/location-filters';
+import { transportStateFor } from '@/lib/browse/transport';
 
 /** Embedded-pet columns selected with every application row. */
 const PET_EMBED = 'pets(id, name, species, breed, photo_url, status)';
 
 /** Soft co-brand (#169): shelter display name on apply/status. */
 const SHELTER_NAME_EMBED = 'shelters(name)';
+
+/** Browse row columns; transport fields drive the "ships to" badge (#331). */
+const BROWSE_PET_FIELDS =
+  'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, video_url, transportable, created_at';
+
+const BROWSE_SHELTER_FIELDS =
+  'name, city, state, zip, transports, transport_states, transport_note';
+
+/** Union of the local and transport result sets, de-duplicated, sorted by name. */
+function mergeBrowsePets(local: BrowsePet[], transported: BrowsePet[]) {
+  const byId = new Map(local.map((pet) => [pet.id, pet]));
+  for (const pet of transported) {
+    if (!byId.has(pet.id)) byId.set(pet.id, pet);
+  }
+  return Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
 
 export interface ApplicationSubmitInput {
   petId: string;
@@ -67,30 +85,71 @@ export class ApplicationService {
    * Public browse list (#112 / #111): available pets for one species, with
    * shelter city/state/zip. Server filters: state, shelterId. Mile radius applied
    * client-side (#280) using shelter ZIP centroids.
+   *
+   * When the adopter's state is known and transport is included (#331), a second
+   * query adds pets from rescues that ship there. It is a separate round trip
+   * because the condition spans both tables — `pets.state OR (shelters.transports
+   * AND state = ANY(shelters.transport_states) AND pets.transportable)` — and
+   * PostgREST cannot express one OR across a parent and an embedded resource.
    */
   async getBrowsePets(
     species: PetSpecies,
     filters: BrowseLocationFilters = {}
   ): Promise<BrowsePet[]> {
-    const { state, shelterId } = normalizeBrowseLocationFilters(filters);
-    const hasLocation = Boolean(state);
-    const shelterEmbed = hasLocation
-      ? 'shelters!inner(name, city, state, zip)'
-      : 'shelters(name, city, state, zip)';
+    const { state, shelterId, centerZip } =
+      normalizeBrowseLocationFilters(filters);
+
+    const local = await this.queryBrowsePets(species, {
+      state,
+      shelterId,
+      requireState: Boolean(state),
+    });
+
+    const transportState = transportIncluded(filters)
+      ? transportStateFor(state, centerZip)
+      : undefined;
+    if (!transportState) return local;
+
+    const transported = await this.queryBrowsePets(species, {
+      shelterId,
+      transportState,
+      requireState: true,
+    });
+
+    return mergeBrowsePets(local, transported);
+  }
+
+  /** One browse round trip; `transportState` switches to the transport match. */
+  private async queryBrowsePets(
+    species: PetSpecies,
+    options: {
+      state?: string;
+      shelterId?: string;
+      transportState?: string;
+      requireState: boolean;
+    }
+  ): Promise<BrowsePet[]> {
+    const shelterEmbed = options.requireState
+      ? `shelters!inner(${BROWSE_SHELTER_FIELDS})`
+      : `shelters(${BROWSE_SHELTER_FIELDS})`;
 
     let query = this.supabase
       .from('pets')
-      .select(
-        `id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, video_url, created_at, ${shelterEmbed}`
-      )
+      .select(`${BROWSE_PET_FIELDS}, ${shelterEmbed}`)
       .eq('status', 'available')
       .eq('species', species);
 
-    if (shelterId) {
-      query = query.eq('shelter_id', shelterId);
+    if (options.shelterId) {
+      query = query.eq('shelter_id', options.shelterId);
     }
-    if (state) {
-      query = query.eq('shelters.state', state);
+    if (options.state) {
+      query = query.eq('shelters.state', options.state);
+    }
+    if (options.transportState) {
+      query = query
+        .eq('transportable', true)
+        .eq('shelters.transports', true)
+        .contains('shelters.transport_states', [options.transportState]);
     }
 
     const { data, error } = await query.order('name');
@@ -137,10 +196,7 @@ export class ApplicationService {
   async getBrowsePet(petId: string): Promise<BrowsePetDetail | null> {
     const { data, error } = await this.supabase
       .from('pets')
-      .select(
-        `id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, video_url, created_at,
-        shelters(name, city, state, zip)`
-      )
+      .select(`${BROWSE_PET_FIELDS}, shelters(${BROWSE_SHELTER_FIELDS})`)
       .eq('id', petId)
       .eq('status', 'available')
       .maybeSingle();

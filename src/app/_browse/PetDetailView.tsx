@@ -9,6 +9,7 @@ import { formatPetAgeLabel } from '@/lib/pet-age';
 import { formatPetSexLabel } from '@/lib/pet-sex';
 import { petDetailPath, speciesBrowsePath } from '@/lib/browse/pet-links';
 import { locationLabel } from './browse-labels';
+import { transportStatesSummary } from '@/lib/browse/transport';
 import PetDetailSearchParamsReader from './PetDetailSearchParamsReader';
 import type { SpeciesBrowseKind } from './SpeciesBrowseView';
 
@@ -149,6 +150,7 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
   const photos = galleryUrls(pet);
   const place = locationLabel(pet);
   const shelterName = pet.shelters?.name?.trim() ?? null;
+  const transportSummary = transportStatesSummary(pet.shelters);
   const shelterListingHref = speciesBrowsePath(dbSpecies, pet.shelter_id);
 
   return (
@@ -225,6 +227,30 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
               <p className="text-base-content/80 mt-3 leading-relaxed">
                 {pet.notes.trim()}
               </p>
+            </section>
+          ) : null}
+
+          {/* Out-of-state adopters find these listings through the transport
+              filter, so the offer and its terms belong on the page (#331). */}
+          {transportSummary ? (
+            <section className="mb-8" aria-labelledby="pet-transport-heading">
+              <h2
+                id="pet-transport-heading"
+                className="font-display text-2xl font-bold"
+              >
+                Transport
+              </h2>
+              <p className="text-base-content/80 mt-3 leading-relaxed">
+                {shelterName ?? 'This rescue'} transports to {transportSummary}
+                {pet.transportable === false
+                  ? `, but ${pet.name} cannot travel and must be adopted locally.`
+                  : '.'}
+              </p>
+              {pet.transportable !== false && pet.shelters?.transport_note ? (
+                <p className="text-base-content/70 mt-2 text-sm leading-relaxed">
+                  {pet.shelters.transport_note.trim()}
+                </p>
+              ) : null}
             </section>
           ) : null}
 
