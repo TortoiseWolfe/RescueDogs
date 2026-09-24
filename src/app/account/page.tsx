@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Payments are not offered yet; the /payment routes still exist. Revisit: #328
+const SHOW_PAYMENT_LINKS = false;
+
 export default function AccountPage() {
   return (
     <ProtectedRoute>
@@ -40,15 +43,22 @@ export default function AccountPage() {
             >
               View recent security activity
             </Link>
-            <Link href="/payment" className="btn btn-outline min-h-11 w-full">
-              View payments
-            </Link>
-            <Link
-              href="/payment?tab=subscriptions"
-              className="btn btn-outline min-h-11 w-full"
-            >
-              Manage subscriptions
-            </Link>
+            {SHOW_PAYMENT_LINKS ? (
+              <>
+                <Link
+                  href="/payment"
+                  className="btn btn-outline min-h-11 w-full"
+                >
+                  View payments
+                </Link>
+                <Link
+                  href="/payment?tab=subscriptions"
+                  className="btn btn-outline min-h-11 w-full"
+                >
+                  Manage subscriptions
+                </Link>
+              </>
+            ) : null}
           </div>
         </div>
       </main>

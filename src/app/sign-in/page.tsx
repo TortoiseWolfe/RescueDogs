@@ -96,7 +96,7 @@ export default function SignInPage() {
       <div className="mx-auto max-w-md">
         <h1
           className={`text-center text-3xl font-bold ${
-            portal && !switchMessage ? 'mb-6 sm:mb-8' : 'mb-2 sm:mb-3'
+            switchMessage ? 'mb-2 sm:mb-3' : 'mb-4 sm:mb-5'
           }`}
         >
           {heading}
@@ -109,18 +109,7 @@ export default function SignInPage() {
           >
             <span>{switchMessage}</span>
           </div>
-        ) : portal ? null : (
-          <p className="text-base-content/70 mb-6 max-w-full text-center text-xs sm:mb-8 sm:text-sm md:whitespace-nowrap">
-            New here?{' '}
-            <Link href="/for-adopters" className="link link-primary">
-              For Adopters
-            </Link>
-            {' · '}
-            <Link href="/for-shelters" className="link link-primary">
-              For Shelters
-            </Link>
-          </p>
-        )}
+        ) : null}
         {switchFrom && demoSwitch && portal ? (
           <p className="text-base-content/60 mb-4 text-center text-xs">
             Coming from the {switchFrom} demo session.
