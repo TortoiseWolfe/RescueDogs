@@ -81,7 +81,7 @@ export class ApplicationService {
     let query = this.supabase
       .from('pets')
       .select(
-        `id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, created_at, ${shelterEmbed}`
+        `id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, video_url, created_at, ${shelterEmbed}`
       )
       .eq('status', 'available')
       .eq('species', species);
@@ -138,7 +138,7 @@ export class ApplicationService {
     const { data, error } = await this.supabase
       .from('pets')
       .select(
-        `id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, created_at,
+        `id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, video_url, created_at,
         shelters(name, city, state, zip)`
       )
       .eq('id', petId)

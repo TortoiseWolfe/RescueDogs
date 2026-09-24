@@ -120,6 +120,8 @@ export interface Pet {
   status: PetStatus;
   /** Public short bio; omit in UI when null/empty (#167). */
   notes: string | null;
+  /** Optional https video URL; omit UI when null/empty (#326). */
+  video_url: string | null;
   created_at: string;
 }
 

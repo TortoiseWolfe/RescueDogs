@@ -20,6 +20,7 @@ const basePet = (zip: string | null): BrowsePet =>
     photo_url: null,
     status: 'available',
     notes: null,
+    video_url: null,
     created_at: '2026-01-01T00:00:00Z',
     shelters: {
       name: 'Rescue',

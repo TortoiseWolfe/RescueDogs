@@ -5,6 +5,7 @@ import {
   DEFAULT_MEET_THE_PETS,
   HOMEPAGE_SLOT_THEMES,
   isSeedDemoPetId,
+  MEET_PET_DETAIL_TEXT,
   MEET_THE_PETS_POOL,
   pickMeetThePets,
   type LiveMeetPetInput,
@@ -50,6 +51,13 @@ describe('HOMEPAGE_SLOT_THEMES', () => {
     expect(HOMEPAGE_SLOT_THEMES[0].bg).toBe('bg-[#e8edf7]');
     expect(HOMEPAGE_SLOT_THEMES[1].bg).toBe('bg-[#fff7ed]');
     expect(HOMEPAGE_SLOT_THEMES[2].bg).toBe('bg-[#f1f6ff]');
+  });
+
+  it('keeps detail copy on fixed navy (not orange title — AAA #326)', () => {
+    expect(MEET_PET_DETAIL_TEXT).toBe('text-[#0c1929]');
+    // Orange slot title is fine for large bold names; body text must not reuse it.
+    expect(HOMEPAGE_SLOT_THEMES[1].title).toBe('text-[#c2410c]');
+    expect(MEET_PET_DETAIL_TEXT).not.toBe(HOMEPAGE_SLOT_THEMES[1].title);
   });
 });
 

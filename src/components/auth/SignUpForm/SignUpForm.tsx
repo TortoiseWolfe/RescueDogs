@@ -201,52 +201,40 @@ export default function SignUpForm({
       onSubmit={handleSubmit}
       className={`space-y-4${className ? ` ${className}` : ''}`}
     >
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
-        <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="email">
-          <span className="label-text">Email</span>
-        </label>
+      <label className="form-control w-full" htmlFor="email">
+        <span className="label-text mb-1">Email</span>
         <input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="input input-bordered min-h-11 min-w-0 flex-1"
+          className="input input-bordered min-h-11 w-full"
           placeholder="you@example.com"
           required
           disabled={loading}
         />
-      </div>
+      </label>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-x-6">
-        <label
-          className="sm:w-36 sm:shrink-0 sm:pt-3 sm:text-right"
-          htmlFor="password"
-        >
-          <span className="label-text">Password</span>
+      <div className="form-control w-full">
+        <label className="label-text mb-1" htmlFor="password">
+          Password
         </label>
-        <div className="min-w-0 flex-1">
-          <PasswordField
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-            disabled={loading}
-          />
-          {/* Password strength indicator (T042) */}
-          <div className="mt-2">
-            <PasswordStrengthIndicator password={password} />
-          </div>
+        <PasswordField
+          id="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          required
+          disabled={loading}
+          className="w-full"
+        />
+        <div className="mt-2">
+          <PasswordStrengthIndicator password={password} />
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
-        <label
-          className="sm:w-36 sm:shrink-0 sm:text-right"
-          htmlFor="confirm-password"
-        >
-          <span className="label-text">Confirm Password</span>
-        </label>
+      <label className="form-control w-full" htmlFor="confirm-password">
+        <span className="label-text mb-1">Confirm Password</span>
         <PasswordField
           id="confirm-password"
           value={confirmPassword}
@@ -254,35 +242,22 @@ export default function SignUpForm({
           placeholder="••••••••"
           required
           disabled={loading}
+          className="w-full"
         />
-      </div>
+      </label>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
-        <div
-          className="hidden sm:block sm:w-36 sm:shrink-0"
-          aria-hidden="true"
+      <label className="label cursor-pointer justify-start gap-2 p-0">
+        <input
+          type="checkbox"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+          className="checkbox min-h-11 min-w-11"
+          disabled={loading}
         />
-        <label className="label cursor-pointer justify-start gap-2 p-0">
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            className="checkbox min-h-11 min-w-11"
-            disabled={loading}
-          />
-          <span className="label-text">Remember me</span>
-        </label>
-      </div>
+        <span className="label-text">Remember me</span>
+      </label>
 
-      {/* Match the label+input row indent so Turnstile lines up with the
-          field column on sm+ (#303), not flush left under the labels. */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-x-6">
-        <div
-          className="hidden sm:block sm:w-36 sm:shrink-0"
-          aria-hidden="true"
-        />
-        <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
-      </div>
+      <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
 
       {error && (
         <div className="alert alert-error" role="alert" aria-live="assertive">

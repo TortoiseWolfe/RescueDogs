@@ -93,7 +93,7 @@ const CaptchaWidget = forwardRef<CaptchaWidgetHandle, CaptchaWidgetProps>(
 
     return (
       <div
-        className={`captcha-widget w-full min-w-0 sm:flex-1${className ? ` ${className}` : ''}`}
+        className={`captcha-widget w-full min-w-0${className ? ` ${className}` : ''}`}
         data-testid="captcha-widget"
         data-turnstile-size={size}
       >

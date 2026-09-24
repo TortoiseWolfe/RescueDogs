@@ -2852,6 +2852,12 @@ CREATE TABLE IF NOT EXISTS pets (
   status TEXT NOT NULL DEFAULT 'available'
     CHECK (status IN ('available', 'pending', 'adopted')),
   notes TEXT CHECK (notes IS NULL OR length(notes) <= 2000),
+  video_url TEXT CHECK (
+    video_url IS NULL OR (
+      length(video_url) <= 2048
+      AND video_url ~* '^https://'
+    )
+  ),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -2870,11 +2876,27 @@ EXCEPTION
   WHEN duplicate_object THEN NULL;
 END $$;
 
+-- Optional public video link (YouTube / TikTok / etc.) — link-out only (#326)
+ALTER TABLE pets ADD COLUMN IF NOT EXISTS video_url TEXT;
+DO $$
+BEGIN
+  ALTER TABLE pets ADD CONSTRAINT pets_video_url_https
+    CHECK (
+      video_url IS NULL OR (
+        length(video_url) <= 2048
+        AND video_url ~* '^https://'
+      )
+    );
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_pets_shelter_available
   ON pets(shelter_id) WHERE status = 'available';
 
-COMMENT ON TABLE pets IS 'Pet records for apply / browse / shelter staff. notes = public short bio (#167).';
+COMMENT ON TABLE pets IS 'Pet records for apply / browse / shelter staff. notes = public short bio (#167). video_url = optional public video link (#326).';
 COMMENT ON COLUMN pets.notes IS 'Public short bio for browse cards; staff-editable; omit UI when null/empty (#167)';
+COMMENT ON COLUMN pets.video_url IS 'Optional https URL to a public video (YouTube, TikTok, Vimeo, etc.); open in new tab — no upload/embed (#326)';
 
 -- Pet sex options expanded for shelter intake (#273)
 ALTER TABLE pets DROP CONSTRAINT IF EXISTS pets_sex_check;
