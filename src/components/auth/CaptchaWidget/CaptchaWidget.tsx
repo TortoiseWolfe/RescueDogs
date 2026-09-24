@@ -36,8 +36,9 @@ export interface CaptchaWidgetHandle {
 /**
  * Viewport below this uses Turnstile `compact` (150×140) so the 300px-min
  * flexible/normal sizes do not overflow a padded 320px form column (#488).
- * At/above it we use `flexible` so the widget stretches to match full-width
- * inputs and buttons (horizontal rectangle, ~65px tall).
+ * At/above it we use `flexible`, stretched across a centered `max-w-xs`
+ * wrapper so it reads as a horizontal rectangle slightly narrower than the
+ * form's full-width submit button.
  */
 export const TURNSTILE_FLEXIBLE_MIN_WIDTH_PX = 400;
 
@@ -68,7 +69,7 @@ function turnstileSizeForViewport(width: number): TurnstileSize {
 const CaptchaWidget = forwardRef<CaptchaWidgetHandle, CaptchaWidgetProps>(
   function CaptchaWidget({ onToken, className = '' }, ref) {
     const instance = useRef<TurnstileInstance>(null);
-    // Prefer the wide horizontal widget on first paint (matches inputs/buttons).
+    // Prefer the wide horizontal widget on first paint.
     // Narrow phones swap to compact after measure + remount (`key={size}`).
     const [size, setSize] = useState<TurnstileSize>('flexible');
 
@@ -93,7 +94,7 @@ const CaptchaWidget = forwardRef<CaptchaWidgetHandle, CaptchaWidgetProps>(
 
     return (
       <div
-        className={`captcha-widget w-full min-w-0${className ? ` ${className}` : ''}`}
+        className={`captcha-widget mx-auto flex w-full max-w-xs min-w-0 justify-center${className ? ` ${className}` : ''}`}
         data-testid="captcha-widget"
         data-turnstile-size={size}
       >
@@ -101,6 +102,7 @@ const CaptchaWidget = forwardRef<CaptchaWidgetHandle, CaptchaWidgetProps>(
           key={size}
           ref={instance}
           siteKey={captchaConfig.siteKey}
+          style={size === 'flexible' ? { width: '100%' } : undefined}
           onSuccess={(token) => onToken(token)}
           // A token is single-use and expires (~5 min). Clearing it forces a
           // fresh solve rather than submitting a stale token that Supabase
