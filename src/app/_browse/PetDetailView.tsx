@@ -228,6 +228,19 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
             </section>
           ) : null}
 
+          {pet.video_url?.trim() ? (
+            <p className="mb-8">
+              <a
+                href={pet.video_url.trim()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-outline btn-primary min-h-11"
+              >
+                Watch video
+              </a>
+            </p>
+          ) : null}
+
           <div className="border-base-300 bg-base-200 sticky bottom-0 -mx-4 border-t px-4 py-4 sm:static sm:mx-0 sm:rounded-xl sm:border sm:px-6">
             <Link
               href={`/adopt?pet=${pet.id}`}

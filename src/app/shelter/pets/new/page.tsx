@@ -9,6 +9,7 @@ import { ShelterPetService } from '@/services/applications';
 import { useShelterMembership } from '../../ShelterGate';
 import type { PetSex, PetSize, PetSpecies } from '@/types/applications';
 import { combineAgeYears } from '@/lib/pet-age';
+import { normalizePetVideoUrl } from '@/lib/pet-video-url';
 import { withAsyncTimeout } from '@/lib/with-timeout';
 import { PET_SEX_OPTIONS } from '@/lib/pet-sex';
 import { PetAgeFields } from '../PetAgeFields';
@@ -30,6 +31,7 @@ interface PetDraft {
   ageMonthsPart: number;
   size: PetSize | '';
   notes: string;
+  videoUrl: string;
 }
 
 /**
@@ -46,6 +48,7 @@ export default function NewShelterPetPage() {
   const [ageMonthsPart, setAgeMonthsPart] = useState(0);
   const [size, setSize] = useState<PetSize | ''>('');
   const [notes, setNotes] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +68,7 @@ export default function NewShelterPetPage() {
     ageMonthsPart,
     size,
     notes,
+    videoUrl,
   };
   const { restored, savedAt, clearDraft } = useFormDraft(
     `shelter:${shelterId}:pet:new`,
@@ -86,6 +90,7 @@ export default function NewShelterPetPage() {
     setAgeMonthsPart(restored.ageMonthsPart ?? 0);
     setSize(restored.size ?? '');
     setNotes(restored.notes ?? '');
+    setVideoUrl(restored.videoUrl ?? '');
     setRestoredFromDraft(true);
   }, [restored]);
 
@@ -127,6 +132,7 @@ export default function NewShelterPetPage() {
     setRedirecting(false);
     setError(null);
     try {
+      const normalizedVideo = normalizePetVideoUrl(videoUrl);
       const service = new ShelterPetService(supabase);
       const pet = await withAsyncTimeout(
         service.createPet(shelterId, {
@@ -137,6 +143,7 @@ export default function NewShelterPetPage() {
           age_years: combineAgeYears(ageYearsPart, ageMonthsPart),
           size: size || null,
           notes: notes || null,
+          video_url: normalizedVideo,
         }),
         30_000,
         'Save pet'
@@ -269,6 +276,23 @@ export default function NewShelterPetPage() {
           />
         </label>
 
+        <label className="form-control w-full">
+          <span className="label-text">Video link (optional)</span>
+          <input
+            type="url"
+            className="input input-bordered min-h-11 w-full"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            maxLength={2048}
+            placeholder="https://www.youtube.com/watch?v=…"
+            inputMode="url"
+            autoComplete="off"
+          />
+          <span className="label-text-alt text-base-content/60 mt-1">
+            YouTube, TikTok, Vimeo, or any public video URL.
+          </span>
+        </label>
+
         <PetPhotoManager
           ref={photoManagerRef}
           shelterId={shelterId}
@@ -301,6 +325,7 @@ export default function NewShelterPetPage() {
             setAgeMonthsPart(0);
             setSize('');
             setNotes('');
+            setVideoUrl('');
           }}
         />
 

@@ -10,7 +10,7 @@ import type {
 } from '@/types/applications';
 
 const PET_COLUMNS =
-  'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, created_at';
+  'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, video_url, created_at';
 
 export type PetWriteInput = {
   name: string;
@@ -22,6 +22,7 @@ export type PetWriteInput = {
   status?: PetStatus;
   photo_url?: string | null;
   notes?: string | null;
+  video_url?: string | null;
 };
 
 /**
@@ -74,6 +75,7 @@ export class ShelterPetService {
         status: input.status ?? 'available',
         photo_url: input.photo_url ?? null,
         notes: input.notes?.trim() || null,
+        video_url: input.video_url?.trim() || null,
       })
       .select(PET_COLUMNS)
       .single();
@@ -95,6 +97,8 @@ export class ShelterPetService {
     if (input.status !== undefined) patch.status = input.status;
     if (input.photo_url !== undefined) patch.photo_url = input.photo_url;
     if (input.notes !== undefined) patch.notes = input.notes?.trim() || null;
+    if (input.video_url !== undefined)
+      patch.video_url = input.video_url?.trim() || null;
 
     const { data, error } = await this.supabase
       .from('pets')

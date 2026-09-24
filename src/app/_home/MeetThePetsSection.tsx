@@ -102,7 +102,7 @@ export default function MeetThePetsSection() {
                     >
                       {pet.name}
                     </h3>
-                    <p className="text-base-content/95 font-semibold">
+                    <p className={`font-semibold ${theme.title}`}>
                       {pet.detail}
                     </p>
                   </div>

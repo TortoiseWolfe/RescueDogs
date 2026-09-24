@@ -313,27 +313,23 @@ export default function SignInForm({
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
-        <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="email">
-          <span className="label-text">Email</span>
-        </label>
+      <label className="form-control w-full" htmlFor="email">
+        <span className="label-text mb-1">Email</span>
         <input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="input input-bordered min-h-11 min-w-0 flex-1"
+          className="input input-bordered min-h-11 w-full"
           placeholder="you@example.com"
           autoComplete="email"
           required
           disabled={loading}
         />
-      </div>
+      </label>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
-        <label className="sm:w-36 sm:shrink-0 sm:text-right" htmlFor="password">
-          <span className="label-text">Password</span>
-        </label>
+      <label className="form-control w-full" htmlFor="password">
+        <span className="label-text mb-1">Password</span>
         <PasswordField
           id="password"
           value={password}
@@ -342,40 +338,27 @@ export default function SignInForm({
           autoComplete="current-password"
           required
           disabled={loading}
+          className="w-full"
         />
-      </div>
+      </label>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6">
-        <div
-          className="hidden sm:block sm:w-36 sm:shrink-0"
-          aria-hidden="true"
+      <label
+        htmlFor="remember-me"
+        className="label cursor-pointer justify-start gap-3 p-0"
+      >
+        <input
+          id="remember-me"
+          type="checkbox"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+          className="checkbox checkbox-primary"
+          disabled={loading}
+          aria-label="Remember Me"
         />
-        <label
-          htmlFor="remember-me"
-          className="label cursor-pointer justify-start gap-3 p-0"
-        >
-          <input
-            id="remember-me"
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            className="checkbox checkbox-primary"
-            disabled={loading}
-            aria-label="Remember Me"
-          />
-          <span className="label-text">Remember Me</span>
-        </label>
-      </div>
+        <span className="label-text">Remember Me</span>
+      </label>
 
-      {/* Match the label+input row indent so Turnstile lines up with the
-          field column on sm+ (#303), not flush left under the labels. */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-x-6">
-        <div
-          className="hidden sm:block sm:w-36 sm:shrink-0"
-          aria-hidden="true"
-        />
-        <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
-      </div>
+      <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
 
       {error && (
         <div className="alert alert-error" role="alert" aria-live="assertive">

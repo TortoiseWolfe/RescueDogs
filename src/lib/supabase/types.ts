@@ -703,12 +703,14 @@ export type Database = {
           created_at: string;
           id: string;
           name: string;
+          notes: string | null;
           photo_url: string | null;
           sex: string | null;
           shelter_id: string;
           size: string | null;
           species: string;
           status: string;
+          video_url: string | null;
         };
         Insert: {
           age_years?: number | null;
@@ -716,12 +718,14 @@ export type Database = {
           created_at?: string;
           id?: string;
           name: string;
+          notes?: string | null;
           photo_url?: string | null;
           sex?: string | null;
           shelter_id: string;
           size?: string | null;
           species?: string;
           status?: string;
+          video_url?: string | null;
         };
         Update: {
           age_years?: number | null;
@@ -729,12 +733,14 @@ export type Database = {
           created_at?: string;
           id?: string;
           name?: string;
+          notes?: string | null;
           photo_url?: string | null;
           sex?: string | null;
           shelter_id?: string;
           size?: string | null;
           species?: string;
           status?: string;
+          video_url?: string | null;
         };
         Relationships: [
           {
