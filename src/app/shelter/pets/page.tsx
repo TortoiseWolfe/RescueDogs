@@ -11,10 +11,11 @@ import type { Pet } from '@/types/applications';
  * Shelter pets list (#110). Staff manage animals for their membership shelter.
  */
 export default function ShelterPetsPage() {
-  const { shelterId } = useShelterMembership();
+  const { shelterId, transports, transportStates } = useShelterMembership();
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [savingTransport, setSavingTransport] = useState<string | null>(null);
 
   const fetchPets = useCallback(async () => {
     try {
@@ -28,6 +29,33 @@ export default function ShelterPetsPage() {
     }
   }, [shelterId]);
 
+  /**
+   * Optimistic so ticking down a long list stays responsive; the row snaps back
+   * if the write fails, rather than lying about what the adopter will see.
+   */
+  async function toggleTransportable(pet: Pet, next: boolean) {
+    setSavingTransport(pet.id);
+    setError(null);
+    setPets((current) =>
+      current.map((row) =>
+        row.id === pet.id ? { ...row, transportable: next } : row
+      )
+    );
+    try {
+      const service = new ShelterPetService(supabase);
+      await service.updatePet(pet.id, { transportable: next });
+    } catch {
+      setPets((current) =>
+        current.map((row) =>
+          row.id === pet.id ? { ...row, transportable: !next } : row
+        )
+      );
+      setError(`Could not update transport for ${pet.name}. Please try again.`);
+    } finally {
+      setSavingTransport(null);
+    }
+  }
+
   useEffect(() => {
     fetchPets();
   }, [fetchPets]);
@@ -40,7 +68,7 @@ export default function ShelterPetsPage() {
     );
   }
 
-  if (error) {
+  if (error && pets.length === 0) {
     return (
       <div role="alert" className="alert alert-error">
         <span>{error}</span>
@@ -59,6 +87,23 @@ export default function ShelterPetsPage() {
           Add Pet
         </Link>
       </div>
+
+      {error ? (
+        <div role="alert" className="alert alert-error">
+          <span>{error}</span>
+        </div>
+      ) : null}
+
+      {transports ? (
+        <p className="text-base-content/70 text-sm">
+          Your rescue transports to {transportStates.length}{' '}
+          {transportStates.length === 1 ? 'state' : 'states'}. Every pet below
+          is offered for transport unless you untick it.{' '}
+          <Link href="/shelter/settings" className="link link-primary">
+            Transport settings
+          </Link>
+        </p>
+      ) : null}
 
       {pets.length === 0 ? (
         <p className="text-base-content/70">
@@ -93,6 +138,26 @@ export default function ShelterPetsPage() {
                   <p className="text-base-content/60 mt-1 line-clamp-2 text-sm">
                     {pet.notes.trim()}
                   </p>
+                ) : null}
+                {transports ? (
+                  <label
+                    className="label mt-2 flex min-h-11 cursor-pointer items-center justify-start gap-2 p-0"
+                    htmlFor={`transportable-${pet.id}`}
+                  >
+                    <input
+                      id={`transportable-${pet.id}`}
+                      type="checkbox"
+                      className="checkbox checkbox-sm checkbox-primary"
+                      checked={pet.transportable !== false}
+                      disabled={savingTransport === pet.id}
+                      onChange={(e) =>
+                        void toggleTransportable(pet, e.target.checked)
+                      }
+                    />
+                    <span className="label-text text-sm">
+                      Available for transport
+                    </span>
+                  </label>
                 ) : null}
               </div>
               <Link

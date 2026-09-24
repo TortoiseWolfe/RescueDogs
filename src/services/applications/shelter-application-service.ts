@@ -6,30 +6,88 @@ import type {
   ApplicationStatus,
   ApplicationWithPet,
   ApplicationWithPetAndHistory,
+  Shelter,
   ShelterRole,
 } from '@/types/applications';
+import { normalizeTransportStates } from '@/lib/browse/transport';
 
 const PET_EMBED = 'pets(id, name, species, breed, photo_url, status)';
+
+const SHELTER_COLUMNS =
+  'id, name, city, state, zip, contact_email, transports, transport_states, transport_note, created_at';
 
 export interface ShelterMembershipInfo {
   shelterId: string;
   shelterName: string;
   role: ShelterRole;
+  /** Rescue-wide transport switch, so pet forms know whether to offer the opt-out (#331). */
+  transports: boolean;
+  /** States this rescue transports to (#331). */
+  transportStates: string[];
 }
 
-export interface CreateMyShelterInput {
+export interface ShelterProfileInput {
   name: string;
   city?: string;
   state?: string;
   zip?: string;
   contactEmail?: string;
+  /** Rescue-wide transport switch (#331). */
+  transports?: boolean;
+  /** States this rescue transports to; required when `transports` (#331). */
+  transportStates?: string[];
+  /** Optional public transport details (#331). */
+  transportNote?: string;
 }
+
+export type CreateMyShelterInput = ShelterProfileInput;
+
+export type UpdateMyShelterInput = ShelterProfileInput & { shelterId: string };
 
 export class AlreadyAMemberError extends Error {
   constructor() {
     super('already_a_member');
     this.name = 'AlreadyAMemberError';
   }
+}
+
+/** Reasons update_my_shelter can refuse (#331). */
+export const SHELTER_UPDATE_ERROR_CODES = [
+  'not_a_manager',
+  'invalid_shelter',
+  'invalid_name',
+  'invalid_city',
+  'invalid_state',
+  'invalid_zip',
+  'invalid_contact_email',
+  'invalid_transport_states',
+  'invalid_transport_note',
+  'transport_states_required',
+] as const;
+
+export type ShelterUpdateErrorCode =
+  | (typeof SHELTER_UPDATE_ERROR_CODES)[number]
+  | 'unknown';
+
+export class ShelterUpdateError extends Error {
+  readonly code: ShelterUpdateErrorCode;
+
+  constructor(code: ShelterUpdateErrorCode) {
+    super(code);
+    this.name = 'ShelterUpdateError';
+    this.code = code;
+  }
+}
+
+/**
+ * The longest-matching code wins: `invalid_transport_states` contains
+ * `invalid_state` as a substring, so a naive `find` would mislabel it.
+ */
+function shelterUpdateErrorCode(message: string): ShelterUpdateErrorCode {
+  const matches = SHELTER_UPDATE_ERROR_CODES.filter((candidate) =>
+    message.includes(candidate)
+  ).sort((a, b) => b.length - a.length);
+  return matches[0] ?? 'unknown';
 }
 
 /** Reasons add_shelter_staff_by_email can refuse (#220 / #261). */
@@ -78,7 +136,7 @@ export class ShelterApplicationService {
   ): Promise<ShelterMembershipInfo[]> {
     const { data, error } = await this.supabase
       .from('shelter_members')
-      .select('shelter_id, role, shelters(name)')
+      .select('shelter_id, role, shelters(name, transports, transport_states)')
       .eq('user_id', userId);
 
     if (error) {
@@ -88,13 +146,21 @@ export class ShelterApplicationService {
     const rows = data as unknown as Array<{
       shelter_id: string;
       role: ShelterRole;
-      shelters: { name: string } | null;
+      shelters: {
+        name: string;
+        transports?: boolean | null;
+        transport_states?: string[] | null;
+      } | null;
     }>;
     return rows
       .map((row) => ({
         shelterId: row.shelter_id,
         shelterName: row.shelters?.name ?? '',
         role: row.role,
+        transports: row.shelters?.transports === true,
+        transportStates: normalizeTransportStates(
+          row.shelters?.transport_states
+        ),
       }))
       .sort((a, b) =>
         a.shelterName.localeCompare(b.shelterName, undefined, {
@@ -131,6 +197,9 @@ export class ShelterApplicationService {
       p_state: input.state ?? null,
       p_zip: input.zip ?? null,
       p_contact_email: input.contactEmail ?? null,
+      p_transports: input.transports ?? false,
+      p_transport_states: normalizeTransportStates(input.transportStates),
+      p_transport_note: input.transportNote ?? null,
     });
 
     if (error) {
@@ -143,6 +212,61 @@ export class ShelterApplicationService {
       throw new Error('create_my_shelter returned no id');
     }
     return data;
+  }
+
+  /** The rescue's own profile row, for the settings form (#331). */
+  async getShelter(shelterId: string): Promise<Shelter | null> {
+    const { data, error } = await this.supabase
+      .from('shelters')
+      .select(SHELTER_COLUMNS)
+      .eq('id', shelterId)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return null;
+
+    const row = data as unknown as Shelter;
+    return {
+      ...row,
+      transports: row.transports === true,
+      transport_states: normalizeTransportStates(row.transport_states),
+    };
+  }
+
+  /**
+   * Manager-only edit of the rescue profile + transport settings (#331).
+   * SECURITY DEFINER RPC — shelters has no client UPDATE policy, and rescues
+   * created before transport existed have no other way to opt in.
+   */
+  async updateMyShelter(input: UpdateMyShelterInput): Promise<Shelter> {
+    const transports = input.transports ?? false;
+    const { data, error } = await this.supabase.rpc('update_my_shelter', {
+      p_shelter_id: input.shelterId,
+      p_name: input.name,
+      p_city: input.city ?? null,
+      p_state: input.state ?? null,
+      p_zip: input.zip ?? null,
+      p_contact_email: input.contactEmail ?? null,
+      p_transports: transports,
+      p_transport_states: transports
+        ? normalizeTransportStates(input.transportStates)
+        : [],
+      p_transport_note: input.transportNote ?? null,
+    });
+
+    if (error) {
+      throw new ShelterUpdateError(shelterUpdateErrorCode(error.message ?? ''));
+    }
+    if (!data) {
+      throw new ShelterUpdateError('unknown');
+    }
+
+    const row = data as unknown as Shelter;
+    return {
+      ...row,
+      transports: row.transports === true,
+      transport_states: normalizeTransportStates(row.transport_states),
+    };
   }
 
   /**

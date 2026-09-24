@@ -28,6 +28,7 @@ const createQueryBuilder = (result: QueryResult) => {
     'upsert',
     'delete',
     'eq',
+    'contains',
     'order',
     'limit',
   ]) {
@@ -109,7 +110,9 @@ describe('ApplicationService', () => {
 
     expect(mock.from).toHaveBeenCalledWith('pets');
     expect(builder.select).toHaveBeenCalledWith(
-      expect.stringContaining('shelters(name, city, state, zip)')
+      expect.stringContaining(
+        'shelters(name, city, state, zip, transports, transport_states, transport_note)'
+      )
     );
     expect(builder.eq).toHaveBeenCalledWith('status', 'available');
     expect(builder.eq).toHaveBeenCalledWith('species', 'cat');
@@ -123,9 +126,78 @@ describe('ApplicationService', () => {
     await service.getBrowsePets('dog', { state: ' nc ' });
 
     expect(builder.select).toHaveBeenCalledWith(
-      expect.stringContaining('shelters!inner(name, city, state, zip)')
+      expect.stringContaining(
+        'shelters!inner(name, city, state, zip, transports, transport_states, transport_note)'
+      )
     );
     expect(builder.eq).toHaveBeenCalledWith('shelters.state', 'NC');
+  });
+
+  it('getBrowsePets adds rescues that transport to the state (#331)', async () => {
+    const localPet = {
+      id: PET_ID,
+      name: 'Pickle',
+      transportable: true,
+      shelters: { name: 'Newark Pet Alliance', state: 'NJ' },
+    };
+    const transportedPet = {
+      id: '44444444-4444-4444-4444-444444444402',
+      name: 'Aspen',
+      transportable: true,
+      shelters: { name: 'Sunnyside Street Dogs Rescue', state: 'TX' },
+    };
+    const localBuilder = createQueryBuilder({ data: [localPet], error: null });
+    const transportBuilder = createQueryBuilder({
+      data: [transportedPet],
+      error: null,
+    });
+    mock.from
+      .mockReturnValueOnce(localBuilder)
+      .mockReturnValueOnce(transportBuilder);
+
+    const result = await service.getBrowsePets('dog', { state: 'NJ' });
+
+    expect(transportBuilder.eq).toHaveBeenCalledWith('transportable', true);
+    expect(transportBuilder.eq).toHaveBeenCalledWith(
+      'shelters.transports',
+      true
+    );
+    expect(transportBuilder.contains).toHaveBeenCalledWith(
+      'shelters.transport_states',
+      ['NJ']
+    );
+    // Sorted by name, de-duplicated across both round trips.
+    expect(result.map((pet) => pet.name)).toEqual(['Aspen', 'Pickle']);
+  });
+
+  it('getBrowsePets derives the transport state from the ZIP (#331)', async () => {
+    const localBuilder = createQueryBuilder({ data: [], error: null });
+    const transportBuilder = createQueryBuilder({ data: [], error: null });
+    mock.from
+      .mockReturnValueOnce(localBuilder)
+      .mockReturnValueOnce(transportBuilder);
+
+    await service.getBrowsePets('dog', { centerZip: '07102' });
+
+    expect(transportBuilder.contains).toHaveBeenCalledWith(
+      'shelters.transport_states',
+      ['NJ']
+    );
+    // The base query keeps its old behaviour: a ZIP alone never narrows by state.
+    expect(localBuilder.eq).not.toHaveBeenCalledWith('shelters.state', 'NJ');
+  });
+
+  it('getBrowsePets skips the transport query when opted out (#331)', async () => {
+    const builder = createQueryBuilder({ data: [], error: null });
+    mock.from.mockReturnValue(builder);
+
+    await service.getBrowsePets('dog', {
+      state: 'NJ',
+      includeTransport: false,
+    });
+
+    expect(mock.from).toHaveBeenCalledTimes(1);
+    expect(builder.contains).not.toHaveBeenCalled();
   });
 
   it('listBrowseShelters returns distinct shelters with available pets (#280)', async () => {
@@ -342,6 +414,8 @@ describe('ShelterApplicationService', () => {
       shelterId: SHELTER_ID,
       shelterName: 'Second Chance Rescue',
       role: 'manager',
+      transports: false,
+      transportStates: [],
     });
   });
 
@@ -364,7 +438,11 @@ describe('ShelterApplicationService', () => {
         {
           shelter_id: SHELTER_ID,
           role: 'manager',
-          shelters: { name: 'Alpha Rescue' },
+          shelters: {
+            name: 'Alpha Rescue',
+            transports: true,
+            transport_states: ['nj', 'NJ', 'ny'],
+          },
         },
       ],
       error: null,
@@ -378,11 +456,15 @@ describe('ShelterApplicationService', () => {
         shelterId: SHELTER_ID,
         shelterName: 'Alpha Rescue',
         role: 'manager',
+        transports: true,
+        transportStates: ['NJ', 'NY'],
       },
       {
         shelterId: otherId,
         shelterName: 'Zebra Rescue',
         role: 'staff',
+        transports: false,
+        transportStates: [],
       },
     ]);
   });
@@ -429,8 +511,140 @@ describe('ShelterApplicationService', () => {
       p_state: 'NC',
       p_zip: '28801',
       p_contact_email: 'hello@example.com',
+      p_transports: false,
+      p_transport_states: [],
+      p_transport_note: null,
     });
     expect(id).toBe(SHELTER_ID);
+  });
+
+  it('createMyShelter forwards normalized transport settings (#331)', async () => {
+    mock.rpc.mockResolvedValue({ data: SHELTER_ID, error: null });
+
+    await service.createMyShelter({
+      name: 'Sunnyside Street Dogs Rescue',
+      state: 'TX',
+      transports: true,
+      transportStates: [' nj ', 'NJ', 'ny', 'ZZ'],
+      transportNote: 'Transport fee $300.',
+    });
+
+    expect(mock.rpc).toHaveBeenCalledWith(
+      'create_my_shelter',
+      expect.objectContaining({
+        p_transports: true,
+        p_transport_states: ['NJ', 'NY'],
+        p_transport_note: 'Transport fee $300.',
+      })
+    );
+  });
+
+  it('updateMyShelter calls the manager-only RPC (#331)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: {
+        id: SHELTER_ID,
+        name: 'Sunnyside Street Dogs Rescue',
+        city: 'Houston',
+        state: 'TX',
+        zip: '77002',
+        contact_email: null,
+        transports: true,
+        transport_states: ['nj'],
+        transport_note: null,
+        created_at: '2026-01-01T00:00:00Z',
+      },
+      error: null,
+    });
+
+    const result = await service.updateMyShelter({
+      shelterId: SHELTER_ID,
+      name: 'Sunnyside Street Dogs Rescue',
+      city: 'Houston',
+      state: 'TX',
+      zip: '77002',
+      transports: true,
+      transportStates: ['NJ'],
+    });
+
+    expect(mock.rpc).toHaveBeenCalledWith('update_my_shelter', {
+      p_shelter_id: SHELTER_ID,
+      p_name: 'Sunnyside Street Dogs Rescue',
+      p_city: 'Houston',
+      p_state: 'TX',
+      p_zip: '77002',
+      p_contact_email: null,
+      p_transports: true,
+      p_transport_states: ['NJ'],
+      p_transport_note: null,
+    });
+    expect(result.transport_states).toEqual(['NJ']);
+  });
+
+  it('updateMyShelter drops transport states when transport is off (#331)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: {
+        id: SHELTER_ID,
+        name: 'Second Chance Rescue',
+        transports: false,
+        transport_states: [],
+      },
+      error: null,
+    });
+
+    await service.updateMyShelter({
+      shelterId: SHELTER_ID,
+      name: 'Second Chance Rescue',
+      transports: false,
+      transportStates: ['NJ'],
+    });
+
+    expect(mock.rpc).toHaveBeenCalledWith(
+      'update_my_shelter',
+      expect.objectContaining({
+        p_transports: false,
+        p_transport_states: [],
+      })
+    );
+  });
+
+  it('updateMyShelter maps RPC refusals to codes, longest match first (#331)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: null,
+      error: { message: 'not_a_manager' },
+    });
+
+    await expect(
+      service.updateMyShelter({ shelterId: SHELTER_ID, name: 'Nope' })
+    ).rejects.toMatchObject({ code: 'not_a_manager' });
+
+    // invalid_state is a substring of invalid_transport_states.
+    mock.rpc.mockResolvedValue({
+      data: null,
+      error: { message: 'invalid_transport_states' },
+    });
+
+    await expect(
+      service.updateMyShelter({ shelterId: SHELTER_ID, name: 'Nope' })
+    ).rejects.toMatchObject({ code: 'invalid_transport_states' });
+  });
+
+  it('getShelter normalizes transport fields (#331)', async () => {
+    const builder = createQueryBuilder({
+      data: {
+        id: SHELTER_ID,
+        name: 'Sunnyside Street Dogs Rescue',
+        transports: true,
+        transport_states: ['ny', 'nj', 'nj'],
+      },
+      error: null,
+    });
+    mock.from.mockReturnValue(builder);
+
+    const result = await service.getShelter(SHELTER_ID);
+
+    expect(mock.from).toHaveBeenCalledWith('shelters');
+    expect(builder.eq).toHaveBeenCalledWith('id', SHELTER_ID);
+    expect(result?.transport_states).toEqual(['NJ', 'NY']);
   });
 
   it('createMyShelter maps already_a_member to AlreadyAMemberError (#218)', async () => {

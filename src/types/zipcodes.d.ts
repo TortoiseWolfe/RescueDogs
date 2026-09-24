@@ -4,6 +4,8 @@ declare module 'zipcodes' {
         zip: string;
         latitude: number;
         longitude: number;
+        /** Two-letter state code; used to derive the adopter's state (#331). */
+        state?: string;
       }
     | undefined;
 }

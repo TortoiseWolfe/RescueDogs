@@ -6,16 +6,20 @@ import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { ApplicationService } from '@/services/applications';
 import type { BrowsePet, PetSpecies } from '@/types/applications';
-import {
-  BROWSE_RADIUS_OPTIONS,
-  filterBrowsePetsByRadius,
-} from '@/lib/browse/distance';
+import { BROWSE_RADIUS_OPTIONS } from '@/lib/browse/distance';
 import {
   hasBrowseLocationFilters,
   normalizeBrowseLocationFilters,
+  transportIncluded,
   US_STATE_OPTIONS,
   type BrowseLocationFilters,
 } from '@/lib/browse/location-filters';
+import {
+  applyRadiusWithTransport,
+  stateName,
+  transportBadgeLabel,
+  transportStateFor,
+} from '@/lib/browse/transport';
 import { petDetailPath } from '@/lib/browse/pet-links';
 import { basicsLabel, locationLabel } from './browse-labels';
 import BrowseSearchParamsReader from './BrowseSearchParamsReader';
@@ -80,11 +84,24 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
   const [draftState, setDraftState] = useState('');
   const [draftCenterZip, setDraftCenterZip] = useState('');
   const [draftMaxMiles, setDraftMaxMiles] = useState<number | ''>('');
+  const [draftIncludeTransport, setDraftIncludeTransport] = useState(true);
   const [filters, setFilters] = useState<BrowseLocationFilters>({});
   const [urlSynced, setUrlSynced] = useState(false);
   const filtersActive = hasBrowseLocationFilters(filters);
 
   const normalizedFilters = normalizeBrowseLocationFilters(filters);
+
+  // Transport needs somewhere to ship TO: the State filter, or the state behind
+  // the adopter's ZIP (#331).
+  const draftTransportState = transportStateFor(draftState, draftCenterZip);
+  // With nowhere to ship to, the filter cannot apply, so it reads as its default
+  // rather than stranding a disabled checkbox in the unchecked position.
+  const draftTransportChecked = draftTransportState
+    ? draftIncludeTransport
+    : true;
+  const appliedTransportState = transportIncluded(filters)
+    ? transportStateFor(normalizedFilters.state, normalizedFilters.centerZip)
+    : undefined;
   const shelterName = normalizedFilters.shelterId
     ? (shelterOptions.find((s) => s.id === normalizedFilters.shelterId)?.name ??
       pets[0]?.shelters?.name?.trim() ??
@@ -98,6 +115,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
     setDraftState(normalized.state ?? '');
     setDraftCenterZip(normalized.centerZip ?? '');
     setDraftMaxMiles(normalized.maxMiles ?? '');
+    setDraftIncludeTransport(transportIncluded(normalized));
     setUrlSynced(true);
   }, []);
 
@@ -126,13 +144,14 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
         const service = new ApplicationService(supabase);
         let rows = await service.getBrowsePets(dbSpecies, filters);
         const normalized = normalizeBrowseLocationFilters(filters);
-        if (normalized.centerZip && normalized.maxMiles) {
-          rows = filterBrowsePetsByRadius(
-            rows,
-            normalized.centerZip,
-            normalized.maxMiles
-          );
-        }
+        rows = applyRadiusWithTransport(rows, {
+          transportState: transportIncluded(normalized)
+            ? transportStateFor(normalized.state, normalized.centerZip)
+            : undefined,
+          centerZip: normalized.centerZip,
+          maxMiles: normalized.maxMiles,
+          includeTransport: transportIncluded(normalized),
+        });
         if (cancelled) return;
         setPets(rows);
         setError(null);
@@ -157,6 +176,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
     if (normalized.state) params.set('state', normalized.state);
     if (normalized.centerZip) params.set('zip', normalized.centerZip);
     if (normalized.maxMiles) params.set('miles', String(normalized.maxMiles));
+    if (normalized.includeTransport === false) params.set('transport', '0');
     const query = params.toString();
     router.replace(query ? `${pathname ?? ''}?${query}` : (pathname ?? ''));
   }
@@ -175,6 +195,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
       ...(draftState ? { state: draftState } : {}),
       ...(draftCenterZip.trim() ? { centerZip: draftCenterZip } : {}),
       ...(draftMaxMiles ? { maxMiles: draftMaxMiles } : {}),
+      ...(draftTransportChecked ? {} : { includeTransport: false }),
     };
     setFilters(next);
     syncFiltersToUrl(next);
@@ -185,6 +206,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
     setDraftState('');
     setDraftCenterZip('');
     setDraftMaxMiles('');
+    setDraftIncludeTransport(true);
     setFilterError(null);
     setFilters({});
     router.replace(pathname ?? '');
@@ -316,18 +338,38 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                   !draftShelterId &&
                   !draftState &&
                   !draftCenterZip &&
-                  draftMaxMiles === ''
+                  draftMaxMiles === '' &&
+                  draftTransportChecked
                 }
               >
                 Clear
               </button>
             </div>
+            <label
+              className="label mt-3 flex min-h-11 cursor-pointer items-center justify-start gap-2 p-0"
+              htmlFor="include-transport"
+            >
+              <input
+                id="include-transport"
+                type="checkbox"
+                className="checkbox checkbox-primary"
+                checked={draftTransportChecked}
+                onChange={(e) => setDraftIncludeTransport(e.target.checked)}
+                disabled={!draftTransportState}
+              />
+              <span className="label-text text-xs sm:text-sm">
+                Include transportable pets
+              </span>
+            </label>
             {filterError && (
               <p role="alert" className="text-error mt-2 text-sm">
                 {filterError}
               </p>
             )}
             <p className="text-base-content/60 mt-2 text-xs leading-snug">
+              {draftTransportState
+                ? `Transportable pets are animals a rescue will drive or fly to ${stateName(draftTransportState)}, even from another state. `
+                : 'Pick a state or enter your ZIP to include pets a rescue will transport to you. '}
               Distance is approximate from your ZIP centroid, not driving miles.
             </p>
           </form>
@@ -360,8 +402,11 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                   No pets match these filters
                 </h2>
                 <p className="text-base-content/80 max-w-md">
-                  Try another rescue, state, or distance, or clear the filters
-                  to see every available {copy.petNoun}.
+                  Try another rescue, state, or distance
+                  {transportIncluded(filters)
+                    ? ''
+                    : ', include transportable pets'}
+                  , or clear the filters to see every available {copy.petNoun}.
                 </p>
                 <button
                   type="button"
@@ -409,6 +454,10 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
               {pets.map((pet) => {
                 const place = locationLabel(pet);
                 const detailHref = petDetailPath(dbSpecies, pet.id);
+                const transportBadge = transportBadgeLabel(
+                  pet,
+                  appliedTransportState
+                );
                 return (
                   <li key={pet.id}>
                     <article className="card bg-base-200 h-full shadow-sm">
@@ -451,7 +500,14 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                         ) : null}
                         {place && (
                           <p className="text-base-content/60 text-sm">
-                            {place}
+                            {transportBadge ? `Located in ${place}` : place}
+                          </p>
+                        )}
+                        {/* This pet is not local, so say so before the adopter
+                            gets attached to a dog 1,500 miles away (#331). */}
+                        {transportBadge && (
+                          <p className="badge badge-outline badge-primary h-auto py-1 text-xs whitespace-normal">
+                            {transportBadge}
                           </p>
                         )}
                         <div className="card-actions mt-auto">

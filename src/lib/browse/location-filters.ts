@@ -62,6 +62,16 @@ export interface BrowseLocationFilters {
   maxMiles?: number;
   /** Shelter UUID for rescue-scoped listing (#274). */
   shelterId?: string;
+  /**
+   * Include pets from rescues that transport to the adopter's state (#331).
+   * Defaults to ON, so only an explicit `false` is ever stored or put in the URL.
+   */
+  includeTransport?: boolean;
+}
+
+/** Transport matches are included unless the adopter opted out (#331). */
+export function transportIncluded(filters: BrowseLocationFilters): boolean {
+  return filters.includeTransport !== false;
 }
 
 /** Uppercase + trim 2-letter codes; drop empty. */
@@ -105,6 +115,7 @@ export function normalizeBrowseLocationFilters(
     ...(centerZip ? { centerZip } : {}),
     ...(maxMiles ? { maxMiles } : {}),
     ...(shelterId ? { shelterId } : {}),
+    ...(filters.includeTransport === false ? { includeTransport: false } : {}),
   };
 }
 
@@ -116,6 +127,7 @@ export function hasBrowseLocationFilters(
     normalized.state ||
       normalized.centerZip ||
       normalized.maxMiles ||
-      normalized.shelterId
+      normalized.shelterId ||
+      normalized.includeTransport === false
   );
 }

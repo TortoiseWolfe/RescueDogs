@@ -13,6 +13,7 @@ import { normalizePetVideoUrl } from '@/lib/pet-video-url';
 import { withAsyncTimeout } from '@/lib/with-timeout';
 import { PET_SEX_OPTIONS } from '@/lib/pet-sex';
 import { PetAgeFields } from '../PetAgeFields';
+import { PetTransportField } from '../PetTransportField';
 import {
   PetPhotoManager,
   type PetPhotoManagerHandle,
@@ -32,13 +33,14 @@ interface PetDraft {
   size: PetSize | '';
   notes: string;
   videoUrl: string;
+  transportable: boolean;
 }
 
 /**
  * Create a pet for the staff member's shelter (#110).
  */
 export default function NewShelterPetPage() {
-  const { shelterId } = useShelterMembership();
+  const { shelterId, transports, transportStates } = useShelterMembership();
   const router = useRouter();
   const [name, setName] = useState('');
   const [species, setSpecies] = useState<PetSpecies>('dog');
@@ -49,6 +51,7 @@ export default function NewShelterPetPage() {
   const [size, setSize] = useState<PetSize | ''>('');
   const [notes, setNotes] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [transportable, setTransportable] = useState(true);
   const [saving, setSaving] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +72,7 @@ export default function NewShelterPetPage() {
     size,
     notes,
     videoUrl,
+    transportable,
   };
   const { restored, savedAt, clearDraft } = useFormDraft(
     `shelter:${shelterId}:pet:new`,
@@ -91,6 +95,7 @@ export default function NewShelterPetPage() {
     setSize(restored.size ?? '');
     setNotes(restored.notes ?? '');
     setVideoUrl(restored.videoUrl ?? '');
+    setTransportable(restored.transportable ?? true);
     setRestoredFromDraft(true);
   }, [restored]);
 
@@ -144,6 +149,7 @@ export default function NewShelterPetPage() {
           size: size || null,
           notes: notes || null,
           video_url: normalizedVideo,
+          transportable,
         }),
         30_000,
         'Save pet'
@@ -293,6 +299,14 @@ export default function NewShelterPetPage() {
           </span>
         </label>
 
+        <PetTransportField
+          transports={transports}
+          transportStates={transportStates}
+          value={transportable}
+          onChange={setTransportable}
+          disabled={busy}
+        />
+
         <PetPhotoManager
           ref={photoManagerRef}
           shelterId={shelterId}
@@ -326,6 +340,7 @@ export default function NewShelterPetPage() {
             setSize('');
             setNotes('');
             setVideoUrl('');
+            setTransportable(true);
           }}
         />
 

@@ -15,6 +15,7 @@ const basePet: BrowsePet = {
   status: 'available',
   notes: null,
   video_url: null,
+  transportable: true,
   created_at: '2026-01-01T00:00:00Z',
   shelters: {
     name: 'Second Chance Rescue',

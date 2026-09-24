@@ -6,7 +6,7 @@ import type { BrowseLocationFilters } from '@/lib/browse/location-filters';
 
 /**
  * Syncs browse URL params to parent state (#274 / #280).
- * Supports ?shelter=, ?state=, ?zip= (center), ?miles=.
+ * Supports ?shelter=, ?state=, ?zip= (center), ?miles=, ?transport=0.
  */
 export default function BrowseSearchParamsReader({
   onParams,
@@ -27,6 +27,9 @@ export default function BrowseSearchParamsReader({
       state: searchParams?.get('state') ?? undefined,
       centerZip: searchParams?.get('zip') ?? undefined,
       maxMiles,
+      // Transport matches are on by default (#331), so only the opt-out travels
+      // in the URL.
+      includeTransport: searchParams?.get('transport') === '0' ? false : true,
     });
   }, [searchParams, onParams]);
 

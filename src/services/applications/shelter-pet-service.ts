@@ -10,7 +10,7 @@ import type {
 } from '@/types/applications';
 
 const PET_COLUMNS =
-  'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, video_url, created_at';
+  'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, video_url, transportable, created_at';
 
 export type PetWriteInput = {
   name: string;
@@ -23,6 +23,8 @@ export type PetWriteInput = {
   photo_url?: string | null;
   notes?: string | null;
   video_url?: string | null;
+  /** Per-pet opt-out of the rescue's transport offer (#331). */
+  transportable?: boolean;
 };
 
 /**
@@ -76,6 +78,7 @@ export class ShelterPetService {
         photo_url: input.photo_url ?? null,
         notes: input.notes?.trim() || null,
         video_url: input.video_url?.trim() || null,
+        transportable: input.transportable ?? true,
       })
       .select(PET_COLUMNS)
       .single();
@@ -99,6 +102,8 @@ export class ShelterPetService {
     if (input.notes !== undefined) patch.notes = input.notes?.trim() || null;
     if (input.video_url !== undefined)
       patch.video_url = input.video_url?.trim() || null;
+    if (input.transportable !== undefined)
+      patch.transportable = input.transportable;
 
     const { data, error } = await this.supabase
       .from('pets')
