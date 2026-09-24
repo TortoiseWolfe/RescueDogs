@@ -2822,6 +2822,101 @@ END $$;
 COMMENT ON TABLE shelters IS 'Rescue organizations; MVP seeds exactly one (Second Chance Rescue)';
 COMMENT ON COLUMN shelters.zip IS 'Postal code for browse location filters; pets inherit via shelter_id (#110/#111)';
 
+-- The browse state filter matches exact 2-letter codes, so a rescue that typed
+-- "Texas" or "tx" at sign-up was invisible to it. Single source of truth for the
+-- valid set, shared by the CHECK constraints and the shelter RPCs (#331).
+CREATE OR REPLACE FUNCTION us_state_codes()
+RETURNS TEXT[]
+LANGUAGE sql
+IMMUTABLE
+PARALLEL SAFE
+AS $$
+  SELECT ARRAY[
+    'AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID','IL','IN',
+    'IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH',
+    'NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT',
+    'VT','VA','WA','WV','WI','WY'
+  ]::TEXT[];
+$$;
+
+COMMENT ON FUNCTION us_state_codes() IS
+  'Valid US state/DC codes for shelters.state and shelters.transport_states (#331).';
+
+-- Backfill legacy free-text states ("Texas", "tx ") to codes (#331).
+UPDATE shelters AS s
+SET state = m.code
+FROM (
+  VALUES
+    ('alabama','AL'),('alaska','AK'),('arizona','AZ'),('arkansas','AR'),
+    ('california','CA'),('colorado','CO'),('connecticut','CT'),
+    ('delaware','DE'),('district of columbia','DC'),('washington dc','DC'),
+    ('washington d.c.','DC'),('florida','FL'),('georgia','GA'),('hawaii','HI'),
+    ('idaho','ID'),('illinois','IL'),('indiana','IN'),('iowa','IA'),
+    ('kansas','KS'),('kentucky','KY'),('louisiana','LA'),('maine','ME'),
+    ('maryland','MD'),('massachusetts','MA'),('michigan','MI'),
+    ('minnesota','MN'),('mississippi','MS'),('missouri','MO'),('montana','MT'),
+    ('nebraska','NE'),('nevada','NV'),('new hampshire','NH'),
+    ('new jersey','NJ'),('new mexico','NM'),('new york','NY'),
+    ('north carolina','NC'),('north dakota','ND'),('ohio','OH'),
+    ('oklahoma','OK'),('oregon','OR'),('pennsylvania','PA'),
+    ('rhode island','RI'),('south carolina','SC'),('south dakota','SD'),
+    ('tennessee','TN'),('texas','TX'),('utah','UT'),('vermont','VT'),
+    ('virginia','VA'),('washington','WA'),('west virginia','WV'),
+    ('wisconsin','WI'),('wyoming','WY')
+) AS m(full_name, code)
+WHERE s.state IS NOT NULL
+  AND lower(btrim(s.state)) = m.full_name
+  AND s.state <> m.code;
+
+UPDATE shelters
+SET state = upper(btrim(state))
+WHERE state IS NOT NULL
+  AND btrim(state) <> ''
+  AND upper(btrim(state)) = ANY (us_state_codes())
+  AND state <> upper(btrim(state));
+
+-- NOT VALID: anything still unmappable (a typo, a non-US region) keeps its row
+-- readable while every future write goes through the check.
+DO $$
+BEGIN
+  ALTER TABLE shelters ADD CONSTRAINT shelters_state_code
+    CHECK (state IS NULL OR state = ANY (us_state_codes())) NOT VALID;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+-- Out-of-state transport (#331). transports is the rescue-wide switch;
+-- transport_states is where they will ship. A pet is transportable when its
+-- rescue transports AND pets.transportable is still true, so flipping the
+-- rescue switch on later covers listings that already exist.
+ALTER TABLE shelters ADD COLUMN IF NOT EXISTS transports BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE shelters ADD COLUMN IF NOT EXISTS transport_states TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE shelters ADD COLUMN IF NOT EXISTS transport_note TEXT;
+
+DO $$
+BEGIN
+  ALTER TABLE shelters ADD CONSTRAINT shelters_transport_states_codes
+    CHECK (transport_states <@ us_state_codes());
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+  ALTER TABLE shelters ADD CONSTRAINT shelters_transport_note_length
+    CHECK (transport_note IS NULL OR length(transport_note) <= 500);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_shelters_transport_states
+  ON shelters USING GIN (transport_states);
+
+COMMENT ON COLUMN shelters.state IS '2-letter US state/DC code; browse filters match it exactly (#331)';
+COMMENT ON COLUMN shelters.transports IS 'Rescue-wide switch: this rescue transports animals out of state (#331)';
+COMMENT ON COLUMN shelters.transport_states IS 'State codes this rescue will transport to; meaningless unless transports (#331)';
+COMMENT ON COLUMN shelters.transport_note IS 'Optional public transport details shown to adopters — fees, cadence (#331)';
+
 CREATE TABLE IF NOT EXISTS shelter_members (
   shelter_id UUID NOT NULL REFERENCES shelters(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -2891,12 +2986,18 @@ EXCEPTION
   WHEN duplicate_object THEN NULL;
 END $$;
 
+-- Per-pet transport opt-OUT (#331). Defaults true so enabling the rescue-wide
+-- switch covers existing listings; staff untick the odd pet that cannot travel.
+-- Never a copy of shelters.transports — it is only read alongside it.
+ALTER TABLE pets ADD COLUMN IF NOT EXISTS transportable BOOLEAN NOT NULL DEFAULT TRUE;
+
 CREATE INDEX IF NOT EXISTS idx_pets_shelter_available
   ON pets(shelter_id) WHERE status = 'available';
 
 COMMENT ON TABLE pets IS 'Pet records for apply / browse / shelter staff. notes = public short bio (#167). video_url = optional public video link (#326).';
 COMMENT ON COLUMN pets.notes IS 'Public short bio for browse cards; staff-editable; omit UI when null/empty (#167)';
 COMMENT ON COLUMN pets.video_url IS 'Optional https URL to a public video (YouTube, TikTok, Vimeo, etc.); open in new tab — no upload/embed (#326)';
+COMMENT ON COLUMN pets.transportable IS 'Per-pet opt-out of the rescue transport offer; only meaningful when shelters.transports (#331)';
 
 -- Pet sex options expanded for shelter intake (#273)
 ALTER TABLE pets DROP CONSTRAINT IF EXISTS pets_sex_check;
@@ -3071,12 +3172,73 @@ GRANT EXECUTE ON FUNCTION get_application_applicant_email(UUID) TO authenticated
 -- become manager of exactly one rescue. Existing members (incl. demo staff)
 -- cannot create a second org.
 
+-- Shared shelter-field validation for create/update (#331). Raises the same
+-- invalid_* messages both RPCs already surface to the client.
+CREATE OR REPLACE FUNCTION normalize_shelter_state(p_state TEXT)
+RETURNS TEXT
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+DECLARE
+  v_state TEXT := nullif(upper(btrim(COALESCE(p_state, ''))), '');
+BEGIN
+  IF v_state IS NULL THEN
+    RETURN NULL;
+  END IF;
+  IF NOT (v_state = ANY (us_state_codes())) THEN
+    RAISE EXCEPTION 'invalid_state';
+  END IF;
+  RETURN v_state;
+END;
+$$;
+
+COMMENT ON FUNCTION normalize_shelter_state(TEXT) IS
+  'Uppercase + validate a shelter state against us_state_codes(); raises invalid_state (#331).';
+
+CREATE OR REPLACE FUNCTION normalize_transport_states(p_states TEXT[])
+RETURNS TEXT[]
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+DECLARE
+  v_states TEXT[];
+BEGIN
+  IF p_states IS NULL THEN
+    RETURN '{}'::TEXT[];
+  END IF;
+
+  SELECT COALESCE(array_agg(DISTINCT code ORDER BY code), '{}'::TEXT[])
+  INTO v_states
+  FROM (
+    SELECT upper(btrim(unnested)) AS code
+    FROM unnest(p_states) AS unnested
+    WHERE nullif(btrim(unnested), '') IS NOT NULL
+  ) AS cleaned;
+
+  IF NOT (v_states <@ us_state_codes()) THEN
+    RAISE EXCEPTION 'invalid_transport_states';
+  END IF;
+
+  RETURN v_states;
+END;
+$$;
+
+COMMENT ON FUNCTION normalize_transport_states(TEXT[]) IS
+  'Uppercase, de-duplicate and validate transport state codes; raises invalid_transport_states (#331).';
+
+-- #331 widened the signature. Drop the 5-arg form so PostgREST cannot resolve
+-- an ambiguous overload when the client posts the original argument names.
+DROP FUNCTION IF EXISTS create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT);
+
 CREATE OR REPLACE FUNCTION create_my_shelter(
   p_name TEXT,
   p_city TEXT DEFAULT NULL,
   p_state TEXT DEFAULT NULL,
   p_zip TEXT DEFAULT NULL,
-  p_contact_email TEXT DEFAULT NULL
+  p_contact_email TEXT DEFAULT NULL,
+  p_transports BOOLEAN DEFAULT FALSE,
+  p_transport_states TEXT[] DEFAULT '{}',
+  p_transport_note TEXT DEFAULT NULL
 )
 RETURNS UUID
 LANGUAGE plpgsql
@@ -3087,9 +3249,12 @@ DECLARE
   v_uid UUID := auth.uid();
   v_name TEXT := btrim(COALESCE(p_name, ''));
   v_city TEXT := nullif(btrim(COALESCE(p_city, '')), '');
-  v_state TEXT := nullif(btrim(COALESCE(p_state, '')), '');
+  v_state TEXT := normalize_shelter_state(p_state);
   v_zip TEXT := nullif(btrim(COALESCE(p_zip, '')), '');
   v_email TEXT := nullif(btrim(COALESCE(p_contact_email, '')), '');
+  v_transport_states TEXT[] := normalize_transport_states(p_transport_states);
+  v_transports BOOLEAN := COALESCE(p_transports, FALSE);
+  v_transport_note TEXT := nullif(btrim(COALESCE(p_transport_note, '')), '');
   v_id UUID;
 BEGIN
   IF v_uid IS NULL THEN
@@ -3107,11 +3272,19 @@ BEGIN
   IF v_city IS NOT NULL AND length(v_city) > 100 THEN
     RAISE EXCEPTION 'invalid_city';
   END IF;
-  IF v_state IS NOT NULL AND length(v_state) > 50 THEN
-    RAISE EXCEPTION 'invalid_state';
-  END IF;
   IF v_zip IS NOT NULL AND length(v_zip) > 20 THEN
     RAISE EXCEPTION 'invalid_zip';
+  END IF;
+  IF v_transport_note IS NOT NULL AND length(v_transport_note) > 500 THEN
+    RAISE EXCEPTION 'invalid_transport_note';
+  END IF;
+
+  -- An empty state list would advertise transport nowhere.
+  IF v_transports AND array_length(v_transport_states, 1) IS NULL THEN
+    RAISE EXCEPTION 'transport_states_required';
+  END IF;
+  IF NOT v_transports THEN
+    v_transport_states := '{}'::TEXT[];
   END IF;
 
   IF v_email IS NULL THEN
@@ -3121,8 +3294,14 @@ BEGIN
     RAISE EXCEPTION 'invalid_contact_email';
   END IF;
 
-  INSERT INTO shelters (name, city, state, zip, contact_email)
-  VALUES (v_name, v_city, v_state, v_zip, v_email)
+  INSERT INTO shelters (
+    name, city, state, zip, contact_email,
+    transports, transport_states, transport_note
+  )
+  VALUES (
+    v_name, v_city, v_state, v_zip, v_email,
+    v_transports, v_transport_states, v_transport_note
+  )
   RETURNING id INTO v_id;
 
   INSERT INTO shelter_members (shelter_id, user_id, role)
@@ -3132,11 +3311,105 @@ BEGIN
 END;
 $$;
 
-COMMENT ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT) IS
-  'Authenticated non-member creates one shelter and becomes manager (#218).';
+COMMENT ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT[], TEXT) IS
+  'Authenticated non-member creates one shelter and becomes manager (#218); carries transport settings (#331).';
 
-REVOKE ALL ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT) TO authenticated;
+REVOKE ALL ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT[], TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION create_my_shelter(TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT[], TEXT) TO authenticated;
+
+-- ─── Manager edits their rescue (#331) ─────────────────────────────────────
+-- shelters has SELECT-only RLS, so this SECURITY DEFINER RPC is the single
+-- write path. Rescues created before transport existed need it to opt in.
+
+CREATE OR REPLACE FUNCTION update_my_shelter(
+  p_shelter_id UUID,
+  p_name TEXT,
+  p_city TEXT DEFAULT NULL,
+  p_state TEXT DEFAULT NULL,
+  p_zip TEXT DEFAULT NULL,
+  p_contact_email TEXT DEFAULT NULL,
+  p_transports BOOLEAN DEFAULT FALSE,
+  p_transport_states TEXT[] DEFAULT '{}',
+  p_transport_note TEXT DEFAULT NULL
+)
+RETURNS shelters
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID := auth.uid();
+  v_name TEXT := btrim(COALESCE(p_name, ''));
+  v_city TEXT := nullif(btrim(COALESCE(p_city, '')), '');
+  v_state TEXT := normalize_shelter_state(p_state);
+  v_zip TEXT := nullif(btrim(COALESCE(p_zip, '')), '');
+  v_email TEXT := nullif(btrim(COALESCE(p_contact_email, '')), '');
+  v_transports BOOLEAN := COALESCE(p_transports, FALSE);
+  v_transport_states TEXT[] := normalize_transport_states(p_transport_states);
+  v_transport_note TEXT := nullif(btrim(COALESCE(p_transport_note, '')), '');
+  v_row shelters;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'not authenticated';
+  END IF;
+
+  IF p_shelter_id IS NULL THEN
+    RAISE EXCEPTION 'invalid_shelter';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM shelter_members
+    WHERE user_id = v_uid
+      AND shelter_id = p_shelter_id
+      AND role = 'manager'
+  ) THEN
+    RAISE EXCEPTION 'not_a_manager';
+  END IF;
+
+  IF length(v_name) < 2 OR length(v_name) > 120 THEN
+    RAISE EXCEPTION 'invalid_name';
+  END IF;
+  IF v_city IS NOT NULL AND length(v_city) > 100 THEN
+    RAISE EXCEPTION 'invalid_city';
+  END IF;
+  IF v_zip IS NOT NULL AND length(v_zip) > 20 THEN
+    RAISE EXCEPTION 'invalid_zip';
+  END IF;
+  IF v_email IS NOT NULL AND length(v_email) > 255 THEN
+    RAISE EXCEPTION 'invalid_contact_email';
+  END IF;
+  IF v_transport_note IS NOT NULL AND length(v_transport_note) > 500 THEN
+    RAISE EXCEPTION 'invalid_transport_note';
+  END IF;
+
+  IF v_transports AND array_length(v_transport_states, 1) IS NULL THEN
+    RAISE EXCEPTION 'transport_states_required';
+  END IF;
+  IF NOT v_transports THEN
+    v_transport_states := '{}'::TEXT[];
+  END IF;
+
+  UPDATE shelters
+  SET name = v_name,
+      city = v_city,
+      state = v_state,
+      zip = v_zip,
+      contact_email = v_email,
+      transports = v_transports,
+      transport_states = v_transport_states,
+      transport_note = v_transport_note
+  WHERE id = p_shelter_id
+  RETURNING * INTO v_row;
+
+  RETURN v_row;
+END;
+$$;
+
+COMMENT ON FUNCTION update_my_shelter(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT[], TEXT) IS
+  'Manager-only edit of their rescue profile + transport settings; shelters has no client UPDATE policy (#331).';
+
+REVOKE ALL ON FUNCTION update_my_shelter(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT[], TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION update_my_shelter(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT[], TEXT) TO authenticated;
 
 -- ─── Manager adds staff by email (#220 / #261) ─────────────────────────────
 -- shelter_members has no client INSERT policy, so this is the only self-serve

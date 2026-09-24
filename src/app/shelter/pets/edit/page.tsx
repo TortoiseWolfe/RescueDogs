@@ -12,6 +12,7 @@ import { PET_SEX_OPTIONS } from '@/lib/pet-sex';
 import { useShelterMembership } from '../../ShelterGate';
 import { PetAgeFields } from '../PetAgeFields';
 import { PetPhotoManager } from '../PetPhotoManager';
+import { PetTransportField } from '../PetTransportField';
 import type {
   Pet,
   PetPhoto,
@@ -28,7 +29,7 @@ import { useFormDraft } from '@/hooks/useFormDraft';
  * Uses ?id= (not a dynamic segment) for GitHub Pages static export.
  */
 function EditShelterPetContent() {
-  const { shelterId } = useShelterMembership();
+  const { shelterId, transports, transportStates } = useShelterMembership();
   const router = useRouter();
 
   const [petId, setPetId] = useState<string | null>(null);
@@ -44,6 +45,7 @@ function EditShelterPetContent() {
   const [status, setStatus] = useState<PetStatus>('available');
   const [notes, setNotes] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [transportable, setTransportable] = useState(true);
   const [photos, setPhotos] = useState<PetPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -74,6 +76,7 @@ function EditShelterPetContent() {
     status,
     notes,
     videoUrl,
+    transportable,
   };
   const {
     restored: pendingDraft,
@@ -108,6 +111,7 @@ function EditShelterPetContent() {
     setStatus(pendingDraft.status ?? 'available');
     setNotes(pendingDraft.notes ?? '');
     setVideoUrl(pendingDraft.videoUrl ?? '');
+    setTransportable(pendingDraft.transportable ?? true);
     setDraftDismissed(true);
   }
 
@@ -152,6 +156,7 @@ function EditShelterPetContent() {
         setStatus(row.status);
         setNotes(row.notes ?? '');
         setVideoUrl(row.video_url ?? '');
+        setTransportable(row.transportable !== false);
         setPhotos(petPhotos);
       } catch {
         if (!cancelled) setError('Could not load pet.');
@@ -185,6 +190,7 @@ function EditShelterPetContent() {
         status,
         notes: notes || null,
         video_url: normalizedVideo,
+        transportable,
       });
 
       clearDraft();
@@ -366,6 +372,14 @@ function EditShelterPetContent() {
                 YouTube, TikTok, Vimeo, or any public video URL.
               </span>
             </label>
+
+            <PetTransportField
+              transports={transports}
+              transportStates={transportStates}
+              value={transportable}
+              onChange={setTransportable}
+              disabled={saving || deleting}
+            />
 
             {error && (
               <div role="alert" className="alert alert-error">
