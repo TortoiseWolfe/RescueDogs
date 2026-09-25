@@ -164,10 +164,12 @@ export function RescueTransportFields({
   const allSelected = selected.size === US_STATE_OPTIONS.length;
 
   return (
-    <fieldset className="border-base-300 rounded-lg border p-4">
+    // A fieldset defaults to min-inline-size: min-content, which let the state
+    // grid push it past the edge of a phone screen (#333).
+    <fieldset className="border-base-300 min-w-0 rounded-lg border p-4">
       <legend className="px-2 font-semibold">Transport</legend>
 
-      <label className="label flex min-h-11 cursor-pointer items-start justify-start gap-3 p-0">
+      <label className="label flex min-h-11 cursor-pointer items-start justify-start gap-3 p-0 whitespace-normal">
         <input
           type="checkbox"
           className="checkbox checkbox-primary mt-1"
@@ -209,10 +211,10 @@ export function RescueTransportFields({
             </button>
           </div>
 
-          <ul className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-1 sm:grid-cols-3 lg:grid-cols-4">
             {US_STATE_OPTIONS.map((option) => (
-              <li key={option.code}>
-                <label className="label flex min-h-11 cursor-pointer items-center justify-start gap-2 p-0">
+              <li key={option.code} className="min-w-0">
+                <label className="label flex min-h-11 cursor-pointer items-center justify-start gap-2 p-0 whitespace-normal">
                   <input
                     type="checkbox"
                     className="checkbox checkbox-sm checkbox-primary"
@@ -235,15 +237,15 @@ export function RescueTransportFields({
             </span>
             <textarea
               id="rescue-transport-note"
-              className="textarea textarea-bordered min-h-24 w-full"
+              className="textarea textarea-bordered min-h-32 w-full max-w-full min-w-0"
               value={value.transportNote}
               onChange={(e) => patch({ transportNote: e.target.value })}
               maxLength={500}
-              rows={3}
+              rows={5}
               placeholder="e.g. Transport fee $300, ground transport twice a month."
               disabled={disabled}
             />
-            <span className="label-text-alt text-base-content/60 mt-1">
+            <span className="label-text-alt text-base-content/60 mt-1 whitespace-normal">
               Shown to adopters on every listing you transport.
             </span>
           </label>
