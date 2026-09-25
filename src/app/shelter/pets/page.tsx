@@ -141,7 +141,7 @@ export default function ShelterPetsPage() {
                 ) : null}
                 {transports ? (
                   <label
-                    className="label mt-2 flex min-h-11 cursor-pointer items-center justify-start gap-2 p-0"
+                    className="label mt-2 flex min-h-11 cursor-pointer items-center justify-start gap-2 p-0 whitespace-normal"
                     htmlFor={`transportable-${pet.id}`}
                   >
                     <input

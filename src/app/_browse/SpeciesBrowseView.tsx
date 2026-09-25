@@ -346,7 +346,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
               </button>
             </div>
             <label
-              className="label mt-3 flex min-h-11 cursor-pointer items-center justify-start gap-2 p-0"
+              className="label mt-3 flex min-h-11 cursor-pointer items-center justify-start gap-2 p-0 whitespace-normal"
               htmlFor="include-transport"
             >
               <input

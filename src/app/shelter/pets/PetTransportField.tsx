@@ -26,7 +26,7 @@ export function PetTransportField({
   const stateCount = transportStates.length;
 
   return (
-    <label className="label flex min-h-11 cursor-pointer items-start justify-start gap-3 p-0">
+    <label className="label flex min-h-11 min-w-0 cursor-pointer items-start justify-start gap-3 p-0 whitespace-normal">
       <input
         type="checkbox"
         className="checkbox checkbox-primary mt-1"
