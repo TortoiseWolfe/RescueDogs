@@ -47,6 +47,39 @@ export function transportStateFor(
   return derived && STATE_CODES.has(derived) ? derived : undefined;
 }
 
+/**
+ * Browse filter hint (#335). Describes what the adopter is looking at so it
+ * never promises transported pets while the box is unticked.
+ */
+export function browseFilterHint(options: {
+  transportState?: string;
+  includeTransport: boolean;
+}): string {
+  if (!options.transportState) {
+    return 'Pick your state or enter your ZIP to see pets near you. Radius is optional.';
+  }
+  if (options.includeTransport) {
+    return `Showing pets near you, plus pets that out-of-state rescues will transport to ${stateName(options.transportState)}.`;
+  }
+  return 'Showing only pets near you. Check "Include transportable pets" to see pets that rescues in other states will transport to you.';
+}
+
+/**
+ * Note for a ZIP outside the chosen State (#335). The State filter wins for
+ * both local results and transport, which silently hides nearby rescues across
+ * the border unless we say so.
+ */
+export function zipStateMismatchNote(
+  state?: string | null,
+  centerZip?: string | null
+): string | null {
+  const chosen = state?.trim().toUpperCase();
+  if (!chosen || !STATE_CODES.has(chosen)) return null;
+  const zipState = transportStateFor(undefined, centerZip);
+  if (!zipState || zipState === chosen) return null;
+  return `Your ZIP is in ${stateName(zipState)}, but you picked ${stateName(chosen)}. Results use ${stateName(chosen)}.`;
+}
+
 /** True when this rescue advertises transport to `state`. */
 export function shelterTransportsTo(
   shelter: ShelterTransportInfo | null | undefined,

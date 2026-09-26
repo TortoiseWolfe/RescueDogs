@@ -1,7 +1,7 @@
 import type { BrowsePet } from '@/types/applications';
 import zipcodes from 'zipcodes';
 
-/** Mile-radius options for browse (#280). */
+/** Mile-radius options for browse (#280, #335). */
 export const BROWSE_RADIUS_OPTIONS: ReadonlyArray<{
   value: number | '';
   label: string;
@@ -10,6 +10,8 @@ export const BROWSE_RADIUS_OPTIONS: ReadonlyArray<{
   { value: 25, label: 'Within 25 miles' },
   { value: 50, label: 'Within 50 miles' },
   { value: 100, label: 'Within 100 miles' },
+  { value: 250, label: 'Within 250 miles' },
+  { value: 500, label: 'Within 500 miles' },
 ];
 
 /** Normalize US ZIP to 5-digit string for lookup, or undefined. */
