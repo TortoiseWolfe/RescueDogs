@@ -144,10 +144,42 @@ describe('PetPhotoService (#273)', () => {
 
   it('rejects reorder above max photos', async () => {
     const ids = Array.from({ length: MAX_PET_PHOTOS + 1 }, (_, i) => `id-${i}`);
-    const supabase = { from: vi.fn() } as any;
+    const supabase = { from: vi.fn(), rpc: vi.fn() } as any;
     const service = new PetPhotoService(supabase);
     await expect(service.reorderPhotos(petId, ids)).rejects.toThrow(
       `Maximum ${MAX_PET_PHOTOS} photos per pet`
+    );
+    expect(supabase.rpc).not.toHaveBeenCalled();
+  });
+
+  it('reorders in one atomic RPC instead of row-by-row updates (#338)', async () => {
+    const supabase = {
+      from: vi.fn(),
+      rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+    } as any;
+    const service = new PetPhotoService(supabase);
+
+    await service.reorderPhotos(petId, ['photo-3', 'photo-1', 'photo-2']);
+
+    expect(supabase.rpc).toHaveBeenCalledTimes(1);
+    expect(supabase.rpc).toHaveBeenCalledWith('reorder_pet_photos', {
+      p_pet_id: petId,
+      p_photo_ids: ['photo-3', 'photo-1', 'photo-2'],
+    });
+    expect(supabase.from).not.toHaveBeenCalled();
+  });
+
+  it('explains a stale photo list instead of a raw database error (#338)', async () => {
+    const supabase = {
+      rpc: vi.fn().mockResolvedValue({
+        data: null,
+        error: { message: 'invalid_photo_order' },
+      }),
+    } as any;
+    const service = new PetPhotoService(supabase);
+
+    await expect(service.reorderPhotos(petId, ['photo-1'])).rejects.toThrow(
+      'The photos changed since this page loaded. Refresh and try again.'
     );
   });
 });
