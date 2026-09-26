@@ -2,23 +2,31 @@ import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { Profiler, useEffect } from 'react';
 
-// The cropper is a canvas-driven third party. The stand-in reports one crop area
-// on mount so "Use photo" is enabled, exactly as the real one does once loaded.
+// The cropper is a canvas-driven third party. Like the real one, the stand-in
+// reports a crop area whenever its image changes, which enables "Use photo".
+// React may keep it mounted between queued photos, so reporting only on mount
+// would leave the next photo's button disabled.
 vi.mock('react-easy-crop', () => ({
   default: function CropperStub({
+    image,
     onCropComplete,
   }: {
+    image: string;
     onCropComplete: (area: unknown, pixels: unknown) => void;
   }) {
     useEffect(() => {
       onCropComplete({}, { x: 0, y: 0, width: 400, height: 300 });
-    }, [onCropComplete]);
+    }, [image, onCropComplete]);
     return null;
   },
 }));
+let preparedCount = 0;
 vi.mock('@/lib/pet-photos/image-processing', () => ({
   PET_PHOTO_ASPECT: 4 / 3,
-  preparePetPhotoForCrop: vi.fn(async () => 'data:image/webp;base64,AAAA'),
+  preparePetPhotoForCrop: vi.fn(async () => {
+    preparedCount += 1;
+    return `data:image/webp;base64,AAAA${preparedCount}`;
+  }),
   createCroppedPetPhoto: vi.fn(
     async () => new Blob(['cropped'], { type: 'image/webp' })
   ),
@@ -316,5 +324,40 @@ describe('PetPhotoManager order arrows', () => {
         'p1',
       ]);
     });
+  });
+
+  it('reorders staged photos without talking to the server', async () => {
+    const { container } = render(
+      <PetPhotoManager shelterId="test-shelter" petId={null} />
+    );
+
+    const input = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    fireEvent.change(input, {
+      target: {
+        files: [
+          new File(['a'], 'a.jpg', { type: 'image/jpeg' }),
+          new File(['b'], 'b.jpg', { type: 'image/jpeg' }),
+        ],
+      },
+    });
+    fireEvent.click(await screen.findByRole('button', { name: 'Use photo' }));
+    expect(await screen.findByText('Photo 2 of 2')).toBeTruthy();
+    fireEvent.click(await screen.findByRole('button', { name: 'Use photo' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    const before = Array.from(
+      container.querySelectorAll('img[src^="blob:"]')
+    ).map((img) => img.getAttribute('src'));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Move later' })[0]);
+    const after = Array.from(
+      container.querySelectorAll('img[src^="blob:"]')
+    ).map((img) => img.getAttribute('src'));
+
+    expect(after).toEqual([before[1], before[0]]);
+    expect(photoServiceMocks.reorderPhotos).not.toHaveBeenCalled();
   });
 });
