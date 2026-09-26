@@ -25,8 +25,8 @@ import {
 import {
   PET_PHOTO_MAX_INPUT_MB,
   uploadPetPhotoBlob,
-  validatePetPhotoFile,
 } from '@/lib/pet-photos/upload';
+import { selectPetPhotos } from '@/lib/pet-photos/selection';
 import {
   MAX_PET_PHOTOS,
   PetPhotoService,
@@ -38,6 +38,11 @@ import {
   pruneExpiredStagedPhotos,
   saveStagedPhotos,
 } from '@/lib/pet-photos/staged-draft';
+
+// Must be a stable reference: an inline `[]` default gives the initialPhotos sync
+// effect a new array on every re-render, so it sets state and re-renders forever
+// (Add Pet passes no photos).
+const NO_PHOTOS: PetPhoto[] = [];
 
 type StagedPhoto = {
   id: string;
@@ -83,7 +88,7 @@ export const PetPhotoManager = forwardRef<
   {
     shelterId,
     petId,
-    initialPhotos = [],
+    initialPhotos = NO_PHOTOS,
     legacyPhotoUrl,
     onStagedChange,
     disabled = false,
@@ -101,6 +106,12 @@ export const PetPhotoManager = forwardRef<
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  /** Files picked together, cropped one after another (#338). */
+  const [cropQueue, setCropQueue] = useState<{
+    files: File[];
+    index: number;
+  } | null>(null);
 
   const showLegacyPhoto =
     petId && photos.length === 0 && Boolean(legacyPhotoUrl?.trim());
@@ -108,6 +119,8 @@ export const PetPhotoManager = forwardRef<
     ? photos.length + (showLegacyPhoto ? 1 : 0)
     : staged.length;
   const canAddMore = totalCount < MAX_PET_PHOTOS && !disabled && !busy;
+  const queueSize = cropQueue?.files.length ?? 0;
+  const queuePosition = (cropQueue?.index ?? 0) + 1;
 
   useEffect(() => {
     setPhotos(initialPhotos);
@@ -242,33 +255,54 @@ export const PetPhotoManager = forwardRef<
     inputRef.current?.click();
   }
 
-  async function onFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-
-    const validationError = validatePetPhotoFile(file);
-    if (validationError) {
-      setError(validationError);
-      return;
+  /**
+   * Open the crop step for `files[index]`, skipping past any that cannot be
+   * read so one bad image does not strand the rest of the selection.
+   */
+  async function openQueuedPhoto(files: File[], index: number) {
+    for (let i = index; i < files.length; i++) {
+      try {
+        revokeCropPreview();
+        const previewUrl = await preparePetPhotoForCrop(files[i]);
+        cropPreviewUrlRef.current = previewUrl;
+        setCropQueue({ files, index: i });
+        setImageSrc(previewUrl);
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+        setCroppedAreaPixels(null);
+        return;
+      } catch (err) {
+        const reason =
+          err instanceof Error
+            ? err.message
+            : 'Could not open that photo. Try a smaller image.';
+        setNotice((prev) =>
+          [prev, `Skipped ${files[i].name}: ${reason}`]
+            .filter(Boolean)
+            .join(' ')
+        );
+      }
     }
+    setCropQueue(null);
+  }
 
+  async function onFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = Array.from(e.target.files ?? []);
+    e.target.value = '';
+    if (picked.length === 0) return;
+
+    const { accepted, notices } = selectPetPhotos(
+      picked,
+      MAX_PET_PHOTOS - totalCount,
+      MAX_PET_PHOTOS
+    );
     setError(null);
+    setNotice(notices.length > 0 ? notices.join(' ') : null);
+    if (accepted.length === 0) return;
+
     setBusy(true);
     try {
-      revokeCropPreview();
-      const previewUrl = await preparePetPhotoForCrop(file);
-      cropPreviewUrlRef.current = previewUrl;
-      setImageSrc(previewUrl);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
-      setCroppedAreaPixels(null);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Could not open that photo. Try a smaller image.'
-      );
+      await openQueuedPhoto(accepted, 0);
     } finally {
       setBusy(false);
     }
@@ -278,6 +312,32 @@ export const PetPhotoManager = forwardRef<
     revokeCropPreview();
     setImageSrc(null);
     setCroppedAreaPixels(null);
+  }
+
+  function cancelCropQueue() {
+    closeCropModal();
+    setCropQueue(null);
+  }
+
+  /** Move on to the next picked photo, or finish when none are left. */
+  async function advanceCropQueue() {
+    closeCropModal();
+    const queue = cropQueue;
+    if (queue && queue.index + 1 < queue.files.length) {
+      await openQueuedPhoto(queue.files, queue.index + 1);
+    } else {
+      setCropQueue(null);
+    }
+  }
+
+  async function skipQueuedPhoto() {
+    setBusy(true);
+    setError(null);
+    try {
+      await advanceCropQueue();
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function confirmCrop() {
@@ -293,7 +353,7 @@ export const PetPhotoManager = forwardRef<
           ...prev,
           { id: crypto.randomUUID(), preview, blob },
         ]);
-        closeCropModal();
+        await advanceCropQueue();
         return;
       }
 
@@ -308,7 +368,7 @@ export const PetPhotoManager = forwardRef<
       const row = await service.addPhoto(petId, uploaded.url, nextOrder);
       await service.syncPrimaryPhotoUrl(petId);
       setPhotos((prev) => [...prev, row]);
-      closeCropModal();
+      await advanceCropQueue();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not process photo.');
     } finally {
@@ -384,7 +444,7 @@ export const PetPhotoManager = forwardRef<
             className="btn btn-outline btn-sm min-h-11"
             onClick={openFilePicker}
           >
-            Add photo
+            {MAX_PET_PHOTOS - totalCount > 1 ? 'Add photos' : 'Add photo'}
           </button>
         )}
       </div>
@@ -393,9 +453,10 @@ export const PetPhotoManager = forwardRef<
         ref={inputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
+        multiple
         className="hidden"
         onChange={(e) => void onFileSelected(e)}
-        aria-label="Add pet photo"
+        aria-label="Add pet photos"
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -488,6 +549,12 @@ export const PetPhotoManager = forwardRef<
         )}
       </div>
 
+      {notice && (
+        <div role="status" className="alert">
+          <span>{notice}</span>
+        </div>
+      )}
+
       {error && (
         <div role="alert" className="alert alert-error">
           <span>{error}</span>
@@ -503,6 +570,11 @@ export const PetPhotoManager = forwardRef<
           <div className="modal-box max-w-2xl">
             <h3 id="pet-crop-title" className="mb-4 text-lg font-bold">
               Crop photo for listing
+              {queueSize > 1 && (
+                <span className="text-base-content/70 ml-2 text-base font-normal">
+                  Photo {queuePosition} of {queueSize}
+                </span>
+              )}
             </h3>
             <p className="text-base-content/70 mb-3 text-sm">
               Drag to reposition. Zoom out to include more of the photo — saved
@@ -544,11 +616,21 @@ export const PetPhotoManager = forwardRef<
               <button
                 type="button"
                 className="btn btn-ghost min-h-11"
-                onClick={closeCropModal}
+                onClick={cancelCropQueue}
                 disabled={busy}
               >
-                Cancel
+                {queueSize > 1 ? 'Cancel all' : 'Cancel'}
               </button>
+              {queueSize > 1 && (
+                <button
+                  type="button"
+                  className="btn btn-outline min-h-11"
+                  onClick={() => void skipQueuedPhoto()}
+                  disabled={busy}
+                >
+                  Skip this photo
+                </button>
+              )}
               <button
                 type="button"
                 className="btn btn-primary min-h-11"
@@ -564,7 +646,7 @@ export const PetPhotoManager = forwardRef<
             </div>
           </div>
           <form method="dialog" className="modal-backdrop">
-            <button type="button" onClick={closeCropModal}>
+            <button type="button" onClick={cancelCropQueue}>
               close
             </button>
           </form>

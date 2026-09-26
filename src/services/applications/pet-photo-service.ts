@@ -130,25 +130,28 @@ export class PetPhotoService {
     }
   }
 
-  /** Reorder by photo id list (index = sort_order) and sync pets.photo_url. */
+  /**
+   * Reorder by photo id list (index = sort_order); the RPC also syncs
+   * pets.photo_url. Must list every photo of the pet exactly once (#338).
+   */
   async reorderPhotos(petId: string, orderedPhotoIds: string[]): Promise<void> {
     if (orderedPhotoIds.length > MAX_PET_PHOTOS) {
       throw new Error(`Maximum ${MAX_PET_PHOTOS} photos per pet`);
     }
 
-    for (let i = 0; i < orderedPhotoIds.length; i++) {
-      const { error } = await this.supabase
-        .from('pet_photos')
-        .update({ sort_order: i })
-        .eq('id', orderedPhotoIds[i])
-        .eq('pet_id', petId);
+    const { error } = await this.supabase.rpc('reorder_pet_photos', {
+      p_pet_id: petId,
+      p_photo_ids: orderedPhotoIds,
+    });
 
-      if (error) {
-        throw new Error(`Failed to reorder pet photos: ${error.message}`);
+    if (error) {
+      if (error.message?.includes('invalid_photo_order')) {
+        throw new Error(
+          'The photos changed since this page loaded. Refresh and try again.'
+        );
       }
+      throw new Error(`Failed to reorder pet photos: ${error.message}`);
     }
-
-    await this.syncPrimaryPhotoUrl(petId);
   }
 
   async syncPrimaryPhotoUrl(petId: string): Promise<void> {
