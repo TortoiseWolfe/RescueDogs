@@ -141,6 +141,24 @@ describe('ShelterPetService', () => {
     expect(builder.eq).toHaveBeenCalledWith('pet_id', 'pet-2');
   });
 
+  it('counts only still-open applications (#339)', async () => {
+    const builder: Record<string, unknown> = {};
+    const self = () => builder;
+    builder.select = vi.fn(self);
+    builder.eq = vi.fn(self);
+    builder.in = vi.fn().mockResolvedValue({ count: 1, error: null });
+    const supabase = { from: vi.fn().mockReturnValue(builder) } as any;
+    const service = new ShelterPetService(supabase);
+    const count = await service.getPetOpenApplicationCount('pet-2');
+    expect(count).toBe(1);
+    expect(builder.in).toHaveBeenCalledWith('status', [
+      'submitted',
+      'under_review',
+      'reference_check',
+      'home_visit',
+    ]);
+  });
+
   it('deletes a pet by id (#223)', async () => {
     const builder: Record<string, unknown> = {};
     const self = () => builder;

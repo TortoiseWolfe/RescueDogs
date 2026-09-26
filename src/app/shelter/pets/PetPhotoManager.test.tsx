@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { Profiler, useEffect } from 'react';
 
@@ -24,6 +24,28 @@ vi.mock('@/lib/pet-photos/image-processing', () => ({
   ),
 }));
 vi.mock('@/lib/supabase/client', () => ({ supabase: {} }));
+
+const photoServiceMocks = vi.hoisted(() => ({
+  reorderPhotos: vi.fn(),
+  listPhotos: vi.fn(),
+}));
+
+vi.mock('@/services/applications/pet-photo-service', async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import('@/services/applications/pet-photo-service')
+    >();
+  return {
+    ...actual,
+    PetPhotoService: vi.fn().mockImplementation(() => ({
+      reorderPhotos: photoServiceMocks.reorderPhotos,
+      listPhotos: photoServiceMocks.listPhotos,
+      addPhoto: vi.fn(),
+      deletePhoto: vi.fn(),
+      syncPrimaryPhotoUrl: vi.fn(),
+    })),
+  };
+});
 
 import { PetPhotoManager } from './PetPhotoManager';
 import {
@@ -242,5 +264,57 @@ describe('PetPhotoManager multi-select (#338)', () => {
       )
     ).toBeTruthy();
     expect(await screen.findByText('Photo 1 of 4')).toBeTruthy();
+  });
+});
+
+describe('PetPhotoManager order arrows', () => {
+  beforeEach(() => {
+    photoServiceMocks.reorderPhotos.mockReset();
+    photoServiceMocks.listPhotos.mockReset();
+  });
+
+  const photos = [
+    {
+      id: 'p1',
+      pet_id: 'pet-1',
+      url: 'https://example.com/1.jpg',
+      sort_order: 0,
+      created_at: '2026-01-01T00:00:00Z',
+    },
+    {
+      id: 'p2',
+      pet_id: 'pet-1',
+      url: 'https://example.com/2.jpg',
+      sort_order: 1,
+      created_at: '2026-01-01T00:00:00Z',
+    },
+  ];
+
+  it('moves a saved photo one place with Later', async () => {
+    photoServiceMocks.reorderPhotos.mockResolvedValue(undefined);
+    photoServiceMocks.listPhotos.mockResolvedValue([photos[1], photos[0]]);
+
+    render(
+      <PetPhotoManager
+        shelterId="test-shelter"
+        petId="pet-1"
+        initialPhotos={photos}
+      />
+    );
+
+    const later = screen.getAllByRole('button', { name: 'Move later' });
+    expect(later[0]).not.toBeDisabled();
+    expect(later[1]).toBeDisabled();
+    expect(
+      screen.getAllByRole('button', { name: 'Move earlier' })[0]
+    ).toBeDisabled();
+
+    fireEvent.click(later[0]);
+    await waitFor(() => {
+      expect(photoServiceMocks.reorderPhotos).toHaveBeenCalledWith('pet-1', [
+        'p2',
+        'p1',
+      ]);
+    });
   });
 });

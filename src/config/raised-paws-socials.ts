@@ -39,6 +39,6 @@ export const RAISED_PAWS_SOCIALS: readonly RaisedPawsSocialLink[] = [
   {
     platform: 'twitter',
     label: 'X',
-    href: 'https://x.com/Raised_Paws',
+    href: 'https://x.com/RaisedPaws',
   },
 ] as const;

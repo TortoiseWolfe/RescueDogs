@@ -21,6 +21,10 @@ import type {
   PetSpecies,
   PetStatus,
 } from '@/types/applications';
+import {
+  adoptedConfirmMessage,
+  petArchiveNote,
+} from '@/lib/pets/adoption-copy';
 import SearchParamsReader from './SearchParamsReader';
 import { useFormDraft } from '@/hooks/useFormDraft';
 
@@ -178,8 +182,26 @@ function EditShelterPetContent() {
     setSaving(true);
     setError(null);
     try {
-      const normalizedVideo = normalizePetVideoUrl(videoUrl);
       const service = new ShelterPetService(supabase);
+      const becomingAdopted = status === 'adopted' && pet.status !== 'adopted';
+      if (becomingAdopted) {
+        const openCount = await service.getPetOpenApplicationCount(pet.id);
+        if (openCount > 0) {
+          const ok = window.confirm(
+            adoptedConfirmMessage({
+              name,
+              sex: sex || pet.sex,
+              openCount,
+            })
+          );
+          if (!ok) {
+            setSaving(false);
+            return;
+          }
+        }
+      }
+
+      const normalizedVideo = normalizePetVideoUrl(videoUrl);
       await service.updatePet(pet.id, {
         name,
         species,
@@ -452,9 +474,12 @@ function EditShelterPetContent() {
               </button>
             ) : (
               <p className="text-base-content/80 text-sm">
-                This pet has {applicationCount} application
-                {applicationCount === 1 ? '' : 's'}, so it can&apos;t be
-                deleted. Set status to Adopted to remove it from browse.
+                {petArchiveNote({
+                  name: name.trim() || pet.name,
+                  sex: sex || pet.sex,
+                  status,
+                  applicationCount,
+                })}
               </p>
             )}
           </div>
