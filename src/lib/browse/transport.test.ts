@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { BrowsePet } from '@/types/applications';
 import {
   applyRadiusWithTransport,
+  browseFilterHint,
   isTransportMatch,
   normalizeTransportStates,
   petTransportsTo,
@@ -10,6 +11,7 @@ import {
   transportBadgeLabel,
   transportStateFor,
   transportStatesSummary,
+  zipStateMismatchNote,
 } from './transport';
 
 /** Sunnyside Street Dogs Rescue, Houston TX — ships to NJ (#331). */
@@ -182,5 +184,56 @@ describe('radius + transport (#331)', () => {
         includeTransport: true,
       })
     ).toEqual(pets);
+  });
+
+  it('keeps transport matches beyond the widest 500-mile radius', () => {
+    const result = applyRadiusWithTransport([houston, newark], {
+      transportState: 'NJ',
+      centerZip: '07102',
+      maxMiles: 500,
+      includeTransport: true,
+    });
+
+    expect(result.map((pet) => pet.id)).toEqual([houston.id, newark.id]);
+  });
+});
+
+describe('browse filter hint (#335)', () => {
+  it('asks for a state or ZIP before either is known', () => {
+    expect(browseFilterHint({ includeTransport: true })).toBe(
+      'Pick your state or enter your ZIP to see pets near you. Radius is optional.'
+    );
+  });
+
+  it('names the destination state while transport is included', () => {
+    expect(
+      browseFilterHint({ transportState: 'NJ', includeTransport: true })
+    ).toBe(
+      'Showing pets near you, plus pets that out-of-state rescues will transport to New Jersey.'
+    );
+  });
+
+  it('never promises transported pets while the box is unticked', () => {
+    const hint = browseFilterHint({
+      transportState: 'NJ',
+      includeTransport: false,
+    });
+    expect(hint).toMatch(/^Showing only pets near you\./);
+    expect(hint).toContain('Check "Include transportable pets"');
+  });
+});
+
+describe('ZIP / State mismatch (#335)', () => {
+  it('flags a ZIP outside the chosen state', () => {
+    expect(zipStateMismatchNote('NJ', '19103')).toBe(
+      'Your ZIP is in Pennsylvania, but you picked New Jersey. Results use New Jersey.'
+    );
+  });
+
+  it('stays quiet when they agree or either is missing', () => {
+    expect(zipStateMismatchNote('nj', '07102')).toBeNull();
+    expect(zipStateMismatchNote('', '19103')).toBeNull();
+    expect(zipStateMismatchNote('NJ', '')).toBeNull();
+    expect(zipStateMismatchNote('NJ', '191')).toBeNull();
   });
 });

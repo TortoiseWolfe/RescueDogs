@@ -16,9 +16,10 @@ import {
 } from '@/lib/browse/location-filters';
 import {
   applyRadiusWithTransport,
-  stateName,
+  browseFilterHint,
   transportBadgeLabel,
   transportStateFor,
+  zipStateMismatchNote,
 } from '@/lib/browse/transport';
 import { petDetailPath } from '@/lib/browse/pet-links';
 import { basicsLabel, locationLabel } from './browse-labels';
@@ -99,6 +100,11 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
   const draftTransportChecked = draftTransportState
     ? draftIncludeTransport
     : true;
+  const filterHint = browseFilterHint({
+    transportState: draftTransportState,
+    includeTransport: draftTransportChecked,
+  });
+  const mismatchNote = zipStateMismatchNote(draftState, draftCenterZip);
   const appliedTransportState = transportIncluded(filters)
     ? transportStateFor(normalizedFilters.state, normalizedFilters.centerZip)
     : undefined;
@@ -366,11 +372,19 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                 {filterError}
               </p>
             )}
+            {mismatchNote && (
+              <p
+                role="status"
+                className="text-base-content mt-2 text-xs leading-snug font-medium"
+              >
+                {mismatchNote}
+              </p>
+            )}
             <p className="text-base-content/60 mt-2 text-xs leading-snug">
-              {draftTransportState
-                ? `Transportable pets are animals a rescue will drive or fly to ${stateName(draftTransportState)}, even from another state. `
-                : 'Pick a state or enter your ZIP to include pets a rescue will transport to you. '}
-              Distance is approximate from your ZIP centroid, not driving miles.
+              {filterHint}
+              {draftMaxMiles
+                ? ' Distance is approximate from your ZIP centroid, not driving miles.'
+                : null}
             </p>
           </form>
         </section>

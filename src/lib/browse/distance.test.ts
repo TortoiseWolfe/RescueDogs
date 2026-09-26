@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { BrowsePet } from '@/types/applications';
 import {
+  BROWSE_RADIUS_OPTIONS,
   filterBrowsePetsByRadius,
   milesBetween,
   normalizeCenterZip,
@@ -38,7 +39,19 @@ describe('browse distance (#280)', () => {
 
   it('normalizes max miles', () => {
     expect(normalizeMaxMiles('50')).toBe(50);
+    expect(normalizeMaxMiles('500')).toBe(500);
     expect(normalizeMaxMiles('')).toBeUndefined();
+  });
+
+  it('offers Any distance first, then 25 through 500 miles (#335)', () => {
+    expect(BROWSE_RADIUS_OPTIONS.map((option) => option.value)).toEqual([
+      '',
+      25,
+      50,
+      100,
+      250,
+      500,
+    ]);
   });
 
   it('computes miles between coordinates', () => {
