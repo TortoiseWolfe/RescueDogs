@@ -3017,8 +3017,34 @@ CREATE TABLE IF NOT EXISTS pet_photos (
   sort_order SMALLINT NOT NULL DEFAULT 0
     CHECK (sort_order >= 0 AND sort_order < 4),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE (pet_id, sort_order)
+  CONSTRAINT pet_photos_pet_id_sort_order_key
+    UNIQUE (pet_id, sort_order) DEFERRABLE INITIALLY IMMEDIATE
 );
+
+-- Deferrable so reorder_pet_photos can swap slots inside one transaction; the
+-- CHECK above rules out parking rows at temporary out-of-range positions (#338).
+-- Postgres cannot ALTER a UNIQUE constraint's deferrability, so re-create it.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.pet_photos'::regclass
+      AND conname = 'pet_photos_pet_id_sort_order_key'
+      AND NOT condeferrable
+  ) THEN
+    ALTER TABLE pet_photos DROP CONSTRAINT pet_photos_pet_id_sort_order_key;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.pet_photos'::regclass
+      AND conname = 'pet_photos_pet_id_sort_order_key'
+  ) THEN
+    ALTER TABLE pet_photos
+      ADD CONSTRAINT pet_photos_pet_id_sort_order_key
+      UNIQUE (pet_id, sort_order) DEFERRABLE INITIALLY IMMEDIATE;
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_pet_photos_pet_id ON pet_photos(pet_id);
 
@@ -3410,6 +3436,69 @@ COMMENT ON FUNCTION update_my_shelter(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEA
 
 REVOKE ALL ON FUNCTION update_my_shelter(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT[], TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION update_my_shelter(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT[], TEXT) TO authenticated;
+
+-- Reorder a pet's gallery in one transaction (#338). Updating slots one row at
+-- a time collided with UNIQUE (pet_id, sort_order) on the very first move.
+-- SECURITY INVOKER so the pet_photos RLS policy still applies to every write.
+CREATE OR REPLACE FUNCTION reorder_pet_photos(
+  p_pet_id UUID,
+  p_photo_ids UUID[]
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = public
+AS $$
+DECLARE
+  v_count INT := COALESCE(array_length(p_photo_ids, 1), 0);
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'not authenticated';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pets
+    WHERE id = p_pet_id AND is_shelter_staff(shelter_id)
+  ) THEN
+    RAISE EXCEPTION 'not_shelter_staff';
+  END IF;
+
+  -- The list must name every photo of this pet exactly once, so a stale page
+  -- can never leave two rows fighting over a slot.
+  IF v_count = 0
+    OR v_count > 4
+    OR (SELECT count(DISTINCT x) FROM unnest(p_photo_ids) AS x) <> v_count
+    OR (SELECT count(*) FROM pet_photos WHERE pet_id = p_pet_id) <> v_count
+    OR (
+      SELECT count(*) FROM pet_photos
+      WHERE pet_id = p_pet_id AND id = ANY (p_photo_ids)
+    ) <> v_count
+  THEN
+    RAISE EXCEPTION 'invalid_photo_order';
+  END IF;
+
+  SET CONSTRAINTS pet_photos_pet_id_sort_order_key DEFERRED;
+
+  UPDATE pet_photos AS pp
+  SET sort_order = (o.ord - 1)::SMALLINT
+  FROM unnest(p_photo_ids) WITH ORDINALITY AS o(photo_id, ord)
+  WHERE pp.id = o.photo_id
+    AND pp.pet_id = p_pet_id;
+
+  UPDATE pets
+  SET photo_url = (
+    SELECT url FROM pet_photos
+    WHERE pet_id = p_pet_id AND sort_order = 0
+  )
+  WHERE id = p_pet_id;
+END;
+$$;
+
+COMMENT ON FUNCTION reorder_pet_photos(UUID, UUID[]) IS
+  'Staff-only atomic gallery reorder; array index = sort_order, slot 0 syncs pets.photo_url (#338).';
+
+REVOKE ALL ON FUNCTION reorder_pet_photos(UUID, UUID[]) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION reorder_pet_photos(UUID, UUID[]) TO authenticated;
 
 -- ─── Manager adds staff by email (#220 / #261) ─────────────────────────────
 -- shelter_members has no client INSERT policy, so this is the only self-serve
