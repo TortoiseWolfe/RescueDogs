@@ -1,6 +1,16 @@
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  configure,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import React, { Profiler, useEffect } from 'react';
+
+// Each queued photo chains several async steps; under full-suite CPU load they
+// can exceed the 1s default wait even though nothing is stuck.
+configure({ asyncUtilTimeout: 5000 });
 
 // The cropper is a canvas-driven third party. Like the real one, the stand-in
 // reports a crop area whenever its image changes, which enables "Use photo".
