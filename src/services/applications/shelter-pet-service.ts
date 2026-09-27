@@ -1,6 +1,7 @@
 'use client';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { OPEN_STATUSES } from '@/types/applications';
 import type {
   Pet,
   PetSex,
@@ -126,6 +127,20 @@ export class ShelterPetService {
 
     if (error) {
       throw new Error(`Failed to count applications: ${error.message}`);
+    }
+    return count ?? 0;
+  }
+
+  /** Applications the adopted-pet trigger will close (#339). */
+  async getPetOpenApplicationCount(petId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('applications')
+      .select('id', { count: 'exact', head: true })
+      .eq('pet_id', petId)
+      .in('status', [...OPEN_STATUSES]);
+
+    if (error) {
+      throw new Error(`Failed to count open applications: ${error.message}`);
     }
     return count ?? 0;
   }

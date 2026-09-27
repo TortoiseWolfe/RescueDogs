@@ -67,6 +67,17 @@ export function isTerminalStatus(status: ApplicationStatus): boolean {
   return (TERMINAL_STATUSES as readonly ApplicationStatus[]).includes(status);
 }
 
+/**
+ * Applications still awaiting a decision. Marking the pet adopted closes these
+ * as not_selected (close_open_applications_on_adoption trigger, #339).
+ */
+export const OPEN_STATUSES = [
+  'submitted',
+  'under_review',
+  'reference_check',
+  'home_visit',
+] as const satisfies readonly ApplicationStatus[];
+
 /** Human-facing labels (Constitution Principle I: status must be legible). */
 export const STATUS_LABELS: Record<ApplicationStatus, string> = {
   submitted: 'Submitted',

@@ -1,29 +1,69 @@
-import { describe, it, expect, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
+import {
+  configure,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import React, { Profiler, useEffect } from 'react';
 
-// The cropper is a canvas-driven third party. The stand-in reports one crop area
-// on mount so "Use photo" is enabled, exactly as the real one does once loaded.
+// Each queued photo chains several async steps; under full-suite CPU load they
+// can exceed the 1s default wait even though nothing is stuck.
+configure({ asyncUtilTimeout: 5000 });
+
+// The cropper is a canvas-driven third party. Like the real one, the stand-in
+// reports a crop area whenever its image changes, which enables "Use photo".
+// React may keep it mounted between queued photos, so reporting only on mount
+// would leave the next photo's button disabled.
 vi.mock('react-easy-crop', () => ({
   default: function CropperStub({
+    image,
     onCropComplete,
   }: {
+    image: string;
     onCropComplete: (area: unknown, pixels: unknown) => void;
   }) {
     useEffect(() => {
       onCropComplete({}, { x: 0, y: 0, width: 400, height: 300 });
-    }, [onCropComplete]);
+    }, [image, onCropComplete]);
     return null;
   },
 }));
+let preparedCount = 0;
 vi.mock('@/lib/pet-photos/image-processing', () => ({
   PET_PHOTO_ASPECT: 4 / 3,
-  preparePetPhotoForCrop: vi.fn(async () => 'data:image/webp;base64,AAAA'),
+  preparePetPhotoForCrop: vi.fn(async () => {
+    preparedCount += 1;
+    return `data:image/webp;base64,AAAA${preparedCount}`;
+  }),
   createCroppedPetPhoto: vi.fn(
     async () => new Blob(['cropped'], { type: 'image/webp' })
   ),
 }));
 vi.mock('@/lib/supabase/client', () => ({ supabase: {} }));
+
+const photoServiceMocks = vi.hoisted(() => ({
+  reorderPhotos: vi.fn(),
+  listPhotos: vi.fn(),
+}));
+
+vi.mock('@/services/applications/pet-photo-service', async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import('@/services/applications/pet-photo-service')
+    >();
+  return {
+    ...actual,
+    PetPhotoService: vi.fn().mockImplementation(() => ({
+      reorderPhotos: photoServiceMocks.reorderPhotos,
+      listPhotos: photoServiceMocks.listPhotos,
+      addPhoto: vi.fn(),
+      deletePhoto: vi.fn(),
+      syncPrimaryPhotoUrl: vi.fn(),
+    })),
+  };
+});
 
 import { PetPhotoManager } from './PetPhotoManager';
 import {
@@ -242,5 +282,92 @@ describe('PetPhotoManager multi-select (#338)', () => {
       )
     ).toBeTruthy();
     expect(await screen.findByText('Photo 1 of 4')).toBeTruthy();
+  });
+});
+
+describe('PetPhotoManager order arrows', () => {
+  beforeEach(() => {
+    photoServiceMocks.reorderPhotos.mockReset();
+    photoServiceMocks.listPhotos.mockReset();
+  });
+
+  const photos = [
+    {
+      id: 'p1',
+      pet_id: 'pet-1',
+      url: 'https://example.com/1.jpg',
+      sort_order: 0,
+      created_at: '2026-01-01T00:00:00Z',
+    },
+    {
+      id: 'p2',
+      pet_id: 'pet-1',
+      url: 'https://example.com/2.jpg',
+      sort_order: 1,
+      created_at: '2026-01-01T00:00:00Z',
+    },
+  ];
+
+  it('moves a saved photo one place with Later', async () => {
+    photoServiceMocks.reorderPhotos.mockResolvedValue(undefined);
+    photoServiceMocks.listPhotos.mockResolvedValue([photos[1], photos[0]]);
+
+    render(
+      <PetPhotoManager
+        shelterId="test-shelter"
+        petId="pet-1"
+        initialPhotos={photos}
+      />
+    );
+
+    const later = screen.getAllByRole('button', { name: 'Move later' });
+    expect(later[0]).not.toBeDisabled();
+    expect(later[1]).toBeDisabled();
+    expect(
+      screen.getAllByRole('button', { name: 'Move earlier' })[0]
+    ).toBeDisabled();
+
+    fireEvent.click(later[0]);
+    await waitFor(() => {
+      expect(photoServiceMocks.reorderPhotos).toHaveBeenCalledWith('pet-1', [
+        'p2',
+        'p1',
+      ]);
+    });
+  });
+
+  it('reorders staged photos without talking to the server', async () => {
+    const { container } = render(
+      <PetPhotoManager shelterId="test-shelter" petId={null} />
+    );
+
+    const input = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    fireEvent.change(input, {
+      target: {
+        files: [
+          new File(['a'], 'a.jpg', { type: 'image/jpeg' }),
+          new File(['b'], 'b.jpg', { type: 'image/jpeg' }),
+        ],
+      },
+    });
+    fireEvent.click(await screen.findByRole('button', { name: 'Use photo' }));
+    expect(await screen.findByText('Photo 2 of 2')).toBeTruthy();
+    fireEvent.click(await screen.findByRole('button', { name: 'Use photo' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    const before = Array.from(
+      container.querySelectorAll('img[src^="blob:"]')
+    ).map((img) => img.getAttribute('src'));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Move later' })[0]);
+    const after = Array.from(
+      container.querySelectorAll('img[src^="blob:"]')
+    ).map((img) => img.getAttribute('src'));
+
+    expect(after).toEqual([before[1], before[0]]);
+    expect(photoServiceMocks.reorderPhotos).not.toHaveBeenCalled();
   });
 });

@@ -130,7 +130,7 @@ describe('Footer (#74 / #65)', () => {
     ).toHaveAttribute('href', 'https://www.tiktok.com/@raisedpaws');
     expect(
       screen.getByRole('link', { name: /raised paws on x/i })
-    ).toHaveAttribute('href', 'https://x.com/Raised_Paws');
+    ).toHaveAttribute('href', 'https://x.com/RaisedPaws');
 
     const instagram = screen.getByRole('link', {
       name: /raised paws on instagram/i,
