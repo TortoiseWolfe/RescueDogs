@@ -27,6 +27,7 @@ import {
   uploadPetPhotoBlob,
 } from '@/lib/pet-photos/upload';
 import { selectPetPhotos } from '@/lib/pet-photos/selection';
+import { moveIdBy } from '@/lib/pet-photos/order';
 import {
   MAX_PET_PHOTOS,
   PetPhotoService,
@@ -408,13 +409,10 @@ export const PetPhotoManager = forwardRef<
     });
   }
 
-  async function makePrimary(photoId: string) {
-    if (!petId || busy) return;
-    const order = photos.map((p) => p.id);
-    const idx = order.indexOf(photoId);
-    if (idx <= 0) return;
-    order.splice(idx, 1);
-    order.unshift(photoId);
+  async function applyPersistedOrder(order: string[]) {
+    if (!petId) return;
+    const unchanged = order.every((id, i) => id === photos[i]?.id);
+    if (unchanged) return;
     setBusy(true);
     setError(null);
     try {
@@ -429,6 +427,71 @@ export const PetPhotoManager = forwardRef<
     } finally {
       setBusy(false);
     }
+  }
+
+  async function movePersisted(photoId: string, delta: -1 | 1) {
+    if (!petId || busy) return;
+    await applyPersistedOrder(
+      moveIdBy(
+        photos.map((p) => p.id),
+        photoId,
+        delta
+      )
+    );
+  }
+
+  function moveStaged(id: string, delta: -1 | 1) {
+    if (busy) return;
+    setStaged((prev) => {
+      const nextIds = moveIdBy(
+        prev.map((item) => item.id),
+        id,
+        delta
+      );
+      return nextIds
+        .map((nextId) => prev.find((item) => item.id === nextId))
+        .filter((item): item is StagedPhoto => Boolean(item));
+    });
+  }
+
+  async function makePrimary(photoId: string) {
+    if (!petId || busy) return;
+    const order = photos.map((p) => p.id);
+    const idx = order.indexOf(photoId);
+    if (idx <= 0) return;
+    order.splice(idx, 1);
+    order.unshift(photoId);
+    await applyPersistedOrder(order);
+  }
+
+  function orderButtons(
+    index: number,
+    total: number,
+    onMove: (delta: -1 | 1) => void
+  ) {
+    if (total < 2) return null;
+    return (
+      <>
+        <button
+          type="button"
+          className="btn btn-ghost btn-xs min-h-11 min-w-11"
+          aria-label="Move earlier"
+          onClick={() => onMove(-1)}
+          disabled={busy || index === 0}
+        >
+          Earlier
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost btn-xs min-h-11 min-w-11"
+          aria-label="Move later"
+          onClick={() => onMove(1)}
+          disabled={busy || index === total - 1}
+        >
+          Later
+        </button>
+      </>
+    );
   }
 
   return (
@@ -495,6 +558,11 @@ export const PetPhotoManager = forwardRef<
                   </span>
                 )}
                 <div className="bg-base-100/90 flex flex-wrap gap-1 p-1">
+                  {orderButtons(
+                    index,
+                    photos.length,
+                    (delta) => void movePersisted(photo.id, delta)
+                  )}
                   {index > 0 && (
                     <button
                       type="button"
@@ -534,7 +602,10 @@ export const PetPhotoManager = forwardRef<
                   Profile
                 </span>
               )}
-              <div className="bg-base-100/90 p-1">
+              <div className="bg-base-100/90 flex flex-wrap gap-1 p-1">
+                {orderButtons(index, staged.length, (delta) =>
+                  moveStaged(item.id, delta)
+                )}
                 <button
                   type="button"
                   className="btn btn-ghost btn-xs text-error min-h-8"

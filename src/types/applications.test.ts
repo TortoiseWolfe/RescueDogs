@@ -4,6 +4,7 @@ import {
   STATUS_TRANSITIONS,
   STATUS_LABELS,
   TERMINAL_STATUSES,
+  OPEN_STATUSES,
   isTerminalStatus,
   isRenting,
   type ApplicationStatus,
@@ -66,6 +67,17 @@ describe('STATUS_TRANSITIONS', () => {
         expect(targetIndex).toBeGreaterThan(i);
       }
     }
+  });
+});
+
+describe('OPEN_STATUSES', () => {
+  it('is the pipeline before a decision (#339)', () => {
+    expect([...OPEN_STATUSES]).toEqual([
+      'submitted',
+      'under_review',
+      'reference_check',
+      'home_visit',
+    ]);
   });
 });
 

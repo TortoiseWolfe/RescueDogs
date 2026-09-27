@@ -3772,6 +3772,72 @@ CREATE TRIGGER on_application_created
   FOR EACH ROW
   EXECUTE FUNCTION log_application_submitted();
 
+-- ─── Adopted pet closes its open applications (#339) ─────────────────────────
+-- Principle I: an application must never sit open on a pet that is gone.
+-- Approved applications are left alone (usually the adopting family);
+-- not_selected / withdrawn are already terminal.
+
+CREATE OR REPLACE FUNCTION close_open_applications_on_adoption()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.status = 'adopted' AND OLD.status IS DISTINCT FROM 'adopted' THEN
+    WITH closed AS (
+      SELECT id, status AS from_status
+      FROM applications
+      WHERE pet_id = NEW.id
+        AND status IN ('submitted', 'under_review', 'reference_check', 'home_visit')
+      FOR UPDATE
+    ), updated AS (
+      UPDATE applications AS a
+      SET status = 'not_selected', status_changed_at = NOW()
+      FROM closed
+      WHERE a.id = closed.id
+      RETURNING a.id, closed.from_status
+    )
+    INSERT INTO application_status_history
+      (application_id, from_status, to_status, changed_by, note)
+    SELECT id, from_status, 'not_selected', auth.uid(), NEW.name || ' has been adopted.'
+    FROM updated;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+COMMENT ON FUNCTION close_open_applications_on_adoption() IS
+  'AFTER UPDATE OF status on pets: moving a pet to adopted closes its open '
+  'applications as not_selected with an adopter-visible note (#339).';
+
+DROP TRIGGER IF EXISTS on_pet_adopted_close_applications ON pets;
+CREATE TRIGGER on_pet_adopted_close_applications
+  AFTER UPDATE OF status ON pets
+  FOR EACH ROW
+  EXECUTE FUNCTION close_open_applications_on_adoption();
+
+-- One-time backfill for applications left open on already-adopted pets;
+-- a no-op on re-run because closed applications no longer match.
+WITH closed AS (
+  SELECT a.id, a.status AS from_status, p.name AS pet_name
+  FROM applications AS a
+  JOIN pets AS p ON p.id = a.pet_id
+  WHERE p.status = 'adopted'
+    AND a.status IN ('submitted', 'under_review', 'reference_check', 'home_visit')
+  FOR UPDATE OF a
+), updated AS (
+  UPDATE applications AS a
+  SET status = 'not_selected', status_changed_at = NOW()
+  FROM closed
+  WHERE a.id = closed.id
+  RETURNING a.id, closed.from_status, closed.pet_name
+)
+INSERT INTO application_status_history
+  (application_id, from_status, to_status, changed_by, note)
+SELECT id, from_status, 'not_selected', NULL, pet_name || ' has been adopted.'
+FROM updated;
+
 -- ─── Shelter email on new application (#260) ─────────────────────────────────
 -- Ops: populate private.shelter_application_notify_config (edge URL + webhook
 -- secret matching APPLICATION_NOTIFY_WEBHOOK_SECRET on the Edge Function).
