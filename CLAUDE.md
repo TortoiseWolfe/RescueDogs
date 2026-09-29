@@ -29,6 +29,9 @@ top, ScriptHammer disciplines as Mandatory Constraints).
   create-then-drop every table
 - `.specify/memory/constitution.md` is RescueDogs v1.0.0 — never let an
   upstream merge overwrite it
+- No ScriptHammer sales promo in `src/`: `grep -rn "CountdownBanner\|SEASON_PRICES" src`
+  must return nothing. Upstream ships a site-wide "Custom Setup" countdown that
+  switches itself on every Oct 31; the rebrand renames it but does not remove it
 
 Supabase project: `RescueDogs` ref `cmdhajshektesctrappl` (us-east-2).
 Live site: https://raisedpaws.com
