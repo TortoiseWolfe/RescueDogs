@@ -15,17 +15,32 @@ candidate against callers, guards, RLS policies and tests before reporting it.
 
 ## Summary
 
-_In progress — updated as tiers report._
+**71 findings: 7 P0 · 18 P1 · 31 P2 · 15 P3.** Eight reviewers covered all code tiers (see Coverage). Duplicates across reviewers are merged and each entry lists every source. Re-grades carry a "Severity note". All 9 findings from the earlier quick pass reappear here, independently confirmed.
+
+### Themes worth fixing as a class
+
+1. **RLS write policies with no column limits or WITH CHECK.** The same shape appears on `messages`, `conversations`, `user_connections`, `conversation_members`, `group_keys`, `user_profiles` and `subscriptions`. A row-ownership check is treated as if it were permission to change every column. This one pattern accounts for message forgery, forced connections, group takeover, self-set `is_admin` and forged subscriptions. **Fix as a class:** audit every `FOR UPDATE`/`FOR INSERT` policy in the monolithic migration. Replace `GRANT ALL` with column-level `GRANT UPDATE (…)`, or add BEFORE UPDATE triggers that freeze identity and state columns. Route state changes through SECURITY DEFINER RPCs, as applications already do.
+2. **One Supabase project serves production, development and CI.** Because of that, a public test password becomes a live admin login, every E2E run wipes production lockouts, `db:reset` can delete real adopters, and the public demo manager can see real applicants. **Fix as a class:** run CI against a local Supabase stack (which also unblocks theme 4), and never seed known credentials or demo tenants into prod.
+3. **Security and integrity rules that live only in the client.** Examples: the sign-in lockout, the "pet has applications" delete guard, the pet status the edit form writes back, the admin UI gate, and consent checks (Disqus, analytics, the nav theme toggle). The app is a static export, so the constitution already puts trust in the database. Move each of these into a trigger, RPC or policy, and treat the UI check as copy only.
+4. **Tests and checks that cannot fail.** The RLS suite never runs in CI, the security E2E job is `continue-on-error`, RLS asserts pass vacuously, specs turn errors into skips, and some tests are `expect(true).toBe(true)` placeholders. Several of the P0/P1 bugs above sit in exactly those untested paths. Also, no secret scan runs server-side, and `monitor.yml` can never go red.
+5. **Failure reported as success, or silently dropped.** Account deletion deletes nothing but redirects as if it did. Webhooks dedupe failed events forever. Load errors render as "not found", a rate-limit outage renders as "account locked", and a failed status change discards the staff note. **Fix as a class:** check the affected row count on writes, and show the real error.
+
+### Unverified — needs a human check
+
+- **Live project state:** whether `supabase/seed-admin-demo.sql` (admin flag on `test@example.com`) and `seed-rescue-demo.sql` have been applied to `cmdhajshektesctrappl`. This decides the practical impact of two P0s. Check it first.
+- **Committed `.env.local-supabase`:** confirm it contains only the standard local-Supabase demo JWTs, not real project keys. Two attempts to read it were blocked by the environment's permission policy.
+- **Default `GITHUB_TOKEN` permissions:** `ci`, `accessibility`, `e2e` and `component-structure` have no `permissions:` block, so the repository setting decides.
+- **Admin date ranges (T6 lead, not verified):** `src/app/admin/*/page.tsx` pass `new Date('YYYY-MM-DD')` (midnight UTC) as the range end, which may drop the last day's data. Out-of-order range responses aren't guarded.
 
 ## Coverage
 
 | Tier | Scope | Status |
 | ---- | ----- | ------ |
-| T1 | DB schema/RLS, edge functions, auth, payments, contexts, schemas | pending |
+| T1 | DB schema/RLS, edge functions, auth, payments, contexts, schemas | done |
 | T2 | Messaging, E2E crypto, offline queue, service worker | done |
 | T3 | Adoption domain: applications, pets, photos, admin, portal, browse, email | done |
-| T4 | Pages/routing (`src/app`), hooks, utils, config, SEO/blog/monitoring libs | pending |
-| T5 | UI components — security-sensitive (auth, payment, privacy, forms, messaging) | pending |
+| T4 | Pages/routing (`src/app`), hooks, utils, config, SEO/blog/monitoring libs | done |
+| T5 | UI components — security-sensitive (auth, payment, privacy, forms, messaging) | done |
 | T6 | UI components — the rest | done |
 | T7 | `scripts/`, CI workflows, Docker, hooks, build config | done |
 | T8 | Tests (`tests/`, `src/tests`, `scripts/__tests__`) | done |
@@ -39,14 +54,14 @@ Not reviewed (prose, not code): `docs/`, `features/`, `specs/`, `.specify/`, `.c
 - **Defect:** The recipient "mark as read" policy permits updating every column of a received message. The sender policy's WITH CHECK tests `created_at > now()-15m` against the *new* row, so the same UPDATE can reset `created_at`. No trigger freezes any column.
 - **Failure scenario:** B PATCHes A's message with new `encrypted_content`/`initialization_vector`. B holds the ECDH secret, so the forgery decrypts cleanly and shows as A's words. B can also set `deleted=true` to hide A's messages. A sender can PATCH `conversation_id` into a conversation they aren't in (including `is_system_message=true`), or reset `created_at` to edit forever.
 - **Fix:** Replace the recipient policy with a SECURITY DEFINER `mark_messages_read(ids)` RPC, or add a BEFORE UPDATE trigger that allows non-senders to change only `read_at`/`delivered_at`. For senders, freeze `conversation_id`, `sender_id`, `created_at`, `sequence_number` and `is_system_message`, and check the window against `OLD.created_at`.
-- **Confidence:** confirmed · **Source:** T2 (also in the earlier diff-review pass)
+- **Confidence:** confirmed · **Source:** T2 + T1 (merged; also in the earlier diff-review pass)
 
 ### [P0] Connection consent and blocking are enforced only in the client
 - **Where:** migration `:1898-1904` (`user_connections` INSERT checks only `auth.uid() = requester_id`; the addressee UPDATE has no column limits); `:1972-1975` (`conversations` UPDATE only requires the caller to stay a participant); `:2534-2550` (`messages` INSERT ignores `status='blocked'`); `src/services/messaging/connection-service.ts:597-613` (`ensureAcceptedConnection` inserts `status:'accepted'` directly)
 - **Defect:** Any user can create an *accepted* connection with anyone. An addressee can rewrite `requester_id`, a participant can swap the other participant of a 1:1 conversation, and a blocked user keeps insert rights on the existing conversation.
 - **Failure scenario:** M inserts `{requester_id:M, addressee_id:V, status:'accepted'}`, opens a conversation and messages V, who never consented. After V blocks M, M's messages still pass RLS. In an A–B conversation, A PATCHes `participant_2_id=C`: B loses the history and C gains the ciphertext rows.
 - **Fix:** Require `status='pending'` on INSERT and move the staff auto-link (#72) into a SECURITY DEFINER RPC that verifies the relationship. Restrict `user_connections` UPDATE to `status`, freeze the `conversations` participant columns, and add a NOT EXISTS blocked check to `messages` INSERT.
-- **Confidence:** confirmed · **Source:** T2 (also in the earlier diff-review pass)
+- **Confidence:** confirmed · **Source:** T2 + T1 (merged; also in the earlier diff-review pass)
 - **Severity note:** Raised from P1. This bypasses consent and blocking, which is an authorization hole and a harassment vector, not just a UX bug.
 
 ### [P0] Public demo-manager login can read real applicants' PII
@@ -64,6 +79,30 @@ Not reviewed (prose, not code): `docs/`, `features/`, `specs/`, `.specify/`, `.c
 - **Fix:** Delete only this run's identifiers (`clearRateLimitsForIdentifier` already exists), or a test-only pattern such as `+bf-`/`+rl-` matched with `ilike`. Never delete all rows in a shared project.
 - **Confidence:** confirmed · **Source:** T8
 - **Severity note:** Raised from P1. Production brute-force protection is reset on every CI run.
+
+### [P0] Test account with a public password is made platform admin on the shared project
+- **Where:** `supabase/migrations/20251006_complete_monolithic_setup.sql:21, 1771-1867` (recreates `test@example.com` / `TestPassword123!`); `supabase/seed-admin-demo.sql:320-329` (adds `{"is_admin": true}` to that user's `raw_app_meta_data`); `scripts/generate-contract-fixtures.ts:8-9`; the password is also published in `CLAUDE.md`
+- **Defect:** There is one Supabase project (`cmdhajshektesctrappl`), and it serves raisedpaws.com. The migration re-creates a user whose password is in the public repo, and the admin seed grants that user the JWT admin claim that every `admin_*` RPC and admin RLS policy trusts.
+- **Failure scenario:** Anyone signs in on raisedpaws.com as `test@example.com` and gets `app_metadata.is_admin`. That opens the admin user list, payment data and audit logs, including sign-up emails and IP addresses in `event_data`.
+- **Fix:** Never seed a known-password user or an admin claim into the production project. On the live project, rotate the password or delete the user and strip `is_admin` from its app_metadata. Point E2E at a separate project or local stack.
+- **Confidence:** confirmed code path. Whether `seed-admin-demo.sql` has been applied to the live project couldn't be checked from here: **check this first.** · **Source:** T1, verified by the orchestrator
+- **Note:** Line 21 also runs `DELETE FROM auth.users WHERE email='test@example.com'` on every re-run of the migration, cascading that account's data.
+
+### [P0] Payment webhooks lose events for good when processing fails once
+- **Where:** `supabase/functions/stripe-webhook/index.ts:55-69, 481`; `supabase/functions/paypal-webhook/index.ts:72-83`
+- **Defect:** The event row is inserted with `processed=false` *before* processing, and the dedupe check only asks whether a row exists. After a 500, every provider retry gets 200 "already processed".
+- **Failure scenario:** Stripe status `incomplete` maps to `'pending'`, which violates the `subscriptions.status` CHECK (migration `:115`). The upsert throws and the retry is deduped, so the event is lost. Any transient DB error on `payment_intent.succeeded` does the same: the customer is charged and no `payment_results` row is ever written.
+- **Fix:** Dedupe only on `processed=true`, or mark the row failed and reprocess on retry. Map statuses only to values the CHECK allows.
+- **Confidence:** confirmed · **Source:** T1
+- **Severity note:** Raised from P1. Customers can be charged with no record kept.
+
+### [P0] PayPal subscription webhook can never insert a row — users billed with no record
+- **Where:** `supabase/functions/paypal-webhook/index.ts:173, 188, 259-293`; `supabase/functions/create-paypal-subscription/index.ts:26-30, 51`
+- **Defect:** The insert omits `template_user_id`, which is NOT NULL (the docs say it's read from `resource.custom_id`, but it isn't). `plan_interval` is taken from `tenure_type` (`regular`/`trial`), which fails the `month`/`year` CHECK. `APPROVAL_PENDING` maps to the invalid status `'pending'`. Signature verification is hard-coded to live `api-m.paypal.com` while the other functions use `PAYPAL_API`.
+- **Failure scenario:** A buyer subscribes and the ACTIVATED webhook throws 23502/23514. Because of the finding above, it's never retried. The user is billed monthly, has no subscription row, and can't cancel in the app. In sandbox, every webhook fails signature verification.
+- **Fix:** Set `template_user_id` from a validated `custom_id`, derive the interval from the plan, map statuses only to allowed values, and use `PAYPAL_API` for verification.
+- **Confidence:** confirmed. It matters only if PayPal subscriptions are enabled in production. · **Source:** T1
+- **Severity note:** Raised from P1 (money charged with no record).
 
 ## P1
 
@@ -100,14 +139,14 @@ Not reviewed (prose, not code): `docs/`, `features/`, `specs/`, `.specify/`, `.c
 - **Defect:** `pets.status` is driven by `advance_application_status` and `finalize_adoption`, but the edit form re-sends the value it loaded on every save. The DB doesn't check it against application state.
 - **Failure scenario:** Staff open Tiger's edit page to fix the bio. Meanwhile an application is approved (pet → `pending`) or finalized (→ `adopted`). The bio save writes `available`. The pet is relisted, and new applicants apply who can never be approved (Principle I limbo).
 - **Fix:** Send `status` only when the user changed it. Add a BEFORE UPDATE trigger on `pets` that rejects un-pending or un-adopting while an `approved` application exists, unless the change comes through the RPCs.
-- **Confidence:** confirmed · **Source:** T3 (also in the earlier diff-review pass)
+- **Confidence:** confirmed · **Source:** T3 + T4 (merged; also in the earlier diff-review pass). T4 adds that `becomingAdopted` compares against the same stale `pet.status`, and suggests a conditional update (`.eq('status', loadedStatus)`) that reports "changed elsewhere" when 0 rows match.
 
 ### [P1] Deleting a pet cascade-deletes its applications; the guard exists only in the UI
 - **Where:** migration `:3097` (`applications.pet_id … ON DELETE CASCADE`), `:4060` (staff DELETE policy); `src/app/shelter/pets/edit/page.tsx:229` (count taken at page load); `src/services/applications/shelter-pet-service.ts:147`
 - **Defect:** The rule that a pet with applications can't be deleted lives only in client state, while the foreign key cascades.
 - **Failure scenario:** The edit page loads with 0 applications, then an adopter applies, then staff click Delete. The application and its history vanish, and the adopter's tracker shows "not found" (Principle I ghosting). A direct API DELETE does the same thing at any time.
 - **Fix:** Use `ON DELETE RESTRICT`, or add a BEFORE DELETE trigger that raises when applications exist.
-- **Confidence:** confirmed · **Source:** T3 (also in the earlier diff-review pass)
+- **Confidence:** confirmed · **Source:** T3 + T1 (merged; also in the earlier diff-review pass)
 - **Severity note:** Raised from P2. This is silent loss of adopters' data.
 
 ### [P1] Rescue founder's login email is made world-readable
@@ -152,7 +191,7 @@ Not reviewed (prose, not code): `docs/`, `features/`, `specs/`, `.specify/`, `.c
 - **Defect:** None of the `conversations` policies can match a group row (participants are NULL), so creating a group fails with 42501. Rename and delete affect 0 rows, and there's no DELETE policy. `'member_added'` isn't in `check_system_message_type`, and that error is swallowed.
 - **Failure scenario:** Create Group always errors. The E2E test sees the failure and navigates away ("backend may be partial"), so CI stays green.
 - **Fix:** Add group-aware policies using `is_conversation_member`/`is_conversation_creator`, add `'member_added'` to the CHECK, and make the E2E test assert that the group was created.
-- **Confidence:** confirmed · **Source:** T2
+- **Confidence:** confirmed · **Source:** T2 + T1 (merged)
 
 ### [P1] Root ErrorBoundary never resets on client-side navigation
 - **Where:** `src/app/layout.tsx:188-192`; `src/components/ErrorBoundary.tsx:83-85, 88-109`; there is no `app/error.tsx`
@@ -160,6 +199,43 @@ Not reviewed (prose, not code): `docs/`, `features/`, `specs/`, `.specify/`, `.c
 - **Failure scenario:** One page throws, and after that every page the user navigates to via GlobalNav or Footer shows "Page Error" until a full reload.
 - **Fix:** Pass `resetKeys={[pathname]}` from a client wrapper, or add `app/error.tsx`.
 - **Confidence:** confirmed · **Source:** T6
+
+### [P1] "Delete my account" reports success but deletes nothing
+- **Where:** `src/services/messaging/gdpr-service.ts:434-449`; `src/components/molecular/AccountDeletionModal/AccountDeletionModal.tsx:65-69`; `user_profiles` policies (migration `:898-914`) have no DELETE policy
+- **Defect:** RLS turns the DELETE into 0 rows with no error. The code comment claims deleting the profile cascades to `auth.users`, but the foreign key runs the other way.
+- **Failure scenario:** The user confirms deletion, sees a success redirect and is signed out. The profile, auth account, messages, applications, the snapshot of their personal details held on each application, and the adopter profile all remain, and they can sign straight back in. That's a GDPR erasure claim the app doesn't honour. `tests/e2e/messaging/gdpr-compliance.spec.ts:~452-461` checks only the redirect, and `tests/contract/profile/delete-account.contract.test.ts:115` is `expect(true).toBe(true)`.
+- **Fix:** Add an Edge Function that uses `auth.admin.deleteUser`, or a SECURITY DEFINER `delete_my_account()` that deletes from `auth.users`. Check the affected row count, and make the E2E test assert the user can no longer sign in.
+- **Confidence:** confirmed · **Source:** T1 + T5 (merged)
+
+### [P1] Rate limiter resets under concurrency; the contact form's limit is keyed on a spoofable header
+- **Where:** migration `:623-637` (`check_rate_limit` with `FOR UPDATE SKIP LOCKED`); `supabase/functions/contact-message/index.ts:25, 72-80`
+- **Defect:** A concurrent caller that hits the lock gets no row, takes the "new window" branch, and resets `attempt_count=0, locked_until=NULL`. The contact function keys on the first `X-Forwarded-For` entry, which the client controls, instead of `cf-connecting-ip`. The doc says 5 per 15 minutes, but the SQL cap is 15.
+- **Failure scenario:** Parallel bursts keep resetting the counter, so neither the sign-in nor the contact limit is ever reached. Rotating the XFF value gives a fresh budget on every request.
+- **Fix:** Use a plain `FOR UPDATE`, or a single atomic `INSERT … ON CONFLICT DO UPDATE … RETURNING`. Key on the proxy-appended or `cf-connecting-ip` address, and fix the limit or the doc.
+- **Confidence:** confirmed (reset logic); plausible (XFF spoofing depends on the gateway) · **Source:** T1 (also in the earlier diff-review pass)
+
+### [P1] Sign-in lockout is client-only: anyone can lock a victim out, and attackers bypass it
+- **Where:** migration `:489-604` (`log_auth_audit_event`, granted to anon, takes any `p_user_id`), `:607-674` (`check_rate_limit`/`record_failed_attempt`, SECURITY DEFINER, no REVOKE); `src/components/auth/SignInForm/SignInForm.tsx:84-101, 143-147`; `SignUpForm.tsx:81`; `ForgotPasswordForm.tsx:52`
+- **Defect:** Only the client increments the per-email counter, anon can increment it for any email, and only the form enforces the lock before it calls GoTrue. Identifiers are case-sensitive.
+- **Failure scenario:** An attacker calls `rpc('record_failed_attempt', {p_identifier:'victim@x.com', …})` 15 times every 15 minutes, and the victim's form says "account locked" indefinitely. Meanwhile the attacker brute-forces via `signInWithPassword` directly, which never touches the counter. Anyone can also forge `sign_in_failed`/`account_delete` audit rows for any user.
+- **Fix:** Enforce lockout where the password is checked (an Auth hook, or an Edge Function that proxies sign-in). REVOKE these functions from anon/authenticated, force `p_user_id = auth.uid()`, and lowercase identifiers.
+- **Confidence:** confirmed · **Source:** T1 + T5 (merged)
+- **Severity note:** T1 and T5 graded this P2. It's raised to P1 because a real user-facing lockout DoS is live, and the brute-force protection is illusory apart from GoTrue's own limits.
+
+### [P1] `subscriptions` is writable by the client in every column
+- **Where:** migration `:875-880, 1754`; `src/lib/offline-queue/payment-adapter.ts:203-209`; `supabase/functions/cancel-subscription/index.ts` and `resume-subscription` act on the stored `provider_subscription_id` with platform keys
+- **Defect:** The INSERT and UPDATE policies only pin `template_user_id`.
+- **Failure scenario:** A user sets their own row to `status='active'` with any amount. Or they insert a fake live row, so the real webhook upsert hits `idx_subscriptions_one_live_per_user` and the real subscription is never recorded. Or they point `provider_subscription_id` at another customer's id and call cancel/resume, which the platform's Stripe/PayPal credentials then carry out.
+- **Fix:** Remove client INSERT and UPDATE on `subscriptions`, so only webhooks and edge functions using the service role write it.
+- **Confidence:** confirmed · **Source:** T1
+- **Severity note:** Raised from P2. It can block recording real subscriptions and act on other customers' provider subscriptions (if their id is known).
+
+### [P1] ProtectedRoute drops the query string from `returnUrl`, breaking every deep link
+- **Where:** `src/components/auth/ProtectedRoute/ProtectedRoute.tsx:57-59, 105, 111` (uses `usePathname()` only)
+- **Defect:** Static export means every detail page is keyed by a query param (`?id=`, `?pet=`, `?conversation=`), and those are lost.
+- **Failure scenario:** A signed-out manager clicks the new-application email link `…/shelter/application?id=<uuid>` (`supabase/functions/notify-shelter-application/index.ts:140`), signs in, and sees "Application not found". The same happens for `/applications/status?id=`, `/adopt?pet=` (the Apply button loses the pet), `/shelter/pets/edit?id=`, `/messages?conversation=` and `/payment-result?id=`.
+- **Fix:** Build `returnUrl` from `pathname + window.location.search`. The sign-in side already validates same-origin.
+- **Confidence:** confirmed · **Source:** T4
 
 ## P2
 
@@ -169,7 +245,8 @@ Not reviewed (prose, not code): `docs/`, `features/`, `specs/`, `.specify/`, `.c
 - **Failure scenario:** A removed member sets `left_at=NULL` and `role='owner'`, regains read access, then rotates keys to include themselves. Or a member pre-inserts a junk key row for the victim's next version, so the real distribution hits the unique constraint and the victim can't decrypt.
 - **Fix:** Let non-owners change only `archived`/`muted`, never allow clearing `left_at`, and require `created_by = auth.uid()` plus owner/RPC-only key distribution.
 - **Confidence:** confirmed · **Source:** T2
-- **Severity note:** This is P0-class once group creation works. It's P2 only because groups can't currently be created (see the P1 above). Fix both together.
+- **Severity note:** T1 graded this P1. It is P0-class once group creation works, and P2 only while groups can't be created (see the group-chat P1). Fix both together.
+- **Source:** T2 + T1 (merged)
 
 ### [P2] Offline message queue can send duplicates
 - **Where:** `src/services/messaging/offline-queue-service.ts:135-245`; `src/services/messaging/message-service.ts:430-443, 499-513`
@@ -211,7 +288,8 @@ Not reviewed (prose, not code): `docs/`, `features/`, `specs/`, `.specify/`, `.c
 - **Defect:** Admin RPCs correctly check the JWT claim, but the UI gate reads this user-writable column, and the admin listings exclude anyone who has it set.
 - **Failure scenario:** A user PATCHes `{is_admin:true}` on their own profile and disappears from the admin user list and stats (moderation evasion). They also see the `/admin` UI shell, though its data calls still fail.
 - **Fix:** Revoke UPDATE on `is_admin` and `welcome_message_sent` from `authenticated` or pin them with a trigger, and have `checkIsAdmin` read `app_metadata`.
-- **Confidence:** confirmed · **Source:** T3 (also in the earlier diff-review pass)
+- **Also:** the `user_profiles` INSERT policy is `WITH CHECK (true)` (`:913-914`), and the client can flip `welcome_*_sent`. Drop the client INSERT policy, since a trigger creates profiles. No access-token hook syncs this column into the JWT (`supabase/config.toml:228` is commented out), which is why this is P2 rather than P0.
+- **Confidence:** confirmed · **Source:** T3 + T1 + T5 (merged; also in the earlier diff-review pass)
 
 ### [P2] E2E "mutex" drops queued runs, so post-merge `main` E2E can be lost
 - **Where:** `.github/workflows/e2e.yml:36-43` (`cancel-in-progress: false`)
@@ -316,15 +394,73 @@ Not reviewed (prose, not code): `docs/`, `features/`, `specs/`, `.specify/`, `.c
 - **Defect:** There's no `onCancel` handler, so Escape closes the native dialog while `isDeleting` is true, but the parent's `isOpen` stays true.
 - **Failure scenario:** A delete error lands in a closed dialog, and the modal can't be reopened until a remount.
 - **Fix:** Call `preventDefault` in `onCancel` while deleting, and sync the parent from the dialog's close event.
-- **Confidence:** confirmed · **Source:** T6
+- **Confidence:** confirmed · **Source:** T6 + T5 (merged; T5 graded P3)
+
+### [P2] `add_shelter_staff_by_email` reveals which emails have accounts and adds staff without consent
+- **Where:** migration `:3514-3582` (distinct `user_not_found`/`user_not_confirmed` results; inserts with no invite step); `:3290` (`already_a_member`); `shelter_members` has only a SELECT policy (`:4032`); `is_shelter_staff(p_shelter, check_user_id)` `:3139-3152` is callable by anon
+- **Defect:** Anyone can become a manager through `create_my_shelter`. From there they can probe emails and silently attach real people as staff, and the target has no way to leave.
+- **Failure scenario:** An attacker learns which emails are registered. Adding a real rescue's email to the attacker's shelter means that rescue's own `create_my_shelter` fails with `already_a_member` forever. Anon can also test staff membership for any user id.
+- **Fix:** Use an invite/accept flow with one generic result, add a self-leave RPC, and REVOKE `is_shelter_staff` from anon/PUBLIC (or drop the `check_user_id` parameter).
+- **Confidence:** confirmed · **Source:** T1 + T3 (merged; also in the earlier diff-review pass)
+- **Severity note:** Raised from P3 (T3) to T1's P2. The consent-less add can permanently block a real rescue from onboarding.
+
+### [P2] PayPal one-time payments are recorded twice, and the captured row has no amount
+- **Where:** `supabase/functions/create-paypal-order/index.ts:189-198`; `capture-paypal-order/index.ts:166-174`; `paypal-webhook/index.ts` `handlePaymentCompleted`
+- **Defect:** Capture flips the order row to succeeded without `charged_amount`. The webhook then inserts a second succeeded row keyed by capture id.
+- **Failure scenario:** One $20 payment shows as 2 successful payments in admin stats and payment history, and one of them has a NULL amount.
+- **Fix:** Upsert by `intent_id`/order id in the webhook, and store `charged_amount` on capture.
+- **Confidence:** confirmed · **Source:** T1
+
+### [P2] Submitted form drafts come back after a fast submit
+- **Where:** `src/hooks/useFormDraft.ts:104-114, 150-168, 286-311`; callers `src/app/adopt/page.tsx:124-125`, `src/app/shelter/pets/new/page.tsx:178`, `src/app/shelter/pets/edit/page.tsx:218`; `src/components/forms/ApplicationForm/ApplicationForm.tsx:250-256`
+- **Defect:** `clearDraft()` doesn't reset `pending.current`, and the external `clearFormDraft()` can't cancel the hook's timer. The unmount flush triggered by `router.push` writes the draft back.
+- **Failure scenario:** Submitting within the 800ms debounce brings the draft back. The next Add Pet auto-restores the previous pet, leading to duplicate listings. The next `/adopt` visit restores the full application (address, phone, vet), and resubmitting hits 23505.
+- **Fix:** Null `pending.current` in `clearDraft`, add a module-level cancelled-keys set that the timer and flush check, and test clear-then-unmount.
+- **Confidence:** confirmed (the frequency depends on timing) · **Source:** T4 + T5 (merged)
+
+### [P2] Content-Security-Policy is emitted as an inert `<meta name>`
+- **Where:** `src/app/layout.tsx:140-160` (`metadata.other['Content-Security-Policy']`, plus `Cache-Control`/`Pragma`/`Expires`)
+- **Defect:** Next renders these as `<meta name=…>`. Browsers honour CSP only from `http-equiv` or a response header, and nothing in `src/` emits `httpEquiv`. `docs/project/SECURITY.md:72-76` claims a strict CSP.
+- **Failure scenario:** There's no CSP behind the `dangerouslySetInnerHTML` sinks (`BlogContent.tsx:73`, including an inline `onclick`, and `CodeBlock.tsx:79`), and any third-party script, such as Disqus, loads unrestricted.
+- **Fix:** Render `<meta httpEquiv="Content-Security-Policy" …>` in the root `<head>` after auditing the allow-list, and add a test that checks the rendered tag.
+- **Confidence:** confirmed (T4; T5 rated it plausible) · **Source:** T4 + T5 (merged)
+
+### [P2] Disqus loads without cookie consent and falls back to the wrong domain
+- **Where:** `src/components/molecular/DisqusComments.tsx:70-72, 236-250`; `src/app/blog/[slug]/page.tsx:155, 188-194`; shortname in `src/config/author-generated.ts:22`
+- **Defect:** `embed.js` is injected on scroll with no `useConsent()` check, unlike `CalendarEmbed` (`CalendarEmbed.tsx:67`). The fallback URL is hard-coded to `https://rescuedogs.com/blog/…` rather than raisedpaws.com.
+- **Failure scenario:** A visitor who rejected non-essential cookies scrolls a post, and Disqus sets tracking cookies anyway. If `NEXT_PUBLIC_BASE_URL` is unset, threads attach to the wrong domain.
+- **Fix:** Gate the script on consent behind a "load comments" placeholder, and derive the fallback from CNAME or config.
+- **Confidence:** confirmed (consent); plausible (domain, depending on env) · **Source:** T5 + T6 (merged)
+
+### [P2] "Remember Me" does nothing — sessions always persist
+- **Where:** `src/components/auth/SignInForm/SignInForm.tsx:53, 345-360`; `SignUpForm.tsx:45, 252`; `src/lib/supabase/client.ts:185` (`persistSession: true`)
+- **Defect:** The `rememberMe` state is never read.
+- **Failure scenario:** On a shared shelter or library computer, the next person opens the site already signed in, with access to applications, home address and messages.
+- **Fix:** Use sessionStorage-backed auth storage when the box is unchecked, or remove the checkbox.
+- **Confidence:** confirmed · **Source:** T5
+
+### [P2] A rate-limit infrastructure error is shown as "account locked"
+- **Where:** `src/lib/auth/rate-limit-check.ts:110-141`; `SignInForm.tsx:83-101`; `ForgotPasswordForm.tsx:52-62`; `SignUpForm.tsx:81-91`
+- **Defect:** `checkRateLimit` fails closed with a `reason`, but all three forms ignore the reason and show the lockout copy. The "fail-open" try/catch is dead code.
+- **Failure scenario:** When Supabase is paused or cold (a known free-tier state), every user is told their account is locked for 15 minutes.
+- **Fix:** Show `reason` when `locked_until` is null, and correct the dead comment.
+- **Confidence:** confirmed · **Source:** T5
+
+### [P2] Auth callback's stale timer bounces a signed-in user to the sign-in page
+- **Where:** `src/app/auth/callback/page.tsx:74-80`
+- **Defect:** The 2-second `setTimeout` captures `user=null` and is never cleared.
+- **Failure scenario:** The session arrives after loading clears (the 10-second timeout, or the transient SIGNED_OUT noted at `AuthContext:285-289`). The page pushes `/profile`, then 2 seconds later `/sign-in?error=auth_callback_failed`.
+- **Fix:** Return `clearTimeout` from the effect, or read `user` from a ref.
+- **Confidence:** plausible (the defect is confirmed; the frequency is timing-dependent) · **Source:** T4
+
+### [P2] Payment result "still processing" never updates, and hides not-found/forbidden
+- **Where:** `src/app/payment-result/page.tsx:36-89, 210-233`
+- **Defect:** The page promises to "update automatically", but nothing polls or subscribes. A missing intent and another user's intent (hidden by RLS) look the same.
+- **Failure scenario:** If the redirect beats the webhook, the user sits on "processing" forever and may pay again.
+- **Fix:** Poll with backoff or subscribe to `payment_results`, and query `payment_intents` to tell the cases apart.
+- **Confidence:** confirmed · **Source:** T4
 
 ## P3
-
-### [P3] Membership and account-existence oracles
-- **Where:** migration `:3139-3152` (`is_shelter_staff(p_shelter, check_user_id)` callable by anon); `:3514-3582` (`add_shelter_staff_by_email` returns distinct `user_not_found`/`user_not_confirmed` errors and adds staff without consent)
-- **Defect / failure:** Anyone can test whether user X is staff at shelter Y. Anyone who self-creates a rescue (or uses the demo manager) can loop over emails to learn which are registered, and can add those people as staff without their consent.
-- **Fix:** REVOKE EXECUTE from anon/PUBLIC, return a single generic error, and turn staff addition into an invitation the invitee accepts.
-- **Confidence:** confirmed · **Source:** T3 (also in the earlier diff-review pass)
 
 ### [P3] Email service retries non-idempotent sends
 - **Where:** `src/utils/email/email-service.ts:149-178`; `supabase/functions/contact-message/index.ts:186-199`
@@ -374,14 +510,44 @@ Not reviewed (prose, not code): `docs/`, `features/`, `specs/`, `.specify/`, `.c
 - **Fix:** Drive visibility from `open`, and drop the focus-triggered opener.
 - **Confidence:** confirmed code path (not browser-verified) · **Source:** T6
 
-### [P3] DisqusComments falls back to the wrong domain
-- **Where:** `src/components/molecular/DisqusComments.tsx:70-72`; `src/app/blog/[slug]/page.tsx:155`
-- **Defect / failure:** When `NEXT_PUBLIC_BASE_URL` is unset, threads attach to `rescuedogs.com` instead of raisedpaws.com.
-- **Fix:** Derive the fallback from CNAME or config.
-- **Confidence:** plausible · **Source:** T6
-
 ### [P3] Dev only: A11yDevOverlay rescans in a loop; DataExportButton gets stuck under StrictMode
 - **Where:** `src/components/organisms/A11yDevOverlay/useA11yScan.ts:98-107`, `A11yDevOverlay.tsx:199-203`; `src/components/atomic/DataExportButton/DataExportButton.tsx:29-35, 72-75`
 - **Defect / failure:** The overlay's own DOM mutations trigger rescans about every 0.5 seconds. The button's `mountedRef` is never reset to true, so it stays on "Exporting…".
 - **Fix:** Ignore mutations inside the overlay, and set `mountedRef.current = true` in the effect.
 - **Confidence:** confirmed (dev only) · **Source:** T6
+
+### [P3] Pet edit copy uses unsaved form state and a different sex fallback than the save
+- **Where:** `src/app/shelter/pets/edit/page.tsx:193` (`sex || pet.sex`) vs `:209` (`sex || null`); `:477-481` (`petArchiveNote` gets the unsaved `status`/`name`)
+- **Defect / failure:** Picking Adopted immediately says the pet is "hidden from browse" before any save, and after navigating away the pet is still listed. Clearing sex still produces "Marking him adopted…" while the save writes null.
+- **Fix:** Pass `pet.status`/`pet.name`, and use `sex || null` in the confirm copy.
+- **Confidence:** confirmed · **Source:** T4 (also in the earlier diff-review pass)
+
+### [P3] Sign-in, sign-up and get-started double-decode `returnUrl`; a `%` crashes the page
+- **Where:** `src/app/sign-in/page.tsx:53-58`; `src/app/sign-up/page.tsx:34-36`; `src/app/get-started/page.tsx:52-66`
+- **Defect / failure:** `/sign-in?returnUrl=%2525` throws a URIError, and the ErrorBoundary replaces the sign-in page. It isn't an open redirect: `isSafeRedirectUrl` holds.
+- **Fix:** Drop the second decode and share one validator.
+- **Confidence:** confirmed · **Source:** T4
+
+### [P3] Analytics events keep firing after consent is withdrawn
+- **Where:** `src/utils/analytics.ts:139-145`; `src/utils/error-handler.ts:235`; `src/utils/web-vitals.ts:57-58`
+- **Defect / failure:** `isAnalyticsEnabled` checks only that `gtag` exists, so unscrubbed error messages and web vitals still go to GA after the user revokes consent.
+- **Fix:** Gate on `canUseCookies(ANALYTICS)` and run `scrubString` on error text.
+- **Confidence:** confirmed · **Source:** T4
+
+### [P3] Shelter application page shows "not found" when the load actually failed
+- **Where:** `src/app/shelter/application/page.tsx:44-46, 133-139`
+- **Defect / failure:** A network blip or paused Supabase tells staff the application was removed.
+- **Fix:** Render the error with a retry button when `error && !application`.
+- **Confidence:** confirmed · **Source:** T4
+
+### [P3] StatusDropdown discards the staff note when the status change fails
+- **Where:** `src/components/molecular/StatusDropdown/StatusDropdown.tsx:69-78`
+- **Defect / failure:** `finally` clears the note even when `onAdvance` rejects, so a long rejection note is lost on a network or RLS error.
+- **Fix:** Reset only on success.
+- **Confidence:** confirmed · **Source:** T5
+
+### [P3] SignInForm re-enables submit mid-flight and runs stale password key derivation
+- **Where:** `src/components/auth/SignInForm/SignInForm.tsx:115, 188-285`; `src/services/messaging/key-service.ts:43, 247`
+- **Defect / failure:** `setLoading(false)` runs before the post-auth key work, so a double click can insert two active keys. Since device keys (#60), `deriveKeys` calls `atob()` on the `'rp-device-key-v1'` marker and logs a failure after a wasted PBKDF2 pass on every sign-in.
+- **Fix:** Keep `loading` true through the whole handler, and drop the password-derivation block in favour of `ensureKeysForSession`.
+- **Confidence:** confirmed (the error on every sign-in); plausible (the double-key race) · **Source:** T5
