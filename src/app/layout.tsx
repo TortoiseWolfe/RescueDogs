@@ -20,7 +20,6 @@ import {
   JsonLdScript,
 } from '@/utils/metadata';
 import PWAInstall from '@/components/PWAInstall';
-import { CountdownBanner } from '@/components/atomic/CountdownBanner';
 import { SetupBanner } from '@/components/SetupBanner';
 import DemoTour from '@/components/organisms/DemoTour';
 import A11yDevOverlay from '@/components/organisms/A11yDevOverlay';
@@ -183,7 +182,6 @@ export default function RootLayout({
             <AccessibilityProvider>
               <GlobalNav />
               <DemoTour />
-              <CountdownBanner />
               <SetupBanner />
               <ErrorBoundary level="page">
                 <div className="bg-base-200 min-h-0 flex-1 overflow-hidden pb-14">
