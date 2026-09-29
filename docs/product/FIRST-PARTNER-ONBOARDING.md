@@ -153,8 +153,10 @@ you are on the wrong Auth user.
 
 ## Shelter application email (#260)
 
-When a new application is submitted, staff receive email at `shelters.contact_email`
-via the `notify-shelter-application` Edge Function (Resend + pg_net trigger).
+When a new application is submitted, the rescue's **managers** receive email at
+their own confirmed sign-in address via the `notify-shelter-application` Edge
+Function (Resend + pg_net trigger). `shelters.contact_email` is display-only and
+is never used as a mail target. Sends are capped at 20 per rescue per hour.
 
 ### One-time deploy (ops)
 
@@ -190,7 +192,8 @@ WHERE id = 1;
 "
 ```
 
-4. Smoke test: submit a demo application → email arrives at shelter `contact_email`.
+4. Smoke test: submit a demo application → email arrives at the rescue manager's
+   confirmed sign-in address (not `contact_email`).
 
 Until step 3 is done, the trigger no-ops safely; staff still use `/shelter`.
 
