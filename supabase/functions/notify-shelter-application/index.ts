@@ -50,6 +50,63 @@ interface ProfileSnapshot {
   full_name?: string;
 }
 
+type ServiceClient = ReturnType<typeof createClient>;
+
+const FUNCTION_NAME = 'notify-shelter-application';
+/** Per-rescue cap on notification emails in a rolling hour. */
+const MAX_NOTIFICATIONS_PER_SHELTER_PER_HOUR = 20;
+
+/**
+ * Recipients are the rescue's MANAGERS' own confirmed sign-in addresses.
+ * Never shelters.contact_email (free text, unverified) and never role=staff
+ * (add_shelter_staff_by_email can add a user without their consent).
+ */
+async function getManagerRecipients(
+  supabase: ServiceClient,
+  shelterId: string
+): Promise<string[]> {
+  const { data: managers, error } = await supabase
+    .from('shelter_members')
+    .select('user_id')
+    .eq('shelter_id', shelterId)
+    .eq('role', 'manager');
+  if (error) {
+    throw new Error(`Manager lookup failed: ${error.message}`);
+  }
+
+  const emails = new Set<string>();
+  for (const row of managers ?? []) {
+    const { data, error: userError } = await supabase.auth.admin.getUserById(
+      row.user_id as string
+    );
+    if (userError || !data?.user) continue;
+    const { email, email_confirmed_at } = data.user;
+    if (email && email_confirmed_at) {
+      emails.add(email.trim().toLowerCase());
+    }
+  }
+  return [...emails];
+}
+
+/** Sent notifications for this rescue in the last hour. Throws on error (fail closed). */
+async function countRecentShelterNotifications(
+  supabase: ServiceClient,
+  shelterId: string
+): Promise<number> {
+  const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { count, error } = await supabase
+    .from('edge_idempotency_keys')
+    .select('id', { count: 'exact', head: true })
+    .eq('function_name', FUNCTION_NAME)
+    .eq('result->>shelter_id', shelterId)
+    .eq('result->>sent', 'true')
+    .gte('created_at', since);
+  if (error) {
+    throw new Error(`Rate-limit lookup failed: ${error.message}`);
+  }
+  return count ?? 0;
+}
+
 serve(async (req) => {
   try {
     if (req.method !== 'POST') {
@@ -83,15 +140,17 @@ serve(async (req) => {
     const cached = await checkIdempotencyKey(
       supabase,
       idempotencyKey,
-      'notify-shelter-application'
+      FUNCTION_NAME
     );
     if (cached.cached) {
-      return json({ sent: false, cached: true, ...cached.result }, 200);
+      // Results recorded before #356 stored the recipient address.
+      const { recipient: _recipient, ...prior } = cached.result ?? {};
+      return json({ sent: false, cached: true, ...prior }, 200);
     }
 
     const { data: application, error: appError } = await supabase
       .from('applications')
-      .select('id, profile_snapshot, pets(name), shelters(name, contact_email)')
+      .select('id, shelter_id, profile_snapshot, pets(name), shelters(name)')
       .eq('id', applicationId)
       .maybeSingle();
 
@@ -105,18 +164,41 @@ serve(async (req) => {
     }
 
     const petEmbed = application.pets as { name?: string } | null;
-    const shelterEmbed = application.shelters as {
-      name?: string;
-      contact_email?: string | null;
-    } | null;
+    const shelterEmbed = application.shelters as { name?: string } | null;
+    const shelterId = application.shelter_id as string;
 
-    const recipient = shelterEmbed?.contact_email?.trim().toLowerCase();
-    if (!recipient) {
-      const result = { sent: false, skipped: true, reason: 'no_contact_email' };
+    const recipients = await getManagerRecipients(supabase, shelterId);
+    if (recipients.length === 0) {
+      const result = {
+        sent: false,
+        skipped: true,
+        reason: 'no_confirmed_manager',
+        shelter_id: shelterId,
+      };
       await recordIdempotencyKey(
         supabase,
         idempotencyKey,
-        'notify-shelter-application',
+        FUNCTION_NAME,
+        result
+      );
+      return json(result, 200);
+    }
+
+    const sentRecently = await countRecentShelterNotifications(
+      supabase,
+      shelterId
+    );
+    if (sentRecently >= MAX_NOTIFICATIONS_PER_SHELTER_PER_HOUR) {
+      const result = {
+        sent: false,
+        skipped: true,
+        reason: 'shelter_rate_limited',
+        shelter_id: shelterId,
+      };
+      await recordIdempotencyKey(
+        supabase,
+        idempotencyKey,
+        FUNCTION_NAME,
         result
       );
       return json(result, 200);
@@ -152,7 +234,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: fromEmail,
-        to: [recipient],
+        to: recipients,
         subject,
         html,
         text,
@@ -169,14 +251,10 @@ serve(async (req) => {
     const result = {
       sent: true,
       email_id: resendData.id,
-      recipient,
+      recipient_count: recipients.length,
+      shelter_id: shelterId,
     };
-    await recordIdempotencyKey(
-      supabase,
-      idempotencyKey,
-      'notify-shelter-application',
-      result
-    );
+    await recordIdempotencyKey(supabase, idempotencyKey, FUNCTION_NAME, result);
 
     return json(result, 200);
   } catch (error) {

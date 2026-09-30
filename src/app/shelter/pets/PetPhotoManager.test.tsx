@@ -11,11 +11,15 @@ import React, { Profiler, useEffect } from 'react';
 // Each queued photo chains several async steps; under full-suite CPU load they
 // can exceed the 1s default wait even though nothing is stuck.
 configure({ asyncUtilTimeout: 5000 });
+// Multi-step flows chain several of those waits, so the per-test limit must
+// sit well above asyncUtilTimeout or the test is killed mid-wait.
+const FLOW_TIMEOUT = { timeout: 20_000 };
 
 // The cropper is a canvas-driven third party. Like the real one, the stand-in
 // reports a crop area whenever its image changes, which enables "Use photo".
 // React may keep it mounted between queued photos, so reporting only on mount
-// would leave the next photo's button disabled.
+// would leave the next photo's button disabled. It reports on a later tick, as
+// the real one does after the image loads, so tests must wait for the button.
 vi.mock('react-easy-crop', () => ({
   default: function CropperStub({
     image,
@@ -25,7 +29,10 @@ vi.mock('react-easy-crop', () => ({
     onCropComplete: (area: unknown, pixels: unknown) => void;
   }) {
     useEffect(() => {
-      onCropComplete({}, { x: 0, y: 0, width: 400, height: 300 });
+      const timer = setTimeout(() => {
+        onCropComplete({}, { x: 0, y: 0, width: 400, height: 300 });
+      }, 0);
+      return () => clearTimeout(timer);
     }, [image, onCropComplete]);
     return null;
   },
@@ -98,6 +105,17 @@ function photo(id: string, body = 'bytes') {
  * is exactly how this file first produced a failure that looked like a restore bug
  * and was not one.
  */
+/**
+ * The crop dialog renders its buttons before they are usable: "Use photo" stays
+ * disabled until the cropper reports an area, and all of them while busy. A click
+ * on a disabled button is silently dropped, which strands the queue on its photo.
+ */
+async function clickWhenEnabled(name: string) {
+  const button = await screen.findByRole('button', { name });
+  await waitFor(() => expect(button).not.toBeDisabled());
+  fireEvent.click(button);
+}
+
 let n = 0;
 function freshKey() {
   n += 1;
@@ -203,7 +221,7 @@ describe('PetPhotoManager render stability (#338)', () => {
   });
 });
 
-describe('PetPhotoManager multi-select (#338)', () => {
+describe('PetPhotoManager multi-select (#338)', FLOW_TIMEOUT, () => {
   function pickFiles(container: HTMLElement, names: string[]) {
     const input = container.querySelector(
       'input[type="file"]'
@@ -234,13 +252,13 @@ describe('PetPhotoManager multi-select (#338)', () => {
     pickFiles(container, ['a.jpg', 'b.jpg', 'c.jpg']);
     expect(await screen.findByText('Photo 1 of 3')).toBeTruthy();
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Use photo' }));
+    await clickWhenEnabled('Use photo');
     expect(await screen.findByText('Photo 2 of 3')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Skip this photo' }));
+    await clickWhenEnabled('Skip this photo');
     expect(await screen.findByText('Photo 3 of 3')).toBeTruthy();
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Use photo' }));
+    await clickWhenEnabled('Use photo');
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).toBeNull();
@@ -254,7 +272,7 @@ describe('PetPhotoManager multi-select (#338)', () => {
     );
 
     pickFiles(container, ['a.jpg', 'b.jpg']);
-    fireEvent.click(await screen.findByRole('button', { name: 'Cancel all' }));
+    await clickWhenEnabled('Cancel all');
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).toBeNull();
@@ -285,7 +303,7 @@ describe('PetPhotoManager multi-select (#338)', () => {
   });
 });
 
-describe('PetPhotoManager order arrows', () => {
+describe('PetPhotoManager order arrows', FLOW_TIMEOUT, () => {
   beforeEach(() => {
     photoServiceMocks.reorderPhotos.mockReset();
     photoServiceMocks.listPhotos.mockReset();
@@ -352,9 +370,9 @@ describe('PetPhotoManager order arrows', () => {
         ],
       },
     });
-    fireEvent.click(await screen.findByRole('button', { name: 'Use photo' }));
+    await clickWhenEnabled('Use photo');
     expect(await screen.findByText('Photo 2 of 2')).toBeTruthy();
-    fireEvent.click(await screen.findByRole('button', { name: 'Use photo' }));
+    await clickWhenEnabled('Use photo');
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).toBeNull();
     });
