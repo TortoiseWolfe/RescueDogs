@@ -11,6 +11,9 @@ import React, { Profiler, useEffect } from 'react';
 // Each queued photo chains several async steps; under full-suite CPU load they
 // can exceed the 1s default wait even though nothing is stuck.
 configure({ asyncUtilTimeout: 5000 });
+// Multi-step flows chain several of those waits, so the per-test limit must
+// sit well above asyncUtilTimeout or the test is killed mid-wait.
+const FLOW_TIMEOUT = { timeout: 20_000 };
 
 // The cropper is a canvas-driven third party. Like the real one, the stand-in
 // reports a crop area whenever its image changes, which enables "Use photo".
@@ -203,7 +206,7 @@ describe('PetPhotoManager render stability (#338)', () => {
   });
 });
 
-describe('PetPhotoManager multi-select (#338)', () => {
+describe('PetPhotoManager multi-select (#338)', FLOW_TIMEOUT, () => {
   function pickFiles(container: HTMLElement, names: string[]) {
     const input = container.querySelector(
       'input[type="file"]'
@@ -285,7 +288,7 @@ describe('PetPhotoManager multi-select (#338)', () => {
   });
 });
 
-describe('PetPhotoManager order arrows', () => {
+describe('PetPhotoManager order arrows', FLOW_TIMEOUT, () => {
   beforeEach(() => {
     photoServiceMocks.reorderPhotos.mockReset();
     photoServiceMocks.listPhotos.mockReset();
