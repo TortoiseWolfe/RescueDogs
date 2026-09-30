@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useFormDraft } from './useFormDraft';
+import { clearFormDraft, useFormDraft } from './useFormDraft';
 
 // `canUseCookies` reads the consent record straight out of localStorage, so mocking
 // the module is both simpler and more honest than hand-writing a consent envelope
@@ -286,6 +286,76 @@ describe('useFormDraft', () => {
       );
       unmount();
       expect(sessionStorage.getItem(KEY)).toBeNull();
+    });
+  });
+
+  describe('clearing mid-debounce (#391)', () => {
+    // A successful submit clears the draft and then navigates. If the last edit was
+    // still inside the debounce, neither the timer nor the unmount flush may write
+    // the just-submitted form back, or the next visit restores it.
+    it('clearDraft then unmount writes nothing', () => {
+      const { result, rerender, unmount } = renderHook(
+        ({ v }) => useFormDraft('test-form', v),
+        { initialProps: { v: { name: '' } } }
+      );
+      rerender({ v: { name: 'Rocky' } });
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+      act(() => {
+        result.current.clearDraft();
+      });
+      unmount();
+
+      expect(sessionStorage.getItem(KEY)).toBeNull();
+      expect(localStorage.getItem(KEY)).toBeNull();
+    });
+
+    it('external clearFormDraft cancels the pending timer', () => {
+      const { rerender } = renderHook(({ v }) => useFormDraft('test-form', v), {
+        initialProps: { v: { name: '' } },
+      });
+      rerender({ v: { name: 'Rocky' } });
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+      clearFormDraft('test-form');
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+
+      expect(sessionStorage.getItem(KEY)).toBeNull();
+      expect(localStorage.getItem(KEY)).toBeNull();
+    });
+
+    it('external clearFormDraft then unmount writes nothing', () => {
+      const { rerender, unmount } = renderHook(
+        ({ v }) => useFormDraft('test-form', v),
+        { initialProps: { v: { name: '' } } }
+      );
+      rerender({ v: { name: 'Rocky' } });
+      clearFormDraft('test-form');
+      unmount();
+
+      expect(sessionStorage.getItem(KEY)).toBeNull();
+      expect(localStorage.getItem(KEY)).toBeNull();
+    });
+
+    it('a new edit after a clear is saved again', () => {
+      const { result, rerender } = renderHook(
+        ({ v }) => useFormDraft('test-form', v),
+        { initialProps: { v: { name: '' } } }
+      );
+      rerender({ v: { name: 'Rocky' } });
+      act(() => {
+        result.current.clearDraft();
+      });
+      rerender({ v: { name: 'Rocky II' } });
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+
+      expect(storedIn(sessionStorage)?.data).toEqual({ name: 'Rocky II' });
     });
   });
 
