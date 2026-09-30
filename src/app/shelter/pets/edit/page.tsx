@@ -190,7 +190,7 @@ function EditShelterPetContent() {
           const ok = window.confirm(
             adoptedConfirmMessage({
               name,
-              sex: sex || pet.sex,
+              sex: sex || null,
               openCount,
             })
           );
@@ -475,9 +475,9 @@ function EditShelterPetContent() {
             ) : (
               <p className="text-base-content/80 text-sm">
                 {petArchiveNote({
-                  name: name.trim() || pet.name,
-                  sex: sex || pet.sex,
-                  status,
+                  name: pet.name,
+                  sex: pet.sex,
+                  status: pet.status,
                   applicationCount,
                 })}
               </p>
