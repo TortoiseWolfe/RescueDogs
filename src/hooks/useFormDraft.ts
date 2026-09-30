@@ -40,6 +40,20 @@ const KEY_PREFIX = 'draft:v1:';
 const DEFAULT_DEBOUNCE_MS = 800;
 const DEFAULT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
+/**
+ * Bumped on every clear of a storage key. A debounced write or unmount flush
+ * captures the generation it was scheduled under and drops itself if a clear
+ * happened since — otherwise a successful submit followed by router.push()
+ * writes the just-submitted form straight back (#391). Module-level so
+ * clearFormDraft(), which cannot reach the owning hook, still cancels it.
+ */
+const clearGeneration = new Map<string, number>();
+const generationOf = (storageKey: string): number =>
+  clearGeneration.get(storageKey) ?? 0;
+const bumpGeneration = (storageKey: string): void => {
+  clearGeneration.set(storageKey, generationOf(storageKey) + 1);
+};
+
 interface DraftEnvelope<T> {
   v: number;
   savedAt: number;
@@ -104,6 +118,7 @@ function pickStorage(sensitive: boolean): Storage | null {
 export function clearFormDraft(key: string): void {
   if (typeof window === 'undefined') return;
   const storageKey = `${KEY_PREFIX}${key}`;
+  bumpGeneration(storageKey);
   for (const store of [window.localStorage, window.sessionStorage]) {
     try {
       store.removeItem(storageKey);
@@ -145,6 +160,7 @@ export function useFormDraft<T>(
     key: string;
     sensitive: boolean;
     data: unknown;
+    generation: number;
   } | null>(null);
 
   const clearDraft = useCallback(() => {
@@ -153,6 +169,8 @@ export function useFormDraft<T>(
       timer.current = null;
     }
     lastWritten.current = null;
+    pending.current = null;
+    bumpGeneration(storageKey);
     setSavedAt(null);
     // Clear BOTH stores: consent can change between the write and the clear, and a
     // draft left behind in the store we are no longer using is the worst outcome —
@@ -241,8 +259,14 @@ export function useFormDraft<T>(
     if (!keep) return;
 
     if (timer.current) clearTimeout(timer.current);
-    pending.current = { key: storageKey, sensitive, data: value };
+    const generation = generationOf(storageKey);
+    pending.current = { key: storageKey, sensitive, data: value, generation };
     timer.current = setTimeout(() => {
+      // Cleared (in this hook or via clearFormDraft) since this was scheduled.
+      if (generationOf(storageKey) !== generation) {
+        pending.current = null;
+        return;
+      }
       const store = pickStorage(sensitive);
       if (!store) return;
       const envelope: DraftEnvelope<T> = {
@@ -293,6 +317,8 @@ export function useFormDraft<T>(
       const due = pending.current;
       pending.current = null;
       if (!due || typeof window === 'undefined') return;
+      // A submit cleared the draft after this edit was queued — do not resurrect it.
+      if (generationOf(due.key) !== due.generation) return;
       try {
         const store = pickStorage(due.sensitive);
         if (!store) return;
