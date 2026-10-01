@@ -166,6 +166,65 @@ describe('StatusDropdown', () => {
       });
       expect(screen.getByLabelText(/note to applicant/i)).toHaveValue('');
     });
+
+    it('keeps the note when the status change fails (#411)', async () => {
+      const onAdvance = vi.fn().mockRejectedValue(new Error('network'));
+      render(
+        <StatusDropdown currentStatus="submitted" onAdvance={onAdvance} />
+      );
+
+      await userEvent.selectOptions(
+        screen.getByLabelText(/new status/i),
+        'under_review'
+      );
+      await userEvent.type(
+        screen.getByLabelText(/note to applicant/i),
+        'We loved meeting you'
+      );
+      await userEvent.click(
+        screen.getByRole('button', { name: /update status/i })
+      );
+
+      await waitFor(() => {
+        expect(onAdvance).toHaveBeenCalledTimes(1);
+        expect(screen.getByLabelText(/new status/i)).toHaveValue('');
+      });
+      expect(screen.getByLabelText(/note to applicant/i)).toHaveValue(
+        'We loved meeting you'
+      );
+    });
+
+    it('keeps the note and closes the confirm step when a final status fails (#411)', async () => {
+      const onAdvance = vi.fn().mockRejectedValue(new Error('network'));
+      render(
+        <StatusDropdown currentStatus="home_visit" onAdvance={onAdvance} />
+      );
+
+      await userEvent.selectOptions(
+        screen.getByLabelText(/new status/i),
+        'not_selected'
+      );
+      await userEvent.type(
+        screen.getByLabelText(/note to applicant/i),
+        'Another family was a closer match'
+      );
+      await userEvent.click(
+        screen.getByRole('button', { name: /update status/i })
+      );
+      await userEvent.click(screen.getByRole('button', { name: /confirm/i }));
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText(
+            'This is final and immediately visible to the applicant.'
+          )
+        ).not.toBeInTheDocument();
+      });
+      expect(screen.getByLabelText(/new status/i)).toHaveValue('');
+      expect(screen.getByLabelText(/note to applicant/i)).toHaveValue(
+        'Another family was a closer match'
+      );
+    });
   });
 
   describe('terminal target confirmation', () => {

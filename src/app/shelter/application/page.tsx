@@ -57,6 +57,11 @@ function ShelterApplicationContent() {
     fetchApplication();
   }, [initialized, applicationId, fetchApplication]);
 
+  const retryLoad = useCallback(() => {
+    setLoading(true);
+    void fetchApplication();
+  }, [fetchApplication]);
+
   const handleAdvance = useCallback(
     async (toStatus: ApplicationStatus, note?: string) => {
       if (!applicationId) return;
@@ -71,12 +76,15 @@ function ShelterApplicationContent() {
           err && typeof err === 'object' && 'message' in err
             ? String((err as { message: unknown }).message)
             : '';
+        // Refetch before setting the message: a successful refetch clears `error`.
+        await fetchApplication();
         setError(
           message.includes('already has an approved')
             ? 'This pet already has an approved application. Another approval is not allowed.'
             : 'Could not update the status — it may have changed in another tab. Refreshing.'
         );
-        await fetchApplication();
+        // Let StatusDropdown see the failure so it keeps the staff note (#411).
+        throw err;
       } finally {
         setAdvancing(false);
       }
@@ -93,8 +101,8 @@ function ShelterApplicationContent() {
       await fetchApplication();
       setError(null);
     } catch {
-      setError('Could not mark this pet adopted. Refreshing.');
       await fetchApplication();
+      setError('Could not mark this pet adopted. Refreshing.');
     } finally {
       setAdvancing(false);
     }
@@ -129,6 +137,19 @@ function ShelterApplicationContent() {
       {!initialized || loading ? (
         <div className="flex min-h-[40vh] items-center justify-center">
           <span className="loading loading-spinner loading-lg" />
+        </div>
+      ) : !application && error ? (
+        // A failed load is not a missing record: Supabase waking up or a network
+        // blip must not tell staff the applicant is gone (#410).
+        <div role="alert" className="alert alert-warning">
+          <span>{error}</span>
+          <button
+            type="button"
+            className="btn btn-sm min-h-11"
+            onClick={retryLoad}
+          >
+            Retry
+          </button>
         </div>
       ) : !application ? (
         <div role="alert" className="alert">
