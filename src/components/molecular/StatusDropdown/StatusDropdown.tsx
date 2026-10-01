@@ -13,7 +13,8 @@ export interface StatusDropdownProps {
   currentStatus: ApplicationStatus;
   /**
    * Called when staff advance the application. Receives the chosen target
-   * status and an optional adopter-visible note.
+   * status and an optional adopter-visible note. Reject to signal failure:
+   * the note is then kept so staff do not have to rewrite it.
    */
   onAdvance: (
     toStatus: ApplicationStatus,
@@ -70,9 +71,14 @@ export default function StatusDropdown({
     const trimmedNote = note.trim();
     try {
       await onAdvance(toStatus, trimmedNote === '' ? undefined : trimmedNote);
-    } finally {
-      setSelected('');
       setNote('');
+    } catch {
+      // The parent owns the error message. Keep the note — it is often a
+      // careful explanation that exists nowhere else.
+    } finally {
+      // Clear the target either way: after a refetch the legal transitions
+      // may have changed.
+      setSelected('');
       setConfirming(false);
     }
   };
