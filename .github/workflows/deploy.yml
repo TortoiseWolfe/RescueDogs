@@ -89,6 +89,8 @@ jobs:
           NEXT_PUBLIC_AUTHOR_TWITTER: ${{ vars.NEXT_PUBLIC_AUTHOR_TWITTER }}
           NEXT_PUBLIC_AUTHOR_WEBSITE: ${{ vars.NEXT_PUBLIC_AUTHOR_WEBSITE }}
           # NEXT_PUBLIC_BASE_PATH intentionally omitted - auto-detected from GITHUB_REPOSITORY
+          # Which build a bug report came from. Without it every report says "build unknown".
+          NEXT_PUBLIC_BUILD_SHA: ${{ github.sha }}
           NEXT_PUBLIC_BASE_URL: ${{ vars.NEXT_PUBLIC_BASE_URL }}
           NEXT_PUBLIC_CALENDAR_PROVIDER: ${{ vars.NEXT_PUBLIC_CALENDAR_PROVIDER }}
           NEXT_PUBLIC_CALENDAR_URL: ${{ vars.NEXT_PUBLIC_CALENDAR_URL }}
