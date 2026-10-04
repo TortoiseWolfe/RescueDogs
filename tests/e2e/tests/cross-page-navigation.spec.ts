@@ -310,9 +310,24 @@ test.describe('Cross-Page Navigation', () => {
       const hamburgerDropdown = page
         .locator('.dropdown', { has: menuLabel })
         .first();
-      await hamburgerDropdown.evaluate((el) => {
-        el.classList.add('dropdown-open');
-      });
+      // Open via real user interaction first (focus triggers DaisyUI
+      // focus-within); force the class only if headless focus-within fails.
+      await menuLabel.focus();
+      await expect
+        .poll(() =>
+          hamburgerDropdown.evaluate((el) => el.matches(':focus-within'))
+        )
+        .toBe(true);
+      const openedByFocus = await hamburgerDropdown
+        .locator('.dropdown-content')
+        .first()
+        .isVisible()
+        .catch(() => false);
+      if (!openedByFocus) {
+        await hamburgerDropdown.evaluate((el) => {
+          el.classList.add('dropdown-open');
+        });
+      }
 
       const menuItems = hamburgerDropdown.locator('.dropdown-content a');
       await expect(menuItems.first()).toBeVisible();

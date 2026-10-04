@@ -191,15 +191,27 @@ test.describe('Mobile Navigation', () => {
         .locator('.dropdown', { has: menuLabel })
         .first();
 
-      // DaisyUI focus-within is flaky in headless; open via class like
+      // Open via real user interaction first (focus triggers DaisyUI
+      // focus-within). Focus landing inside the dropdown is asserted, so the
+      // test fails if the label stops being focusable; the class is forced
+      // only if headless focus-within fails to paint, as in
       // mobile-dropdown-screenshot.spec.ts.
-      await hamburgerDropdown.evaluate((el) => {
-        el.classList.add('dropdown-open');
-      });
+      await menuLabel.focus();
+      await expect
+        .poll(() =>
+          hamburgerDropdown.evaluate((el) => el.matches(':focus-within'))
+        )
+        .toBe(true);
 
       const menuContent = hamburgerDropdown
         .locator('.dropdown-content')
         .first();
+      const openedByFocus = await menuContent.isVisible().catch(() => false);
+      if (!openedByFocus) {
+        await hamburgerDropdown.evaluate((el) => {
+          el.classList.add('dropdown-open');
+        });
+      }
       await expect(menuContent).toBeVisible({ timeout: 2000 });
 
       const menuLinks = menuContent.locator('a');
