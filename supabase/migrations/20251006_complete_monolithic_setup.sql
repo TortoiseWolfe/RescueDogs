@@ -3318,9 +3318,8 @@ BEGIN
     v_transport_states := '{}'::TEXT[];
   END IF;
 
-  IF v_email IS NULL THEN
-    SELECT email INTO v_email FROM auth.users WHERE id = v_uid;
-  END IF;
+  -- contact_email is adopter-facing; never default it to the founder's
+  -- private sign-in address. NULL unless explicitly entered (#197).
   IF v_email IS NOT NULL AND length(v_email) > 255 THEN
     RAISE EXCEPTION 'invalid_contact_email';
   END IF;
@@ -4031,6 +4030,16 @@ CREATE POLICY "Authenticated users can view shelters" ON shelters
 DROP POLICY IF EXISTS "Public can view shelters" ON shelters;
 CREATE POLICY "Public can view shelters" ON shelters
   FOR SELECT TO anon USING (true);
+
+-- RLS filters rows, not columns: without column grants, anon could request
+-- ?select=contact_email (#197). Signed-out browse reads only these columns;
+-- authenticated users keep full read. REVOKE must precede the column GRANT,
+-- because revoking a table privilege also drops column-level ones.
+REVOKE SELECT ON shelters FROM anon;
+GRANT SELECT (
+  id, name, city, state, zip,
+  transports, transport_states, transport_note, created_at
+) ON shelters TO anon;
 
 -- shelter_members: users see own memberships (powers ShelterGate)
 DROP POLICY IF EXISTS "Users can view own shelter memberships" ON shelter_members;
