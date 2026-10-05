@@ -60,7 +60,7 @@ check_rate_limit(
 
 ### Business Rules
 
-- **Max Attempts**: 5 per 15-minute window
+- **Max Attempts**: 15 per 15-minute window
 - **Lockout Duration**: 15 minutes after 5th failure
 - **Window Reset**: Automatic after 15 minutes of inactivity
 - **Tracking**: By email OR IP (whichever is more restrictive)

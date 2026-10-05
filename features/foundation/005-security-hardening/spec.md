@@ -80,7 +80,7 @@ As a user, I need the system to prevent attackers from guessing my password by b
 
 **Acceptance Scenarios**:
 
-1. **Given** an attacker tries to guess my password, **When** they make 5 failed attempts, **Then** further attempts are blocked
+1. **Given** an attacker tries to guess my password, **When** they make 15 failed attempts, **Then** further attempts are blocked
 2. **Given** the attacker clears their browser data, **When** they try again, **Then** they are still blocked
 3. **Given** the attacker uses a different browser, **When** they try again, **Then** they are still blocked
 4. **Given** I am legitimately locked out, **When** the lockout period expires, **Then** I can try again
@@ -275,7 +275,7 @@ As a developer, I need all my commits to be automatically scanned for accidental
 **Rate Limiting & Brute Force Prevention**
 
 - **FR-009**: System MUST track failed authentication attempts server-side by identifier (email or connection source)
-- **FR-010**: System MUST block authentication attempts after 5 consecutive failures
+- **FR-010**: System MUST block authentication attempts after 15 consecutive failures
 - **FR-011**: System MUST enforce rate limits regardless of client behavior (cleared storage, different browser)
 - **FR-012**: System MUST display clear feedback on lockout duration and remaining attempts
 

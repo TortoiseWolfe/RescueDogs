@@ -95,7 +95,7 @@ As a user with a RescueDogs account, I need my payment data and personal informa
 
 #### Scenario 3: Brute Force Attack Prevention
 
-1. **Given** an attacker tries to guess my password, **When** they make 5 failed login attempts, **Then** further attempts are blocked regardless of which browser or device they use
+1. **Given** an attacker tries to guess my password, **When** they make 15 failed login attempts, **Then** further attempts are blocked regardless of which browser or device they use
 2. **Given** the attacker clears their browser data, **When** they try again, **Then** they are still blocked
 3. **Given** I am a legitimate user locked out by rate limiting, **When** I wait the specified time period, **Then** I can try again
 

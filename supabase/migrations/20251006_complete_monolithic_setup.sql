@@ -616,6 +616,11 @@ SET search_path = public
 AS $$
 DECLARE
   v_record rate_limit_attempts%ROWTYPE;
+  -- Per-email failed-attempt cap. Raised 5 -> 15 in #81 (ratified in #198) so
+  -- Supabase Auth's separate IP-level 429 bucket can no longer burn a user's
+  -- per-email budget. MUST stay in sync with AUTH_RATE_LIMIT_MAX_ATTEMPTS in
+  -- src/lib/auth/rate-limit-check.ts (a unit test enforces this) and with
+  -- FR-016 in features/foundation/003-user-authentication/spec.md.
   v_max_attempts INTEGER := 15;
   v_window_minutes INTEGER := 15;
   v_now TIMESTAMPTZ := now();

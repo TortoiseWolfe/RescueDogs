@@ -142,7 +142,7 @@ Generated via `/speckit.tasks` command after plan approval.
 | OAuth provider downtime | Low        | Medium   | Fallback to email/password with clear error messaging |
 | Email delivery failures | Medium     | High     | Retry mechanism, clear user feedback, resend option   |
 | Session hijacking       | Low        | Critical | Secure cookies, token rotation, session revocation    |
-| Brute force attacks     | Medium     | High     | Rate limiting (5 attempts/15 min), account lockout    |
+| Brute force attacks     | Medium     | High     | Rate limiting (15 attempts/15 min), account lockout   |
 
 ## Dependencies
 

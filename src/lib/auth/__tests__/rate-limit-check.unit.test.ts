@@ -3,6 +3,8 @@
 // Purpose: Test rate limiting business logic without database dependency
 
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   formatLockoutTime,
   isAuthRequestRateLimited,
@@ -83,6 +85,25 @@ describe('Rate Limiting - Unit Tests', () => {
         '../rate-limit-check'
       );
       expect(AUTH_RATE_LIMIT_MAX_ATTEMPTS).toBe(15);
+    });
+
+    it('matches v_max_attempts in the monolithic migration (#198)', async () => {
+      const { AUTH_RATE_LIMIT_MAX_ATTEMPTS } = await import(
+        '../rate-limit-check'
+      );
+      const sql = readFileSync(
+        resolve(
+          __dirname,
+          '../../../../supabase/migrations/20251006_complete_monolithic_setup.sql'
+        ),
+        'utf8'
+      );
+      const match = sql.match(/v_max_attempts INTEGER := (\d+);/);
+      expect(
+        match,
+        'v_max_attempts not found in monolithic migration'
+      ).not.toBeNull();
+      expect(Number(match![1])).toBe(AUTH_RATE_LIMIT_MAX_ATTEMPTS);
     });
   });
 });

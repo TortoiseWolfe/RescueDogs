@@ -236,7 +236,7 @@ Location: After line 385 (in Functions section)
 
 **Security Features Delivered:**
 
-1. ✅ Server-side rate limiting (5 attempts/15min window)
+1. ✅ Server-side rate limiting (15 attempts/15min window)
 2. ✅ OAuth CSRF protection with state validation
 3. ✅ Enhanced email validation (TLD + disposable email checks)
 4. ✅ Metadata validation (prototype pollution prevention)

@@ -35,7 +35,7 @@ CREATE INDEX idx_rate_limit_locked ON rate_limit_attempts(locked_until) WHERE lo
 
 **Business Rules**:
 
-- Maximum 5 attempts per 15-minute window
+- Maximum 15 attempts per 15-minute window
 - Lockout duration: 15 minutes after 5th failure
 - Window automatically resets after 15 minutes
 - Attempts tracked by email OR IP (whichever is more restrictive)
