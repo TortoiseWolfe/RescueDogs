@@ -66,11 +66,11 @@ RescueDogs uses Supabase Auth (GoTrue) for authentication. Since the app is a st
 
 ### Session Configuration
 
-| Setting          | Default             | With "Remember Me"  |
-| ---------------- | ------------------- | ------------------- |
-| Session duration | 7 days              | 30 days             |
-| Token refresh    | Automatic           | Automatic           |
-| Rate limit       | 5 attempts / 15 min | 5 attempts / 15 min |
+| Setting          | Default              | With "Remember Me"   |
+| ---------------- | -------------------- | -------------------- |
+| Session duration | 7 days               | 30 days              |
+| Token refresh    | Automatic            | Automatic            |
+| Rate limit       | 15 attempts / 15 min | 15 attempts / 15 min |
 
 ---
 

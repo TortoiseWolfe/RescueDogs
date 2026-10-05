@@ -111,7 +111,7 @@ As a user of RescueDogs's payment system, I need to create an account and authen
   -> System redirects to sign-in page with message: "Session expired. Please sign in again."
 
 - How does the system prevent brute force password attacks?
-  -> System limits login attempts to 5 per 15 minutes per email address
+  -> System limits login attempts to 15 per 15 minutes per email address
 
 - What happens when a user tries to access someone else's payment data?
   -> System returns empty results (database RLS policies prevent unauthorized access)
@@ -143,7 +143,7 @@ As a user of RescueDogs's payment system, I need to create an account and authen
 - **FR-015a**: System MUST provide "Remember Me" option at sign-in to extend session duration to 30 days
 - **FR-015b**: System MUST expire sessions after 30 days when "Remember Me" is enabled, or 7 days default duration when not enabled
 - **FR-016**: System MUST automatically refresh authentication tokens before expiration
-- **FR-017**: System MUST limit failed login attempts to 5 per 15-minute period per email address
+- **FR-017**: System MUST limit failed login attempts to 15 per 15-minute period per email address
 - **FR-018**: System MUST expire password reset links after 1 hour
 - **FR-019**: System MUST expire email verification links after 24 hours
 

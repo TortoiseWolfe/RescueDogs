@@ -53,7 +53,7 @@ Here's what ships in our authentication system:
 
 ### 🛡️ Security Hardening
 
-- 🚦 **Server-Side Rate Limiting**: 5 failed attempts per 15-minute window, enforced in PostgreSQL (client can't bypass)
+- 🚦 **Server-Side Rate Limiting**: 15 failed attempts per 15-minute window, enforced in PostgreSQL (client can't bypass)
 - 🔒 **OAuth CSRF Protection**: State token validation prevents session hijacking
 - 📝 **Audit Logging**: Every authentication event logged to database with Internet Protocol (IP) address and user agent
 - 🗄️ **Row-Level Security**: Database policies ensure users only see their own data

@@ -150,8 +150,8 @@
 
 **Rate Limit Rule**:
 
-- Max 5 failed attempts per email per 15 minutes
-- After 5 failures: 15-minute lockout
+- Max 15 failed attempts per email per 15 minutes
+- After 15 failures: 15-minute lockout
 
 ---
 

@@ -159,7 +159,7 @@ As an unverified user, I need clear guidance to verify my email so that I can ac
   - System redirects to sign-in page: "Session expired. Please sign in again."
 
 - How does the system prevent brute force password attacks?
-  - System limits login attempts to 5 per 15 minutes per email address
+  - System limits login attempts to 15 per 15 minutes per email address
 
 - What happens when a user tries to access someone else's payment data?
   - System returns empty results (RLS policies prevent unauthorized access)
@@ -199,7 +199,7 @@ As an unverified user, I need clear guidance to verify my email so that I can ac
 
 **Security**
 
-- **FR-016**: System MUST limit failed login attempts to 5 per 15 minutes per email
+- **FR-016**: System MUST limit failed login attempts to 15 per 15 minutes per email
 - **FR-017**: System MUST redirect unauthenticated users to sign-in for protected routes
 - **FR-018**: System MUST redirect unverified users to verification page for payment access
 - **FR-019**: System MUST enforce row-level security on all payment data
