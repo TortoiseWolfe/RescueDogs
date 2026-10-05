@@ -154,5 +154,25 @@ describe.skipIf(!hasRlsTestEnvironment())(
       // Should fail - no INSERT policy for anon
       expect(error).not.toBeNull();
     });
+
+    // #197: signed-out browse gets the browse columns only.
+    it('anon user can read shelter browse columns but not contact_email', async () => {
+      const anonClient = createAnonClient();
+
+      const browse = await anonClient
+        .from('shelters')
+        .select(
+          'id, name, city, state, zip, transports, transport_states, transport_note'
+        )
+        .limit(1);
+      expect(browse.error).toBeNull();
+
+      const restricted = await anonClient
+        .from('shelters')
+        .select('contact_email')
+        .limit(1);
+      expect(restricted.error).not.toBeNull();
+      expect(restricted.data).toBeNull();
+    });
   }
 );

@@ -336,6 +336,7 @@ function CreateRescueForm({ onCreated }: { onCreated: () => Promise<void> }) {
         city: profile.city || undefined,
         state: profile.state || undefined,
         zip: profile.zip || undefined,
+        contactEmail: profile.contactEmail.trim() || undefined,
         transports: profile.transports,
         transportStates: profile.transportStates,
         transportNote: profile.transportNote || undefined,
@@ -360,6 +361,7 @@ function CreateRescueForm({ onCreated }: { onCreated: () => Promise<void> }) {
         value={profile}
         onChange={setProfile}
         disabled={submitting}
+        showContactEmail
       />
       <RescueTransportFields
         value={profile}
