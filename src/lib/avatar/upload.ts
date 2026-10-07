@@ -52,7 +52,8 @@ export async function uploadAvatar(
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('avatars')
       .upload(filePath, croppedImageBlob, {
-        cacheControl: '3600',
+        // Paths are unique per upload and never overwritten (#427).
+        cacheControl: '31536000',
         upsert: false,
         contentType: 'image/webp',
       });

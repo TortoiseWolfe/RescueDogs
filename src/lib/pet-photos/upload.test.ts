@@ -1,11 +1,61 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   downscalePetPhoto,
   extractPetPhotoPathFromUrl,
+  PET_PHOTO_CACHE_CONTROL,
   PET_PHOTO_MAX_INPUT_BYTES,
   PET_PHOTO_MAX_INPUT_MB,
+  uploadPetPhotoBlob,
   validatePetPhotoFile,
 } from './upload';
+
+const mockUpload = vi.fn();
+
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: () => ({
+    storage: {
+      from: () => ({
+        upload: mockUpload,
+        getPublicUrl: (path: string) => ({
+          data: { publicUrl: `https://cdn.test/pet-photos/${path}` },
+        }),
+      }),
+    },
+  }),
+}));
+
+describe('uploadPetPhotoBlob (#427)', () => {
+  beforeEach(() => {
+    mockUpload.mockReset();
+    mockUpload.mockImplementation(async (path: string) => ({
+      data: { path },
+      error: null,
+    }));
+  });
+
+  it('labels the object by the blob it actually received', async () => {
+    const blob = new Blob(['x'], { type: 'image/jpeg' });
+    const result = await uploadPetPhotoBlob('shelter-1', 'pet-1', blob);
+
+    const [path, , options] = mockUpload.mock.calls[0];
+    expect(path).toMatch(/^shelter-1\/pet-1\/\d+\.jpg$/);
+    expect(options.contentType).toBe('image/jpeg');
+    expect(result.url).toMatch(/\.jpg$/);
+  });
+
+  it('caches uploads for a year, since paths are never reused', async () => {
+    await uploadPetPhotoBlob(
+      'shelter-1',
+      'pet-1',
+      new Blob(['x'], { type: 'image/webp' })
+    );
+
+    expect(mockUpload.mock.calls[0][2].cacheControl).toBe(
+      PET_PHOTO_CACHE_CONTROL
+    );
+    expect(Number(PET_PHOTO_CACHE_CONTROL)).toBeGreaterThanOrEqual(31536000);
+  });
+});
 
 describe('pet-photos upload helpers', () => {
   it('rejects non-image MIME types', () => {

@@ -15,6 +15,9 @@ export const PET_PHOTO_MAX_INPUT_BYTES = PET_PHOTO_MAX_INPUT_MB * 1024 * 1024;
 const MAX_STORED_EDGE = 1600;
 const STORED_QUALITY = 0.82;
 const UPLOAD_TIMEOUT_MS = 45_000;
+/** One year. Paths are `{timestamp}.{ext}` and never overwritten (`upsert: false`),
+ *  so a long cache is safe and keeps repeat views off the egress quota (#427). */
+export const PET_PHOTO_CACHE_CONTROL = '31536000';
 
 export type PetPhotoUploadResult =
   | { url: string; error?: undefined }
@@ -129,7 +132,7 @@ export async function uploadPetPhoto(
 
   const { data: uploadData, error: uploadError } = await withAsyncTimeout(
     supabase.storage.from(BUCKET).upload(filePath, body, {
-      cacheControl: '3600',
+      cacheControl: PET_PHOTO_CACHE_CONTROL,
       upsert: false,
       contentType: bodyType,
     }),
@@ -155,7 +158,7 @@ export async function uploadPetPhotoBlob(
   shelterId: string,
   folderId: string,
   blob: Blob,
-  contentType = 'image/webp'
+  contentType = blob.type || 'image/webp'
 ): Promise<PetPhotoUploadResult> {
   if (blob.size > PET_PHOTO_MAX_INPUT_BYTES) {
     const sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
@@ -171,7 +174,7 @@ export async function uploadPetPhotoBlob(
 
   const { data: uploadData, error: uploadError } = await withAsyncTimeout(
     supabase.storage.from(BUCKET).upload(filePath, blob, {
-      cacheControl: '3600',
+      cacheControl: PET_PHOTO_CACHE_CONTROL,
       upsert: false,
       contentType,
     }),

@@ -16,6 +16,7 @@ const OUTPUT_WIDTH = 1200;
 const OUTPUT_HEIGHT = 900;
 const WEBP_QUALITY = 0.88;
 const PREVIEW_JPEG_QUALITY = 0.92;
+const CROP_JPEG_FALLBACK_QUALITY = 0.85;
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -124,7 +125,7 @@ export async function createCroppedPetPhoto(
     OUTPUT_HEIGHT
   );
 
-  return new Promise((resolve, reject) => {
+  const webp = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
         if (!blob) {
@@ -137,6 +138,11 @@ export async function createCroppedPetPhoto(
       WEBP_QUALITY
     );
   });
+
+  // Browsers that cannot encode WebP (older Safari) silently return a
+  // lossless PNG — ~2 MB at this size, served to every visitor (#427).
+  if (webp.type === 'image/webp') return webp;
+  return canvasToJpegBlob(canvas, CROP_JPEG_FALLBACK_QUALITY);
 }
 
 export function fileToDataURL(file: File): Promise<string> {

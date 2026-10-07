@@ -1,9 +1,56 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
+  createCroppedPetPhoto,
   preparePetPhotoForCrop,
   petPhotoPreviewTargetSize,
   PET_PHOTO_PREVIEW_MAX_EDGE,
 } from './image-processing';
+
+describe('createCroppedPetPhoto output format (#427)', () => {
+  const area = { x: 0, y: 0, width: 400, height: 300 };
+
+  class LoadedImage {
+    onload: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    set src(_value: string) {
+      queueMicrotask(() => this.onload?.());
+    }
+  }
+
+  // toBlob is already a vi.fn from tests/setup.ts; spying on it and restoring
+  // would strip that shared implementation, so swap it by hand instead.
+  const sharedToBlob = HTMLCanvasElement.prototype.toBlob;
+
+  function stubCanvasEncoder(encodes: (requested: string) => string) {
+    HTMLCanvasElement.prototype.toBlob = function (callback, type) {
+      callback(new Blob(['x'], { type: encodes(type ?? 'image/png') }));
+    };
+  }
+
+  afterEach(() => {
+    HTMLCanvasElement.prototype.toBlob = sharedToBlob;
+    vi.unstubAllGlobals();
+  });
+
+  it('keeps WebP when the browser can encode it', async () => {
+    vi.stubGlobal('Image', LoadedImage);
+    stubCanvasEncoder((requested) => requested);
+
+    const blob = await createCroppedPetPhoto('blob:test', area);
+    expect(blob.type).toBe('image/webp');
+  });
+
+  it('falls back to JPEG instead of storing a lossless PNG', async () => {
+    vi.stubGlobal('Image', LoadedImage);
+    // Older Safari ignores 'image/webp' and hands back PNG.
+    stubCanvasEncoder((requested) =>
+      requested === 'image/webp' ? 'image/png' : requested
+    );
+
+    const blob = await createCroppedPetPhoto('blob:test', area);
+    expect(blob.type).toBe('image/jpeg');
+  });
+});
 
 describe('petPhotoPreviewTargetSize (#284)', () => {
   it('leaves images under the max edge unchanged', () => {
