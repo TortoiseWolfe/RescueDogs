@@ -124,6 +124,63 @@ describe('ShelterPetService', () => {
     expect(from.eq).toHaveBeenCalledWith('id', 'pet-2');
   });
 
+  it('does not filter on status when no expectedStatus is given (#354)', async () => {
+    const from = mockFrom({ data: { id: 'pet-2' }, error: null });
+    const supabase = { from: vi.fn().mockReturnValue(from) } as any;
+    const service = new ShelterPetService(supabase);
+    await service.updatePet('pet-2', { name: 'Noodle' });
+    expect(from.eq).toHaveBeenCalledTimes(1);
+    expect(from.update).toHaveBeenCalledWith({ name: 'Noodle' });
+  });
+
+  it('only overwrites status if it is still the loaded value (#354)', async () => {
+    const from = mockFrom({ data: { id: 'pet-2' }, error: null });
+    const supabase = { from: vi.fn().mockReturnValue(from) } as any;
+    const service = new ShelterPetService(supabase);
+    await service.updatePet(
+      'pet-2',
+      { status: 'available' },
+      { expectedStatus: 'pending' }
+    );
+    expect(from.eq).toHaveBeenCalledWith('id', 'pet-2');
+    expect(from.eq).toHaveBeenCalledWith('status', 'pending');
+  });
+
+  it('reports a status changed elsewhere instead of overwriting it (#354)', async () => {
+    const from = mockFrom({
+      data: null,
+      error: { code: 'PGRST116', message: 'no rows' },
+    });
+    const supabase = { from: vi.fn().mockReturnValue(from) } as any;
+    const service = new ShelterPetService(supabase);
+    await expect(
+      service.updatePet(
+        'pet-2',
+        { status: 'available' },
+        { expectedStatus: 'pending' }
+      )
+    ).rejects.toThrow(/changed elsewhere/);
+  });
+
+  it('explains the approved-application lock from the DB (#354)', async () => {
+    const from = mockFrom({
+      data: null,
+      error: {
+        code: '23514',
+        message: 'pet_status_locked_by_approved_application',
+      },
+    });
+    const supabase = { from: vi.fn().mockReturnValue(from) } as any;
+    const service = new ShelterPetService(supabase);
+    await expect(
+      service.updatePet(
+        'pet-2',
+        { status: 'available' },
+        { expectedStatus: 'adopted' }
+      )
+    ).rejects.toThrow(/approved application/);
+  });
+
   it('returns application count for a pet (#223)', async () => {
     const builder: Record<string, unknown> = {};
     const self = () => builder;

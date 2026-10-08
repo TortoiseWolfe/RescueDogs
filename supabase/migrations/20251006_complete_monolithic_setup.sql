@@ -3821,6 +3821,44 @@ CREATE TRIGGER on_pet_adopted_close_applications
   FOR EACH ROW
   EXECUTE FUNCTION close_open_applications_on_adoption();
 
+-- ─── Approved application locks the pet's status (#354) ─────────────────────
+-- While a pet has an approved application its status belongs to the
+-- lifecycle RPCs. A direct UPDATE (e.g. the edit form re-sending a stale
+-- value) must not relist it or undo an adoption. The RPCs are unaffected:
+-- advance_application_status updates the application BEFORE the pet, so no
+-- approved row remains when it frees the pet; finalize_adoption only moves
+-- the pet to 'adopted'.
+CREATE OR REPLACE FUNCTION guard_pet_status_against_approved_application()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.status IS DISTINCT FROM OLD.status
+     AND OLD.status IN ('pending', 'adopted')
+     AND NEW.status IS DISTINCT FROM 'adopted'
+     AND EXISTS (
+       SELECT 1 FROM applications
+       WHERE pet_id = NEW.id AND status = 'approved'
+     )
+  THEN
+    RAISE EXCEPTION 'pet_status_locked_by_approved_application'
+      USING ERRCODE = 'check_violation';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+COMMENT ON FUNCTION guard_pet_status_against_approved_application() IS
+  'BEFORE UPDATE OF status on pets: no relisting/un-adopting while an approved application exists (#354).';
+
+DROP TRIGGER IF EXISTS guard_pet_status_approved_application ON pets;
+CREATE TRIGGER guard_pet_status_approved_application
+  BEFORE UPDATE OF status ON pets
+  FOR EACH ROW
+  EXECUTE FUNCTION guard_pet_status_against_approved_application();
+
 -- One-time backfill for applications left open on already-adopted pets;
 -- a no-op on re-run because closed applications no longer match.
 WITH closed AS (
