@@ -526,6 +526,16 @@ describe.skipIf(!hasRlsTestEnvironment())(
         .single();
       expect(pendingPet!.status).toBe('pending');
 
+      // #354: a direct write (the pet edit form) cannot relist a pet that
+      // has an approved application.
+      const { error: relistPending } = await staffClient
+        .from('pets')
+        .update({ status: 'available' })
+        .eq('id', PET_LIFE);
+      expect(relistPending?.message).toContain(
+        'pet_status_locked_by_approved_application'
+      );
+
       expect(
         (
           await staffClient.rpc('finalize_adoption', {
@@ -540,6 +550,15 @@ describe.skipIf(!hasRlsTestEnvironment())(
         .eq('id', PET_LIFE)
         .single();
       expect(adoptedPet!.status).toBe('adopted');
+
+      // #354: nor undo the adoption.
+      const { error: unadopt } = await staffClient
+        .from('pets')
+        .update({ status: 'available' })
+        .eq('id', PET_LIFE);
+      expect(unadopt?.message).toContain(
+        'pet_status_locked_by_approved_application'
+      );
 
       expect(
         (

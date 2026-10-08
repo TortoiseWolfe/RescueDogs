@@ -90,7 +90,11 @@ export class ShelterPetService {
     return data as Pet;
   }
 
-  async updatePet(petId: string, input: Partial<PetWriteInput>): Promise<Pet> {
+  async updatePet(
+    petId: string,
+    input: Partial<PetWriteInput>,
+    options: { expectedStatus?: PetStatus } = {}
+  ): Promise<Pet> {
     const patch: Record<string, unknown> = {};
     if (input.name !== undefined) patch.name = input.name.trim();
     if (input.species !== undefined) patch.species = input.species;
@@ -106,14 +110,27 @@ export class ShelterPetService {
     if (input.transportable !== undefined)
       patch.transportable = input.transportable;
 
-    const { data, error } = await this.supabase
-      .from('pets')
-      .update(patch)
-      .eq('id', petId)
-      .select(PET_COLUMNS)
-      .single();
+    let query = this.supabase.from('pets').update(patch).eq('id', petId);
+    // Status is driven by the application RPCs; only overwrite it if it is
+    // still what the caller loaded (0 rows matched => changed elsewhere).
+    if (options.expectedStatus !== undefined) {
+      query = query.eq('status', options.expectedStatus);
+    }
+    const { data, error } = await query.select(PET_COLUMNS).single();
 
     if (error) {
+      if (error.code === 'PGRST116' && options.expectedStatus !== undefined) {
+        throw new Error(
+          "This pet's status was changed elsewhere (for example an approval or adoption). Reload the page and try again."
+        );
+      }
+      if (
+        error.message?.includes('pet_status_locked_by_approved_application')
+      ) {
+        throw new Error(
+          'This pet has an approved application, so it cannot be relisted from here. Move that application to "Not selected" first.'
+        );
+      }
       throw new Error(`Failed to update pet: ${error.message}`);
     }
     return data as Pet;

@@ -77,7 +77,6 @@ function EditShelterPetContent() {
     ageYearsPart,
     ageMonthsPart,
     size,
-    status,
     notes,
     videoUrl,
     transportable,
@@ -112,7 +111,6 @@ function EditShelterPetContent() {
     setAgeYearsPart(pendingDraft.ageYearsPart ?? 0);
     setAgeMonthsPart(pendingDraft.ageMonthsPart ?? 0);
     setSize(pendingDraft.size ?? '');
-    setStatus(pendingDraft.status ?? 'available');
     setNotes(pendingDraft.notes ?? '');
     setVideoUrl(pendingDraft.videoUrl ?? '');
     setTransportable(pendingDraft.transportable ?? true);
@@ -202,18 +200,23 @@ function EditShelterPetContent() {
       }
 
       const normalizedVideo = normalizePetVideoUrl(videoUrl);
-      await service.updatePet(pet.id, {
-        name,
-        species,
-        breed: breed || null,
-        sex: sex || null,
-        age_years: combineAgeYears(ageYearsPart, ageMonthsPart),
-        size: size || null,
-        status,
-        notes: notes || null,
-        video_url: normalizedVideo,
-        transportable,
-      });
+      const statusChanged = status !== pet.status;
+      await service.updatePet(
+        pet.id,
+        {
+          name,
+          species,
+          breed: breed || null,
+          sex: sex || null,
+          age_years: combineAgeYears(ageYearsPart, ageMonthsPart),
+          size: size || null,
+          ...(statusChanged ? { status } : {}),
+          notes: notes || null,
+          video_url: normalizedVideo,
+          transportable,
+        },
+        statusChanged ? { expectedStatus: pet.status } : {}
+      );
 
       clearDraft();
       router.push('/shelter/pets');
