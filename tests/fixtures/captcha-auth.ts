@@ -1,14 +1,15 @@
 /**
- * Node-side auth helpers for E2E under Supabase Bot Protection (Turnstile).
+ * Node-side auth helpers for E2E and RLS tests under Supabase Bot
+ * Protection (Turnstile).
  *
  * After `security_captcha_enabled` is true, anon `signInWithPassword` without
  * a captcha_token is rejected. Helpers that only need a session fall back to
  * an admin magic-link (password is not re-checked on that path).
  *
- * UI wait helpers live in `captcha-ui.ts` so global-setup can import this
- * file without pulling `@playwright/test`.
+ * UI wait helpers live in `tests/e2e/utils/captcha-ui.ts` so this file never
+ * pulls `@playwright/test` — Vitest (RLS) imports it too (#430).
  *
- * @module tests/e2e/utils/captcha-auth
+ * @module tests/fixtures/captcha-auth
  */
 
 import { createClient, type Session, type User } from '@supabase/supabase-js';

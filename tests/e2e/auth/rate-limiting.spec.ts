@@ -11,7 +11,7 @@
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 import { clearAllRateLimits } from '../utils/rate-limit-admin';
-import { isSupabaseCaptchaEnforced } from '../utils/captcha-auth';
+import { isSupabaseCaptchaEnforced } from '../../fixtures/captcha-auth';
 
 // Run tests in serial - rate limiting is IP-based, so tests must coordinate
 test.describe.configure({ mode: 'serial' });

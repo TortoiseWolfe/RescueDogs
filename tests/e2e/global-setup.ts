@@ -15,7 +15,7 @@ import { findAuthUserByEmail } from './utils/find-auth-user';
 import {
   obtainAuthSession,
   isCaptchaProtectionError,
-} from './utils/captcha-auth';
+} from '../fixtures/captcha-auth';
 
 interface PrerequisiteError {
   category: string;

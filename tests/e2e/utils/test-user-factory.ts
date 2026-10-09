@@ -14,7 +14,10 @@ import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { expect, type Page, type Browser } from '@playwright/test';
 import { KeyDerivationService } from '@/lib/messaging/key-derivation';
 import { findAuthUserByEmail } from './find-auth-user';
-import { obtainAuthSession, isSupabaseCaptchaEnforced } from './captcha-auth';
+import {
+  obtainAuthSession,
+  isSupabaseCaptchaEnforced,
+} from '../../fixtures/captcha-auth';
 import { waitForCaptchaIfPresent } from './captcha-ui';
 
 /**
