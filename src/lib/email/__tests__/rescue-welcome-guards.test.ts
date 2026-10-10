@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { isTestRecipient } from '../../../../supabase/functions/_shared/test-recipients';
 
 type WelcomeUserLike = {
   email?: string | null;
@@ -23,13 +24,7 @@ function shouldSkipRescueWelcomeEmail(
     return { skip: true, reason: 'no_email' };
   }
 
-  if (
-    email.endsWith('@example.com') ||
-    email.endsWith('.demo') ||
-    email.includes('+e2e') ||
-    email.includes('+playwright') ||
-    email.includes('+ci-')
-  ) {
+  if (isTestRecipient(email)) {
     return { skip: true, reason: 'test_email' };
   }
 
@@ -67,6 +62,9 @@ describe('rescue welcome send guards (#316)', () => {
     ).toBe(true);
     expect(
       shouldSkipRescueWelcomeEmail({ email: 'person06@example.com' }).skip
+    ).toBe(true);
+    expect(
+      shouldSkipRescueWelcomeEmail({ email: 'manager@demo.test' }).skip
     ).toBe(true);
   });
 
