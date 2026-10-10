@@ -120,11 +120,12 @@ function RoleDropdown({
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelHidden = open ? '' : ' !hidden';
+  const openClass = open ? ' dropdown-open' : '';
   const active = hovered || open;
 
   return (
     <div
-      className={`dropdown dropdown-start${open ? 'dropdown-open' : ''} ${className}`.trim()}
+      className={`dropdown dropdown-start${openClass} ${className}`.trim()}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onBlur={(e) => {

@@ -456,17 +456,19 @@ describe('RoleDropdown aria-expanded matches visibility (#405)', () => {
     const panel = wrapper.querySelector('ul')!;
 
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(panel.className).toContain('!hidden');
+    expect(panel.classList.contains('!hidden')).toBe(true);
 
     await userEvent.click(trigger);
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    expect(panel.className).not.toContain('!hidden');
-    expect(wrapper.className).toContain('dropdown-open');
+    expect(panel.classList.contains('!hidden')).toBe(false);
+    expect(wrapper.classList.contains('dropdown-open')).toBe(true);
+    expect(wrapper.classList.contains('dropdown-start')).toBe(true);
 
     await userEvent.click(trigger);
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(panel.className).toContain('!hidden');
-    expect(wrapper.className).not.toContain('dropdown-open');
+    expect(panel.classList.contains('!hidden')).toBe(true);
+    expect(wrapper.classList.contains('dropdown-open')).toBe(false);
+    expect(wrapper.classList.contains('dropdown-start')).toBe(true);
   });
 
   it('focus alone does not open; Enter opens and Escape closes (#405)', async () => {
