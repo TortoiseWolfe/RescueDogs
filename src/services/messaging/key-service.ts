@@ -538,13 +538,10 @@ export class KeyManagementService {
         );
       }
 
-      const newKeyId = (inserted as { id?: string } | null)?.id;
-      if (newKeyId) {
-        // #147: the cached id now points at a row we are about to revoke.
-        this.activeKeyIdCache.set(userId, newKeyId);
-        await this.revokeKeysForUser(userId, newKeyId);
-      }
-
+      // #188: persist the private half BEFORE revoking the superseded rows. The
+      // new public row is already live and read newest-first, so it must never
+      // exist without its private key. A stale older row left un-revoked is
+      // harmless by comparison, so the revoke is the step that is safe to lose.
       this.derivedKeys = keyPair;
       try {
         await encryptionService.storePrivateKey(
@@ -559,6 +556,23 @@ export class KeyManagementService {
             error: err,
           }
         );
+      }
+
+      const newKeyId = (inserted as { id?: string } | null)?.id;
+      if (newKeyId) {
+        // #147: the cached id now points at a row we are about to revoke.
+        this.activeKeyIdCache.set(userId, newKeyId);
+        try {
+          await this.revokeKeysForUser(userId, newKeyId);
+        } catch (err) {
+          // #188: non-fatal. Peers still read this newest row; the older rows
+          // are revoked by the next bootstrap.
+          this.clearPublicKeyCache();
+          logger.warn(
+            'Could not revoke superseded keys after initializeDeviceKeys()',
+            { error: err }
+          );
+        }
       }
 
       logger.info('Device keys initialized for user', { userId });

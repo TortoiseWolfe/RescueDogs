@@ -318,6 +318,37 @@ describe('KeyManagementService', () => {
       // The revoke must scope AROUND the new row, or it kills the key it just made.
       expect(builder.neq).toHaveBeenCalledWith('id', 'new-device-row');
     });
+
+    it('persists the private key BEFORE revoking superseded rows (#188)', async () => {
+      const order: string[] = [];
+      mockStorePrivateKey.mockImplementation(async () => {
+        order.push('store');
+      });
+      mockMessagingFrom.mockReturnValue(orderTrackingBuilder(order));
+
+      await keyManagementService.initializeDeviceKeys(CURRENT_USER_ID);
+
+      expect(order).toEqual(['insert', 'store', 'revoke']);
+    });
+
+    it('keeps the new key when the revoke fails (#188)', async () => {
+      const order: string[] = [];
+      const builder = orderTrackingBuilder(order);
+      builder.then = vi.fn((resolve: (v: unknown) => unknown) =>
+        resolve({ data: null, error: { message: 'network down' } })
+      );
+      mockMessagingFrom.mockReturnValue(builder);
+
+      const keys =
+        await keyManagementService.initializeDeviceKeys(CURRENT_USER_ID);
+
+      expect(mockStorePrivateKey).toHaveBeenCalledWith(
+        CURRENT_USER_ID,
+        keys.privateKey,
+        keys.publicKeyJwk?.x
+      );
+      expect(keyManagementService.getCurrentKeys()).toBe(keys);
+    });
   });
 
   describe('restoreKeysFromCache mismatch self-heal (#126)', () => {
