@@ -119,6 +119,7 @@ function RoleDropdown({
   const [hovered, setHovered] = useState(false);
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelHidden = open ? '' : ' !hidden';
   const active = hovered || open;
 
   return (
@@ -160,7 +161,7 @@ function RoleDropdown({
         tabIndex={0}
         role="menu"
         aria-label={accessibleName}
-        className={`role-dropdown-panel menu dropdown-content z-50 mt-1.5 w-max min-w-full gap-0 rounded-lg border border-[#1e3a8a]/20 bg-[#fdfbf7] text-xs font-medium shadow-md shadow-[#1e3a8a]/10${open ? '' : '!hidden'}`}
+        className={`role-dropdown-panel menu dropdown-content z-50 mt-1.5 w-max min-w-full gap-0 rounded-lg border border-[#1e3a8a]/20 bg-[#fdfbf7] text-xs font-medium shadow-md shadow-[#1e3a8a]/10${panelHidden}`}
       >
         {links.map((item) => (
           <li key={`${accessibleName}-${item.href}-${item.label}`} role="none">
