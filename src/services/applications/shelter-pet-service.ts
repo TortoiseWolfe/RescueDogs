@@ -64,10 +64,15 @@ export class ShelterPetService {
     return data as Pet | null;
   }
 
-  async createPet(shelterId: string, input: PetWriteInput): Promise<Pet> {
+  async createPet(
+    shelterId: string,
+    input: PetWriteInput,
+    options: { id?: string } = {}
+  ): Promise<Pet> {
     const { data, error } = await this.supabase
       .from('pets')
       .insert({
+        ...(options.id ? { id: options.id } : {}),
         shelter_id: shelterId,
         name: input.name.trim(),
         species: input.species,
@@ -85,6 +90,12 @@ export class ShelterPetService {
       .single();
 
     if (error) {
+      // #399: a Save retried after a client-side timeout reuses the same id. A
+      // unique violation means the earlier attempt already committed, so apply
+      // the current values to that row instead of creating a second listing.
+      if (options.id && (error as { code?: string }).code === '23505') {
+        return this.updatePet(options.id, input);
+      }
       throw new Error(`Failed to create pet: ${error.message}`);
     }
     return data as Pet;
