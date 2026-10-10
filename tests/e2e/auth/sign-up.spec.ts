@@ -25,7 +25,7 @@ import {
 import {
   isSupabaseCaptchaEnforced,
   obtainAuthSession,
-} from '../utils/captcha-auth';
+} from '../../fixtures/captcha-auth';
 import { waitForCaptchaIfPresent } from '../utils/captcha-ui';
 
 /**

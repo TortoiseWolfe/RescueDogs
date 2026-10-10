@@ -25,8 +25,9 @@ import {
 } from '../fixtures/test-users';
 
 const SHELTER_ID = '22222222-2222-2222-2222-222222222201';
-const PET_BISCUIT = '44444444-4444-4444-4444-444444444401';
-const PET_PEPPER = '44444444-4444-4444-4444-444444444402';
+// Own throwaway pet: the seeded demo pets' statuses drift in a live project,
+// and applications are only accepted for an available pet (#430).
+const PET_APPLY = '44444444-4444-4444-4444-4444444444a1';
 
 const SNAPSHOT = {
   full_name: 'RLS Test Adopter',
@@ -65,6 +66,13 @@ describe.skipIf(!hasRlsTestEnvironment())(
         user_id: staff.id,
         role: 'staff',
       });
+      await service.from('pets').upsert({
+        id: PET_APPLY,
+        shelter_id: SHELTER_ID,
+        name: 'RLS Apply',
+        species: 'dog',
+        status: 'available',
+      });
     }, 60000);
 
     afterAll(async () => {
@@ -72,6 +80,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
       if (applicationId) {
         await service.from('applications').delete().eq('id', applicationId);
       }
+      await service.from('pets').delete().eq('id', PET_APPLY);
       await service.from('shelter_members').delete().eq('user_id', staff.id);
       await deleteTestUser(adopter.id);
       await deleteTestUser(stranger.id);
@@ -87,7 +96,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
         .from('applications')
         .insert({
           adopter_id: adopter.id,
-          pet_id: PET_BISCUIT,
+          pet_id: PET_APPLY,
           shelter_id: SHELTER_ID,
           profile_snapshot: SNAPSHOT,
         })
@@ -121,7 +130,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
       );
       const { error } = await client.from('applications').insert({
         adopter_id: stranger.id,
-        pet_id: PET_PEPPER,
+        pet_id: PET_APPLY,
         shelter_id: SHELTER_ID,
         profile_snapshot: SNAPSHOT,
       });

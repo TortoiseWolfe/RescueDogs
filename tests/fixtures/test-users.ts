@@ -9,6 +9,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/supabase/types';
+import { obtainAuthSession } from './captcha-auth';
 
 // Test configuration — read without non-null assertion so we can gate
 // cleanly when infra is absent rather than failing with an opaque
@@ -127,11 +128,17 @@ export async function createAuthenticatedClient(
     requireEnv(SUPABASE_ANON_KEY, 'NEXT_PUBLIC_SUPABASE_ANON_KEY')
   );
 
-  const { error } = await client.auth.signInWithPassword({
-    email,
-    password,
-  });
+  // Password grant first; under Supabase captcha it falls back to an admin
+  // magic link, so the RLS suite still runs against production (#430).
+  const result = await obtainAuthSession(email, password);
+  if (!result.ok) {
+    throw new Error(`Failed to authenticate test user: ${result.error}`);
+  }
 
+  const { error } = await client.auth.setSession({
+    access_token: result.session.access_token,
+    refresh_token: result.session.refresh_token,
+  });
   if (error) {
     throw new Error(`Failed to authenticate test user: ${error.message}`);
   }
