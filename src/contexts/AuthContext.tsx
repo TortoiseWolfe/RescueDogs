@@ -26,6 +26,7 @@ import { useIdleTimeout } from '@/hooks/useIdleTimeout';
 import { retryWithBackoff } from '@/lib/auth/retry-utils';
 import { ensureDisplayNameSeeded } from '@/lib/auth/oauth-utils';
 import { createLogger } from '@/lib/logger';
+import { withAsyncTimeout } from '@/lib/with-timeout';
 import IdleTimeoutModal from '@/components/molecular/IdleTimeoutModal';
 import { clearPortalPreference } from '@/lib/portal/portal-preference';
 
@@ -406,6 +407,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } finally {
       setAllowAuthTokenRemoval(false);
+    }
+
+    // #196: the device private key deliberately survives sign-out (#60), so the
+    // cached ciphertext it can decrypt must not. On a shared browser the next
+    // person would otherwise hold both halves. The cache refills from Supabase
+    // the next time a conversation opens.
+    try {
+      const { cacheService } = await import('@/lib/messaging/cache');
+      await withAsyncTimeout(
+        cacheService.clearAllCache(),
+        3_000,
+        'Clear message cache'
+      );
+    } catch (err) {
+      logger.error('Failed to clear cached messages on sign-out', {
+        error: err,
+      });
     }
 
     // FR-005: Force page reload to clear any stale React state.

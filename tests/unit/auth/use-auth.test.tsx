@@ -56,6 +56,14 @@ vi.mock('@/lib/supabase/client', () => {
   };
 });
 
+// #196: sign-out must wipe the cached ciphertext (the private key stays for #60).
+const { mockClearAllCache } = vi.hoisted(() => ({
+  mockClearAllCache: vi.fn(() => Promise.resolve()),
+}));
+vi.mock('@/lib/messaging/cache', () => ({
+  cacheService: { clearAllCache: mockClearAllCache },
+}));
+
 // Unmock AuthContext to use real implementation for these unit tests
 vi.unmock('@/contexts/AuthContext');
 
@@ -147,6 +155,34 @@ describe('useAuth', () => {
 
     await result.current.signOut();
 
+    expect(supabase.auth.signOut).toHaveBeenCalled();
+  });
+
+  it('clears cached message ciphertext on sign-out (#196)', async () => {
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: AuthProvider,
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    await result.current.signOut();
+
+    expect(mockClearAllCache).toHaveBeenCalledTimes(1);
+  });
+
+  it('still signs out when clearing the message cache fails (#196)', async () => {
+    mockClearAllCache.mockRejectedValueOnce(new Error('IndexedDB blocked'));
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: AuthProvider,
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    await expect(result.current.signOut()).resolves.toBeUndefined();
     expect(supabase.auth.signOut).toHaveBeenCalled();
   });
 
