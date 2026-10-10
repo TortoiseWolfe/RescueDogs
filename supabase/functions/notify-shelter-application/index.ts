@@ -16,6 +16,7 @@ import {
   checkIdempotencyKey,
   recordIdempotencyKey,
 } from '../_shared/idempotency.ts';
+import { isTestRecipient } from '../_shared/test-recipients.ts';
 
 const supabaseUrl = Deno.env.get('NEXT_PUBLIC_SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -184,6 +185,25 @@ serve(async (req) => {
       return json(result, 200);
     }
 
+    // Demo/test managers (e.g. @demo.test) can never receive mail; sending
+    // to them hard-bounces and damages the domain's reputation (#433).
+    const deliverable = recipients.filter((email) => !isTestRecipient(email));
+    if (deliverable.length === 0) {
+      const result = {
+        sent: false,
+        skipped: true,
+        reason: 'no_deliverable_manager',
+        shelter_id: shelterId,
+      };
+      await recordIdempotencyKey(
+        supabase,
+        idempotencyKey,
+        FUNCTION_NAME,
+        result
+      );
+      return json(result, 200);
+    }
+
     const sentRecently = await countRecentShelterNotifications(
       supabase,
       shelterId
@@ -234,7 +254,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: fromEmail,
-        to: recipients,
+        to: deliverable,
         subject,
         html,
         text,
@@ -251,7 +271,7 @@ serve(async (req) => {
     const result = {
       sent: true,
       email_id: resendData.id,
-      recipient_count: recipients.length,
+      recipient_count: deliverable.length,
       shelter_id: shelterId,
     };
     await recordIdempotencyKey(supabase, idempotencyKey, FUNCTION_NAME, result);

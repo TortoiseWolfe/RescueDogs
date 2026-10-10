@@ -2,6 +2,8 @@
  * Guards for #316 rescue welcome email — keep E2E/CI from burning Resend quota.
  */
 
+import { isTestRecipient } from './test-recipients.ts';
+
 export type WelcomeUserLike = {
   email?: string | null;
   app_metadata?: Record<string, unknown> | null;
@@ -20,13 +22,7 @@ export function shouldSkipRescueWelcomeEmail(
     return { skip: true, reason: 'no_email' };
   }
 
-  if (
-    email.endsWith('@example.com') ||
-    email.endsWith('.demo') ||
-    email.includes('+e2e') ||
-    email.includes('+playwright') ||
-    email.includes('+ci-')
-  ) {
+  if (isTestRecipient(email)) {
     return { skip: true, reason: 'test_email' };
   }
 
