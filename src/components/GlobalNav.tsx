@@ -118,22 +118,30 @@ function RoleDropdown({
   const accessibleName = `${prefixWord} ${accentWord}`;
   const [hovered, setHovered] = useState(false);
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const active = hovered || open;
 
   return (
     <div
-      className={`dropdown dropdown-start ${className}`.trim()}
+      className={`dropdown dropdown-start${open ? 'dropdown-open' : ''} ${className}`.trim()}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onFocus={() => setOpen(true)}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
           setOpen(false);
         }
       }}
+      onKeyDown={(e) => {
+        // #405: Escape closes the menu and returns focus to its trigger.
+        if (e.key === 'Escape' && open) {
+          setOpen(false);
+          triggerRef.current?.focus();
+        }
+      }}
     >
       <button
         type="button"
+        ref={triggerRef}
         tabIndex={0}
         className={`nav-role-trigger relative inline-flex min-h-11 items-center rounded-full px-3 text-xs transition-[background-color,box-shadow] duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
           active ? 'nav-role-trigger-active' : ''
@@ -147,11 +155,12 @@ function RoleDropdown({
         <span className="nav-role-accent font-bold">{accentWord}</span>
         <ChevronDown className="nav-role-chevron ml-0.5 h-3 w-3 shrink-0" />
       </button>
+      {/* #405: `open` is the single source of truth. DaisyUI's :focus-within must not show the panel on its own. */}
       <ul
         tabIndex={0}
         role="menu"
         aria-label={accessibleName}
-        className="role-dropdown-panel menu dropdown-content z-50 mt-1.5 w-max min-w-full gap-0 rounded-lg border border-[#1e3a8a]/20 bg-[#fdfbf7] text-xs font-medium shadow-md shadow-[#1e3a8a]/10"
+        className={`role-dropdown-panel menu dropdown-content z-50 mt-1.5 w-max min-w-full gap-0 rounded-lg border border-[#1e3a8a]/20 bg-[#fdfbf7] text-xs font-medium shadow-md shadow-[#1e3a8a]/10${open ? '' : '!hidden'}`}
       >
         {links.map((item) => (
           <li key={`${accessibleName}-${item.href}-${item.label}`} role="none">

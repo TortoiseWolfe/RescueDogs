@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { GlobalNav } from './GlobalNav';
 
@@ -431,5 +431,59 @@ describe('GlobalNav role menus (#65)', () => {
     expect(
       screen.queryByRole('link', { name: /^create account$/i })
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('RoleDropdown aria-expanded matches visibility (#405)', () => {
+  const mockUseAuth = useAuth as ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseAuth.mockReturnValue({
+      user: null,
+      signOut: vi.fn(),
+      isLoading: false,
+      isAuthenticated: false,
+    });
+  });
+
+  it('a mouse click opens the menu and a second click closes it (#405)', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    render(<GlobalNav />);
+
+    const trigger = screen.getByRole('button', { name: /for adopters/i });
+    const wrapper = trigger.parentElement!;
+    const panel = wrapper.querySelector('ul')!;
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(panel.className).toContain('!hidden');
+
+    await userEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(panel.className).not.toContain('!hidden');
+    expect(wrapper.className).toContain('dropdown-open');
+
+    await userEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(panel.className).toContain('!hidden');
+    expect(wrapper.className).not.toContain('dropdown-open');
+  });
+
+  it('focus alone does not open; Enter opens and Escape closes (#405)', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    render(<GlobalNav />);
+
+    const trigger = screen.getByRole('button', { name: /for adopters/i });
+    act(() => {
+      trigger.focus();
+    });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.keyboard('{Enter}');
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    await userEvent.keyboard('{Escape}');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(trigger).toHaveFocus();
   });
 });
