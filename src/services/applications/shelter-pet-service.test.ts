@@ -92,6 +92,75 @@ describe('ShelterPetService', () => {
     );
   });
 
+  it('reuses the supplied id and updates instead of inserting twice on 23505 (#399)', async () => {
+    const petId = '33333333-3333-4333-8333-333333333333';
+    const saved = {
+      id: petId,
+      shelter_id: shelterId,
+      name: 'Noodle',
+      species: 'dog',
+      breed: null,
+      sex: null,
+      age_years: null,
+      size: null,
+      photo_url: null,
+      status: 'available',
+      notes: null,
+      created_at: '2026-01-01T00:00:00Z',
+    };
+    const builder: Record<string, any> = {};
+    for (const m of ['select', 'insert', 'update', 'eq']) {
+      builder[m] = vi.fn(() => builder);
+    }
+    builder.single = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: null,
+        error: {
+          code: '23505',
+          message: 'duplicate key value violates unique constraint "pets_pkey"',
+        },
+      })
+      .mockResolvedValueOnce({ data: saved, error: null });
+    const supabase = { from: vi.fn().mockReturnValue(builder) } as any;
+    const service = new ShelterPetService(supabase);
+
+    const result = await service.createPet(
+      shelterId,
+      { name: 'Noodle', species: 'dog' },
+      { id: petId }
+    );
+
+    expect(builder.insert).toHaveBeenCalledTimes(1);
+    expect(builder.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ id: petId, shelter_id: shelterId })
+    );
+    expect(builder.update).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Noodle' })
+    );
+    expect(builder.eq).toHaveBeenCalledWith('id', petId);
+    expect(result).toEqual(saved);
+  });
+
+  it('keeps the old behaviour when no id is supplied (#399)', async () => {
+    const builder: Record<string, any> = {};
+    for (const m of ['select', 'insert', 'update', 'eq']) {
+      builder[m] = vi.fn(() => builder);
+    }
+    builder.single = vi.fn().mockResolvedValue({
+      data: null,
+      error: { code: '23505', message: 'duplicate key' },
+    });
+    const supabase = { from: vi.fn().mockReturnValue(builder) } as any;
+    const service = new ShelterPetService(supabase);
+
+    await expect(
+      service.createPet(shelterId, { name: 'Noodle', species: 'dog' })
+    ).rejects.toThrow(/Failed to create pet: duplicate key/);
+    expect(builder.insert.mock.calls[0][0]).not.toHaveProperty('id');
+    expect(builder.update).not.toHaveBeenCalled();
+  });
+
   it('updates a pet with a trimmed patch payload', async () => {
     const updated = {
       id: 'pet-2',
