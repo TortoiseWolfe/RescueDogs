@@ -47,15 +47,15 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     beforeAll(async () => {
       adopter = await createTestUser(
-        'rls-app-adopter@example.com',
+        'rls-app-adopter@rescuedogs.test',
         'RlsTestPassword123!'
       );
       stranger = await createTestUser(
-        'rls-app-stranger@example.com',
+        'rls-app-stranger@rescuedogs.test',
         'RlsTestPassword123!'
       );
       staff = await createTestUser(
-        'rls-app-staff@example.com',
+        'rls-app-staff@rescuedogs.test',
         'RlsTestPassword123!'
       );
 
@@ -89,7 +89,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('adopter can submit an application for an available pet', async () => {
       const client = await createAuthenticatedClient(
-        'rls-app-adopter@example.com',
+        'rls-app-adopter@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { data, error } = await client
@@ -110,7 +110,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('the submit trigger wrote the initial history row, visible to the adopter', async () => {
       const client = await createAuthenticatedClient(
-        'rls-app-adopter@example.com',
+        'rls-app-adopter@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { data, error } = await client
@@ -125,7 +125,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('adopter cannot submit an application impersonating someone else', async () => {
       const client = await createAuthenticatedClient(
-        'rls-app-adopter@example.com',
+        'rls-app-adopter@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { error } = await client.from('applications').insert({
@@ -140,7 +140,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('a stranger sees no applications (tenant isolation)', async () => {
       const client = await createAuthenticatedClient(
-        'rls-app-stranger@example.com',
+        'rls-app-stranger@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { data, error } = await client
@@ -154,7 +154,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('adopter cannot change status with a direct UPDATE (no policy)', async () => {
       const client = await createAuthenticatedClient(
-        'rls-app-adopter@example.com',
+        'rls-app-adopter@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { data } = await client
@@ -176,7 +176,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('adopter cannot advance status via the staff RPC', async () => {
       const client = await createAuthenticatedClient(
-        'rls-app-adopter@example.com',
+        'rls-app-adopter@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { error } = await client.rpc('advance_application_status', {
@@ -190,7 +190,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('shelter staff sees the application', async () => {
       const client = await createAuthenticatedClient(
-        'rls-app-staff@example.com',
+        'rls-app-staff@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { data, error } = await client
@@ -204,7 +204,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('staff RPC rejects illegal transitions', async () => {
       const client = await createAuthenticatedClient(
-        'rls-app-staff@example.com',
+        'rls-app-staff@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { error } = await client.rpc('advance_application_status', {
@@ -218,7 +218,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('staff advances legally; note lands in adopter-visible history', async () => {
       const client = await createAuthenticatedClient(
-        'rls-app-staff@example.com',
+        'rls-app-staff@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { data, error } = await client.rpc('advance_application_status', {
@@ -231,7 +231,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
       expect((data as { status: string }).status).toBe('under_review');
 
       const adopterClient = await createAuthenticatedClient(
-        'rls-app-adopter@example.com',
+        'rls-app-adopter@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { data: history } = await adopterClient
@@ -245,7 +245,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('adopter withdraws own application; terminal state locks', async () => {
       const client = await createAuthenticatedClient(
-        'rls-app-adopter@example.com',
+        'rls-app-adopter@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { data, error } = await client.rpc('withdraw_application', {
@@ -264,7 +264,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('adopter profiles are strictly own-row', async () => {
       const adopterClient = await createAuthenticatedClient(
-        'rls-app-adopter@example.com',
+        'rls-app-adopter@rescuedogs.test',
         'RlsTestPassword123!'
       );
       await adopterClient.from('adopter_profiles').upsert({
@@ -274,7 +274,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
       });
 
       const strangerClient = await createAuthenticatedClient(
-        'rls-app-stranger@example.com',
+        'rls-app-stranger@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const { data } = await strangerClient
@@ -307,15 +307,15 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     beforeAll(async () => {
       adopterA = await createTestUser(
-        'rls-34-adopter-a@example.com',
+        'rls-34-adopter-a@rescuedogs.test',
         'RlsTestPassword123!'
       );
       adopterB = await createTestUser(
-        'rls-34-adopter-b@example.com',
+        'rls-34-adopter-b@rescuedogs.test',
         'RlsTestPassword123!'
       );
       staff = await createTestUser(
-        'rls-34-staff@example.com',
+        'rls-34-staff@rescuedogs.test',
         'RlsTestPassword123!'
       );
 
@@ -347,15 +347,15 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('rejects a second approval when another adopter is already approved', async () => {
       const clientA = await createAuthenticatedClient(
-        'rls-34-adopter-a@example.com',
+        'rls-34-adopter-a@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const clientB = await createAuthenticatedClient(
-        'rls-34-adopter-b@example.com',
+        'rls-34-adopter-b@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const staffClient = await createAuthenticatedClient(
-        'rls-34-staff@example.com',
+        'rls-34-staff@rescuedogs.test',
         'RlsTestPassword123!'
       );
 
@@ -453,11 +453,11 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     beforeAll(async () => {
       adopter = await createTestUser(
-        'rls-35-adopter@example.com',
+        'rls-35-adopter@rescuedogs.test',
         'RlsTestPassword123!'
       );
       staff = await createTestUser(
-        'rls-35-staff@example.com',
+        'rls-35-staff@rescuedogs.test',
         'RlsTestPassword123!'
       );
 
@@ -489,11 +489,11 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('fall-through after approval returns the pet to available', async () => {
       const adopterClient = await createAuthenticatedClient(
-        'rls-35-adopter@example.com',
+        'rls-35-adopter@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const staffClient = await createAuthenticatedClient(
-        'rls-35-staff@example.com',
+        'rls-35-staff@rescuedogs.test',
         'RlsTestPassword123!'
       );
       const service = createServiceClient();

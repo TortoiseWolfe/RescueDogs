@@ -8,6 +8,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import { cleanupStaleScripthammerUsers } from '../rls/__setup__/cleanup-stale-impl';
 
 // Mock service client. Each table accessor returns a chain; the .delete()
@@ -137,5 +139,19 @@ describe('cleanupStaleScripthammerUsers (#50)', () => {
       usersRemoved: 0,
       errorsLogged: 0,
     });
+  });
+});
+
+describe('application-rls suite users (#403)', () => {
+  it('creates every user on the @rescuedogs.test domain the stale sweep covers (#403)', () => {
+    const source = readFileSync(
+      resolve(process.cwd(), 'tests/rls/application-rls.test.ts'),
+      'utf8'
+    );
+    const emails = source.match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g) ?? [];
+    expect(emails.length).toBeGreaterThan(0);
+    expect(
+      emails.filter((email) => !email.endsWith('@rescuedogs.test'))
+    ).toEqual([]);
   });
 });
