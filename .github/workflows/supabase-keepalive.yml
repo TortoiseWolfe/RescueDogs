@@ -16,15 +16,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: '20'
-
+      # pnpm BEFORE Node, as in every other workflow here. package.json declares
+      # `packageManager: pnpm@...`, so actions/setup-node@v5 turns on its package-manager
+      # cache by itself and shells out to `pnpm` while setting up Node. With pnpm not yet
+      # installed that step died with "Unable to locate executable file: pnpm", so the
+      # job failed before it ever contacted Supabase. Since 2026-06 every scheduled run has
+      # been red for that reason, and the "may be paused" message below sent people looking
+      # at the database instead.
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
           version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
