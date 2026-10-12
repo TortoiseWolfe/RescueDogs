@@ -55,6 +55,9 @@ export default function NewShelterPetPage() {
   const [saving, setSaving] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // #399: one id per form instance, reused by every Save attempt, so a retry
+  // after a timeout can never create a second pet row.
+  const [newPetId] = useState(() => crypto.randomUUID());
   const photoManagerRef = useRef<PetPhotoManagerHandle>(null);
   const hardNavTimerRef = useRef<number | null>(null);
   const busy = saving || redirecting;
@@ -140,17 +143,21 @@ export default function NewShelterPetPage() {
       const normalizedVideo = normalizePetVideoUrl(videoUrl);
       const service = new ShelterPetService(supabase);
       const pet = await withAsyncTimeout(
-        service.createPet(shelterId, {
-          name,
-          species,
-          breed: breed || null,
-          sex: sex || null,
-          age_years: combineAgeYears(ageYearsPart, ageMonthsPart),
-          size: size || null,
-          notes: notes || null,
-          video_url: normalizedVideo,
-          transportable,
-        }),
+        service.createPet(
+          shelterId,
+          {
+            name,
+            species,
+            breed: breed || null,
+            sex: sex || null,
+            age_years: combineAgeYears(ageYearsPart, ageMonthsPart),
+            size: size || null,
+            notes: notes || null,
+            video_url: normalizedVideo,
+            transportable,
+          },
+          { id: newPetId }
+        ),
         30_000,
         'Save pet'
       );
