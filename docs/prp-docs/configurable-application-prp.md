@@ -13,27 +13,27 @@ Both pilot partners use longer applications than our universal form. #337 keeps 
 
 The partner and public applications were collected into a local-only reference folder. That folder is never committed because it holds the rescues' own documents and contact details. This PRP contains no staff names or contact details.
 
-| Code | Source                                                                                                        | Kind                                       |
-| ---- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| CUR  | Raised Paws current form (`AdopterProfile` + `why_this_pet`)                                                  | Our baseline                               |
-| SSD  | Sunnyside Street Dogs (73 questions; `Q` numbers refer to their form)                                         | Pilot partner, dogs                        |
-| OUP  | Once Upon A Prayer Rescue (~40 fields)                                                                        | Pilot partner                              |
-| SON  | Sonoma County Animal Services                                                                                 | County shelter, dogs, short                |
-| PGH  | PAWS of Grays Harbor                                                                                          | Small shelter, dogs, medium                |
-| CAWS | CAWS cat adoption (partial capture)                                                                           | Cats                                       |
-| GU   | Greyhounds Unlimited                                                                                          | Breed rescue                               |
-| LD   | Lucky Dog Animal Rescue                                                                                       | Foster-based, dogs and cats                |
-| CRU  | Cats R Us Feline Rescue                                                                                       | Cats                                       |
-| SM   | San Marcos Regional Animal Shelter                                                                            | City shelter, all species                  |
-| BF   | Best Friends open-adoption guidance                                                                           | Not an application; argues for short forms |
-| NCS  | **Not from a collected source.** Common in senior and bully-breed rescue applications; proposed for the bank. | —                                          |
+| Code | Source                                                                                                                                  | Kind                                       |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| CUR  | Raised Paws current form (`AdopterProfile` + `why_this_pet`)                                                                            | Our baseline                               |
+| SSD  | Sunnyside Street Dogs (73 questions; `Q` numbers refer to their form)                                                                   | Pilot partner, dogs                        |
+| OUP  | Once Upon A Prayer Rescue (~40 fields)                                                                                                  | Pilot partner                              |
+| SON  | Sonoma County Animal Services                                                                                                           | County shelter, dogs, short                |
+| PGH  | PAWS of Grays Harbor                                                                                                                    | Small shelter, dogs, medium                |
+| CAWS | CAWS cat adoption (partial capture)                                                                                                     | Cats                                       |
+| GU   | Greyhounds Unlimited                                                                                                                    | Breed rescue                               |
+| LD   | Lucky Dog Animal Rescue                                                                                                                 | Foster-based, dogs and cats                |
+| CRU  | Cats R Us Feline Rescue                                                                                                                 | Cats                                       |
+| SM   | San Marcos Regional Animal Shelter                                                                                                      | City shelter, all species                  |
+| BF   | Best Friends open-adoption guidance                                                                                                     | Not an application; argues for short forms |
+| NCS  | **Not from a collected source.** Proposed by us for senior, bully-breed, large-dog and special-needs situations; confirm with partners. | —                                          |
 
 ## Design rules this list follows
 
 1. **One wording per question.** Duplicates across sources are merged, including duplicates inside one form (SSD Q50 = Q65; SSD Q23 ≈ Q71; SSD Q43 ≈ Q45).
 2. **Locked core = the questions on today's application.** They are always on and cannot be hidden, so no rescue's application gets shorter than it is now. Locked means always shown, not necessarily required; whether a question is required is a separate setting (later enhancement, per the issue).
 3. **Flags only on structured answers** (yes/no, choice, number, date, counts). Free text is never flagged, because there is nothing to evaluate it against without a human reading it.
-4. **Flag, never auto-reject.** A flag is a dashboard badge. Staff decide.
+4. **Red flag, never auto-reject.** A red flag is a dashboard badge. Staff decide.
 5. **A rescue never sees an answer to a question it did not select** (Principle III), and never sees a flag derived from one.
 6. **Species tag** controls visibility: `dog` questions show only on dog applications, `cat` only on cat applications, `any` always.
 7. **Follow-ups are part of the question**, not separate questions: "Yes/No + explain if yes" is one id with a conditional text field.
@@ -243,7 +243,35 @@ Open-ended "what would you do" questions. Most come from one partner's form, but
 
 `scn.give_up_reasons` is a multi-choice so that a rescue can flag specific reasons (for example "Moving" or "New baby"). The explanation is still free text for staff to read.
 
-### 12. Agreements
+### 12. Pet-specific questions
+
+Questions that only matter for certain pets. The rescue **tags a pet's listing** (zero or more tags), and **turns on** the groups it wants, like any other category. A group's questions appear only on applications for a pet with that tag. Answers about the adopter's home (stairs, pool) are reused like any other answer.
+
+Groups are triggered by tags rather than the listing's breed name because shelter breed labels are mostly visual guesses, the breed field is free text, and most of these concerns (water, stairs, strength, escaping) are about the individual pet rather than its breed. This follows the Best Friends advice to put a requirement on the pet that needs it instead of asking every adopter.
+
+Proposed tags: `sighthound`, `bully_breed`, `large_dog`, `escape_risk`, `senior`, `special_needs`. Pet tags are a new listing field, built with the settings screen (steps 2–3).
+
+| ID                       | Question                                                                               | Answer type                                             | Tag             | Species | Sens. | Core | Flag | Sources |
+| ------------------------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------- | --------------- | ------- | ----- | ---- | ---- | ------- |
+| `pts.sight.stairs`       | Are there stairs in your home? What kind?                                              | choice(No stairs / Carpeted / Hard surface / Open-back) | `sighthound`    | dog     | —     | N    | N    | GU      |
+| `pts.sight.water`        | Is there a swimming pool or open water on or next to your property? Is it fenced off?  | yes/no +describe                                        | `sighthound`    | dog     | —     | N    | Y    | GU      |
+| `pts.sight.crate_muzzle` | Are you willing to use a crate or muzzle during the adjustment period?                 | yes/no +explain if no                                   | `sighthound`    | dog     | —     | N    | Y    | GU      |
+| `pts.sight.leash_only`   | Do you understand this dog must always be on a leash or in a fully fenced area?        | yes/no                                                  | `sighthound`    | dog     | —     | N    | Y    | GU      |
+| `pts.bully.dog_intros`   | How would you introduce this dog to other dogs, and would you use dog parks?           | long                                                    | `bully_breed`   | dog     | —     | N    | N    | NCS     |
+| `pts.bully.public`       | How would you handle neighbors or strangers who are nervous about this type of dog?    | long                                                    | `bully_breed`   | dog     | —     | N    | N    | NCS     |
+| `pts.large.vehicle`      | Do you have a vehicle that fits a large dog for vet visits?                            | yes/no                                                  | `large_dog`     | dog     | —     | N    | Y    | NCS     |
+| `pts.large.handling`     | Can everyone who will walk this dog handle a strong puller?                            | yes/no +explain if no                                   | `large_dog`     | dog     | —     | N    | Y    | NCS     |
+| `pts.escape.doors`       | How will you keep the pet from slipping out of doors and gates?                        | long                                                    | `escape_risk`   | any     | —     | N    | N    | NCS     |
+| `pts.senior.costs`       | Are you prepared for higher vet costs as this pet ages?                                | yes/no                                                  | `senior`        | any     | —     | N    | Y    | NCS     |
+| `pts.senior.mobility`    | Will the pet need to use stairs to go outside or reach where it sleeps?                | yes/no +describe                                        | `senior`        | any     | —     | N    | N    | NCS     |
+| `pts.senior.end_of_life` | Are you prepared to care for this pet through the end of its life?                     | yes/no +explain if no                                   | `senior`        | any     | —     | N    | Y    | NCS     |
+| `pts.medical.medication` | Can you give daily medication, including pills or injections?                          | yes/no +explain if no                                   | `special_needs` | any     | —     | N    | Y    | NCS     |
+| `pts.medical.budget`     | Can you budget for this pet's ongoing medical care?                                    | yes/no                                                  | `special_needs` | any     | —     | N    | Y    | NCS     |
+| `pts.medical.routine`    | Who will follow the pet's care routine (feeding, medication, appointments) day to day? | long                                                    | `special_needs` | any     | —     | N    | N    | NCS     |
+
+Related questions that stay in their own categories because they apply to many pets: `hou.insurance_breed` and `hou.breed_legislation` (Housing), `hou.restrictions` weight limits (Housing), `yrd.fence_details` (Yard). A rescue that tags bully breeds or escape risks will usually show those too.
+
+### 13. Agreements
 
 Agreements are **not questions** and are **never reused** across rescues. Each rescue picks from this catalog (and edits the wording to name itself). The adopter accepts them on each application. See the separate list below.
 
@@ -291,9 +319,9 @@ Statements the adopter confirms about themselves, rather than blanks to fill. Th
 
 ---
 
-## Flags a rescue can turn on
+## Red flags a rescue can turn on
 
-Every flag is optional, off by default, and set per rescue. A flag shows as a badge on the dashboard only if the rescue asked the question.
+Every red flag is optional, off by default, and set per rescue. There is one level: a red flag badge on the dashboard, shown only if the rescue asked the question. Staff then follow up with the adopter as they see fit; a red flag never rejects an application. Pet-specific questions marked `Flag: Y` can be red-flagged the same way (for example "Won't use a muzzle", "Can't give medication").
 
 | Flag badge (example)       | Question                                                           | Trigger (rescue chooses)                       |
 | -------------------------- | ------------------------------------------------------------------ | ---------------------------------------------- |
@@ -395,10 +423,6 @@ These came from a single source and are too breed- or rescue-specific to share. 
 
 | Question                                                                                | Source                                      |
 | --------------------------------------------------------------------------------------- | ------------------------------------------- |
-| Stairs in the home, and what type (open back, cement, carpet)                           | GU                                          |
-| Swimming pool or large body of water on the property                                    | GU                                          |
-| Willing to crate or muzzle during the adjustment period                                 | GU                                          |
-| Aware the dog must be leashed or in a fully fenced area                                 | GU                                          |
 | Color or sex preference for a greyhound                                                 | GU                                          |
 | Willing to buy a plastic cat carrier today                                              | CAWS                                        |
 | Preference about whether the cat is already spayed or neutered                          | CAWS                                        |
@@ -417,7 +441,7 @@ There are **no Small / Medium / Large presets**. Every rescue sees the whole mas
 **Starting state for a new rescue:** only the locked core is shown; every other question starts hidden (greyed out, with **+**). Reasons:
 
 - Existing rescues' applications don't change until they add questions.
-- A rescue that never opens settings can't accidentally publish the full list of about 115 questions.
+- A rescue that never opens settings can't accidentally publish the full list of about 130 questions.
 - Adding the handful of questions a rescue cares about is quicker than hiding a hundred (Principle II). Showing a whole category, such as Scenarios, is one click.
 
 **Adopter reuse:** an adopter answers each question once. On a later application they answer only the questions that rescue shows and they haven't answered yet; everything else is pre-filled and confirmed on the review step.
@@ -453,6 +477,8 @@ Every current `AdopterProfile` field maps to a master-bank id, so existing answe
 6. **No driver's licence or ID number** in the bank (breach-notification risk; see Eligibility).
 7. **Third-party details are removed from rescues' copies after applications close** (see "Data retention").
 8. **References are shared with a new rescue only after the adopter confirms** on the review step.
+9. **One flag level: a red flag.** Staff can still ask the adopter about it; no separate "yellow" level.
+10. **Pet-specific questions** are a category of groups (sighthound, bully breed, large dog, escape risk, senior, special needs), shown only on applications for pets the rescue has tagged.
 
 ## Data retention
 
@@ -473,7 +499,7 @@ Implementation (scheduled removal job, snapshot fields) belongs to step 1.
 ## Open decisions for the product owner
 
 1. **Non-medical euthanasia** (`pet.euthanized_non_medical`). Keep or leave out.
-2. **Not-from-a-collected-source questions** (`hou.insurance_breed`, `hou.breed_legislation`). Confirm with the second pilot partner before including them.
+2. **Not-from-a-collected-source questions** (`hou.insurance_breed`, `hou.breed_legislation`, and the `NCS` pet-specific questions). Confirm wording and the tag list with both pilot partners before including them.
 3. **Once Upon a Prayer selections** need confirming at that partner's first meeting.
 4. **Partners' own record-keeping.** Ask both pilot partners whether they must keep adoption records for a set period (for example for their state or a grant funder), before Raised Paws promises the 90-day removal.
 
