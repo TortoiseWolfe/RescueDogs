@@ -170,7 +170,7 @@ Current pets are one repeating group. Each health detail is its own id, so a res
 | -------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------- | ------- | ----- | ---- | ---- | ------------------------------------------- |
 | `ref.personal` | Personal references who can speak about you as a pet owner or caregiver | repeat{name, phone, relationship, how long they've known you} | any     | 3P    | N    | Y    | SSD Q40 (three), OUP (three, non-relatives) |
 
-Per-rescue settings on `ref.personal`: **minimum number** (0–3) and **non-relatives only** (yes/no). The flag fires when the adopter gives fewer than the rescue's minimum ("No references"). Retention of reference data is open decision 2 and must be settled before this question ships.
+Per-rescue settings on `ref.personal`: **minimum number** (0–3) and **non-relatives only** (yes/no). The flag fires when the adopter gives fewer than the rescue's minimum ("No references"). Retention and reuse of reference data follow "Data retention" below.
 
 ### 9. Lifestyle & Schedule
 
