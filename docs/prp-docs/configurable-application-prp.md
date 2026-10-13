@@ -3,37 +3,37 @@
 ## Problem Statement
 
 **Date**: 2026-10-12
-**Status**: Draft for product-owner review (step 0, documents only)
+**Status**: Draft, revised with product-owner decisions 2026-10-12 (step 0, documents only)
 **Issue**: [#337](https://github.com/TortoiseWolfe/RescueDogs/issues/337)
 **Scope of this document**: the master question list, its metadata, and which questions the two pilot partners would select. No schema, code, or migration changes. Those are steps 1–4 of #337.
 
-Both pilot partners use longer applications than our universal form. #337 keeps the core promise (an adopter answers each question once, ever) by turning the application into a **shared master question bank**. Each rescue selects the questions it wants; a small **locked core** is always on. Rescues may **flag** answers that matter to them; Raised Paws never rejects anyone automatically.
+Both pilot partners use longer applications than our universal form. #337 keeps the core promise (an adopter answers each question once, ever) by turning the application into a **shared master question bank**. Each rescue sees every question, grouped by category, and shows or hides single questions or whole categories; the **locked core** (today's application) is always on. Rescues may **flag** answers that matter to them; Raised Paws never rejects anyone automatically.
 
 ### Sources reviewed
 
 The partner and public applications were collected into a local-only reference folder. That folder is never committed because it holds the rescues' own documents and contact details. This PRP contains no staff names or contact details.
 
-| Code | Source                                                                                                        | Kind                                       |
-| ---- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| CUR  | Raised Paws current form (`AdopterProfile` + `why_this_pet`)                                                  | Our baseline                               |
-| SSD  | Sunnyside Street Dogs (73 questions; `Q` numbers refer to their form)                                         | Pilot partner, dogs                        |
-| OUP  | Once Upon A Prayer Rescue (~40 fields)                                                                        | Pilot partner                              |
-| SON  | Sonoma County Animal Services                                                                                 | County shelter, dogs, short                |
-| PGH  | PAWS of Grays Harbor                                                                                          | Small shelter, dogs, medium                |
-| CAWS | CAWS cat adoption (partial capture)                                                                           | Cats                                       |
-| GU   | Greyhounds Unlimited                                                                                          | Breed rescue                               |
-| LD   | Lucky Dog Animal Rescue                                                                                       | Foster-based, dogs and cats                |
-| CRU  | Cats R Us Feline Rescue                                                                                       | Cats                                       |
-| SM   | San Marcos Regional Animal Shelter                                                                            | City shelter, all species                  |
-| BF   | Best Friends open-adoption guidance                                                                           | Not an application; argues for short forms |
-| NCS  | **Not from a collected source.** Common in senior and bully-breed rescue applications; proposed for the bank. | —                                          |
+| Code | Source                                                                                                                                  | Kind                                       |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| CUR  | Raised Paws current form (`AdopterProfile` + `why_this_pet`)                                                                            | Our baseline                               |
+| SSD  | Sunnyside Street Dogs (73 questions; `Q` numbers refer to their form)                                                                   | Pilot partner, dogs                        |
+| OUP  | Once Upon A Prayer Rescue (~40 fields)                                                                                                  | Pilot partner                              |
+| SON  | Sonoma County Animal Services                                                                                                           | County shelter, dogs, short                |
+| PGH  | PAWS of Grays Harbor                                                                                                                    | Small shelter, dogs, medium                |
+| CAWS | CAWS cat adoption (partial capture)                                                                                                     | Cats                                       |
+| GU   | Greyhounds Unlimited                                                                                                                    | Breed rescue                               |
+| LD   | Lucky Dog Animal Rescue                                                                                                                 | Foster-based, dogs and cats                |
+| CRU  | Cats R Us Feline Rescue                                                                                                                 | Cats                                       |
+| SM   | San Marcos Regional Animal Shelter                                                                                                      | City shelter, all species                  |
+| BF   | Best Friends open-adoption guidance                                                                                                     | Not an application; argues for short forms |
+| NCS  | **Not from a collected source.** Proposed by us for senior, bully-breed, large-dog and special-needs situations; confirm with partners. | —                                          |
 
 ## Design rules this list follows
 
 1. **One wording per question.** Duplicates across sources are merged, including duplicates inside one form (SSD Q50 = Q65; SSD Q23 ≈ Q71; SSD Q43 ≈ Q45).
-2. **Locked core = always on, not necessarily required.** Whether a question is required is a separate setting (later enhancement, per the issue).
+2. **Locked core = the questions on today's application.** They are always on and cannot be hidden, so no rescue's application gets shorter than it is now. Locked means always shown, not necessarily required; whether a question is required is a separate setting (later enhancement, per the issue).
 3. **Flags only on structured answers** (yes/no, choice, number, date, counts). Free text is never flagged, because there is nothing to evaluate it against without a human reading it.
-4. **Flag, never auto-reject.** A flag is a dashboard badge. Staff decide.
+4. **Red flag, never auto-reject.** A red flag is a dashboard badge. Staff decide.
 5. **A rescue never sees an answer to a question it did not select** (Principle III), and never sees a flag derived from one.
 6. **Species tag** controls visibility: `dog` questions show only on dog applications, `cat` only on cat applications, `any` always.
 7. **Follow-ups are part of the question**, not separate questions: "Yes/No + explain if yes" is one id with a conditional text field.
@@ -44,7 +44,7 @@ The partner and public applications were collected into a local-only reference f
 
 - **Answer type**: `text` (one line), `long` (paragraph), `yes/no`, `choice(…)` (pick one), `multi(…)` (pick any), `number`, `date`, `phone`, `email`, `repeat{…}` (add a row per item). `+explain if yes` / `+explain if no` / `+describe if Other` are conditional follow-ups.
 - **Species**: `dog`, `cat`, `any`.
-- **Sens.** (sensitivity): `—` normal adopter data; `Yes` sensitive about the adopter (health, minors' ages, government ID, criminal history, finances, employer); `3P` personal data about a **third party** (landlord, references). Sensitive questions need explicit retention rules before collection (open decision 2).
+- **Sens.** (sensitivity): `—` normal adopter data; `Yes` sensitive about the adopter (health, minors' ages, criminal history, finances, employer); `3P` personal data about a **third party** (landlord, vet, references). `3P` answers follow the removal rules in "Data retention" below.
 - **Core**: `Y` locked core (always on, cannot be hidden).
 - **Flag**: `Y` a rescue can choose to flag an answer to this question.
 
@@ -78,12 +78,15 @@ The partner and public applications were collected into a local-only reference f
 
 ### 2. Eligibility
 
-| ID                         | Question                                                                   | Answer type                                                                                          | Species | Sens. | Core | Flag | Sources                                               |
-| -------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------- | ----- | ---- | ---- | ----------------------------------------------------- |
-| `elg.date_of_birth`        | Date of birth                                                              | date. Rescue sees **age and whether it meets its own minimum**, not the date.                        | any     | Yes   | Y    | Y    | OUP, LD, SM; SSD Q13 asks age; PGH asks "18 or over?" |
-| `elg.cruelty_conviction`   | Have you ever been convicted of abuse or neglect of a child or an animal?  | yes/no +explain if yes                                                                               | any     | Yes   | N    | Y    | PGH; SM (as a certification statement)                |
-| `elg.application_rejected` | Have you ever had an adoption application rejected by a rescue or shelter? | yes/no +explain if yes                                                                               | any     | Yes   | N    | Y    | CRU                                                   |
-| `elg.government_id`        | Driver's licence or ID number                                              | text. **Not recommended**: prefer the "ID showing current address" statement and check ID in person. | any     | Yes   | N    | N    | SM                                                    |
+| ID                         | Question                                                                   | Answer type                                                                   | Species | Sens. | Core | Flag | Sources                                               |
+| -------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------- | ----- | ---- | ---- | ----------------------------------------------------- |
+| `elg.date_of_birth`        | Date of birth                                                              | date. Rescue sees **age and whether it meets its own minimum**, not the date. | any     | Yes   | N    | Y    | OUP, LD, SM; SSD Q13 asks age; PGH asks "18 or over?" |
+| `elg.cruelty_conviction`   | Have you ever been convicted of abuse or neglect of a child or an animal?  | yes/no +explain if yes                                                        | any     | Yes   | N    | Y    | PGH; SM (as a certification statement)                |
+| `elg.application_rejected` | Have you ever had an adoption application rejected by a rescue or shelter? | yes/no +explain if yes                                                        | any     | Yes   | N    | Y    | CRU                                                   |
+
+`elg.cruelty_conviction` is an ordinary optional question: hidden by default, any rescue can show it and flag a "yes", and only rescues that show it see the answer.
+
+**Deliberately not in the bank: driver's licence or ID number** (asked by SM). In most US states, a name plus a driver's licence number is protected personal information under data-breach notification laws, so storing it would oblige Raised Paws to notify every affected adopter (and in some states the attorney general) after a leak. A typed number also proves nothing without seeing the card. Rescues that need ID checked use the `elg.stmt.id_address` statement and look at the physical ID at pickup or the home visit.
 
 ### 3. Household
 
@@ -119,8 +122,8 @@ The partner and public applications were collected into a local-only reference f
 
 | ID                        | Question                                                      | Answer type                                                                                                                       | Species | Sens. | Core | Flag | Sources                               |
 | ------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------- | ----- | ---- | ---- | ------------------------------------- |
-| `yrd.has_yard`            | Do you have a yard?                                           | yes/no                                                                                                                            | any     | —     | N    | Y    | CUR, SM                               |
-| `yrd.fenced`              | Is your yard fully fenced? Shown only if yard.                | choice(Fully / Partly / No)                                                                                                       | dog     | —     | N    | Y    | CUR, SSD Q20, OUP, SON, PGH, GU, LD   |
+| `yrd.has_yard`            | Do you have a yard?                                           | yes/no                                                                                                                            | any     | —     | Y    | Y    | CUR, SM                               |
+| `yrd.fenced`              | Is your yard fully fenced? Shown only if yard.                | choice(Fully / Partly / No)                                                                                                       | any     | —     | Y    | Y    | CUR, SSD Q20, OUP, SON, PGH, GU, LD   |
 | `yrd.fence_details`       | Fence height and type. Shown only if fenced.                  | text (height) + choice(Wood / Chain-link / Vinyl / Wrought iron / Other)                                                          | dog     | —     | N    | N    | SSD Q21, OUP, SON, PGH, GU            |
 | `yrd.other_containment`   | Do you use any other outdoor containment?                     | multi(None / Underground or electric fence / Outdoor kennel or dog run / Tie-out or chain / Other) +describe how it would be used | dog     | —     | N    | Y    | SSD Q22, SON, PGH, LD                 |
 | `yrd.no_fence_plan`       | If you don't have a fenced yard, how will the dog go outside? | long                                                                                                                              | dog     | —     | N    | N    | PGH, GU                               |
@@ -155,7 +158,7 @@ Current pets are one repeating group. Each health detail is its own id, so a res
 
 | ID              | Question                                                   | Answer type                            | Species | Sens. | Core | Flag | Sources                                       |
 | --------------- | ---------------------------------------------------------- | -------------------------------------- | ------- | ----- | ---- | ---- | --------------------------------------------- |
-| `vet.contact`   | Current or previous veterinarian or clinic: name and phone | text + phone (or "I don't have a vet") | any     | 3P    | N    | Y    | CUR, SSD Q39, OUP, PGH, GU, CAWS, LD, CRU, SM |
+| `vet.contact`   | Current or previous veterinarian or clinic: name and phone | text + phone (or "I don't have a vet") | any     | 3P    | Y    | Y    | CUR, SSD Q39, OUP, PGH, GU, CAWS, LD, CRU, SM |
 | `vet.how_long`  | How long have you used this vet?                           | text                                   | any     | —     | N    | N    | CAWS                                          |
 | `vet.need_help` | If you don't have a vet, would you like help finding one?  | yes/no                                 | any     | —     | N    | N    | SM                                            |
 
@@ -167,14 +170,14 @@ Current pets are one repeating group. Each health detail is its own id, so a res
 | -------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------- | ------- | ----- | ---- | ---- | ------------------------------------------- |
 | `ref.personal` | Personal references who can speak about you as a pet owner or caregiver | repeat{name, phone, relationship, how long they've known you} | any     | 3P    | N    | Y    | SSD Q40 (three), OUP (three, non-relatives) |
 
-Per-rescue settings on `ref.personal`: **minimum number** (0–3) and **non-relatives only** (yes/no). The flag fires when the adopter gives fewer than the rescue's minimum ("No references"). Retention of reference data is open decision 2 and must be settled before this question ships.
+Per-rescue settings on `ref.personal`: **minimum number** (0–3) and **non-relatives only** (yes/no). The flag fires when the adopter gives fewer than the rescue's minimum ("No references"). Retention and reuse of reference data follow "Data retention" below.
 
 ### 9. Lifestyle & Schedule
 
 | ID                      | Question                                                                                                                                         | Answer type                                                                                                | Species | Sens. | Core | Flag | Sources                                       |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- | ------- | ----- | ---- | ---- | --------------------------------------------- |
-| `lif.hours_alone`       | On a typical day, how many hours will the pet be home alone?                                                                                     | number                                                                                                     | any     | —     | Y    | Y    | SSD Q46, OUP, SON, PGH, CAWS, LD, CRU         |
-| `lif.where_when_away`   | Where will the pet stay when nobody is home?                                                                                                     | choice(Loose in the house / One room / Crate / Yard / Garage / Other) +describe if Other                   | any     | —     | Y    | Y    | SSD Q49, OUP, SON, PGH (garage), CAWS, CRU    |
+| `lif.hours_alone`       | On a typical day, how many hours will the pet be home alone?                                                                                     | number                                                                                                     | any     | —     | N    | Y    | SSD Q46, OUP, SON, PGH, CAWS, LD, CRU         |
+| `lif.where_when_away`   | Where will the pet stay when nobody is home?                                                                                                     | choice(Loose in the house / One room / Crate / Yard / Garage / Other) +describe if Other                   | any     | —     | N    | Y    | SSD Q49, OUP, SON, PGH (garage), CAWS, CRU    |
 | `lif.sleep`             | Where will the pet sleep at night?                                                                                                               | choice(Bedroom / Elsewhere in the house / Crate / Garage / Outdoors / Other) +describe if Other            | any     | —     | N    | Y    | SSD Q47, SON, PGH, GU, CAWS, CRU              |
 | `lif.schedule`          | Describe your work or school schedule, including whether you work from home and how long you're usually away                                     | long                                                                                                       | any     | —     | N    | N    | SSD Q14, LD                                   |
 | `lif.employment_status` | Employment status                                                                                                                                | choice(Full-time / Part-time / Self-employed or work from home / Student / Retired / Not employed / Other) | any     | Yes   | N    | N    | PGH                                           |
@@ -209,7 +212,7 @@ Per-rescue settings on `ref.personal`: **minimum number** (0–3) and **non-rela
 
 | ID                     | Question                                                                                                                                | Answer type                                                                                                                                                                                       | Species | Sens. | Core | Flag | Sources                                   |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ----- | ---- | ---- | ----------------------------------------- |
-| `trn.experience_level` | Your experience with this kind of pet                                                                                                   | choice(Beginner: first one as an adult / Moderate: 1–2 as an adult, some basic training / Advanced: several, including behavior challenges / Raised puppies or kittens) +describe your experience | any     | —     | N    | N    | CUR (`experience` text), SON, OUP, GU, SM |
+| `trn.experience_level` | Your experience with this kind of pet                                                                                                   | choice(Beginner: first one as an adult / Moderate: 1–2 as an adult, some basic training / Advanced: several, including behavior challenges / Raised puppies or kittens) +describe your experience | any     | —     | Y    | N    | CUR (`experience` text), SON, OUP, GU, SM |
 | `trn.decompression`    | How long do you expect to give a newly adopted pet to settle in (decompress)?                                                           | choice(A few days / 1–2 weeks / 3–4 weeks / 1–3 months / As long as it takes) +explain                                                                                                            | any     | —     | N    | Y    | SSD Q50 + Q65 (duplicate)                 |
 | `trn.adjustment_signs` | What changes in behavior would you consider normal while the pet adjusts, and when would you seek help?                                 | long                                                                                                                                                                                              | any     | —     | N    | N    | SSD Q52                                   |
 | `trn.crate`            | What is your experience with crate training, and how will you use a crate?                                                              | long                                                                                                                                                                                              | dog     | —     | N    | N    | SSD Q42, GU                               |
@@ -224,7 +227,7 @@ Per-rescue settings on `ref.personal`: **minimum number** (0–3) and **non-rela
 
 ### 11. Scenarios
 
-Open-ended "what would you do" questions. All are `long` text, so none can be flagged; staff read them.
+Open-ended "what would you do" questions. Most come from one partner's form, but they are shared-bank questions that any rescue can show; like every other category, a rescue can hide the whole category at once. All except `scn.give_up_reasons` are `long` text, so they can't be flagged; staff read them.
 
 | ID                        | Question                                                                                                                                              | Answer type                                                                                                                                                                                                                                                         | Species | Sens. | Core | Flag | Sources                   |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ----- | ---- | ---- | ------------------------- |
@@ -240,7 +243,35 @@ Open-ended "what would you do" questions. All are `long` text, so none can be fl
 
 `scn.give_up_reasons` is a multi-choice so that a rescue can flag specific reasons (for example "Moving" or "New baby"). The explanation is still free text for staff to read.
 
-### 12. Agreements
+### 12. Pet-specific questions
+
+Questions that only matter for certain pets. The rescue **tags a pet's listing** (zero or more tags), and **turns on** the groups it wants, like any other category. A group's questions appear only on applications for a pet with that tag. Answers about the adopter's home (stairs, pool) are reused like any other answer.
+
+Groups are triggered by tags rather than the listing's breed name because shelter breed labels are mostly visual guesses, the breed field is free text, and most of these concerns (water, stairs, strength, escaping) are about the individual pet rather than its breed. This follows the Best Friends advice to put a requirement on the pet that needs it instead of asking every adopter.
+
+Proposed tags: `sighthound`, `bully_breed`, `large_dog`, `escape_risk`, `senior`, `special_needs`. Pet tags are a new listing field, built with the settings screen (steps 2–3).
+
+| ID                       | Question                                                                               | Answer type                                             | Tag             | Species | Sens. | Core | Flag | Sources |
+| ------------------------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------- | --------------- | ------- | ----- | ---- | ---- | ------- |
+| `pts.sight.stairs`       | Are there stairs in your home? What kind?                                              | choice(No stairs / Carpeted / Hard surface / Open-back) | `sighthound`    | dog     | —     | N    | N    | GU      |
+| `pts.sight.water`        | Is there a swimming pool or open water on or next to your property? Is it fenced off?  | yes/no +describe                                        | `sighthound`    | dog     | —     | N    | Y    | GU      |
+| `pts.sight.crate_muzzle` | Are you willing to use a crate or muzzle during the adjustment period?                 | yes/no +explain if no                                   | `sighthound`    | dog     | —     | N    | Y    | GU      |
+| `pts.sight.leash_only`   | Do you understand this dog must always be on a leash or in a fully fenced area?        | yes/no                                                  | `sighthound`    | dog     | —     | N    | Y    | GU      |
+| `pts.bully.dog_intros`   | How would you introduce this dog to other dogs, and would you use dog parks?           | long                                                    | `bully_breed`   | dog     | —     | N    | N    | NCS     |
+| `pts.bully.public`       | How would you handle neighbors or strangers who are nervous about this type of dog?    | long                                                    | `bully_breed`   | dog     | —     | N    | N    | NCS     |
+| `pts.large.vehicle`      | Do you have a vehicle that fits a large dog for vet visits?                            | yes/no                                                  | `large_dog`     | dog     | —     | N    | Y    | NCS     |
+| `pts.large.handling`     | Can everyone who will walk this dog handle a strong puller?                            | yes/no +explain if no                                   | `large_dog`     | dog     | —     | N    | Y    | NCS     |
+| `pts.escape.doors`       | How will you keep the pet from slipping out of doors and gates?                        | long                                                    | `escape_risk`   | any     | —     | N    | N    | NCS     |
+| `pts.senior.costs`       | Are you prepared for higher vet costs as this pet ages?                                | yes/no                                                  | `senior`        | any     | —     | N    | Y    | NCS     |
+| `pts.senior.mobility`    | Will the pet need to use stairs to go outside or reach where it sleeps?                | yes/no +describe                                        | `senior`        | any     | —     | N    | N    | NCS     |
+| `pts.senior.end_of_life` | Are you prepared to care for this pet through the end of its life?                     | yes/no +explain if no                                   | `senior`        | any     | —     | N    | Y    | NCS     |
+| `pts.medical.medication` | Can you give daily medication, including pills or injections?                          | yes/no +explain if no                                   | `special_needs` | any     | —     | N    | Y    | NCS     |
+| `pts.medical.budget`     | Can you budget for this pet's ongoing medical care?                                    | yes/no                                                  | `special_needs` | any     | —     | N    | Y    | NCS     |
+| `pts.medical.routine`    | Who will follow the pet's care routine (feeding, medication, appointments) day to day? | long                                                    | `special_needs` | any     | —     | N    | N    | NCS     |
+
+Related questions that stay in their own categories because they apply to many pets: `hou.insurance_breed` and `hou.breed_legislation` (Housing), `hou.restrictions` weight limits (Housing), `yrd.fence_details` (Yard). A rescue that tags bully breeds or escape risks will usually show those too.
+
+### 13. Agreements
 
 Agreements are **not questions** and are **never reused** across rescues. Each rescue picks from this catalog (and edits the wording to name itself). The adopter accepts them on each application. See the separate list below.
 
@@ -288,9 +319,9 @@ Statements the adopter confirms about themselves, rather than blanks to fill. Th
 
 ---
 
-## Flags a rescue can turn on
+## Red flags a rescue can turn on
 
-Every flag is optional, off by default, and set per rescue. A flag shows as a badge on the dashboard only if the rescue asked the question.
+Every red flag is optional, off by default, and set per rescue. There is one level: a red flag badge on the dashboard, shown only if the rescue asked the question. Staff then follow up with the adopter as they see fit; a red flag never rejects an application. Pet-specific questions marked `Flag: Y` can be red-flagged the same way (for example "Won't use a muzzle", "Can't give medication").
 
 | Flag badge (example)       | Question                                                           | Trigger (rescue chooses)                       |
 | -------------------------- | ------------------------------------------------------------------ | ---------------------------------------------- |
@@ -329,76 +360,69 @@ Every flag is optional, off by default, and set per rescue. A flag shows as a ba
 
 `Y` = would select. `+` = not on their form, but recommended because they already verify it some other way or listed it as make-or-break. `—` = not selected. Locked-core questions are on for everyone and omitted.
 
-| Question                       | Sunnyside                                                                                        | Once Upon a Prayer                                                                                   | Notes                                 |
-| ------------------------------ | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `con.email_secondary`          | Y                                                                                                | —                                                                                                    |                                       |
-| `con.phone_secondary`          | Y                                                                                                | Y                                                                                                    | OUP asks home and cell                |
-| `con.county`                   | Y                                                                                                | —                                                                                                    |                                       |
-| `app.heard_about`              | Y                                                                                                | —                                                                                                    |                                       |
-| `elg.date_of_birth` (age flag) | Y (flag under 21)                                                                                | Y (minimum 18)                                                                                       | Locked core; listed here for the flag |
-| `hh.members`                   | Y                                                                                                | Y                                                                                                    |                                       |
-| `hh.all_agree`                 | Y                                                                                                | —                                                                                                    |                                       |
-| `hh.primary_caregiver`         | Y                                                                                                | —                                                                                                    |                                       |
-| `hh.allergies`                 | Y                                                                                                | —                                                                                                    |                                       |
-| `hh.children_experience`       | Y                                                                                                | —                                                                                                    |                                       |
-| `hou.restrictions`             | Y                                                                                                | —                                                                                                    |                                       |
-| `yrd.has_yard`                 | Y                                                                                                | Y                                                                                                    |                                       |
-| `yrd.fenced`                   | Y (not flagged)                                                                                  | Y                                                                                                    | Sunnyside accepts no fence            |
-| `yrd.fence_details`            | Y                                                                                                | Y                                                                                                    |                                       |
-| `yrd.other_containment`        | Y                                                                                                | —                                                                                                    |                                       |
-| `yrd.outdoor_supervision`      | Y                                                                                                | —                                                                                                    |                                       |
-| `yrd.indoor_outdoor`           | —                                                                                                | Y                                                                                                    |                                       |
-| `pet.current.spay_neuter`      | Y (flag)                                                                                         | Y                                                                                                    |                                       |
-| `pet.current.vaccines`         | + (flag)                                                                                         | Y                                                                                                    | Make-or-break for Sunnyside           |
-| `pet.current.heartworm`        | +                                                                                                | Y                                                                                                    | Sunnyside checks this with the vet    |
-| `pet.past`                     | Y                                                                                                | Y                                                                                                    | OUP asks past pet types only          |
-| `pet.ever_given_up`            | Y (flag)                                                                                         | Y                                                                                                    | Make-or-break for Sunnyside           |
-| `pet.adopted_before`           | Y                                                                                                | —                                                                                                    |                                       |
-| `vet.contact`                  | Y                                                                                                | Y                                                                                                    |                                       |
-| `ref.personal`                 | Y (3, flag if none)                                                                              | Y (3, non-relatives)                                                                                 |                                       |
-| `lif.where_when_away`          | Y                                                                                                | Y                                                                                                    | Locked core                           |
-| `lif.sleep`                    | Y                                                                                                | —                                                                                                    |                                       |
-| `lif.schedule`                 | Y                                                                                                | —                                                                                                    |                                       |
-| `lif.typical_day`              | —                                                                                                | Y                                                                                                    |                                       |
-| `lif.furniture`                | Y                                                                                                | —                                                                                                    |                                       |
-| `lif.costs_responsible`        | Y                                                                                                | —                                                                                                    |                                       |
-| `lif.looking_for`              | Y                                                                                                | —                                                                                                    |                                       |
-| `trn.experience_level`         | —                                                                                                | Y                                                                                                    | OUP: "Any training experience?"       |
-| `trn.decompression`            | Y (flag)                                                                                         | —                                                                                                    | Make-or-break for Sunnyside           |
-| `trn.adjustment_signs`         | Y                                                                                                | —                                                                                                    |                                       |
-| `trn.crate`                    | Y                                                                                                | —                                                                                                    |                                       |
-| `trn.house_training`           | Y                                                                                                | —                                                                                                    |                                       |
-| `trn.behavior_plan`            | Y                                                                                                | —                                                                                                    |                                       |
-| `trn.methods`                  | Y                                                                                                | —                                                                                                    |                                       |
-| `trn.obedience_class`          | Y                                                                                                | —                                                                                                    |                                       |
-| `trn.hard_behaviors`           | Y                                                                                                | —                                                                                                    |                                       |
-| `trn.ready_when`               | Y                                                                                                | —                                                                                                    |                                       |
-| `scn.give_up_reasons`          | Y (flag)                                                                                         | Y                                                                                                    | Make-or-break for Sunnyside           |
-| `scn.growl_child`              | Y                                                                                                | —                                                                                                    |                                       |
-| `scn.rough_start`              | Y                                                                                                | —                                                                                                    |                                       |
-| `scn.life_change`              | Y                                                                                                | —                                                                                                    |                                       |
-| `scn.unexpected_behavior`      | Y                                                                                                | —                                                                                                    |                                       |
-| `scn.vet_bill`                 | Y                                                                                                | —                                                                                                    |                                       |
-| `scn.frustration`              | Y                                                                                                | —                                                                                                    |                                       |
-| `scn.resource_guarding`        | Y                                                                                                | —                                                                                                    |                                       |
-| `scn.bite`                     | Y                                                                                                | —                                                                                                    |                                       |
-| **Agreements**                 | `agr.truthful`, `agr.return_to_rescue`, `agr.signature`, `agr.fee_aware`, `agr.pickup_transport` | `agr.no_guarantee`, `agr.home_visit`, `agr.lifelong`, `agr.return_to_rescue`                         |                                       |
-| **Eligibility statements**     | `elg.stmt.min_age` (21)                                                                          | `elg.stmt.min_age` (18), `elg.stmt.id_address`, `elg.stmt.landlord_consent`, `elg.stmt.time_to_care` |                                       |
+| Question                   | Sunnyside                                                                                        | Once Upon a Prayer                                                                                   | Notes                              |
+| -------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `con.email_secondary`      | Y                                                                                                | —                                                                                                    |                                    |
+| `con.phone_secondary`      | Y                                                                                                | Y                                                                                                    | OUP asks home and cell             |
+| `con.county`               | Y                                                                                                | —                                                                                                    |                                    |
+| `app.heard_about`          | Y                                                                                                | —                                                                                                    |                                    |
+| `elg.date_of_birth`        | Y (flag under 21)                                                                                | Y (minimum 18)                                                                                       |                                    |
+| `hh.members`               | Y                                                                                                | Y                                                                                                    |                                    |
+| `hh.all_agree`             | Y                                                                                                | —                                                                                                    |                                    |
+| `hh.primary_caregiver`     | Y                                                                                                | —                                                                                                    |                                    |
+| `hh.allergies`             | Y                                                                                                | —                                                                                                    |                                    |
+| `hh.children_experience`   | Y                                                                                                | —                                                                                                    |                                    |
+| `hou.restrictions`         | Y                                                                                                | —                                                                                                    |                                    |
+| `yrd.fence_details`        | Y                                                                                                | Y                                                                                                    |                                    |
+| `yrd.other_containment`    | Y                                                                                                | —                                                                                                    |                                    |
+| `yrd.outdoor_supervision`  | Y                                                                                                | —                                                                                                    |                                    |
+| `yrd.indoor_outdoor`       | —                                                                                                | Y                                                                                                    |                                    |
+| `pet.current.spay_neuter`  | Y (flag)                                                                                         | Y                                                                                                    |                                    |
+| `pet.current.vaccines`     | + (flag)                                                                                         | Y                                                                                                    | Make-or-break for Sunnyside        |
+| `pet.current.heartworm`    | +                                                                                                | Y                                                                                                    | Sunnyside checks this with the vet |
+| `pet.past`                 | Y                                                                                                | Y                                                                                                    | OUP asks past pet types only       |
+| `pet.ever_given_up`        | Y (flag)                                                                                         | Y                                                                                                    | Make-or-break for Sunnyside        |
+| `pet.adopted_before`       | Y                                                                                                | —                                                                                                    |                                    |
+| `ref.personal`             | Y (3, flag if none)                                                                              | Y (3, non-relatives)                                                                                 |                                    |
+| `lif.hours_alone`          | Y                                                                                                | Y                                                                                                    |                                    |
+| `lif.where_when_away`      | Y                                                                                                | Y                                                                                                    |                                    |
+| `lif.sleep`                | Y                                                                                                | —                                                                                                    |                                    |
+| `lif.schedule`             | Y                                                                                                | —                                                                                                    |                                    |
+| `lif.typical_day`          | —                                                                                                | Y                                                                                                    |                                    |
+| `lif.furniture`            | Y                                                                                                | —                                                                                                    |                                    |
+| `lif.costs_responsible`    | Y                                                                                                | —                                                                                                    |                                    |
+| `lif.looking_for`          | Y                                                                                                | —                                                                                                    |                                    |
+| `trn.decompression`        | Y (flag)                                                                                         | —                                                                                                    | Make-or-break for Sunnyside        |
+| `trn.adjustment_signs`     | Y                                                                                                | —                                                                                                    |                                    |
+| `trn.crate`                | Y                                                                                                | —                                                                                                    |                                    |
+| `trn.house_training`       | Y                                                                                                | —                                                                                                    |                                    |
+| `trn.behavior_plan`        | Y                                                                                                | —                                                                                                    |                                    |
+| `trn.methods`              | Y                                                                                                | —                                                                                                    |                                    |
+| `trn.obedience_class`      | Y                                                                                                | —                                                                                                    |                                    |
+| `trn.hard_behaviors`       | Y                                                                                                | —                                                                                                    |                                    |
+| `trn.ready_when`           | Y                                                                                                | —                                                                                                    |                                    |
+| `scn.give_up_reasons`      | Y (flag)                                                                                         | Y                                                                                                    | Make-or-break for Sunnyside        |
+| `scn.growl_child`          | Y                                                                                                | —                                                                                                    |                                    |
+| `scn.rough_start`          | Y                                                                                                | —                                                                                                    |                                    |
+| `scn.life_change`          | Y                                                                                                | —                                                                                                    |                                    |
+| `scn.unexpected_behavior`  | Y                                                                                                | —                                                                                                    |                                    |
+| `scn.vet_bill`             | Y                                                                                                | —                                                                                                    |                                    |
+| `scn.frustration`          | Y                                                                                                | —                                                                                                    |                                    |
+| `scn.resource_guarding`    | Y                                                                                                | —                                                                                                    |                                    |
+| `scn.bite`                 | Y                                                                                                | —                                                                                                    |                                    |
+| **Agreements**             | `agr.truthful`, `agr.return_to_rescue`, `agr.signature`, `agr.fee_aware`, `agr.pickup_transport` | `agr.no_guarantee`, `agr.home_visit`, `agr.lifelong`, `agr.return_to_rescue`                         |                                    |
+| **Eligibility statements** | `elg.stmt.min_age` (21)                                                                          | `elg.stmt.min_age` (18), `elg.stmt.id_address`, `elg.stmt.landlord_consent`, `elg.stmt.time_to_care` |                                    |
 
-Notes on Sunnyside: `pet.current.vaccines` and `pet.current.heartworm` don't appear on its form. Its coordinator checklist confirms them by calling the vet, and vaccines are on its make-or-break list, so asking up front saves a step. Its home-and-property flags stay off because it accepts apartments and no fence.
+Notes on Sunnyside: `pet.current.vaccines` and `pet.current.heartworm` don't appear on its form. Its coordinator checklist confirms them by calling the vet, and vaccines are on its make-or-break list, so asking up front saves a step. Its home-and-property flags (apartment, renter, no fenced yard) stay off because it accepts apartments and no fence.
 
 ---
 
 ## Candidate custom questions (not in the master bank)
 
-These came from a single source and are too breed- or rescue-specific to share. They belong in the later "Additional questions from this rescue" feature (open decision 1), and their answers are not reused.
+These came from a single source and are too breed- or rescue-specific to share. They belong in the later "Additional questions from this rescue" feature (#337 open decision 1), and their answers are not reused.
 
 | Question                                                                                | Source                                      |
 | --------------------------------------------------------------------------------------- | ------------------------------------------- |
-| Stairs in the home, and what type (open back, cement, carpet)                           | GU                                          |
-| Swimming pool or large body of water on the property                                    | GU                                          |
-| Willing to crate or muzzle during the adjustment period                                 | GU                                          |
-| Aware the dog must be leashed or in a fully fenced area                                 | GU                                          |
 | Color or sex preference for a greyhound                                                 | GU                                          |
 | Willing to buy a plastic cat carrier today                                              | CAWS                                        |
 | Preference about whether the cat is already spayed or neutered                          | CAWS                                        |
@@ -406,17 +430,21 @@ These came from a single source and are too breed- or rescue-specific to share. 
 
 ---
 
-## Starting presets
+## How a rescue builds its application
 
-The main model is now per-question selection with a locked core (2026-10-11 feedback). Presets remain as starting points so a rescue that never opens settings still has a sensible form (Principle II).
+There are **no Small / Medium / Large presets**. Every rescue sees the whole master list, grouped into the categories above, and shows or hides single questions or whole categories (the −/+ screen in the 2026-10-12 comment on #337). Locked-core questions show a lock and can't be hidden.
 
-| Preset     | Contents                                                                                                                                                                                                                                                                                                                 | Approx. questions |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| **Small**  | Locked core only: `con.full_name`, `con.email`, `con.phone`, `con.address`, `app.pet_interest`, `app.why_this_pet`, `elg.date_of_birth`, `hh.adults_count`, `hh.children_count`, `hou.home_type`, `hou.own_rent`, `hou.landlord_allows`, `hou.landlord_contact`, `pet.current`, `lif.hours_alone`, `lif.where_when_away` | 16                |
-| **Medium** | Small + today's form (`yrd.has_yard`, `yrd.fenced`, `vet.contact`, `trn.experience_level`) + `hh.all_agree`, `pet.current.spay_neuter`, `pet.current.vaccines`, `pet.ever_given_up`, `lif.sleep`, `scn.give_up_reasons`, `trn.decompression`                                                                             | ~27               |
-| **Large**  | Medium + `hh.members`, `hou.restrictions`, `yrd.other_containment`, `pet.past`, `pet.current.heartworm`, `ref.personal`, `lif.schedule`, `trn.*`, `scn.*`                                                                                                                                                                | ~55               |
+**Locked core** (17 questions, exactly today's application):
 
-Medium is the proposed default because it matches today's form, so existing rescues see no change. That is a product-owner decision, weighed against the Best Friends argument for a short default.
+`con.full_name`, `con.email`, `con.phone`, `con.address`, `app.pet_interest`, `app.why_this_pet`, `hou.home_type`, `hou.own_rent`, `hou.landlord_allows`, `hou.landlord_contact`, `yrd.has_yard`, `yrd.fenced`, `hh.adults_count`, `hh.children_count`, `pet.current`, `vet.contact`, `trn.experience_level`
+
+**Starting state for a new rescue:** only the locked core is shown; every other question starts hidden (greyed out, with **+**). Reasons:
+
+- Existing rescues' applications don't change until they add questions.
+- A rescue that never opens settings can't accidentally publish the full list of about 130 questions.
+- Adding the handful of questions a rescue cares about is quicker than hiding a hundred (Principle II). Showing a whole category, such as Scenarios, is one click.
+
+**Adopter reuse:** an adopter answers each question once. On a later application they answer only the questions that rescue shows and they haven't answered yet; everything else is pre-filled and confirmed on the review step.
 
 ---
 
@@ -439,15 +467,41 @@ Every current `AdopterProfile` field maps to a master-bank id, so existing answe
 
 ---
 
+## Decisions made (product owner, 2026-10-12)
+
+1. **Locked core = today's application** (17 questions, listed above). `elg.date_of_birth`, `lif.hours_alone` and `lif.where_when_away` are optional; a rescue that wants an age flag shows `elg.date_of_birth`.
+2. **No presets.** Rescues show or hide questions and categories from the full list.
+3. **New rescues start with only the locked core shown.**
+4. **Scenarios are shared-bank questions** any rescue can show, in one category that can be hidden as a whole.
+5. **Conviction question** (`elg.cruelty_conviction`) is an ordinary optional, flaggable question.
+6. **No driver's licence or ID number** in the bank (breach-notification risk; see Eligibility).
+7. **Third-party details are removed from rescues' copies after applications close** (see "Data retention").
+8. **References are shared with a new rescue only after the adopter confirms** on the review step.
+9. **One flag level: a red flag.** Staff can still ask the adopter about it; no separate "yellow" level.
+10. **Pet-specific questions** are a category of groups (sighthound, bully breed, large dog, escape risk, senior, special needs), shown only on applications for pets the rescue has tagged.
+
+## Data retention
+
+Rules for the rescue's copy of an application (the snapshot). The adopter's own saved answers are unaffected: they stay until the adopter edits or deletes them.
+
+| Detail                 | Removed from the rescue's copy                                       |
+| ---------------------- | -------------------------------------------------------------------- |
+| `hou.landlord_contact` | 90 days after the application closes (adopted, denied, or withdrawn) |
+| `ref.personal`         | 90 days after the application closes                                 |
+| `vet.contact`          | 90 days after closing if denied or withdrawn; kept if adopted        |
+
+Why 90 days: it covers the checking stage, questions after a decision, and post-adoption follow-ups (Sunnyside follows up at 48–72 hours, 2 weeks, and 30 days). Storage space is not a factor; a full application is a few kilobytes. The reason to remove the data is that information no longer held can't leak, and landlords and references never agreed to be in Raised Paws.
+
+**References and reuse:** an adopter's saved references are shown on the review step of each new application with "Share these references with {rescue}?". They are copied into that application only if the adopter confirms.
+
+Implementation (scheduled removal job, snapshot fields) belongs to step 1.
+
 ## Open decisions for the product owner
 
-1. **Locked core contents.** The list above (16 questions) is a proposal. In particular: should `elg.date_of_birth` be locked, given that the rescue only sees the derived age? Should `vet.contact` be locked, given it's on today's form but some shelters don't ask?
-2. **Third-party data retention** (`3P`: `hou.landlord_contact`, `vet.contact`, `ref.personal`). How long is it kept after an application closes, and can the adopter delete references? This must be decided before `ref.personal` ships.
-3. **Sensitive questions** (`elg.cruelty_conviction`, `elg.government_id`, `pet.euthanized_non_medical`). Keep them in the bank, or leave them out as Best Friends' guidance suggests? This draft recommends leaving `elg.government_id` out.
-4. **Default preset** for new rescues (Small or Medium).
-5. **Scenario questions** are almost all from one partner. Are they shared-bank questions, or Sunnyside custom questions?
-6. **Not-from-a-collected-source questions** (`hou.insurance_breed`, `hou.breed_legislation`). Confirm with the second pilot partner before including them.
-7. **Once Upon a Prayer selections** need confirming at that partner's first meeting.
+1. **Non-medical euthanasia** (`pet.euthanized_non_medical`). Keep or leave out.
+2. **Not-from-a-collected-source questions** (`hou.insurance_breed`, `hou.breed_legislation`, and the `NCS` pet-specific questions). Confirm wording and the tag list with both pilot partners before including them.
+3. **Once Upon a Prayer selections** need confirming at that partner's first meeting.
+4. **Partners' own record-keeping.** Ask both pilot partners whether they must keep adoption records for a set period (for example for their state or a grant funder), before Raised Paws promises the 90-day removal.
 
 ## Out of scope for step 0
 
