@@ -44,7 +44,7 @@ The partner and public applications were collected into a local-only reference f
 
 - **Answer type**: `text` (one line), `long` (paragraph), `yes/no`, `choice(…)` (pick one), `multi(…)` (pick any), `number`, `date`, `phone`, `email`, `repeat{…}` (add a row per item). `+explain if yes` / `+explain if no` / `+describe if Other` are conditional follow-ups.
 - **Species**: `dog`, `cat`, `any`.
-- **Sens.** (sensitivity): `—` normal adopter data; `Yes` sensitive about the adopter (health, minors' ages, government ID, criminal history, finances, employer); `3P` personal data about a **third party** (landlord, references). Sensitive questions need explicit retention rules before collection (open decision 2).
+- **Sens.** (sensitivity): `—` normal adopter data; `Yes` sensitive about the adopter (health, minors' ages, criminal history, finances, employer); `3P` personal data about a **third party** (landlord, vet, references). `3P` answers follow the removal rules in "Data retention" below.
 - **Core**: `Y` locked core (always on, cannot be hidden).
 - **Flag**: `Y` a rescue can choose to flag an answer to this question.
 
@@ -78,12 +78,15 @@ The partner and public applications were collected into a local-only reference f
 
 ### 2. Eligibility
 
-| ID                         | Question                                                                   | Answer type                                                                                          | Species | Sens. | Core | Flag | Sources                                               |
-| -------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------- | ----- | ---- | ---- | ----------------------------------------------------- |
-| `elg.date_of_birth`        | Date of birth                                                              | date. Rescue sees **age and whether it meets its own minimum**, not the date.                        | any     | Yes   | N    | Y    | OUP, LD, SM; SSD Q13 asks age; PGH asks "18 or over?" |
-| `elg.cruelty_conviction`   | Have you ever been convicted of abuse or neglect of a child or an animal?  | yes/no +explain if yes                                                                               | any     | Yes   | N    | Y    | PGH; SM (as a certification statement)                |
-| `elg.application_rejected` | Have you ever had an adoption application rejected by a rescue or shelter? | yes/no +explain if yes                                                                               | any     | Yes   | N    | Y    | CRU                                                   |
-| `elg.government_id`        | Driver's licence or ID number                                              | text. **Not recommended**: prefer the "ID showing current address" statement and check ID in person. | any     | Yes   | N    | N    | SM                                                    |
+| ID                         | Question                                                                   | Answer type                                                                   | Species | Sens. | Core | Flag | Sources                                               |
+| -------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------- | ----- | ---- | ---- | ----------------------------------------------------- |
+| `elg.date_of_birth`        | Date of birth                                                              | date. Rescue sees **age and whether it meets its own minimum**, not the date. | any     | Yes   | N    | Y    | OUP, LD, SM; SSD Q13 asks age; PGH asks "18 or over?" |
+| `elg.cruelty_conviction`   | Have you ever been convicted of abuse or neglect of a child or an animal?  | yes/no +explain if yes                                                        | any     | Yes   | N    | Y    | PGH; SM (as a certification statement)                |
+| `elg.application_rejected` | Have you ever had an adoption application rejected by a rescue or shelter? | yes/no +explain if yes                                                        | any     | Yes   | N    | Y    | CRU                                                   |
+
+`elg.cruelty_conviction` is an ordinary optional question: hidden by default, any rescue can show it and flag a "yes", and only rescues that show it see the answer.
+
+**Deliberately not in the bank: driver's licence or ID number** (asked by SM). In most US states, a name plus a driver's licence number is protected personal information under data-breach notification laws, so storing it would oblige Raised Paws to notify every affected adopter (and in some states the attorney general) after a leak. A typed number also proves nothing without seeing the card. Rescues that need ID checked use the `elg.stmt.id_address` statement and look at the physical ID at pickup or the home visit.
 
 ### 3. Household
 
@@ -446,16 +449,33 @@ Every current `AdopterProfile` field maps to a master-bank id, so existing answe
 2. **No presets.** Rescues show or hide questions and categories from the full list.
 3. **New rescues start with only the locked core shown.**
 4. **Scenarios are shared-bank questions** any rescue can show, in one category that can be hidden as a whole.
+5. **Conviction question** (`elg.cruelty_conviction`) is an ordinary optional, flaggable question.
+6. **No driver's licence or ID number** in the bank (breach-notification risk; see Eligibility).
+7. **Third-party details are removed from rescues' copies after applications close** (see "Data retention").
+8. **References are shared with a new rescue only after the adopter confirms** on the review step.
+
+## Data retention
+
+Rules for the rescue's copy of an application (the snapshot). The adopter's own saved answers are unaffected: they stay until the adopter edits or deletes them.
+
+| Detail                 | Removed from the rescue's copy                                       |
+| ---------------------- | -------------------------------------------------------------------- |
+| `hou.landlord_contact` | 90 days after the application closes (adopted, denied, or withdrawn) |
+| `ref.personal`         | 90 days after the application closes                                 |
+| `vet.contact`          | 90 days after closing if denied or withdrawn; kept if adopted        |
+
+Why 90 days: it covers the checking stage, questions after a decision, and post-adoption follow-ups (Sunnyside follows up at 48–72 hours, 2 weeks, and 30 days). Storage space is not a factor; a full application is a few kilobytes. The reason to remove the data is that information no longer held can't leak, and landlords and references never agreed to be in Raised Paws.
+
+**References and reuse:** an adopter's saved references are shown on the review step of each new application with "Share these references with {rescue}?". They are copied into that application only if the adopter confirms.
+
+Implementation (scheduled removal job, snapshot fields) belongs to step 1.
 
 ## Open decisions for the product owner
 
-1. **Landlord and vet retention** (`hou.landlord_contact`, `vet.contact`, both locked core and already collected today with no deletion rule). Options: keep each rescue's copy with the application indefinitely, or remove it from closed applications (adopted, withdrawn, denied) after a set period such as 90 days. The adopter's own saved copy stays editable either way.
-2. **References** (`ref.personal`, private third parties). Options: reuse across rescues only after the adopter confirms "share these references with {rescue}?" on the review step; or never reuse and ask fresh each time. Either way, remove them from closed applications after a set period. Draft recommendation: confirm-on-review plus removal after closing. Must be decided before `ref.personal` ships.
-3. **Criminal conviction** (`elg.cruelty_conviction`). Options: yes/no question with explanation; statement-only checkbox (`elg.stmt.no_cruelty`), which stores only the confirmation; or leave it out. Draft recommendation: statement only, since the answer is self-reported either way and stored criminal history is high-harm if leaked.
-4. **Government ID number** (`elg.government_id`). Draft recommendation: remove it from the bank; staff check the physical ID at pickup or home visit, and `elg.stmt.id_address` covers the requirement.
-5. **Non-medical euthanasia** (`pet.euthanized_non_medical`). Keep or leave out.
-6. **Not-from-a-collected-source questions** (`hou.insurance_breed`, `hou.breed_legislation`). Confirm with the second pilot partner before including them.
-7. **Once Upon a Prayer selections** need confirming at that partner's first meeting.
+1. **Non-medical euthanasia** (`pet.euthanized_non_medical`). Keep or leave out.
+2. **Not-from-a-collected-source questions** (`hou.insurance_breed`, `hou.breed_legislation`). Confirm with the second pilot partner before including them.
+3. **Once Upon a Prayer selections** need confirming at that partner's first meeting.
+4. **Partners' own record-keeping.** Ask both pilot partners whether they must keep adoption records for a set period (for example for their state or a grant funder), before Raised Paws promises the 90-day removal.
 
 ## Out of scope for step 0
 
