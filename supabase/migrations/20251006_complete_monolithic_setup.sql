@@ -4227,6 +4227,500 @@ CREATE POLICY "Application parties view status history" ON application_status_hi
     )
   );
 
+-- ─── Configurable application: question bank, saved answers (#337) ──────────
+-- Spec: features/core-features/049-configurable-application/
+-- Content: docs/prp-docs/configurable-application-prp.md
+-- Principle III: a rescue reads only answers to questions it showed, frozen
+-- into applications.answers_snapshot by the database at submit time.
+
+CREATE TABLE IF NOT EXISTS application_questions (
+  id TEXT PRIMARY KEY CHECK (id ~ '^[a-z]+(\.[a-z_]+)+$'),
+  category TEXT NOT NULL CHECK (category IN
+    ('contact', 'application', 'eligibility', 'household', 'housing', 'yard',
+     'pets', 'vet', 'references', 'lifestyle', 'training', 'scenarios',
+     'pet_specific')),
+  sort_order SMALLINT NOT NULL UNIQUE,
+  wording TEXT NOT NULL CHECK (length(wording) BETWEEN 2 AND 500),
+  answer_type TEXT NOT NULL CHECK (answer_type IN
+    ('text', 'long_text', 'yes_no', 'choice', 'multi_choice', 'number',
+     'date', 'phone', 'email', 'address', 'contact', 'group', 'repeat',
+     'repeat_field', 'pet')),
+  choices JSONB CHECK (choices IS NULL OR jsonb_typeof(choices) = 'array'),
+  fields JSONB CHECK (fields IS NULL OR jsonb_typeof(fields) = 'array'),
+  follow_up JSONB CHECK (follow_up IS NULL OR jsonb_typeof(follow_up) = 'object'),
+  show_if JSONB CHECK (show_if IS NULL OR jsonb_typeof(show_if) = 'object'),
+  parent_id TEXT REFERENCES application_questions(id),
+  species TEXT NOT NULL DEFAULT 'any' CHECK (species IN ('any', 'dog', 'cat')),
+  pet_tag TEXT CHECK (pet_tag IN
+    ('sighthound', 'bully_breed', 'large_dog', 'escape_risk', 'senior',
+     'special_needs')),
+  sensitivity TEXT NOT NULL DEFAULT 'normal' CHECK (sensitivity IN
+    ('normal', 'sensitive', 'third_party')),
+  is_locked BOOLEAN NOT NULL DEFAULT FALSE,
+  is_flaggable BOOLEAN NOT NULL DEFAULT FALSE,
+  always_optional BOOLEAN NOT NULL DEFAULT FALSE,
+  retired_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT repeat_field_has_parent CHECK ((answer_type = 'repeat_field') = (parent_id IS NOT NULL))
+);
+
+COMMENT ON TABLE application_questions IS 'Shared master question bank (#337). ids are stable and never reused; edit wording here, never in a rescue. Locked questions are always on every application.';
+
+CREATE TABLE IF NOT EXISTS shelter_application_questions (
+  shelter_id UUID NOT NULL REFERENCES shelters(id) ON DELETE CASCADE,
+  question_id TEXT NOT NULL REFERENCES application_questions(id) ON DELETE CASCADE,
+  shown BOOLEAN NOT NULL DEFAULT TRUE,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (shelter_id, question_id)
+);
+
+COMMENT ON TABLE shelter_application_questions IS 'Which non-locked bank questions a rescue shows (#337). No row = hidden. No client write path yet; a manager-only RPC arrives with the settings screen.';
+
+CREATE TABLE IF NOT EXISTS adopter_answers (
+  adopter_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  question_id TEXT NOT NULL REFERENCES application_questions(id) ON DELETE CASCADE,
+  value JSONB NOT NULL CHECK (octet_length(value::text) <= 20000),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (adopter_id, question_id)
+);
+
+COMMENT ON TABLE adopter_answers IS 'Answer once, reuse everywhere (#337). Strictly own-row; shelter staff never read it and see applications.answers_snapshot instead (Principle III).';
+
+DROP TRIGGER IF EXISTS update_shelter_application_questions_updated_at ON shelter_application_questions;
+CREATE TRIGGER update_shelter_application_questions_updated_at
+  BEFORE UPDATE ON shelter_application_questions
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_adopter_answers_updated_at ON adopter_answers;
+CREATE TRIGGER update_adopter_answers_updated_at
+  BEFORE UPDATE ON adopter_answers
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE applications
+  ADD COLUMN IF NOT EXISTS answers_snapshot JSONB
+  CHECK (answers_snapshot IS NULL OR jsonb_typeof(answers_snapshot) = 'array');
+
+COMMENT ON COLUMN applications.answers_snapshot IS 'Questions the rescue showed at submit time, with wording and the adopter''s answers (#337). Always written by set_application_answers_snapshot; NULL for applications submitted before #337.';
+
+ALTER TABLE application_questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shelter_application_questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE adopter_answers ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can read the question bank" ON application_questions;
+CREATE POLICY "Anyone can read the question bank" ON application_questions
+  FOR SELECT TO anon, authenticated USING (true);
+
+DROP POLICY IF EXISTS "Signed-in users read rescue question choices" ON shelter_application_questions;
+CREATE POLICY "Signed-in users read rescue question choices" ON shelter_application_questions
+  FOR SELECT TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "Users view own answers" ON adopter_answers;
+CREATE POLICY "Users view own answers" ON adopter_answers
+  FOR SELECT USING (auth.uid() = adopter_id);
+DROP POLICY IF EXISTS "Users create own answers" ON adopter_answers;
+CREATE POLICY "Users create own answers" ON adopter_answers
+  FOR INSERT WITH CHECK (auth.uid() = adopter_id);
+DROP POLICY IF EXISTS "Users update own answers" ON adopter_answers;
+CREATE POLICY "Users update own answers" ON adopter_answers
+  FOR UPDATE USING (auth.uid() = adopter_id) WITH CHECK (auth.uid() = adopter_id);
+DROP POLICY IF EXISTS "Users delete own answers" ON adopter_answers;
+CREATE POLICY "Users delete own answers" ON adopter_answers
+  FOR DELETE USING (auth.uid() = adopter_id);
+
+-- Bank content. ON CONFLICT DO UPDATE so wording fixes are a re-run; retired_at
+-- is left alone. sort_order: category blocks of 100.
+INSERT INTO application_questions
+  (id, category, sort_order, wording, answer_type, choices, fields, follow_up, show_if, parent_id,
+   species, pet_tag, sensitivity, is_locked, is_flaggable, always_optional)
+VALUES
+  -- Contact
+  ('con.full_name', 'contact', 101, 'Full name', 'text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', TRUE, FALSE, FALSE),
+  ('con.email', 'contact', 102, 'Email address', 'email', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', TRUE, FALSE, FALSE),
+  ('con.email_secondary', 'contact', 103, 'Secondary email', 'email', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, TRUE),
+  ('con.phone', 'contact', 104, 'Phone', 'phone', '[{"value":"mobile","label":"Mobile"},{"value":"home","label":"Home"},{"value":"work","label":"Work"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', TRUE, FALSE, FALSE),
+  ('con.phone_secondary', 'contact', 105, 'Secondary phone', 'phone', '[{"value":"mobile","label":"Mobile"},{"value":"home","label":"Home"},{"value":"work","label":"Work"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, TRUE),
+  ('con.address', 'contact', 106, 'Home address', 'address', NULL, '[{"key":"street","label":"Street address","type":"text"},{"key":"unit","label":"Apartment or unit","type":"text"},{"key":"city","label":"City","type":"text"},{"key":"state","label":"State","type":"text"},{"key":"zip","label":"ZIP","type":"text"}]', NULL, NULL, NULL, 'any', NULL, 'normal', TRUE, FALSE, FALSE),
+  ('con.county', 'contact', 107, 'County', 'text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, TRUE),
+  ('con.mailing_address', 'contact', 108, 'Mailing address, if different', 'address', NULL, '[{"key":"street","label":"Street address","type":"text"},{"key":"unit","label":"Apartment or unit","type":"text"},{"key":"city","label":"City","type":"text"},{"key":"state","label":"State","type":"text"},{"key":"zip","label":"ZIP","type":"text"}]', NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, TRUE),
+  ('con.preferred_contact', 'contact', 109, 'Preferred way to contact you', 'choice', '[{"value":"email","label":"Email"},{"value":"phone","label":"Phone call"},{"value":"text","label":"Text message"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  -- This application (answered fresh each time, never reused)
+  ('app.pet_interest', 'application', 201, 'Which pet are you applying for?', 'pet', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', TRUE, FALSE, FALSE),
+  ('app.why_this_pet', 'application', 202, 'Why this pet?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', TRUE, FALSE, FALSE),
+  ('app.heard_about', 'application', 203, 'How did you hear about us?', 'choice', '[{"value":"petfinder","label":"Petfinder"},{"value":"adopt_a_pet","label":"Adopt-a-Pet"},{"value":"facebook","label":"Facebook"},{"value":"instagram","label":"Instagram"},{"value":"friend_family","label":"Friend or family"},{"value":"other_website","label":"Other website"},{"value":"other","label":"Other"}]', NULL, '{"when":["other_website","other"],"label":"Please specify"}', NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('app.adopted_from_us', 'application', 204, 'Have you adopted from us before?', 'yes_no', NULL, NULL, '{"when":[true],"label":"When, and which pet?"}', NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('app.surrendered_to_us', 'application', 205, 'Have you ever surrendered an animal to us?', 'yes_no', NULL, NULL, '{"when":[true],"label":"Please explain"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  -- Eligibility
+  ('elg.date_of_birth', 'eligibility', 301, 'Date of birth', 'date', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'sensitive', FALSE, TRUE, FALSE),
+  ('elg.cruelty_conviction', 'eligibility', 302, 'Have you ever been convicted of abuse or neglect of a child or an animal?', 'yes_no', NULL, NULL, '{"when":[true],"label":"Please explain"}', NULL, NULL, 'any', NULL, 'sensitive', FALSE, TRUE, FALSE),
+  ('elg.application_rejected', 'eligibility', 303, 'Have you ever had an adoption application rejected by a rescue or shelter?', 'yes_no', NULL, NULL, '{"when":[true],"label":"Please explain"}', NULL, NULL, 'any', NULL, 'sensitive', FALSE, TRUE, FALSE),
+  -- Household
+  ('hh.adults_count', 'household', 401, 'How many adults live in your home?', 'number', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', TRUE, FALSE, FALSE),
+  ('hh.children_count', 'household', 402, 'How many children live in your home?', 'number', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', TRUE, TRUE, FALSE),
+  ('hh.members', 'household', 403, 'Everyone who lives in your home: their relationship to you and age', 'repeat', NULL, '[{"key":"relationship","label":"Relationship to you","type":"text"},{"key":"age","label":"Age","type":"number"}]', NULL, NULL, NULL, 'any', NULL, 'sensitive', FALSE, TRUE, FALSE),
+  ('hh.all_agree', 'household', 404, 'Does every adult in your home know you are applying and agree to the adoption?', 'yes_no', NULL, NULL, '{"when":[false],"label":"Please explain"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('hh.primary_caregiver', 'household', 405, 'Who will be the pet''s primary caregiver?', 'text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('hh.allergies', 'household', 406, 'Does anyone in your home have pet allergies or asthma?', 'yes_no', NULL, NULL, '{"when":[true],"label":"Please explain"}', NULL, NULL, 'any', NULL, 'sensitive', FALSE, TRUE, FALSE),
+  ('hh.children_experience', 'household', 407, 'Describe your children''s experience with pets and how you will supervise them together.', 'long_text', NULL, NULL, NULL, '{"question":"hh.children_count","gt":0}', NULL, 'any', NULL, 'sensitive', FALSE, FALSE, FALSE),
+  ('hh.visitors', 'household', 408, 'Who visits your home regularly?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('hh.pet_for', 'household', 409, 'Who is this pet for?', 'choice', '[{"value":"me","label":"Me"},{"value":"household","label":"My household"},{"value":"gift","label":"Someone else, as a gift"}]', NULL, '{"when":["gift"],"label":"Who is it for?"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  -- Housing & Landlord
+  ('hou.home_type', 'housing', 501, 'What type of home do you live in?', 'choice', '[{"value":"house","label":"House"},{"value":"townhouse","label":"Townhouse"},{"value":"apartment","label":"Apartment"},{"value":"condo","label":"Condo"},{"value":"duplex","label":"Duplex"},{"value":"mobile_home","label":"Mobile home"},{"value":"other","label":"Other"}]', NULL, '{"when":["other"],"label":"Please describe"}', NULL, NULL, 'any', NULL, 'normal', TRUE, TRUE, FALSE),
+  ('hou.own_rent', 'housing', 502, 'Do you own or rent your home?', 'choice', '[{"value":"own","label":"Own"},{"value":"rent","label":"Rent"},{"value":"family_other","label":"Live with family or other"}]', NULL, '{"when":["family_other"],"label":"Please describe"}', NULL, NULL, 'any', NULL, 'normal', TRUE, TRUE, FALSE),
+  ('hou.landlord_allows', 'housing', 503, 'Does your landlord allow this pet?', 'choice', '[{"value":"yes","label":"Yes"},{"value":"no","label":"No"},{"value":"not_asked","label":"Not asked yet"}]', NULL, NULL, '{"question":"hou.own_rent","in":["rent"]}', NULL, 'any', NULL, 'normal', TRUE, TRUE, FALSE),
+  ('hou.landlord_contact', 'housing', 504, 'Landlord or property manager: name and phone', 'contact', NULL, '[{"key":"name","label":"Name","type":"text"},{"key":"phone","label":"Phone","type":"phone"}]', NULL, '{"question":"hou.own_rent","in":["rent"]}', NULL, 'any', NULL, 'third_party', TRUE, TRUE, FALSE),
+  ('hou.restrictions', 'housing', 505, 'Does your landlord, HOA, or neighborhood have pet restrictions?', 'yes_no', NULL, NULL, '{"when":[true],"label":"Describe them (number of pets, size or weight, breeds, deposits or fees)"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('hou.insurance_breed', 'housing', 506, 'Does your homeowner''s or renter''s insurance restrict any breeds or sizes?', 'choice', '[{"value":"yes","label":"Yes"},{"value":"no","label":"No"},{"value":"dont_know","label":"Don''t know"}]', NULL, '{"when":["yes"],"label":"Please explain"}', NULL, NULL, 'dog', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('hou.breed_legislation', 'housing', 507, 'Does your city or county have breed-specific laws or restrictions?', 'choice', '[{"value":"yes","label":"Yes"},{"value":"no","label":"No"},{"value":"dont_know","label":"Don''t know"}]', NULL, '{"when":["yes"],"label":"Please explain"}', NULL, NULL, 'dog', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('hou.area_type', 'housing', 508, 'What type of area do you live in?', 'choice', '[{"value":"urban","label":"Urban"},{"value":"suburban","label":"Suburban"},{"value":"rural","label":"Rural"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('hou.time_at_address', 'housing', 509, 'How long have you lived at your current address?', 'choice', '[{"value":"under_1","label":"Under 1 year"},{"value":"1_3","label":"1 to 3 years"},{"value":"3_plus","label":"3 years or more"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('hou.moving_soon', 'housing', 510, 'Do you expect to move in the next 6 months?', 'yes_no', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('hou.neighbor_issues', 'housing', 511, 'Have you had any issues with neighbors about pets?', 'yes_no', NULL, NULL, '{"when":[true],"label":"Please explain"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  -- Yard & Containment
+  ('yrd.has_yard', 'yard', 601, 'Do you have a yard?', 'yes_no', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', TRUE, TRUE, FALSE),
+  ('yrd.fenced', 'yard', 602, 'Is your yard fenced?', 'choice', '[{"value":"fully","label":"Fully"},{"value":"partly","label":"Partly"},{"value":"no","label":"No"}]', NULL, NULL, '{"question":"yrd.has_yard","in":[true]}', NULL, 'any', NULL, 'normal', TRUE, TRUE, FALSE),
+  ('yrd.fence_details', 'yard', 603, 'Fence height and type (for example: 6 ft wood)', 'text', NULL, NULL, NULL, '{"question":"yrd.fenced","in":["fully","partly"]}', NULL, 'dog', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('yrd.other_containment', 'yard', 604, 'Do you use any other outdoor containment?', 'multi_choice', '[{"value":"none","label":"None"},{"value":"electric_fence","label":"Underground or electric fence"},{"value":"kennel_run","label":"Outdoor kennel or dog run"},{"value":"tie_out","label":"Tie-out or chain"},{"value":"other","label":"Other"}]', NULL, '{"when":["electric_fence","kennel_run","tie_out","other"],"label":"How would it be used?"}', NULL, NULL, 'dog', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('yrd.no_fence_plan', 'yard', 605, 'If you don''t have a fenced yard, how will the dog go outside?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'dog', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('yrd.outdoor_supervision', 'yard', 606, 'How will you supervise the pet''s time outdoors?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('yrd.indoor_outdoor', 'yard', 607, 'Will the pet live indoors, outdoors, or both?', 'choice', '[{"value":"indoors","label":"Indoors"},{"value":"outdoors","label":"Outdoors"},{"value":"both","label":"Both"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('yrd.cat_outdoor_access', 'yard', 608, 'Will your cat go outdoors?', 'choice', '[{"value":"never","label":"Never"},{"value":"enclosed","label":"Screened porch or catio only"},{"value":"supervised","label":"Supervised"},{"value":"free","label":"Free access"}]', NULL, '{"when":["supervised","free"],"label":"About how many hours a day?"}', NULL, NULL, 'cat', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('yrd.pet_door', 'yard', 609, 'Will the pet have access to a pet door?', 'choice', '[{"value":"yes","label":"Yes"},{"value":"no","label":"No"},{"value":"future","label":"In the future"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('yrd.window_screens', 'yard', 610, 'Do your windows have screens?', 'choice', '[{"value":"yes","label":"Yes"},{"value":"no","label":"No"},{"value":"some","label":"Some"}]', NULL, NULL, NULL, NULL, 'cat', NULL, 'normal', FALSE, TRUE, FALSE),
+  -- Current & Past Pets
+  ('pet.current', 'pets', 701, 'Pets living in your home now, including pets that belong to roommates or family', 'repeat', NULL, '[{"key":"name","label":"Name","type":"text"},{"key":"species","label":"Species","type":"text"},{"key":"breed","label":"Breed","type":"text"},{"key":"age","label":"Age","type":"text"},{"key":"sex","label":"Sex","type":"text"}]', NULL, NULL, NULL, 'any', NULL, 'normal', TRUE, FALSE, FALSE),
+  ('pet.current.spay_neuter', 'pets', 702, 'Is this pet spayed or neutered?', 'repeat_field', NULL, '[{"key":"spay_neuter","label":"Spayed or neutered?","type":"yes_no"},{"key":"spay_neuter_explain","label":"If not, why?","type":"text"}]', NULL, NULL, 'pet.current', 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('pet.current.vaccines', 'pets', 703, 'Is this pet current on vaccinations?', 'repeat_field', NULL, '[{"key":"vaccines","label":"Current on vaccinations?","type":"yes_no"},{"key":"vaccines_explain","label":"If not, why?","type":"text"}]', NULL, NULL, 'pet.current', 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('pet.current.heartworm', 'pets', 704, 'Is this dog on heartworm prevention?', 'repeat_field', NULL, '[{"key":"heartworm","label":"On heartworm prevention?","type":"yes_no"},{"key":"heartworm_explain","label":"If not, why?","type":"text"}]', NULL, NULL, 'pet.current', 'dog', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('pet.current.microchip', 'pets', 705, 'Is this pet microchipped?', 'repeat_field', NULL, '[{"key":"microchip","label":"Microchipped?","type":"yes_no"}]', NULL, NULL, 'pet.current', 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('pet.current.declawed', 'pets', 706, 'Is this cat declawed?', 'repeat_field', NULL, '[{"key":"declawed","label":"Declawed?","type":"yes_no"}]', NULL, NULL, 'pet.current', 'cat', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('pet.current.details', 'pets', 707, 'How long you''ve had this pet and where it''s kept', 'repeat_field', NULL, '[{"key":"how_long","label":"How long you''ve had them","type":"text"},{"key":"where_kept","label":"Where kept (indoors, outdoors, both)","type":"text"}]', NULL, NULL, 'pet.current', 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('pet.current.food', 'pets', 708, 'Type and brand of food', 'repeat_field', NULL, '[{"key":"food","label":"Food type and brand","type":"text"}]', NULL, NULL, 'pet.current', 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('pet.current_adjust', 'pets', 709, 'How do you think your current pets will adjust to a new pet?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('pet.past', 'pets', 710, 'Pets you''ve owned in the past 5 years that no longer live with you', 'repeat', NULL, '[{"key":"name","label":"Name","type":"text"},{"key":"species","label":"Species","type":"text"},{"key":"age","label":"Age","type":"text"},{"key":"when_left","label":"When they left","type":"text"},{"key":"outcome","label":"What happened","type":"choice","choices":[{"value":"died","label":"Died"},{"value":"rehomed","label":"Rehomed"},{"value":"returned","label":"Returned to a rescue or shelter"},{"value":"lost","label":"Lost"},{"value":"other","label":"Other"}]},{"key":"explain","label":"Please explain (if died, the cause if known)","type":"text"}]', NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('pet.ever_given_up', 'pets', 711, 'Have you ever given up, rehomed, or returned a pet?', 'yes_no', NULL, NULL, '{"when":[true],"label":"What happened, what you tried first, and where the pet went"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('pet.euthanized_non_medical', 'pets', 712, 'Have you ever had a pet euthanized for reasons other than illness or old age?', 'yes_no', NULL, NULL, '{"when":[true],"label":"Please explain"}', NULL, NULL, 'any', NULL, 'sensitive', FALSE, TRUE, FALSE),
+  ('pet.adopted_before', 'pets', 713, 'Have you adopted from a rescue or shelter before?', 'yes_no', NULL, NULL, '{"when":[true],"label":"Which group(s)?"}', NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('pet.moved_with_pets', 'pets', 714, 'Have you moved with pets before? What happened?', 'choice', '[{"value":"not_moved","label":"Haven''t moved with pets"},{"value":"took_with","label":"Took them with me"},{"value":"gave_family","label":"Gave to friend or family"},{"value":"shelter","label":"Took to a shelter"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  -- Veterinarian
+  ('vet.contact', 'vet', 801, 'Current or previous veterinarian or clinic: name and phone', 'contact', NULL, '[{"key":"name","label":"Vet or clinic name","type":"text"},{"key":"phone","label":"Phone","type":"phone"},{"key":"no_vet","label":"I don''t have a vet","type":"yes_no"}]', NULL, NULL, NULL, 'any', NULL, 'third_party', TRUE, TRUE, FALSE),
+  ('vet.how_long', 'vet', 802, 'How long have you used this vet?', 'text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('vet.need_help', 'vet', 803, 'If you don''t have a vet, would you like help finding one?', 'yes_no', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  -- References
+  ('ref.personal', 'references', 901, 'Personal references who can speak about you as a pet owner or caregiver', 'repeat', NULL, '[{"key":"name","label":"Name","type":"text"},{"key":"phone","label":"Phone","type":"phone"},{"key":"relationship","label":"Relationship to you","type":"text"},{"key":"years_known","label":"How long they''ve known you","type":"text"}]', NULL, NULL, NULL, 'any', NULL, 'third_party', FALSE, TRUE, FALSE),
+  -- Lifestyle & Schedule
+  ('lif.hours_alone', 'lifestyle', 1001, 'On a typical day, how many hours will the pet be home alone?', 'number', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('lif.where_when_away', 'lifestyle', 1002, 'Where will the pet stay when nobody is home?', 'choice', '[{"value":"loose","label":"Loose in the house"},{"value":"one_room","label":"One room"},{"value":"crate","label":"Crate"},{"value":"yard","label":"Yard"},{"value":"garage","label":"Garage"},{"value":"other","label":"Other"}]', NULL, '{"when":["other"],"label":"Please describe"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('lif.sleep', 'lifestyle', 1003, 'Where will the pet sleep at night?', 'choice', '[{"value":"bedroom","label":"Bedroom"},{"value":"elsewhere_inside","label":"Elsewhere in the house"},{"value":"crate","label":"Crate"},{"value":"garage","label":"Garage"},{"value":"outdoors","label":"Outdoors"},{"value":"other","label":"Other"}]', NULL, '{"when":["other"],"label":"Please describe"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('lif.schedule', 'lifestyle', 1004, 'Describe your work or school schedule, including whether you work from home and how long you''re usually away', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.employment_status', 'lifestyle', 1005, 'Employment status', 'choice', '[{"value":"full_time","label":"Full-time"},{"value":"part_time","label":"Part-time"},{"value":"self_employed","label":"Self-employed or work from home"},{"value":"student","label":"Student"},{"value":"retired","label":"Retired"},{"value":"not_employed","label":"Not employed"},{"value":"other","label":"Other"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'sensitive', FALSE, FALSE, FALSE),
+  ('lif.employer', 'lifestyle', 1006, 'Employer or school, and occupation', 'text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'sensitive', FALSE, FALSE, FALSE),
+  ('lif.typical_day', 'lifestyle', 1007, 'What would a typical day look like with your pet?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.activity_level', 'lifestyle', 1008, 'How active is your home?', 'choice', '[{"value":"very","label":"Very active"},{"value":"moderate","label":"Moderately active"},{"value":"quiet","label":"Quiet"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.lifestyle', 'lifestyle', 1009, 'Describe your lifestyle (for example: travel, stay-at-home parent, retired, active)', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.exercise', 'lifestyle', 1010, 'How will you exercise the dog, and how often?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'dog', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.furniture', 'lifestyle', 1011, 'Will the pet be allowed on furniture?', 'choice', '[{"value":"yes","label":"Yes"},{"value":"no","label":"No"},{"value":"some","label":"Some furniture"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.care_when_away', 'lifestyle', 1012, 'Who will care for the pet when you travel?', 'choice', '[{"value":"family_friend","label":"Family or friend"},{"value":"sitter","label":"Pet sitter"},{"value":"boarding","label":"Boarding"},{"value":"travels_with_me","label":"Travels with me"},{"value":"other","label":"Other"}]', NULL, '{"when":["other"],"label":"Please describe"}', NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.emergency_plan', 'lifestyle', 1013, 'What arrangements will you make for the pet in an emergency?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.moving_plan', 'lifestyle', 1014, 'If you move, what will you do with the pet?', 'choice', '[{"value":"moves_with_me","label":"The pet moves with me"},{"value":"not_sure","label":"Not sure"},{"value":"other","label":"Other"}]', NULL, '{"when":["not_sure","other"],"label":"Please describe"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('lif.future_changes', 'lifestyle', 1015, 'Any major life changes you expect in the next 5 to 10 years (moving, children, career)?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.costs_responsible', 'lifestyle', 1016, 'Who in your household pays for vet care, emergencies, food, training, and grooming?', 'text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.budget', 'lifestyle', 1017, 'Basic care for a pet can cost $1,000 or more a year, not including emergencies. Are you able to take on that cost?', 'yes_no', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'sensitive', FALSE, TRUE, FALSE),
+  ('lif.truck_bed', 'lifestyle', 1018, 'If you drive a pickup truck, would the dog ride in the bed?', 'choice', '[{"value":"yes","label":"Yes"},{"value":"no","label":"No"},{"value":"no_truck","label":"I don''t have a truck"}]', NULL, NULL, NULL, NULL, 'dog', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('lif.litter_box', 'lifestyle', 1019, 'Where will the litter box be kept?', 'text', NULL, NULL, NULL, NULL, NULL, 'cat', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.declaw_plan', 'lifestyle', 1020, 'Are you planning to declaw?', 'choice', '[{"value":"yes","label":"Yes"},{"value":"no","label":"No"},{"value":"unsure","label":"Unsure"}]', NULL, '{"when":["yes","unsure"],"label":"Please explain why"}', NULL, NULL, 'cat', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('lif.food_plan', 'lifestyle', 1021, 'What food do you plan to feed?', 'text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.reason_adopting', 'lifestyle', 1022, 'Main reason you want a pet', 'multi_choice', '[{"value":"companion","label":"Companion"},{"value":"exercise_buddy","label":"Exercise buddy"},{"value":"lap_pet","label":"Lap pet"},{"value":"companion_for_pet","label":"Companion for another pet"},{"value":"working","label":"Working or hunting dog"},{"value":"assistance","label":"Service or emotional support animal"},{"value":"other","label":"Other"}]', NULL, '{"when":["other"],"label":"Please describe"}', NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.looking_for', 'lifestyle', 1023, 'What personality and traits are you looking for?', 'multi_choice', '[{"value":"active","label":"Active"},{"value":"mellow","label":"Mellow"},{"value":"playful","label":"Playful"},{"value":"affectionate","label":"Affectionate"},{"value":"lap_loving","label":"Lap-loving"},{"value":"good_with_dogs","label":"Good with dogs"},{"value":"good_with_cats","label":"Good with cats"},{"value":"good_with_kids","label":"Good with kids"},{"value":"single_pet","label":"Single-pet home"},{"value":"shy","label":"Shy, needs a friend"},{"value":"other","label":"Other"}]', NULL, '{"when":["other"],"label":"Please describe"}', NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.preferences', 'lifestyle', 1024, 'Preferred size, age, and sex', 'group', NULL, '[{"key":"size","label":"Size","type":"choice","choices":[{"value":"small","label":"Small"},{"value":"medium","label":"Medium"},{"value":"large","label":"Large"},{"value":"extra_large","label":"Extra large"},{"value":"no_preference","label":"No preference"}]},{"key":"age","label":"Age","type":"choice","choices":[{"value":"baby","label":"Baby"},{"value":"young","label":"Young"},{"value":"adult","label":"Adult"},{"value":"senior","label":"Senior"},{"value":"no_preference","label":"No preference"}]},{"key":"sex","label":"Sex","type":"choice","choices":[{"value":"male","label":"Male"},{"value":"female","label":"Female"},{"value":"no_preference","label":"No preference"}]}]', NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('lif.assistance_role', 'lifestyle', 1025, 'Will this pet need to be trained as a service animal or emotional support animal?', 'choice', '[{"value":"no","label":"No"},{"value":"service","label":"Service animal"},{"value":"esa","label":"Emotional support animal"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'sensitive', FALSE, FALSE, FALSE),
+  ('lif.anything_else', 'lifestyle', 1026, 'Anything else we should know?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, TRUE),
+  -- Training & Experience
+  ('trn.experience_level', 'training', 1101, 'Your experience with this kind of pet', 'choice', '[{"value":"beginner","label":"Beginner: my first one as an adult"},{"value":"moderate","label":"Moderate: 1 or 2 as an adult, some basic training"},{"value":"advanced","label":"Advanced: several, including behavior challenges"},{"value":"raised_young","label":"I have raised puppies or kittens"}]', NULL, '{"always":true,"label":"Describe your experience"}', NULL, NULL, 'any', NULL, 'normal', TRUE, FALSE, FALSE),
+  ('trn.decompression', 'training', 1102, 'How long do you expect to give a newly adopted pet to settle in (decompress)?', 'choice', '[{"value":"few_days","label":"A few days"},{"value":"1_2_weeks","label":"1 to 2 weeks"},{"value":"3_4_weeks","label":"3 to 4 weeks"},{"value":"1_3_months","label":"1 to 3 months"},{"value":"as_long_as_it_takes","label":"As long as it takes"}]', NULL, '{"always":true,"label":"Anything you would like to add?"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('trn.adjustment_signs', 'training', 1103, 'What changes in behavior would you consider normal while the pet adjusts, and when would you seek help?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('trn.crate', 'training', 1104, 'What is your experience with crate training, and how will you use a crate?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'dog', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('trn.house_training', 'training', 1105, 'How would you handle house-training, accidents, or regression?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('trn.destructive', 'training', 1106, 'How would you handle destructive behavior?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('trn.behavior_plan', 'training', 1107, 'If a behavior problem comes up that is difficult for your household, what would you do?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('trn.methods', 'training', 1108, 'What training methods and tools would you use, and any you would not? Would you work with a trainer or behavior professional if needed?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('trn.obedience_class', 'training', 1109, 'If you plan to take an obedience class, where?', 'text', NULL, NULL, NULL, NULL, NULL, 'dog', NULL, 'normal', FALSE, FALSE, TRUE),
+  ('trn.hard_behaviors', 'training', 1110, 'Which pet behaviors would be hardest for you to live with?', 'multi_choice', '[{"value":"barking","label":"Barking"},{"value":"chewing","label":"Chewing"},{"value":"house_soiling","label":"House-soiling"},{"value":"jumping","label":"Jumping"},{"value":"fear","label":"Shyness or fear"},{"value":"separation_anxiety","label":"Separation anxiety"},{"value":"scratching","label":"Scratching furniture"},{"value":"other_pets","label":"Not good with other pets"},{"value":"other","label":"Other"}]', NULL, '{"when":["other"],"label":"Please describe"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('trn.want_to_learn', 'training', 1111, 'I would like to learn more about…', 'multi_choice', '[{"value":"crate_training","label":"Crate training"},{"value":"house_training","label":"House training"},{"value":"litter_box","label":"Litter box training"},{"value":"finding_vet","label":"Finding a vet"},{"value":"heartworm","label":"Heartworm"},{"value":"obedience","label":"Obedience training"},{"value":"pet_insurance","label":"Pet insurance"},{"value":"new_pet_care","label":"Caring for my new pet"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, TRUE),
+  ('trn.ready_when', 'training', 1112, 'How soon are you ready to bring your new pet home?', 'choice', '[{"value":"now","label":"Right away"},{"value":"2_weeks","label":"Within 2 weeks"},{"value":"month","label":"Within a month"},{"value":"flexible","label":"Flexible"}]', NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  -- Scenarios
+  ('scn.give_up_reasons', 'scenarios', 1201, 'What would make you consider giving up or returning a pet?', 'multi_choice', '[{"value":"destructive","label":"Chewing or destructive"},{"value":"not_house_trained","label":"Not house-trained"},{"value":"medical","label":"Medical issues"},{"value":"other_pets","label":"Not getting along with other pets"},{"value":"children","label":"Not good with children"},{"value":"escaping","label":"Escaping"},{"value":"moving","label":"Moving"},{"value":"too_big","label":"Pet gets too big"},{"value":"new_baby","label":"New baby"},{"value":"landlord","label":"Landlord issues"},{"value":"allergies","label":"Allergies"},{"value":"bite","label":"Bit someone"},{"value":"nothing","label":"Nothing"},{"value":"other","label":"Other"}]', NULL, '{"always":true,"label":"Please be specific"}', NULL, NULL, 'any', NULL, 'normal', FALSE, TRUE, FALSE),
+  ('scn.growl_child', 'scenarios', 1202, 'Two weeks in, your dog growls when a child pulls its ears. What would you do?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'dog', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('scn.rough_start', 'scenarios', 1203, 'Three weeks in, the pet has had accidents, chewed something valuable, and still isn''t settled. How would you handle it?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('scn.life_change', 'scenarios', 1204, 'If your living situation or household changed (move, new baby, marriage or divorce, job change, deployment), what would you do with your pet?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('scn.unexpected_behavior', 'scenarios', 1205, 'The pet shows a behavior you didn''t expect (barking, fear, resource guarding, separation anxiety, trouble with another pet). What would you do first?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('scn.vet_bill', 'scenarios', 1206, 'Your vet recommends an unexpected treatment costing $1,000 to $2,000. How would you approach it?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('scn.frustration', 'scenarios', 1207, 'Tell us about a time a pet frustrated or surprised you. What happened and how did you handle it?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('scn.resource_guarding', 'scenarios', 1208, 'Your dog growls when you take away a toy, food, or other valued item. What would you do?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'dog', NULL, 'normal', FALSE, FALSE, FALSE),
+  ('scn.bite', 'scenarios', 1209, 'Your pet bites or tries to bite a person or another animal. What would you do next?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', NULL, 'normal', FALSE, FALSE, FALSE),
+  -- Pet-specific (shown only for pets the rescue has tagged)
+  ('pts.sight.stairs', 'pet_specific', 1301, 'Are there stairs in your home? What kind?', 'choice', '[{"value":"none","label":"No stairs"},{"value":"carpeted","label":"Carpeted"},{"value":"hard","label":"Hard surface"},{"value":"open_back","label":"Open-back"}]', NULL, NULL, NULL, NULL, 'dog', 'sighthound', 'normal', FALSE, FALSE, FALSE),
+  ('pts.sight.water', 'pet_specific', 1302, 'Is there a swimming pool or open water on or next to your property?', 'yes_no', NULL, NULL, '{"when":[true],"label":"Is it fenced off? Please describe"}', NULL, NULL, 'dog', 'sighthound', 'normal', FALSE, TRUE, FALSE),
+  ('pts.sight.crate_muzzle', 'pet_specific', 1303, 'Are you willing to use a crate or muzzle during the adjustment period?', 'yes_no', NULL, NULL, '{"when":[false],"label":"Please explain"}', NULL, NULL, 'dog', 'sighthound', 'normal', FALSE, TRUE, FALSE),
+  ('pts.sight.leash_only', 'pet_specific', 1304, 'Do you understand this dog must always be on a leash or in a fully fenced area?', 'yes_no', NULL, NULL, NULL, NULL, NULL, 'dog', 'sighthound', 'normal', FALSE, TRUE, FALSE),
+  ('pts.bully.dog_intros', 'pet_specific', 1311, 'How would you introduce this dog to other dogs, and would you use dog parks?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'dog', 'bully_breed', 'normal', FALSE, FALSE, FALSE),
+  ('pts.bully.public', 'pet_specific', 1312, 'How would you handle neighbors or strangers who are nervous about this type of dog?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'dog', 'bully_breed', 'normal', FALSE, FALSE, FALSE),
+  ('pts.large.vehicle', 'pet_specific', 1321, 'Do you have a vehicle that fits a large dog for vet visits?', 'yes_no', NULL, NULL, NULL, NULL, NULL, 'dog', 'large_dog', 'normal', FALSE, TRUE, FALSE),
+  ('pts.large.handling', 'pet_specific', 1322, 'Can everyone who will walk this dog handle a strong puller?', 'yes_no', NULL, NULL, '{"when":[false],"label":"Please explain"}', NULL, NULL, 'dog', 'large_dog', 'normal', FALSE, TRUE, FALSE),
+  ('pts.escape.doors', 'pet_specific', 1331, 'How will you keep the pet from slipping out of doors and gates?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', 'escape_risk', 'normal', FALSE, FALSE, FALSE),
+  ('pts.senior.costs', 'pet_specific', 1341, 'Are you prepared for higher vet costs as this pet ages?', 'yes_no', NULL, NULL, NULL, NULL, NULL, 'any', 'senior', 'normal', FALSE, TRUE, FALSE),
+  ('pts.senior.mobility', 'pet_specific', 1342, 'Will the pet need to use stairs to go outside or reach where it sleeps?', 'yes_no', NULL, NULL, '{"when":[true],"label":"Please describe"}', NULL, NULL, 'any', 'senior', 'normal', FALSE, FALSE, FALSE),
+  ('pts.senior.end_of_life', 'pet_specific', 1343, 'Are you prepared to care for this pet through the end of its life?', 'yes_no', NULL, NULL, '{"when":[false],"label":"Please explain"}', NULL, NULL, 'any', 'senior', 'normal', FALSE, TRUE, FALSE),
+  ('pts.medical.medication', 'pet_specific', 1351, 'Can you give daily medication, including pills or injections?', 'yes_no', NULL, NULL, '{"when":[false],"label":"Please explain"}', NULL, NULL, 'any', 'special_needs', 'normal', FALSE, TRUE, FALSE),
+  ('pts.medical.budget', 'pet_specific', 1352, 'Can you budget for this pet''s ongoing medical care?', 'yes_no', NULL, NULL, NULL, NULL, NULL, 'any', 'special_needs', 'normal', FALSE, TRUE, FALSE),
+  ('pts.medical.routine', 'pet_specific', 1353, 'Who will follow the pet''s care routine (feeding, medication, appointments) day to day?', 'long_text', NULL, NULL, NULL, NULL, NULL, 'any', 'special_needs', 'normal', FALSE, FALSE, FALSE)
+ON CONFLICT (id) DO UPDATE SET
+  category = EXCLUDED.category,
+  sort_order = EXCLUDED.sort_order,
+  wording = EXCLUDED.wording,
+  answer_type = EXCLUDED.answer_type,
+  choices = EXCLUDED.choices,
+  fields = EXCLUDED.fields,
+  follow_up = EXCLUDED.follow_up,
+  show_if = EXCLUDED.show_if,
+  parent_id = EXCLUDED.parent_id,
+  species = EXCLUDED.species,
+  pet_tag = EXCLUDED.pet_tag,
+  sensitivity = EXCLUDED.sensitivity,
+  is_locked = EXCLUDED.is_locked,
+  is_flaggable = EXCLUDED.is_flaggable,
+  always_optional = EXCLUDED.always_optional;
+
+-- Today's adopter_profiles row → saved answers. Value shapes are documented in
+-- features/core-features/049-configurable-application/plan.md.
+CREATE OR REPLACE FUNCTION adopter_profile_answers(p adopter_profiles)
+RETURNS TABLE (question_id TEXT, value JSONB)
+LANGUAGE sql
+IMMUTABLE
+SET search_path = public
+AS $$
+  SELECT m.question_id, m.value
+  FROM (VALUES
+    ('con.full_name', to_jsonb(NULLIF(btrim(p.full_name), ''))),
+    ('con.phone', CASE WHEN NULLIF(btrim(p.phone), '') IS NULL THEN NULL
+      ELSE jsonb_build_object('number', btrim(p.phone)) END),
+    ('con.address', NULLIF(jsonb_strip_nulls(jsonb_build_object(
+      'street', NULLIF(btrim(p.address_line), ''),
+      'city', NULLIF(btrim(p.city), ''),
+      'state', NULLIF(btrim(p.state), ''),
+      'zip', NULLIF(btrim(p.zip), ''))), '{}'::jsonb)),
+    ('hou.home_type', to_jsonb(CASE p.housing_type
+      WHEN 'own_house' THEN 'house'
+      WHEN 'rent_house' THEN 'house'
+      WHEN 'own_condo' THEN 'condo'
+      WHEN 'rent_apartment' THEN 'apartment'
+      WHEN 'other' THEN 'other' END)),
+    ('hou.own_rent', to_jsonb(CASE
+      WHEN p.housing_type LIKE 'own\_%' THEN 'own'
+      WHEN p.housing_type LIKE 'rent\_%' THEN 'rent' END)),
+    ('hou.landlord_allows', to_jsonb(CASE p.landlord_approval
+      WHEN TRUE THEN 'yes' WHEN FALSE THEN 'no' END)),
+    ('hou.landlord_contact', CASE WHEN NULLIF(btrim(p.landlord_contact), '') IS NULL THEN NULL
+      ELSE jsonb_build_object('note', btrim(p.landlord_contact)) END),
+    ('yrd.has_yard', to_jsonb(p.has_yard)),
+    ('yrd.fenced', to_jsonb(CASE p.yard_fenced
+      WHEN TRUE THEN 'fully' WHEN FALSE THEN 'no' END)),
+    ('hh.adults_count', to_jsonb(p.household_adults)),
+    ('hh.children_count', to_jsonb(p.household_children)),
+    ('pet.current', CASE WHEN NULLIF(btrim(p.other_pets), '') IS NULL THEN NULL
+      ELSE jsonb_build_object('rows', '[]'::jsonb, 'legacy_note', btrim(p.other_pets)) END),
+    ('vet.contact', NULLIF(jsonb_strip_nulls(jsonb_build_object(
+      'name', NULLIF(btrim(p.vet_name), ''),
+      'phone', NULLIF(btrim(p.vet_phone), ''))), '{}'::jsonb)),
+    ('trn.experience_level', CASE WHEN NULLIF(btrim(p.experience), '') IS NULL THEN NULL
+      ELSE jsonb_build_object('level', NULL::text, 'describe', btrim(p.experience)) END)
+  ) AS m(question_id, value)
+  WHERE m.value IS NOT NULL;
+$$;
+
+COMMENT ON FUNCTION adopter_profile_answers(adopter_profiles) IS
+  'Maps today''s universal-application columns to bank question ids (#337). Blank columns produce no answer.';
+
+-- While the legacy form is the only writer, every profile save refreshes the
+-- mapped saved answers (and clears ones whose column was blanked).
+CREATE OR REPLACE FUNCTION sync_adopter_profile_answers()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  DELETE FROM adopter_answers a
+  WHERE a.adopter_id = NEW.id
+    AND a.question_id = ANY (ARRAY[
+      'con.full_name', 'con.phone', 'con.address', 'hou.home_type',
+      'hou.own_rent', 'hou.landlord_allows', 'hou.landlord_contact',
+      'yrd.has_yard', 'yrd.fenced', 'hh.adults_count', 'hh.children_count',
+      'pet.current', 'vet.contact', 'trn.experience_level'])
+    AND NOT EXISTS (
+      SELECT 1 FROM adopter_profile_answers(NEW) m
+      WHERE m.question_id = a.question_id
+    );
+
+  INSERT INTO adopter_answers (adopter_id, question_id, value)
+  SELECT NEW.id, m.question_id, m.value
+  FROM adopter_profile_answers(NEW) m
+  ON CONFLICT (adopter_id, question_id) DO UPDATE
+    SET value = EXCLUDED.value
+    WHERE adopter_answers.value IS DISTINCT FROM EXCLUDED.value;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS sync_adopter_profile_answers ON adopter_profiles;
+CREATE TRIGGER sync_adopter_profile_answers
+  AFTER INSERT OR UPDATE ON adopter_profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION sync_adopter_profile_answers();
+
+-- One-time carry-over of every existing profile. DO NOTHING keeps any answer
+-- already saved, so re-running the migration never overwrites newer answers.
+INSERT INTO adopter_answers (adopter_id, question_id, value)
+SELECT p.id, m.question_id, m.value
+FROM adopter_profiles p
+CROSS JOIN LATERAL adopter_profile_answers(p) m
+ON CONFLICT (adopter_id, question_id) DO NOTHING;
+
+-- The rescue's questions for this pet, with the adopter's answers. Repeat
+-- answers (current pets) keep only the row fields the rescue asked for.
+CREATE OR REPLACE FUNCTION build_application_answers_snapshot(
+  p_adopter UUID,
+  p_shelter UUID,
+  p_pet UUID,
+  p_why TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_species TEXT;
+  v_pet_name TEXT;
+  v_email TEXT;
+  v_result JSONB;
+BEGIN
+  SELECT species, name INTO v_species, v_pet_name FROM pets WHERE id = p_pet;
+  SELECT email INTO v_email FROM auth.users WHERE id = p_adopter;
+
+  WITH selected AS (
+    SELECT q.*
+    FROM application_questions q
+    WHERE q.retired_at IS NULL
+      AND q.pet_tag IS NULL
+      AND (q.species = 'any' OR q.species = v_species)
+      AND (
+        q.is_locked
+        OR EXISTS (
+          SELECT 1 FROM shelter_application_questions s
+          WHERE s.shelter_id = p_shelter
+            AND s.question_id = q.id
+            AND s.shown
+        )
+      )
+  ),
+  repeat_fields AS (
+    SELECT parent.id AS question_id,
+           COALESCE(parent.fields, '[]'::jsonb) || COALESCE((
+             SELECT jsonb_agg(f ORDER BY child.sort_order)
+             FROM selected child
+             CROSS JOIN LATERAL jsonb_array_elements(child.fields) f
+             WHERE child.parent_id = parent.id
+           ), '[]'::jsonb) AS fields
+    FROM selected parent
+    WHERE parent.answer_type = 'repeat'
+  ),
+  valued AS (
+    SELECT q.id, q.category, q.sort_order, q.wording, q.answer_type, q.choices,
+           COALESCE(rf.fields, q.fields) AS fields,
+           rf.fields AS allowed_fields,
+           CASE
+             WHEN q.id = 'app.pet_interest' THEN
+               CASE WHEN v_pet_name IS NULL THEN NULL
+                 ELSE jsonb_build_object('pet_id', p_pet, 'name', v_pet_name) END
+             WHEN q.id = 'app.why_this_pet' THEN to_jsonb(NULLIF(btrim(p_why), ''))
+             WHEN q.id = 'con.email' THEN to_jsonb(v_email)
+             WHEN q.category = 'application' THEN NULL
+             ELSE a.value
+           END AS raw_value
+    FROM selected q
+    LEFT JOIN repeat_fields rf ON rf.question_id = q.id
+    LEFT JOIN adopter_answers a
+      ON a.adopter_id = p_adopter AND a.question_id = q.id
+    WHERE q.parent_id IS NULL
+  )
+  SELECT COALESCE(jsonb_agg(jsonb_build_object(
+           'question_id', v.id,
+           'category', v.category,
+           'wording', v.wording,
+           'answer_type', v.answer_type,
+           'choices', v.choices,
+           'fields', v.fields,
+           'value', CASE
+             WHEN v.allowed_fields IS NOT NULL
+                  AND jsonb_typeof(v.raw_value -> 'rows') = 'array' THEN
+               jsonb_set(v.raw_value, '{rows}', COALESCE((
+                 SELECT jsonb_agg(COALESCE((
+                   SELECT jsonb_object_agg(e.key, e.value)
+                   FROM jsonb_each(r) e
+                   WHERE e.key IN (
+                     SELECT af ->> 'key'
+                     FROM jsonb_array_elements(v.allowed_fields) af
+                   )
+                 ), '{}'::jsonb))
+                 FROM jsonb_array_elements(v.raw_value -> 'rows') r
+               ), '[]'::jsonb))
+             ELSE v.raw_value
+           END
+         ) ORDER BY v.sort_order), '[]'::jsonb)
+  INTO v_result
+  FROM valued v;
+
+  RETURN v_result;
+END;
+$$;
+
+COMMENT ON FUNCTION build_application_answers_snapshot(UUID, UUID, UUID, TEXT) IS
+  'Principle III (#337): locked + rescue-shown questions for the pet''s species, with the adopter''s answers. The only path by which saved answers reach a rescue.';
+
+REVOKE ALL ON FUNCTION build_application_answers_snapshot(UUID, UUID, UUID, TEXT) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION adopter_profile_answers(adopter_profiles) FROM PUBLIC, anon, authenticated;
+
+-- Always overwrite: a client cannot add, drop, or edit snapshot answers.
+-- A failure must never block a submission; the legacy profile_snapshot is
+-- still written by the client, so the warning path loses nothing.
+CREATE OR REPLACE FUNCTION set_application_answers_snapshot()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  BEGIN
+    NEW.answers_snapshot := build_application_answers_snapshot(
+      NEW.adopter_id, NEW.shelter_id, NEW.pet_id, NEW.why_this_pet);
+  EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'answers_snapshot build failed for application %: %', NEW.id, SQLERRM;
+    NEW.answers_snapshot := NULL;
+  END;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS set_application_answers_snapshot ON applications;
+CREATE TRIGGER set_application_answers_snapshot
+  BEFORE INSERT ON applications
+  FOR EACH ROW
+  EXECUTE FUNCTION set_application_answers_snapshot();
+
 -- ─── Realtime: live status tracker ──────────────────────────────────────────
 -- REPLICA IDENTITY FULL is required for Realtime UPDATE events; publication
 -- membership is required for postgres_changes delivery. Events respect the

@@ -14,6 +14,35 @@ export type Database = {
   };
   public: {
     Tables: {
+      adopter_answers: {
+        Row: {
+          adopter_id: string;
+          question_id: string;
+          updated_at: string;
+          value: Json;
+        };
+        Insert: {
+          adopter_id: string;
+          question_id: string;
+          updated_at?: string;
+          value: Json;
+        };
+        Update: {
+          adopter_id?: string;
+          question_id?: string;
+          updated_at?: string;
+          value?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'adopter_answers_question_id_fkey';
+            columns: ['question_id'];
+            isOneToOne: false;
+            referencedRelation: 'application_questions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       adopter_profiles: {
         Row: {
           address_line: string | null;
@@ -83,6 +112,77 @@ export type Database = {
         };
         Relationships: [];
       };
+      application_questions: {
+        Row: {
+          always_optional: boolean;
+          answer_type: string;
+          category: string;
+          choices: Json | null;
+          created_at: string;
+          fields: Json | null;
+          follow_up: Json | null;
+          id: string;
+          is_flaggable: boolean;
+          is_locked: boolean;
+          parent_id: string | null;
+          pet_tag: string | null;
+          retired_at: string | null;
+          sensitivity: string;
+          show_if: Json | null;
+          sort_order: number;
+          species: string;
+          wording: string;
+        };
+        Insert: {
+          always_optional?: boolean;
+          answer_type: string;
+          category: string;
+          choices?: Json | null;
+          created_at?: string;
+          fields?: Json | null;
+          follow_up?: Json | null;
+          id: string;
+          is_flaggable?: boolean;
+          is_locked?: boolean;
+          parent_id?: string | null;
+          pet_tag?: string | null;
+          retired_at?: string | null;
+          sensitivity?: string;
+          show_if?: Json | null;
+          sort_order: number;
+          species?: string;
+          wording: string;
+        };
+        Update: {
+          always_optional?: boolean;
+          answer_type?: string;
+          category?: string;
+          choices?: Json | null;
+          created_at?: string;
+          fields?: Json | null;
+          follow_up?: Json | null;
+          id?: string;
+          is_flaggable?: boolean;
+          is_locked?: boolean;
+          parent_id?: string | null;
+          pet_tag?: string | null;
+          retired_at?: string | null;
+          sensitivity?: string;
+          show_if?: Json | null;
+          sort_order?: number;
+          species?: string;
+          wording?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'application_questions_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'application_questions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       application_status_history: {
         Row: {
           application_id: string;
@@ -124,6 +224,7 @@ export type Database = {
       applications: {
         Row: {
           adopter_id: string;
+          answers_snapshot: Json | null;
           created_at: string;
           id: string;
           pet_id: string;
@@ -135,6 +236,7 @@ export type Database = {
         };
         Insert: {
           adopter_id: string;
+          answers_snapshot?: Json | null;
           created_at?: string;
           id?: string;
           pet_id: string;
@@ -146,6 +248,7 @@ export type Database = {
         };
         Update: {
           adopter_id?: string;
+          answers_snapshot?: Json | null;
           created_at?: string;
           id?: string;
           pet_id?: string;
@@ -822,6 +925,42 @@ export type Database = {
           window_start?: string;
         };
         Relationships: [];
+      };
+      shelter_application_questions: {
+        Row: {
+          question_id: string;
+          shelter_id: string;
+          shown: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          question_id: string;
+          shelter_id: string;
+          shown?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          question_id?: string;
+          shelter_id?: string;
+          shown?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'shelter_application_questions_question_id_fkey';
+            columns: ['question_id'];
+            isOneToOne: false;
+            referencedRelation: 'application_questions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'shelter_application_questions_shelter_id_fkey';
+            columns: ['shelter_id'];
+            isOneToOne: false;
+            referencedRelation: 'shelters';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       shelter_members: {
         Row: {

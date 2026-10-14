@@ -29,6 +29,7 @@ const baseApplication: ApplicationWithPet = {
   shelter_id: 'shelter-springfield',
   status: 'under_review',
   profile_snapshot: profileSnapshot,
+  answers_snapshot: null,
   why_this_pet: 'Biscuit looks like the perfect trail buddy for our family.',
   status_changed_at: new Date(Date.now() - 3 * 3_600_000).toISOString(),
   created_at: new Date(Date.now() - 2 * 86_400_000).toISOString(),
