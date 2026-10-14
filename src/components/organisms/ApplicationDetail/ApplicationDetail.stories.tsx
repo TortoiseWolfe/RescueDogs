@@ -91,6 +91,7 @@ const renterApplication: ApplicationWithPetAndHistory = {
   shelter_id: 'shelter-1',
   status: 'home_visit',
   profile_snapshot: renterSnapshot,
+  answers_snapshot: null,
   why_this_pet:
     'Bella matches our active household — we hike every weekend and want a smart, busy dog.',
   status_changed_at: '2026-06-05T16:00:00Z',
@@ -129,6 +130,7 @@ const ownerApplication: ApplicationWithPetAndHistory = {
   shelter_id: 'shelter-1',
   status: 'submitted',
   profile_snapshot: ownerSparseSnapshot,
+  answers_snapshot: null,
   why_this_pet: null,
   status_changed_at: '2026-06-08T09:00:00Z',
   created_at: '2026-06-08T09:00:00Z',

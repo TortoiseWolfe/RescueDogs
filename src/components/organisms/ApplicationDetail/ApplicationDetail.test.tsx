@@ -116,6 +116,7 @@ const baseApplication: ApplicationWithPetAndHistory = {
   shelter_id: 'shelter-1',
   status: 'under_review',
   profile_snapshot: renterSnapshot,
+  answers_snapshot: null,
   why_this_pet: 'She matches our active household.',
   status_changed_at: '2026-06-02T12:00:00Z',
   created_at: '2026-06-01T12:00:00Z',

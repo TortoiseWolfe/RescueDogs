@@ -253,6 +253,53 @@ export type ProfileSnapshot = Omit<
   'id' | 'created_at' | 'updated_at'
 >;
 
+export type QuestionCategory =
+  | 'contact'
+  | 'application'
+  | 'eligibility'
+  | 'household'
+  | 'housing'
+  | 'yard'
+  | 'pets'
+  | 'vet'
+  | 'references'
+  | 'lifestyle'
+  | 'training'
+  | 'scenarios'
+  | 'pet_specific';
+
+export type AnswerType =
+  | 'text'
+  | 'long_text'
+  | 'yes_no'
+  | 'choice'
+  | 'multi_choice'
+  | 'number'
+  | 'date'
+  | 'phone'
+  | 'email'
+  | 'address'
+  | 'contact'
+  | 'group'
+  | 'repeat'
+  | 'repeat_field'
+  | 'pet';
+
+/**
+ * One question as the rescue showed it at submit time (#337), frozen with
+ * its wording so later bank edits never rewrite a submitted application.
+ * `value` is null when the adopter left an optional question blank.
+ */
+export interface AnswerSnapshotEntry {
+  question_id: string;
+  category: QuestionCategory;
+  wording: string;
+  answer_type: AnswerType;
+  choices: unknown[] | null;
+  fields: unknown[] | null;
+  value: unknown;
+}
+
 export interface Application {
   id: string;
   adopter_id: string;
@@ -260,6 +307,8 @@ export interface Application {
   shelter_id: string;
   status: ApplicationStatus;
   profile_snapshot: ProfileSnapshot;
+  /** Null for applications submitted before #337 or if the build failed. */
+  answers_snapshot: AnswerSnapshotEntry[] | null;
   why_this_pet: string | null;
   status_changed_at: string;
   created_at: string;

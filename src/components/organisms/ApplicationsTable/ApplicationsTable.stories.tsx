@@ -32,6 +32,7 @@ function makeApplication(
     shelter_id: 'shelter-1',
     status: 'submitted',
     profile_snapshot: baseSnapshot,
+    answers_snapshot: null,
     why_this_pet: null,
     status_changed_at: '2026-06-01T12:00:00Z',
     created_at: '2026-05-28T12:00:00Z',

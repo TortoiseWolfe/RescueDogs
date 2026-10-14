@@ -33,6 +33,7 @@ const application: ApplicationWithPet = {
   shelter_id: 'shelter-1',
   status: 'under_review',
   profile_snapshot: profileSnapshot,
+  answers_snapshot: null,
   why_this_pet: 'Biscuit looks like a perfect trail buddy.',
   status_changed_at: new Date(Date.now() - 5 * 60_000).toISOString(),
   created_at: new Date(Date.now() - 86_400_000).toISOString(),
