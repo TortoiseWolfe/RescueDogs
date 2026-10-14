@@ -1,10 +1,21 @@
 # Feature Specification: Configurable Adoption Application
 
-**Feature Branch**: `feat/337-question-bank-storage`
+**Feature Branch**: `feat/337-question-settings-wireframe`
 **Created**: 2026-10-13
 **Status**: Draft
 **Issue**: [#337](https://github.com/TortoiseWolfe/RescueDogs/issues/337)
 **Input**: `docs/prp-docs/configurable-application-prp.md` (master question bank, product-owner decisions of 2026-10-12)
+
+## UI Mockup
+
+Signed off: 2026-10-14
+
+- Builder: [`wireframes/01-application-questions.svg`](./wireframes/01-application-questions.svg) (light theme)
+- Preview: [`wireframes/02-application-preview.svg`](./wireframes/02-application-preview.svg) (light theme)
+- Red flag editor: [`wireframes/03-red-flag-editor.svg`](./wireframes/03-red-flag-editor.svg) (light theme)
+- Pet tags on listing: [`wireframes/04-pet-tags.svg`](./wireframes/04-pet-tags.svg) (light theme)
+
+These wireframes are spec constraints — implementation should match their layout, component structure, and interaction flow. Deviations require spec revision.
 
 ## Summary
 

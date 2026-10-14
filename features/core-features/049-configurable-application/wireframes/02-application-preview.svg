@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c7ddf5"/>
+      <stop offset="1" stop-color="#b8d4f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+
+  <text x="960" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#4b5563">APPLICATION PREVIEW - /shelter/questions/preview (PHASE 2)</text>
+  <text x="40" y="52" font-family="system-ui, sans-serif" font-size="14" fill="#8b5cf6" font-weight="700">DESKTOP (16:9)</text>
+  <text x="1500" y="52" font-family="system-ui, sans-serif" font-size="14" fill="#d946ef" font-weight="700">MOBILE</text>
+
+  <!-- ===================== DESKTOP ===================== -->
+  <g id="desktop" transform="translate(40, 60)">
+    <rect width="1280" height="720" rx="8" fill="#e8d4b8" stroke="#b8a080"/>
+    <use href="includes/header-desktop.svg#desktop-header" x="0" y="0"/>
+
+    <g font-family="system-ui, sans-serif" font-size="14">
+      <!-- Preview banner -->
+      <rect x="40" y="80" width="1200" height="56" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+      <rect x="40" y="80" width="6" height="56" fill="#8b5cf6"/>
+      <text x="60" y="104" font-size="16" fill="#1f2937" font-weight="700">Preview: this is exactly what adopters will see</text>
+      <text x="60" y="124" fill="#4b5563">Nothing here can be filled in or sent.</text>
+      <rect x="1076" y="86" width="156" height="44" rx="8" fill="#8b5cf6"/>
+      <text x="1154" y="113" text-anchor="middle" fill="#fff" font-weight="700">Back to editing</text>
+
+      <!-- Species + tag switches -->
+      <text x="40" y="178" fill="#1f2937" font-weight="700">Preview for:</text>
+      <rect x="136" y="150" width="88" height="44" rx="8" fill="#8b5cf6"/>
+      <text x="180" y="177" text-anchor="middle" fill="#fff" font-weight="700">Dog</text>
+      <rect x="230" y="150" width="88" height="44" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="274" y="177" text-anchor="middle" fill="#1f2937" font-weight="600">Cat</text>
+      <text x="350" y="178" fill="#1f2937" font-weight="700">Pet tags:</text>
+      <rect x="426" y="150" width="96" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="474" y="177" text-anchor="middle" fill="#1f2937">Senior</text>
+      <rect x="530" y="150" width="128" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="594" y="177" text-anchor="middle" fill="#1f2937">Sighthound</text>
+      <text x="1240" y="178" text-anchor="end" fill="#4b5563">29 questions for a dog &#183; 27 for a cat</text>
+
+      <!-- Category list -->
+      <rect x="40" y="208" width="300" height="424" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="56" y="240" fill="#1f2937">1. Contact</text><text x="324" y="240" text-anchor="end" fill="#4b5563">6</text>
+      <line x1="56" y1="256" x2="324" y2="256" stroke="#dcc8a8"/>
+      <text x="56" y="284" fill="#1f2937">2. Application</text><text x="324" y="284" text-anchor="end" fill="#4b5563">2</text>
+      <line x1="56" y1="300" x2="324" y2="300" stroke="#dcc8a8"/>
+      <text x="56" y="328" fill="#1f2937">3. Household</text><text x="324" y="328" text-anchor="end" fill="#4b5563">4</text>
+      <rect x="48" y="346" width="284" height="44" rx="6" fill="#dcc8a8"/>
+      <rect x="48" y="346" width="4" height="44" fill="#8b5cf6"/>
+      <text x="56" y="372" fill="#1f2937" font-weight="700">4. Housing</text><text x="324" y="372" text-anchor="end" fill="#1f2937" font-weight="700">6</text>
+      <text x="56" y="416" fill="#1f2937">5. Yard</text><text x="324" y="416" text-anchor="end" fill="#4b5563">3</text>
+      <line x1="56" y1="432" x2="324" y2="432" stroke="#dcc8a8"/>
+      <text x="56" y="460" fill="#1f2937">6. Pets</text><text x="324" y="460" text-anchor="end" fill="#4b5563">2</text>
+      <line x1="56" y1="476" x2="324" y2="476" stroke="#dcc8a8"/>
+      <text x="56" y="504" fill="#1f2937">7. Vet</text><text x="324" y="504" text-anchor="end" fill="#4b5563">2</text>
+      <line x1="56" y1="520" x2="324" y2="520" stroke="#dcc8a8"/>
+      <text x="56" y="548" fill="#1f2937">8. Lifestyle</text><text x="324" y="548" text-anchor="end" fill="#4b5563">3</text>
+      <line x1="56" y1="564" x2="324" y2="564" stroke="#dcc8a8"/>
+      <text x="56" y="592" fill="#1f2937">9. Training</text><text x="324" y="592" text-anchor="end" fill="#4b5563">1</text>
+
+      <!-- Questions as adopters see them -->
+      <rect x="356" y="208" width="884" height="424" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="372" y="236" font-size="18" fill="#1f2937" font-weight="700">Housing</text>
+      <text x="456" y="236" fill="#4b5563">&#183; 6 questions</text>
+
+      <text x="372" y="268" fill="#1f2937" font-weight="600">What type of home do you live in?</text>
+      <rect x="372" y="278" width="64" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="404" y="301" text-anchor="middle" fill="#4b5563">House</text>
+      <rect x="444" y="278" width="96" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="492" y="301" text-anchor="middle" fill="#4b5563">Townhouse</text>
+      <rect x="548" y="278" width="96" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="596" y="301" text-anchor="middle" fill="#4b5563">Apartment</text>
+      <rect x="652" y="278" width="64" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="684" y="301" text-anchor="middle" fill="#4b5563">Condo</text>
+      <rect x="724" y="278" width="72" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="760" y="301" text-anchor="middle" fill="#4b5563">Duplex</text>
+      <rect x="804" y="278" width="112" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="860" y="301" text-anchor="middle" fill="#4b5563">Mobile home</text>
+      <rect x="924" y="278" width="64" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="956" y="301" text-anchor="middle" fill="#4b5563">Other</text>
+
+      <text x="372" y="330" fill="#1f2937" font-weight="600">Do you own or rent your home?</text>
+      <rect x="372" y="340" width="56" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="400" y="363" text-anchor="middle" fill="#4b5563">Own</text>
+      <rect x="436" y="340" width="56" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="464" y="363" text-anchor="middle" fill="#4b5563">Rent</text>
+      <rect x="500" y="340" width="224" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="612" y="363" text-anchor="middle" fill="#4b5563">Live with family or other</text>
+
+      <text x="372" y="392" fill="#1f2937" font-weight="600">Does your landlord allow this pet?</text>
+      <text x="640" y="392" fill="#6d28d9" font-style="italic">Asked only if they rent</text>
+      <rect x="372" y="402" width="56" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="400" y="425" text-anchor="middle" fill="#4b5563">Yes</text>
+      <rect x="436" y="402" width="56" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="464" y="425" text-anchor="middle" fill="#4b5563">No</text>
+      <rect x="500" y="402" width="128" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="564" y="425" text-anchor="middle" fill="#4b5563">Not asked yet</text>
+
+      <text x="372" y="454" fill="#1f2937" font-weight="600">Landlord or property manager: name and phone</text>
+      <text x="740" y="454" fill="#6d28d9" font-style="italic">Asked only if they rent</text>
+      <rect x="372" y="464" width="320" height="36" rx="6" fill="#dcc8a8" stroke="#b8a080"/><text x="384" y="487" fill="#6b7280">Name</text>
+      <rect x="704" y="464" width="320" height="36" rx="6" fill="#dcc8a8" stroke="#b8a080"/><text x="716" y="487" fill="#6b7280">Phone</text>
+
+      <text x="372" y="516" fill="#1f2937" font-weight="600">Does your landlord, HOA, or neighborhood have pet restrictions?</text>
+      <rect x="372" y="526" width="56" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="400" y="549" text-anchor="middle" fill="#4b5563">Yes</text>
+      <rect x="436" y="526" width="56" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="464" y="549" text-anchor="middle" fill="#4b5563">No</text>
+      <text x="512" y="549" fill="#6d28d9" font-style="italic">If yes: Describe them (number of pets, size or weight&#8230;)</text>
+
+      <text x="372" y="578" fill="#1f2937" font-weight="600">Does your insurance restrict any breeds or sizes?</text>
+      <rect x="1120" y="562" width="96" height="24" rx="12" fill="#dcc8a8"/>
+      <text x="1168" y="579" text-anchor="middle" fill="#1f2937" font-weight="600">Dogs only</text>
+      <rect x="372" y="588" width="56" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="400" y="611" text-anchor="middle" fill="#4b5563">Yes</text>
+      <rect x="436" y="588" width="56" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="464" y="611" text-anchor="middle" fill="#4b5563">No</text>
+      <rect x="500" y="588" width="96" height="36" rx="18" fill="#dcc8a8" stroke="#b8a080"/><text x="548" y="611" text-anchor="middle" fill="#4b5563">Not sure</text>
+    </g>
+
+    <use href="includes/footer-desktop.svg#site-footer" x="0" y="640"/>
+
+    <!-- Callouts -->
+    <g class="callout"><circle cx="1000" cy="108" r="14" fill="#dc2626"/><text x="1000" y="113" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">1</text></g>
+    <g class="callout"><circle cx="680" cy="172" r="14" fill="#dc2626"/><text x="680" y="177" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">2</text></g>
+    <g class="callout"><circle cx="316" cy="224" r="14" fill="#dc2626"/><text x="316" y="229" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">3</text></g>
+    <g class="callout"><circle cx="1220" cy="232" r="14" fill="#dc2626"/><text x="1220" y="237" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">4</text></g>
+    <g class="callout"><circle cx="1220" cy="430" r="14" fill="#dc2626"/><text x="1220" y="435" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">5</text></g>
+    <g class="callout"><circle cx="830" cy="387" r="14" fill="#dc2626"/><text x="830" y="392" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">6</text></g>
+  </g>
+
+  <!-- ===================== MOBILE ===================== -->
+  <g id="mobile" transform="translate(1360, 60)">
+    <rect width="360" height="720" rx="24" fill="#e8d4b8" stroke="#b8a080"/>
+    <use href="includes/header-mobile.svg#mobile-header-group" x="0" y="0"/>
+
+    <g font-family="system-ui, sans-serif" font-size="14">
+      <rect x="16" y="92" width="328" height="52" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+      <rect x="16" y="92" width="6" height="52" fill="#8b5cf6"/>
+      <text x="32" y="114" fill="#1f2937" font-weight="700">Preview</text>
+      <text x="32" y="134" fill="#4b5563">What adopters will see</text>
+      <rect x="16" y="152" width="328" height="44" rx="8" fill="#8b5cf6"/>
+      <text x="180" y="179" text-anchor="middle" fill="#fff" font-weight="700">Back to editing</text>
+
+      <rect x="16" y="206" width="160" height="44" rx="8" fill="#8b5cf6"/>
+      <text x="96" y="233" text-anchor="middle" fill="#fff" font-weight="700">Dog</text>
+      <rect x="184" y="206" width="160" height="44" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="264" y="233" text-anchor="middle" fill="#1f2937" font-weight="600">Cat</text>
+
+      <text x="20" y="276" fill="#1f2937" font-weight="700">Housing &#183; step 4 of 9</text>
+      <rect x="20" y="284" width="320" height="8" rx="4" fill="#dcc8a8"/>
+      <rect x="20" y="284" width="142" height="8" rx="4" fill="#8b5cf6"/>
+
+      <text x="20" y="318" fill="#1f2937" font-weight="600">What type of home do you live in?</text>
+      <rect x="20" y="326" width="320" height="44" rx="6" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="32" y="353" fill="#6b7280">Choose one &#9662;</text>
+
+      <text x="20" y="396" fill="#1f2937" font-weight="600">Do you own or rent your home?</text>
+      <rect x="20" y="404" width="320" height="44" rx="6" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="32" y="431" fill="#6b7280">Choose one &#9662;</text>
+
+      <text x="20" y="474" fill="#1f2937" font-weight="600">Does your landlord allow this pet?</text>
+      <text x="20" y="492" fill="#6d28d9" font-style="italic">Asked only if they rent</text>
+      <rect x="20" y="500" width="64" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/><text x="52" y="527" text-anchor="middle" fill="#4b5563">Yes</text>
+      <rect x="92" y="500" width="64" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/><text x="124" y="527" text-anchor="middle" fill="#4b5563">No</text>
+      <rect x="164" y="500" width="136" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/><text x="232" y="527" text-anchor="middle" fill="#4b5563">Not asked yet</text>
+
+      <text x="20" y="570" fill="#1f2937" font-weight="600">Does your insurance restrict any</text>
+      <text x="20" y="588" fill="#1f2937" font-weight="600">breeds or sizes?</text>
+      <rect x="140" y="574" width="96" height="22" rx="11" fill="#dcc8a8"/>
+      <text x="188" y="590" text-anchor="middle" fill="#1f2937" font-weight="600">Dogs only</text>
+      <rect x="20" y="600" width="64" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/><text x="52" y="627" text-anchor="middle" fill="#4b5563">Yes</text>
+      <rect x="92" y="600" width="64" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/><text x="124" y="627" text-anchor="middle" fill="#4b5563">No</text>
+      <rect x="164" y="600" width="96" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/><text x="212" y="627" text-anchor="middle" fill="#4b5563">Not sure</text>
+    </g>
+
+    <use href="includes/footer-mobile.svg#mobile-bottom-nav" x="0" y="664"/>
+
+    <!-- Mobile callouts -->
+    <g class="callout"><circle cx="330" cy="104" r="11" fill="#dc2626"/><text x="330" y="109" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">1</text></g>
+    <g class="callout"><circle cx="12" cy="228" r="11" fill="#dc2626"/><text x="12" y="233" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">2</text></g>
+    <g class="callout"><circle cx="330" cy="272" r="11" fill="#dc2626"/><text x="330" y="277" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">3</text></g>
+    <g class="callout"><circle cx="330" cy="314" r="11" fill="#dc2626"/><text x="330" y="319" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">4</text></g>
+    <g class="callout"><circle cx="330" cy="488" r="11" fill="#dc2626"/><text x="330" y="493" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">6</text></g>
+  </g>
+
+  <!-- ===================== ANNOTATIONS ===================== -->
+  <g id="annotations" transform="translate(40, 800)" font-family="system-ui, sans-serif" font-size="14">
+    <rect width="1840" height="220" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+
+    <!-- Row 1 -->
+    <g class="callout"><circle cx="34" cy="24" r="14" fill="#dc2626"/><text x="34" y="29" text-anchor="middle" fill="#fff" font-weight="bold">1</text></g>
+    <text x="58" y="29" fill="#1f2937" font-weight="700">Preview banner</text>
+    <text x="20" y="52" fill="#374151">As a rescue manager, I check my application before</text>
+    <text x="20" y="70" fill="#374151">adopters see it. Back to editing keeps every change.</text>
+    <a href="#us-003"><rect x="20" y="78" width="72" height="22" rx="11" fill="#0891b2"/><text x="56" y="94" text-anchor="middle" fill="#fff" font-weight="700">US-003</text></a>
+    <a href="#sc-004"><rect x="98" y="78" width="72" height="22" rx="11" fill="#ea580c"/><text x="134" y="94" text-anchor="middle" fill="#fff" font-weight="700">SC-004</text></a>
+
+    <g class="callout"><circle cx="494" cy="24" r="14" fill="#dc2626"/><text x="494" y="29" text-anchor="middle" fill="#fff" font-weight="bold">2</text></g>
+    <text x="518" y="29" fill="#1f2937" font-weight="700">Dog, cat, and pet tags</text>
+    <text x="480" y="52" fill="#374151">Switch to see the form for each species or tag. Dogs-only</text>
+    <text x="480" y="70" fill="#374151">and tagged questions appear or disappear.</text>
+    <a href="#us-005"><rect x="480" y="78" width="72" height="22" rx="11" fill="#0891b2"/><text x="516" y="94" text-anchor="middle" fill="#fff" font-weight="700">US-005</text></a>
+    <a href="#fr-011"><rect x="558" y="78" width="72" height="22" rx="11" fill="#2563eb"/><text x="594" y="94" text-anchor="middle" fill="#fff" font-weight="700">FR-011</text></a>
+    <a href="#fr-023"><rect x="636" y="78" width="72" height="22" rx="11" fill="#2563eb"/><text x="672" y="94" text-anchor="middle" fill="#fff" font-weight="700">FR-023</text></a>
+
+    <g class="callout"><circle cx="954" cy="24" r="14" fill="#dc2626"/><text x="954" y="29" text-anchor="middle" fill="#fff" font-weight="bold">3</text></g>
+    <text x="978" y="29" fill="#1f2937" font-weight="700">Steps in adopter order</text>
+    <text x="940" y="52" fill="#374151">Only shown categories appear, with how many questions</text>
+    <text x="940" y="70" fill="#374151">each holds. Hidden ones like Eligibility are left out.</text>
+    <a href="#us-003"><rect x="940" y="78" width="72" height="22" rx="11" fill="#0891b2"/><text x="976" y="94" text-anchor="middle" fill="#fff" font-weight="700">US-003</text></a>
+    <a href="#fr-006"><rect x="1018" y="78" width="72" height="22" rx="11" fill="#2563eb"/><text x="1054" y="94" text-anchor="middle" fill="#fff" font-weight="700">FR-006</text></a>
+
+    <g class="callout"><circle cx="1414" cy="24" r="14" fill="#dc2626"/><text x="1414" y="29" text-anchor="middle" fill="#fff" font-weight="bold">4</text></g>
+    <text x="1438" y="29" fill="#1f2937" font-weight="700">Questions as adopters see them</text>
+    <text x="1400" y="52" fill="#374151">Exact bank wording and answer choices. All</text>
+    <text x="1400" y="70" fill="#374151">shown questions are required unless optional.</text>
+    <a href="#us-003"><rect x="1400" y="78" width="72" height="22" rx="11" fill="#0891b2"/><text x="1436" y="94" text-anchor="middle" fill="#fff" font-weight="700">US-003</text></a>
+    <a href="#fr-002"><rect x="1478" y="78" width="72" height="22" rx="11" fill="#2563eb"/><text x="1514" y="94" text-anchor="middle" fill="#fff" font-weight="700">FR-002</text></a>
+    <a href="#fr-015"><rect x="1556" y="78" width="72" height="22" rx="11" fill="#2563eb"/><text x="1592" y="94" text-anchor="middle" fill="#fff" font-weight="700">FR-015</text></a>
+
+    <!-- Row 2 -->
+    <g class="callout"><circle cx="34" cy="122" r="14" fill="#dc2626"/><text x="34" y="127" text-anchor="middle" fill="#fff" font-weight="bold">5</text></g>
+    <text x="58" y="127" fill="#1f2937" font-weight="700">No red flags in the preview</text>
+    <text x="20" y="148" fill="#374151">As an adopter, I never see whether an answer is flagged.</text>
+    <text x="20" y="166" fill="#374151">Flags show only to staff, like internal notes.</text>
+    <a href="#us-004"><rect x="20" y="172" width="72" height="22" rx="11" fill="#0891b2"/><text x="56" y="188" text-anchor="middle" fill="#fff" font-weight="700">US-004</text></a>
+    <a href="#fr-022"><rect x="98" y="172" width="72" height="22" rx="11" fill="#2563eb"/><text x="134" y="188" text-anchor="middle" fill="#fff" font-weight="700">FR-022</text></a>
+
+    <g class="callout"><circle cx="494" cy="122" r="14" fill="#dc2626"/><text x="494" y="127" text-anchor="middle" fill="#fff" font-weight="bold">6</text></g>
+    <text x="518" y="127" fill="#1f2937" font-weight="700">Conditional questions</text>
+    <text x="480" y="148" fill="#374151">Landlord questions show only for renters; "If yes"</text>
+    <text x="480" y="166" fill="#374151">boxes only after Yes. The preview labels both.</text>
+    <a href="#us-003"><rect x="480" y="172" width="72" height="22" rx="11" fill="#0891b2"/><text x="516" y="188" text-anchor="middle" fill="#fff" font-weight="700">US-003</text></a>
+    <a href="#fr-002"><rect x="558" y="172" width="72" height="22" rx="11" fill="#2563eb"/><text x="594" y="188" text-anchor="middle" fill="#fff" font-weight="700">FR-002</text></a>
+  </g>
+
+  <text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" fill="#374151" font-weight="bold">049:02 | Application Preview | ScriptHammer</text>
+</svg>
