@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c7ddf5"/>
+      <stop offset="1" stop-color="#b8d4f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+
+  <text x="960" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#4b5563">PET TAGS - /shelter/pets/edit (PHASE 2)</text>
+  <text x="40" y="52" font-family="system-ui, sans-serif" font-size="14" fill="#8b5cf6" font-weight="700">DESKTOP (16:9)</text>
+  <text x="1500" y="52" font-family="system-ui, sans-serif" font-size="14" fill="#d946ef" font-weight="700">MOBILE</text>
+
+  <!-- ===================== DESKTOP ===================== -->
+  <g id="desktop" transform="translate(40, 60)">
+    <rect width="1280" height="720" rx="8" fill="#e8d4b8" stroke="#b8a080"/>
+    <use href="includes/header-desktop.svg#desktop-header" x="0" y="0"/>
+
+    <g font-family="system-ui, sans-serif" font-size="14">
+      <text x="40" y="84" fill="#1f2937" font-weight="700" font-size="22">Happy Tails Rescue</text>
+      <text x="40" y="106" fill="#4b5563">Signed in as Shelter Manager</text>
+      <rect x="40" y="118" width="132" height="44" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="106" y="145" text-anchor="middle" fill="#1f2937">Applications</text>
+      <rect x="180" y="118" width="88" height="44" rx="8" fill="#8b5cf6"/>
+      <text x="224" y="145" text-anchor="middle" fill="#fff" font-weight="700">Pets</text>
+      <rect x="276" y="118" width="108" height="44" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="330" y="145" text-anchor="middle" fill="#1f2937">Settings</text>
+
+      <text x="40" y="192" fill="#1f2937" font-weight="600">&#8592; Back to Pets</text>
+      <text x="40" y="226" fill="#1f2937" font-weight="700" font-size="20">Edit Biscuit</text>
+
+      <text x="40" y="262" fill="#1f2937" font-weight="600">Name</text>
+      <rect x="40" y="270" width="520" height="44" rx="6" fill="#dcc8a8" stroke="#b8a080"/>
+      <text x="56" y="297" fill="#1f2937">Biscuit</text>
+
+      <text x="580" y="262" fill="#1f2937" font-weight="600">Species</text>
+      <rect x="580" y="270" width="200" height="44" rx="6" fill="#dcc8a8" stroke="#b8a080"/>
+      <text x="596" y="297" fill="#1f2937">Dog &#9662;</text>
+
+      <text x="800" y="262" fill="#1f2937" font-weight="600">Breed</text>
+      <rect x="800" y="270" width="440" height="44" rx="6" fill="#dcc8a8" stroke="#b8a080"/>
+      <text x="816" y="297" fill="#1f2937">Greyhound mix</text>
+
+      <text x="40" y="350" fill="#1f2937" font-weight="700" font-size="16">Pet tags</text>
+      <text x="40" y="372" fill="#4b5563">Adds question groups only for this pet. Leave blank if none apply.</text>
+
+      <rect x="40" y="388" width="140" height="44" rx="22" fill="#8b5cf6"/>
+      <text x="110" y="415" text-anchor="middle" fill="#fff" font-weight="700">Sighthound</text>
+      <rect x="192" y="388" width="140" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="262" y="415" text-anchor="middle" fill="#1f2937">Bully breed</text>
+      <rect x="344" y="388" width="132" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="410" y="415" text-anchor="middle" fill="#1f2937">Large dog</text>
+      <rect x="488" y="388" width="140" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="558" y="415" text-anchor="middle" fill="#1f2937">Escape risk</text>
+      <rect x="640" y="388" width="108" height="44" rx="22" fill="#8b5cf6"/>
+      <text x="694" y="415" text-anchor="middle" fill="#fff" font-weight="700">Senior</text>
+      <rect x="760" y="388" width="160" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="840" y="415" text-anchor="middle" fill="#1f2937">Special needs</text>
+
+      <rect x="40" y="448" width="800" height="72" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+      <rect x="40" y="448" width="6" height="72" fill="#8b5cf6"/>
+      <text x="60" y="476" fill="#1f2937" font-weight="700">Shown on applications for Biscuit</text>
+      <text x="60" y="500" fill="#4b5563">Sighthound (4 questions) &#183; Senior (3 questions)</text>
+
+      <rect x="40" y="536" width="148" height="44" rx="8" fill="#8b5cf6"/>
+      <text x="114" y="563" text-anchor="middle" fill="#fff" font-weight="700">Save changes</text>
+    </g>
+
+    <use href="includes/footer-desktop.svg#site-footer" x="0" y="640"/>
+
+    <g class="callout"><circle cx="948" cy="410" r="14" fill="#dc2626"/><text x="948" y="415" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">1</text></g>
+    <g class="callout"><circle cx="860" cy="484" r="14" fill="#dc2626"/><text x="860" y="489" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">2</text></g>
+    <g class="callout"><circle cx="800" cy="250" r="14" fill="#dc2626"/><text x="800" y="255" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">3</text></g>
+    <g class="callout"><circle cx="210" cy="558" r="14" fill="#dc2626"/><text x="210" y="563" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">4</text></g>
+  </g>
+
+  <!-- ===================== MOBILE ===================== -->
+  <g id="mobile" transform="translate(1360, 60)">
+    <rect width="360" height="720" rx="24" fill="#e8d4b8" stroke="#b8a080"/>
+    <use href="includes/header-mobile.svg#mobile-header-group" x="0" y="0"/>
+
+    <g font-family="system-ui, sans-serif" font-size="14">
+      <text x="20" y="100" fill="#1f2937" font-weight="700">Happy Tails Rescue</text>
+      <rect x="16" y="112" width="104" height="44" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="68" y="139" text-anchor="middle" fill="#1f2937">Apps</text>
+      <rect x="128" y="112" width="88" height="44" rx="8" fill="#8b5cf6"/>
+      <text x="172" y="139" text-anchor="middle" fill="#fff" font-weight="700">Pets</text>
+      <rect x="224" y="112" width="120" height="44" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="284" y="139" text-anchor="middle" fill="#1f2937">Settings</text>
+
+      <text x="20" y="180" fill="#1f2937" font-weight="600">&#8592; Back to Pets</text>
+      <text x="20" y="208" fill="#1f2937" font-weight="700" font-size="18">Edit Biscuit</text>
+
+      <text x="20" y="236" fill="#1f2937" font-weight="600">Name</text>
+      <rect x="16" y="244" width="328" height="44" rx="6" fill="#dcc8a8" stroke="#b8a080"/>
+      <text x="32" y="271" fill="#1f2937">Biscuit</text>
+
+      <text x="20" y="314" fill="#1f2937" font-weight="700">Pet tags</text>
+      <text x="20" y="332" fill="#4b5563">Only for this pet</text>
+
+      <rect x="16" y="344" width="156" height="44" rx="22" fill="#8b5cf6"/>
+      <text x="94" y="371" text-anchor="middle" fill="#fff" font-weight="700">Sighthound</text>
+      <rect x="180" y="344" width="164" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="262" y="371" text-anchor="middle" fill="#1f2937">Bully breed</text>
+      <rect x="16" y="396" width="156" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="94" y="423" text-anchor="middle" fill="#1f2937">Large dog</text>
+      <rect x="180" y="396" width="164" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="262" y="423" text-anchor="middle" fill="#1f2937">Escape risk</text>
+      <rect x="16" y="448" width="120" height="44" rx="22" fill="#8b5cf6"/>
+      <text x="76" y="475" text-anchor="middle" fill="#fff" font-weight="700">Senior</text>
+      <rect x="144" y="448" width="200" height="44" rx="22" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="244" y="475" text-anchor="middle" fill="#1f2937">Special needs</text>
+
+      <rect x="16" y="504" width="328" height="64" rx="8" fill="#f5f0e6" stroke="#b8a080"/>
+      <text x="28" y="528" fill="#1f2937" font-weight="700">On Biscuit's application</text>
+      <text x="28" y="550" fill="#4b5563">Sighthound &#183; Senior</text>
+
+      <rect x="16" y="580" width="328" height="44" rx="8" fill="#8b5cf6"/>
+      <text x="180" y="607" text-anchor="middle" fill="#fff" font-weight="700">Save changes</text>
+    </g>
+
+    <use href="includes/footer-mobile.svg#mobile-bottom-nav" x="0" y="664"/>
+
+    <g class="callout"><circle cx="348" cy="366" r="11" fill="#dc2626"/><text x="348" y="371" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">1</text></g>
+    <g class="callout"><circle cx="348" cy="536" r="11" fill="#dc2626"/><text x="348" y="541" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">2</text></g>
+    <g class="callout"><circle cx="12" cy="266" r="11" fill="#dc2626"/><text x="12" y="271" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">3</text></g>
+    <g class="callout"><circle cx="348" cy="602" r="11" fill="#dc2626"/><text x="348" y="607" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#fff" font-weight="bold">4</text></g>
+  </g>
+
+  <!-- ===================== ANNOTATIONS ===================== -->
+  <g id="annotations" transform="translate(40, 800)" font-family="system-ui, sans-serif" font-size="14">
+    <rect width="1840" height="220" rx="8" fill="#dcc8a8" stroke="#b8a080"/>
+
+    <g class="callout"><circle cx="34" cy="24" r="14" fill="#dc2626"/><text x="34" y="29" text-anchor="middle" fill="#fff" font-weight="bold">1</text></g>
+    <text x="58" y="29" fill="#1f2937" font-weight="700">Tags on this pet</text>
+    <text x="20" y="52" fill="#374151">As a rescue manager, I tag a listing so breed or</text>
+    <text x="20" y="70" fill="#374151">senior questions apply only to that animal.</text>
+    <a href="#us-005"><rect x="20" y="78" width="72" height="22" rx="11" fill="#0891b2"/><text x="56" y="94" text-anchor="middle" fill="#fff" font-weight="700">US-005</text></a>
+    <a href="#fr-023"><rect x="98" y="78" width="72" height="22" rx="11" fill="#2563eb"/><text x="134" y="94" text-anchor="middle" fill="#fff" font-weight="700">FR-023</text></a>
+
+    <g class="callout"><circle cx="494" cy="24" r="14" fill="#dc2626"/><text x="494" y="29" text-anchor="middle" fill="#fff" font-weight="bold">2</text></g>
+    <text x="518" y="29" fill="#1f2937" font-weight="700">Only matching groups appear</text>
+    <text x="480" y="52" fill="#374151">Biscuit's applications include Sighthound and Senior.</text>
+    <text x="480" y="70" fill="#374151">An untagged pet at the same rescue skips them.</text>
+    <a href="#us-005"><rect x="480" y="78" width="72" height="22" rx="11" fill="#0891b2"/><text x="516" y="94" text-anchor="middle" fill="#fff" font-weight="700">US-005</text></a>
+    <a href="#fr-011"><rect x="558" y="78" width="72" height="22" rx="11" fill="#2563eb"/><text x="594" y="94" text-anchor="middle" fill="#fff" font-weight="700">FR-011</text></a>
+
+    <g class="callout"><circle cx="954" cy="24" r="14" fill="#dc2626"/><text x="954" y="29" text-anchor="middle" fill="#fff" font-weight="bold">3</text></g>
+    <text x="978" y="29" fill="#1f2937" font-weight="700">Species still filters too</text>
+    <text x="940" y="52" fill="#374151">Dog-only bank questions stay off cat listings, even</text>
+    <text x="940" y="70" fill="#374151">when a tag is on. Tags never override species.</text>
+    <a href="#us-003"><rect x="940" y="78" width="72" height="22" rx="11" fill="#0891b2"/><text x="976" y="94" text-anchor="middle" fill="#fff" font-weight="700">US-003</text></a>
+    <a href="#fr-001"><rect x="1018" y="78" width="72" height="22" rx="11" fill="#2563eb"/><text x="1054" y="94" text-anchor="middle" fill="#fff" font-weight="700">FR-001</text></a>
+
+    <g class="callout"><circle cx="1414" cy="24" r="14" fill="#dc2626"/><text x="1414" y="29" text-anchor="middle" fill="#fff" font-weight="bold">4</text></g>
+    <text x="1438" y="29" fill="#1f2937" font-weight="700">Answers still reuse</text>
+    <text x="1400" y="52" fill="#374151">An adopter who answered Senior once does not</text>
+    <text x="1400" y="70" fill="#374151">retype it for the next tagged pet.</text>
+    <a href="#us-001"><rect x="1400" y="78" width="72" height="22" rx="11" fill="#0891b2"/><text x="1436" y="94" text-anchor="middle" fill="#fff" font-weight="700">US-001</text></a>
+    <a href="#fr-010"><rect x="1478" y="78" width="72" height="22" rx="11" fill="#2563eb"/><text x="1514" y="94" text-anchor="middle" fill="#fff" font-weight="700">FR-010</text></a>
+  </g>
+
+  <text x="40" y="1060" font-family="system-ui, sans-serif" font-size="18" fill="#374151" font-weight="bold">049:04 | Pet Tags on Listing | ScriptHammer</text>
+</svg>
