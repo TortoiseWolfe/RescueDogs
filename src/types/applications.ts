@@ -285,6 +285,78 @@ export type AnswerType =
   | 'repeat_field'
   | 'pet';
 
+export type QuestionSpecies = 'any' | 'dog' | 'cat';
+export type QuestionSensitivity = 'normal' | 'sensitive' | 'third_party';
+export type PetTag =
+  | 'sighthound'
+  | 'bully_breed'
+  | 'large_dog'
+  | 'escape_risk'
+  | 'senior'
+  | 'special_needs';
+
+export const QUESTION_CATEGORIES = [
+  'contact',
+  'application',
+  'eligibility',
+  'household',
+  'housing',
+  'yard',
+  'pets',
+  'vet',
+  'references',
+  'lifestyle',
+  'training',
+  'scenarios',
+  'pet_specific',
+] as const satisfies readonly QuestionCategory[];
+
+export const CATEGORY_LABELS: Record<QuestionCategory, string> = {
+  contact: 'Contact',
+  application: 'Application',
+  eligibility: 'Eligibility',
+  household: 'Household',
+  housing: 'Housing',
+  yard: 'Yard',
+  pets: 'Pets',
+  vet: 'Vet',
+  references: 'References',
+  lifestyle: 'Lifestyle',
+  training: 'Training',
+  scenarios: 'Scenarios',
+  pet_specific: 'Pet-specific',
+};
+
+export const PET_TAG_LABELS: Record<PetTag, string> = {
+  sighthound: 'Sighthound',
+  bully_breed: 'Bully breed',
+  large_dog: 'Large dog',
+  escape_risk: 'Escape risk',
+  senior: 'Senior',
+  special_needs: 'Special needs',
+};
+
+/** One row of the shared question bank (#337). */
+export interface ApplicationQuestion {
+  id: string;
+  category: QuestionCategory;
+  sort_order: number;
+  wording: string;
+  answer_type: AnswerType;
+  choices: unknown[] | null;
+  fields: unknown[] | null;
+  follow_up: unknown | null;
+  show_if: { question?: string; in?: unknown[]; gt?: number } | null;
+  parent_id: string | null;
+  species: QuestionSpecies;
+  pet_tag: PetTag | null;
+  sensitivity: QuestionSensitivity;
+  is_locked: boolean;
+  is_flaggable: boolean;
+  always_optional: boolean;
+  retired_at: string | null;
+}
+
 /**
  * One question as the rescue showed it at submit time (#337), frozen with
  * its wording so later bank edits never rewrite a submitted application.

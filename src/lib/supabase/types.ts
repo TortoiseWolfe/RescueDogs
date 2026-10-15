@@ -1439,6 +1439,10 @@ export type Database = {
         Args: { check_user_id?: string; p_shelter: string };
         Returns: boolean;
       };
+      set_shelter_application_questions: {
+        Args: { p_question_ids: string[]; p_shelter_id: string };
+        Returns: number;
+      };
       record_failed_attempt: {
         Args: {
           p_attempt_type: string;

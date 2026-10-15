@@ -28,6 +28,7 @@ const createQueryBuilder = (result: QueryResult) => {
     'upsert',
     'delete',
     'eq',
+    'is',
     'contains',
     'order',
     'limit',
@@ -808,5 +809,57 @@ describe('ShelterApplicationService', () => {
     });
 
     await expect(service.getApplicantEmail(APP_ID)).resolves.toBeNull();
+  });
+
+  it('listApplicationQuestions reads the bank in sort order (#337)', async () => {
+    const builder = createQueryBuilder({
+      data: [{ id: 'hou.home_type', is_locked: true }],
+      error: null,
+    });
+    mock.from.mockReturnValue(builder);
+
+    const rows = await service.listApplicationQuestions();
+    expect(mock.from).toHaveBeenCalledWith('application_questions');
+    expect(builder.is).toHaveBeenCalledWith('retired_at', null);
+    expect(builder.order).toHaveBeenCalledWith('sort_order');
+    expect(rows).toHaveLength(1);
+  });
+
+  it('listShownQuestionIds returns extra ids this rescue shows (#337)', async () => {
+    const builder = createQueryBuilder({
+      data: [{ question_id: 'lif.hours_alone' }],
+      error: null,
+    });
+    mock.from.mockReturnValue(builder);
+
+    await expect(service.listShownQuestionIds(SHELTER_ID)).resolves.toEqual([
+      'lif.hours_alone',
+    ]);
+    expect(mock.from).toHaveBeenCalledWith('shelter_application_questions');
+    expect(builder.eq).toHaveBeenCalledWith('shelter_id', SHELTER_ID);
+    expect(builder.eq).toHaveBeenCalledWith('shown', true);
+  });
+
+  it('setShownQuestionIds calls the manager-only RPC (#337)', async () => {
+    mock.rpc.mockResolvedValue({ data: 2, error: null });
+
+    await expect(
+      service.setShownQuestionIds(SHELTER_ID, ['lif.hours_alone'])
+    ).resolves.toBe(2);
+    expect(mock.rpc).toHaveBeenCalledWith('set_shelter_application_questions', {
+      p_shelter_id: SHELTER_ID,
+      p_question_ids: ['lif.hours_alone'],
+    });
+  });
+
+  it('setShownQuestionIds maps not_a_manager (#337)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: null,
+      error: { message: 'not_a_manager' },
+    });
+
+    await expect(
+      service.setShownQuestionIds(SHELTER_ID, [])
+    ).rejects.toMatchObject({ code: 'not_a_manager' });
   });
 });

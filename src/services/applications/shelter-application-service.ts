@@ -3,6 +3,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
   Application,
+  ApplicationQuestion,
   ApplicationStatus,
   ApplicationWithPet,
   ApplicationWithPetAndHistory,
@@ -77,6 +78,34 @@ export class ShelterUpdateError extends Error {
     this.name = 'ShelterUpdateError';
     this.code = code;
   }
+}
+
+export const QUESTION_SETTINGS_ERROR_CODES = [
+  'not_a_manager',
+  'invalid_shelter',
+  'invalid_question',
+  'invalid_questions',
+] as const;
+
+export type QuestionSettingsErrorCode =
+  | (typeof QUESTION_SETTINGS_ERROR_CODES)[number]
+  | 'unknown';
+
+export class QuestionSettingsError extends Error {
+  readonly code: QuestionSettingsErrorCode;
+
+  constructor(code: QuestionSettingsErrorCode) {
+    super(code);
+    this.name = 'QuestionSettingsError';
+    this.code = code;
+  }
+}
+
+function questionSettingsErrorCode(message: string): QuestionSettingsErrorCode {
+  const matches = QUESTION_SETTINGS_ERROR_CODES.filter((candidate) =>
+    message.includes(candidate)
+  ).sort((a, b) => b.length - a.length);
+  return matches[0] ?? 'unknown';
 }
 
 /**
@@ -378,5 +407,54 @@ export class ShelterApplicationService {
       p_application_id: applicationId,
     });
     if (error) throw error;
+  }
+
+  /** Shared bank, minus retired questions, in display order (#337). */
+  async listApplicationQuestions(): Promise<ApplicationQuestion[]> {
+    const { data, error } = await this.supabase
+      .from('application_questions')
+      .select(
+        'id, category, sort_order, wording, answer_type, choices, fields, follow_up, show_if, parent_id, species, pet_tag, sensitivity, is_locked, is_flaggable, always_optional, retired_at'
+      )
+      .is('retired_at', null)
+      .order('sort_order');
+
+    if (error) throw error;
+    return (data ?? []) as unknown as ApplicationQuestion[];
+  }
+
+  /** Extra question ids this rescue currently shows (locked are implied). */
+  async listShownQuestionIds(shelterId: string): Promise<string[]> {
+    const { data, error } = await this.supabase
+      .from('shelter_application_questions')
+      .select('question_id')
+      .eq('shelter_id', shelterId)
+      .eq('shown', true);
+
+    if (error) throw error;
+    return (data ?? []).map((row) => row.question_id);
+  }
+
+  /**
+   * Manager-only replace of which extra questions this rescue shows (#337).
+   * Locked questions are always on and are ignored in the payload.
+   */
+  async setShownQuestionIds(
+    shelterId: string,
+    questionIds: string[]
+  ): Promise<number> {
+    const { data, error } = await this.supabase.rpc(
+      'set_shelter_application_questions',
+      {
+        p_shelter_id: shelterId,
+        p_question_ids: questionIds,
+      }
+    );
+    if (error) {
+      throw new QuestionSettingsError(
+        questionSettingsErrorCode(error.message ?? '')
+      );
+    }
+    return typeof data === 'number' ? data : 0;
   }
 }

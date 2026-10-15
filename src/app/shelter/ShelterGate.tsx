@@ -299,6 +299,12 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
               Pets
             </Link>
             <Link
+              href="/shelter/questions"
+              className="btn btn-sm btn-ghost min-h-11"
+            >
+              Questions
+            </Link>
+            <Link
               href="/shelter/settings"
               className="btn btn-sm btn-ghost min-h-11"
             >

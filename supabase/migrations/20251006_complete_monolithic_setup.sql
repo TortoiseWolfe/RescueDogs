@@ -4274,7 +4274,7 @@ CREATE TABLE IF NOT EXISTS shelter_application_questions (
   PRIMARY KEY (shelter_id, question_id)
 );
 
-COMMENT ON TABLE shelter_application_questions IS 'Which non-locked bank questions a rescue shows (#337). No row = hidden. No client write path yet; a manager-only RPC arrives with the settings screen.';
+COMMENT ON TABLE shelter_application_questions IS 'Which non-locked bank questions a rescue shows (#337). No row = hidden. Managers write only through set_shelter_application_questions.';
 
 CREATE TABLE IF NOT EXISTS adopter_answers (
   adopter_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -4720,6 +4720,72 @@ CREATE TRIGGER set_application_answers_snapshot
   BEFORE INSERT ON applications
   FOR EACH ROW
   EXECUTE FUNCTION set_application_answers_snapshot();
+
+CREATE OR REPLACE FUNCTION set_shelter_application_questions(
+  p_shelter_id UUID,
+  p_question_ids TEXT[]
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID := auth.uid();
+  v_ids TEXT[] := COALESCE(p_question_ids, '{}');
+  v_unknown TEXT;
+  v_count INTEGER;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'not authenticated';
+  END IF;
+  IF p_shelter_id IS NULL THEN
+    RAISE EXCEPTION 'invalid_shelter';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM shelter_members
+    WHERE user_id = v_uid
+      AND shelter_id = p_shelter_id
+      AND role = 'manager'
+  ) THEN
+    RAISE EXCEPTION 'not_a_manager';
+  END IF;
+  IF COALESCE(cardinality(v_ids), 0) > 200 THEN
+    RAISE EXCEPTION 'invalid_questions';
+  END IF;
+
+  IF COALESCE(cardinality(v_ids), 0) > 0 THEN
+    SELECT q.id INTO v_unknown
+    FROM unnest(v_ids) AS q(id)
+    LEFT JOIN application_questions a
+      ON a.id = q.id AND a.retired_at IS NULL
+    WHERE a.id IS NULL
+    LIMIT 1;
+    IF v_unknown IS NOT NULL THEN
+      RAISE EXCEPTION 'invalid_question';
+    END IF;
+  END IF;
+
+  DELETE FROM shelter_application_questions
+  WHERE shelter_id = p_shelter_id;
+
+  INSERT INTO shelter_application_questions (shelter_id, question_id, shown)
+  SELECT DISTINCT p_shelter_id, q.id, TRUE
+  FROM unnest(v_ids) AS q(id)
+  JOIN application_questions a ON a.id = q.id
+  WHERE a.is_locked = FALSE
+    AND a.retired_at IS NULL;
+
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
+END;
+$$;
+
+COMMENT ON FUNCTION set_shelter_application_questions(UUID, TEXT[]) IS
+  'Manager-only replace of which extra bank questions a rescue shows (#337 phase 2). Locked questions are always shown and are ignored in the payload.';
+
+REVOKE ALL ON FUNCTION set_shelter_application_questions(UUID, TEXT[]) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION set_shelter_application_questions(UUID, TEXT[]) TO authenticated;
 
 -- ─── Realtime: live status tracker ──────────────────────────────────────────
 -- REPLICA IDENTITY FULL is required for Realtime UPDATE events; publication
