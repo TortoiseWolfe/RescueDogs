@@ -168,8 +168,10 @@ export default function ShelterQuestionsPreviewPage() {
               <li key={group.category}>
                 <button
                   type="button"
-                  className={`min-h-11 w-full rounded-lg px-3 text-left ${
-                    openGroup?.category === group.category ? 'bg-base-300' : ''
+                  className={`min-h-11 w-full cursor-pointer rounded-lg px-3 text-left transition-colors ${
+                    openGroup?.category === group.category
+                      ? 'bg-base-300'
+                      : 'hover:bg-base-300'
                   }`}
                   onClick={() => setOpenCategory(group.category)}
                 >
