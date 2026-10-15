@@ -293,6 +293,9 @@ describe('PaymentStatusDisplay', () => {
 
     expect(screen.getByText('Retrying...')).toBeInTheDocument();
     expect(retryButton).toBeDisabled();
+    await waitFor(() => {
+      expect(screen.queryByText('Retrying...')).not.toBeInTheDocument();
+    });
   });
 
   it('displays webhook verified badge when verified', () => {

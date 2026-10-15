@@ -276,13 +276,13 @@ export default function ShelterQuestionsPage() {
             return (
               <div
                 key={category}
-                className={`mb-1 flex items-center gap-1 rounded-lg p-1 ${
-                  selected ? 'bg-base-300' : ''
+                className={`mb-1 flex items-center gap-1 rounded-lg p-1 transition-colors ${
+                  selected ? 'bg-base-300' : 'hover:bg-base-300'
                 }`}
               >
                 <button
                   type="button"
-                  className="min-h-11 flex-1 px-2 text-left"
+                  className="min-h-11 flex-1 cursor-pointer px-2 text-left"
                   onClick={() => setOpenCategory(category)}
                   aria-current={selected ? 'true' : undefined}
                 >
