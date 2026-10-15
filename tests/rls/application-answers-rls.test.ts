@@ -4,7 +4,8 @@
  * Security contract (Constitution Principle III — Applicant Data Is a Trust):
  * - the question bank is public to read and has no client write path
  * - adopter_answers are strictly own-row; shelter staff never read them
- * - a rescue's question choices have no client write path yet
+ * - a rescue's question choices have no table write path; managers replace
+ *   them only through set_shelter_application_questions
  * - applications.answers_snapshot is built by the database at submit time
  *   from the locked core plus the questions that rescue shows; a client
  *   cannot forge it, and later changes never rewrite a submitted one
@@ -33,6 +34,7 @@ const PASSWORD = 'RlsTestPassword123!';
 const ADOPTER_EMAIL = 'rls-337-adopter@example.com';
 const STRANGER_EMAIL = 'rls-337-stranger@example.com';
 const STAFF_EMAIL = 'rls-337-staff@example.com';
+const MANAGER_EMAIL = 'rls-337-manager@example.com';
 
 const LOCKED_CORE = [
   'con.full_name',
@@ -72,6 +74,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
     let adopter: TestUser;
     let stranger: TestUser;
     let staff: TestUser;
+    let manager: TestUser;
     const applicationIds: string[] = [];
 
     async function snapshotOf(applicationId: string) {
@@ -109,16 +112,24 @@ describe.skipIf(!hasRlsTestEnvironment())(
       adopter = await createTestUser(ADOPTER_EMAIL, PASSWORD);
       stranger = await createTestUser(STRANGER_EMAIL, PASSWORD);
       staff = await createTestUser(STAFF_EMAIL, PASSWORD);
+      manager = await createTestUser(MANAGER_EMAIL, PASSWORD);
 
       const service = createServiceClient();
       await service
         .from('shelters')
         .upsert({ id: SHELTER_ID, name: 'RLS 337 Rescue' });
-      await service.from('shelter_members').insert({
-        shelter_id: SHELTER_ID,
-        user_id: staff.id,
-        role: 'staff',
-      });
+      await service.from('shelter_members').insert([
+        {
+          shelter_id: SHELTER_ID,
+          user_id: staff.id,
+          role: 'staff',
+        },
+        {
+          shelter_id: SHELTER_ID,
+          user_id: manager.id,
+          role: 'manager',
+        },
+      ]);
       await service.from('pets').upsert([
         {
           id: DOG_1,
@@ -154,12 +165,16 @@ describe.skipIf(!hasRlsTestEnvironment())(
         .delete()
         .eq('shelter_id', SHELTER_ID);
       await service.from('pets').delete().in('id', [DOG_1, DOG_2, CAT]);
-      await service.from('shelter_members').delete().eq('user_id', staff.id);
+      await service
+        .from('shelter_members')
+        .delete()
+        .eq('shelter_id', SHELTER_ID);
       await service.from('shelters').delete().eq('id', SHELTER_ID);
       await service.from('adopter_profiles').delete().eq('id', adopter.id);
       await deleteTestUser(adopter.id);
       await deleteTestUser(stranger.id);
       await deleteTestUser(staff.id);
+      await deleteTestUser(manager.id);
     }, 60000);
 
     it('the bank is readable and holds exactly the locked core', async () => {
@@ -274,6 +289,26 @@ describe.skipIf(!hasRlsTestEnvironment())(
       expect(error).not.toBeNull();
     });
 
+    it('staff cannot replace question choices through the manager RPC', async () => {
+      const client = await createAuthenticatedClient(STAFF_EMAIL, PASSWORD);
+      const { error } = await client.rpc('set_shelter_application_questions', {
+        p_shelter_id: SHELTER_ID,
+        p_question_ids: [ANY_SPECIES_EXTRA],
+      });
+      expect(error).not.toBeNull();
+      expect(error!.message).toContain('not_a_manager');
+    });
+
+    it('a manager cannot store an unknown question id', async () => {
+      const client = await createAuthenticatedClient(MANAGER_EMAIL, PASSWORD);
+      const { error } = await client.rpc('set_shelter_application_questions', {
+        p_shelter_id: SHELTER_ID,
+        p_question_ids: ['not.a.real.question'],
+      });
+      expect(error).not.toBeNull();
+      expect(error!.message).toContain('invalid_question');
+    });
+
     it('with no rescue choices the snapshot is exactly the locked core, ignoring a forged one', async () => {
       const id = await apply(DOG_1, [
         { question_id: 'forged', wording: 'x', value: 'x' },
@@ -291,12 +326,19 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     it('showing questions adds them to new applications only, filtered by species', async () => {
       const firstId = applicationIds[0];
-      await createServiceClient()
-        .from('shelter_application_questions')
-        .insert([
-          { shelter_id: SHELTER_ID, question_id: ANY_SPECIES_EXTRA },
-          { shelter_id: SHELTER_ID, question_id: DOG_ONLY_EXTRA },
-        ]);
+      const managerClient = await createAuthenticatedClient(
+        MANAGER_EMAIL,
+        PASSWORD
+      );
+      const { data, error } = await managerClient.rpc(
+        'set_shelter_application_questions',
+        {
+          p_shelter_id: SHELTER_ID,
+          p_question_ids: [ANY_SPECIES_EXTRA, DOG_ONLY_EXTRA, 'hou.home_type'],
+        }
+      );
+      expect(error).toBeNull();
+      expect(data).toBe(2);
 
       const dogSnapshot = await snapshotOf(await apply(DOG_2));
       const dogIds = dogSnapshot.map((e) => e.question_id);

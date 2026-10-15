@@ -132,9 +132,17 @@ export default function ShelterSettingsPage() {
     <div className="mx-auto max-w-2xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-semibold">Rescue settings</h2>
-        <Link href="/shelter" className="btn btn-ghost btn-sm min-h-11">
-          Back to Applications
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/shelter/questions"
+            className="btn btn-ghost btn-sm min-h-11"
+          >
+            Application questions
+          </Link>
+          <Link href="/shelter" className="btn btn-ghost btn-sm min-h-11">
+            Back to Applications
+          </Link>
+        </div>
       </div>
 
       {!isManager ? (

@@ -4,6 +4,7 @@ export { ShelterApplicationService } from './shelter-application-service';
 export type {
   AddStaffErrorCode,
   CreateMyShelterInput,
+  QuestionSettingsErrorCode,
   ShelterMembershipInfo,
   ShelterProfileInput,
   ShelterUpdateErrorCode,
@@ -13,6 +14,8 @@ export {
   AddStaffError,
   ADD_STAFF_ERROR_CODES,
   AlreadyAMemberError,
+  QuestionSettingsError,
+  QUESTION_SETTINGS_ERROR_CODES,
   ShelterUpdateError,
   SHELTER_UPDATE_ERROR_CODES,
 } from './shelter-application-service';
