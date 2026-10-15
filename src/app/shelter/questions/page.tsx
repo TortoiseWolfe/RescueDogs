@@ -290,9 +290,12 @@ export default function ShelterQuestionsPage() {
                     {CATEGORY_LABELS[category]}
                   </span>
                   <span className="text-base-content/70 block text-sm">
+                    <span className="text-xs">
+                      {state === 'hidden' ? 'Hidden' : 'Shown'}:
+                    </span>{' '}
                     {state === 'hidden'
-                      ? `Hidden · 0 of ${counts.total} shown`
-                      : `${counts.shown} of ${counts.total} shown`}
+                      ? `0 of ${counts.total}`
+                      : `${counts.shown} of ${counts.total}`}
                     {counts.locked ? ` · ${counts.locked} locked` : ''}
                   </span>
                 </button>
