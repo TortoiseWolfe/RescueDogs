@@ -136,6 +136,17 @@ export function questionsForPreview(
   });
 }
 
+export function shownCountForTag(
+  questions: readonly ApplicationQuestion[],
+  shownIds: ReadonlySet<string>,
+  tag: PetTag
+): number {
+  return questions.filter(
+    (question) =>
+      question.pet_tag === tag && isQuestionShown(question, shownIds)
+  ).length;
+}
+
 export function questionTags(question: ApplicationQuestion): string[] {
   const tags: string[] = [];
   if (question.is_locked) tags.push('Locked');

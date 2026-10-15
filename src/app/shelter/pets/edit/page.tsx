@@ -20,7 +20,9 @@ import type {
   PetSize,
   PetSpecies,
   PetStatus,
+  PetTag,
 } from '@/types/applications';
+import { PetTagsField } from '../PetTagsField';
 import {
   adoptedConfirmMessage,
   petArchiveNote,
@@ -50,6 +52,7 @@ function EditShelterPetContent() {
   const [notes, setNotes] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [transportable, setTransportable] = useState(true);
+  const [applicationTags, setApplicationTags] = useState<PetTag[]>([]);
   const [photos, setPhotos] = useState<PetPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -80,6 +83,7 @@ function EditShelterPetContent() {
     notes,
     videoUrl,
     transportable,
+    applicationTags,
   };
   const {
     restored: pendingDraft,
@@ -114,6 +118,7 @@ function EditShelterPetContent() {
     setNotes(pendingDraft.notes ?? '');
     setVideoUrl(pendingDraft.videoUrl ?? '');
     setTransportable(pendingDraft.transportable ?? true);
+    setApplicationTags(pendingDraft.applicationTags ?? []);
     setDraftDismissed(true);
   }
 
@@ -159,6 +164,7 @@ function EditShelterPetContent() {
         setNotes(row.notes ?? '');
         setVideoUrl(row.video_url ?? '');
         setTransportable(row.transportable !== false);
+        setApplicationTags(row.application_tags ?? []);
         setPhotos(petPhotos);
       } catch {
         if (!cancelled) setError('Could not load pet.');
@@ -214,6 +220,7 @@ function EditShelterPetContent() {
           notes: notes || null,
           video_url: normalizedVideo,
           transportable,
+          application_tags: applicationTags,
         },
         statusChanged ? { expectedStatus: pet.status } : {}
       );
@@ -314,6 +321,14 @@ function EditShelterPetContent() {
                 maxLength={100}
               />
             </label>
+
+            <PetTagsField
+              shelterId={shelterId}
+              petName={name}
+              value={applicationTags}
+              onChange={setApplicationTags}
+              disabled={saving || deleting}
+            />
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="form-control w-full">

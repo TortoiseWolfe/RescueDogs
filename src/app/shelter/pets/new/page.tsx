@@ -7,7 +7,8 @@ import { getInternalUrl } from '@/config/project.config';
 import { supabase } from '@/lib/supabase/client';
 import { ShelterPetService } from '@/services/applications';
 import { useShelterMembership } from '../../ShelterGate';
-import type { PetSex, PetSize, PetSpecies } from '@/types/applications';
+import type { PetSex, PetSize, PetSpecies, PetTag } from '@/types/applications';
+import { PetTagsField } from '../PetTagsField';
 import { combineAgeYears } from '@/lib/pet-age';
 import { normalizePetVideoUrl } from '@/lib/pet-video-url';
 import { withAsyncTimeout } from '@/lib/with-timeout';
@@ -34,6 +35,7 @@ interface PetDraft {
   notes: string;
   videoUrl: string;
   transportable: boolean;
+  applicationTags: PetTag[];
 }
 
 /**
@@ -52,6 +54,7 @@ export default function NewShelterPetPage() {
   const [notes, setNotes] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [transportable, setTransportable] = useState(true);
+  const [applicationTags, setApplicationTags] = useState<PetTag[]>([]);
   const [saving, setSaving] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +76,7 @@ export default function NewShelterPetPage() {
     notes,
     videoUrl,
     transportable,
+    applicationTags,
   };
   const { restored, savedAt, clearDraft } = useFormDraft(
     `shelter:${shelterId}:pet:new`,
@@ -96,6 +100,7 @@ export default function NewShelterPetPage() {
     setNotes(restored.notes ?? '');
     setVideoUrl(restored.videoUrl ?? '');
     setTransportable(restored.transportable ?? true);
+    setApplicationTags(restored.applicationTags ?? []);
     setRestoredFromDraft(true);
   }, [restored]);
 
@@ -150,6 +155,7 @@ export default function NewShelterPetPage() {
           notes: notes || null,
           video_url: normalizedVideo,
           transportable,
+          application_tags: applicationTags,
         }),
         30_000,
         'Save pet'
@@ -230,6 +236,14 @@ export default function NewShelterPetPage() {
             maxLength={100}
           />
         </label>
+
+        <PetTagsField
+          shelterId={shelterId}
+          petName={name}
+          value={applicationTags}
+          onChange={setApplicationTags}
+          disabled={busy}
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="form-control w-full">

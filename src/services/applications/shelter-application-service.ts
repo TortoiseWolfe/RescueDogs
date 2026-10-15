@@ -7,7 +7,9 @@ import type {
   ApplicationStatus,
   ApplicationWithPet,
   ApplicationWithPetAndHistory,
+  FlagComparator,
   Shelter,
+  ShelterFlagRule,
   ShelterRole,
 } from '@/types/applications';
 import { normalizeTransportStates } from '@/lib/browse/transport';
@@ -85,6 +87,9 @@ export const QUESTION_SETTINGS_ERROR_CODES = [
   'invalid_shelter',
   'invalid_question',
   'invalid_questions',
+  'not_flaggable',
+  'invalid_label',
+  'invalid_rule',
 ] as const;
 
 export type QuestionSettingsErrorCode =
@@ -456,5 +461,63 @@ export class ShelterApplicationService {
       );
     }
     return typeof data === 'number' ? data : 0;
+  }
+
+  async listApplicationFlags(shelterId: string): Promise<ShelterFlagRule[]> {
+    const { data, error } = await this.supabase
+      .from('shelter_application_flags')
+      .select('question_id, answers, comparator, threshold, label')
+      .eq('shelter_id', shelterId);
+
+    if (error) throw error;
+    return (data ?? []).map((row) => ({
+      question_id: row.question_id,
+      answers: Array.isArray(row.answers)
+        ? row.answers.map((value) => String(value))
+        : [],
+      comparator: (row.comparator ?? 'in') as FlagComparator,
+      threshold:
+        row.threshold === null || row.threshold === undefined
+          ? null
+          : Number(row.threshold),
+      label: row.label,
+    }));
+  }
+
+  async setApplicationFlag(
+    shelterId: string,
+    rule: ShelterFlagRule
+  ): Promise<void> {
+    const { error } = await this.supabase.rpc('set_shelter_application_flag', {
+      p_shelter_id: shelterId,
+      p_question_id: rule.question_id,
+      p_answers: rule.answers,
+      p_comparator: rule.comparator,
+      p_threshold: rule.threshold,
+      p_label: rule.label.trim(),
+    });
+    if (error) {
+      throw new QuestionSettingsError(
+        questionSettingsErrorCode(error.message ?? '')
+      );
+    }
+  }
+
+  async clearApplicationFlag(
+    shelterId: string,
+    questionId: string
+  ): Promise<void> {
+    const { error } = await this.supabase.rpc(
+      'clear_shelter_application_flag',
+      {
+        p_shelter_id: shelterId,
+        p_question_id: questionId,
+      }
+    );
+    if (error) {
+      throw new QuestionSettingsError(
+        questionSettingsErrorCode(error.message ?? '')
+      );
+    }
   }
 }

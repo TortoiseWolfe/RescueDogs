@@ -3004,6 +3004,26 @@ COMMENT ON COLUMN pets.notes IS 'Public short bio for browse cards; staff-editab
 COMMENT ON COLUMN pets.video_url IS 'Optional https URL to a public video (YouTube, TikTok, Vimeo, etc.); open in new tab — no upload/embed (#326)';
 COMMENT ON COLUMN pets.transportable IS 'Per-pet opt-out of the rescue transport offer; only meaningful when shelters.transports (#331)';
 
+-- Pet-specific application question groups (#337). Empty = no tagged groups.
+ALTER TABLE pets ADD COLUMN IF NOT EXISTS application_tags TEXT[] NOT NULL DEFAULT '{}';
+DO $$
+BEGIN
+  ALTER TABLE pets ADD CONSTRAINT pets_application_tags_valid
+    CHECK (
+      application_tags <@ ARRAY[
+        'sighthound',
+        'bully_breed',
+        'large_dog',
+        'escape_risk',
+        'senior',
+        'special_needs'
+      ]::text[]
+    );
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+COMMENT ON COLUMN pets.application_tags IS 'Which pet-specific question groups this listing adds to its application (#337).';
+
 -- Pet sex options expanded for shelter intake (#273)
 ALTER TABLE pets DROP CONSTRAINT IF EXISTS pets_sex_check;
 ALTER TABLE pets ADD CONSTRAINT pets_sex_check CHECK (
@@ -4605,17 +4625,23 @@ AS $$
 DECLARE
   v_species TEXT;
   v_pet_name TEXT;
+  v_tags TEXT[];
   v_email TEXT;
   v_result JSONB;
 BEGIN
-  SELECT species, name INTO v_species, v_pet_name FROM pets WHERE id = p_pet;
+  SELECT species, name, application_tags
+    INTO v_species, v_pet_name, v_tags
+    FROM pets WHERE id = p_pet;
   SELECT email INTO v_email FROM auth.users WHERE id = p_adopter;
 
   WITH selected AS (
     SELECT q.*
     FROM application_questions q
     WHERE q.retired_at IS NULL
-      AND q.pet_tag IS NULL
+      AND (
+        q.pet_tag IS NULL
+        OR q.pet_tag = ANY(COALESCE(v_tags, '{}'))
+      )
       AND (q.species = 'any' OR q.species = v_species)
       AND (
         q.is_locked
@@ -4786,6 +4812,155 @@ COMMENT ON FUNCTION set_shelter_application_questions(UUID, TEXT[]) IS
 
 REVOKE ALL ON FUNCTION set_shelter_application_questions(UUID, TEXT[]) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION set_shelter_application_questions(UUID, TEXT[]) TO authenticated;
+
+CREATE TABLE IF NOT EXISTS shelter_application_flags (
+  shelter_id UUID NOT NULL REFERENCES shelters(id) ON DELETE CASCADE,
+  question_id TEXT NOT NULL REFERENCES application_questions(id) ON DELETE CASCADE,
+  answers JSONB NOT NULL DEFAULT '[]',
+  comparator TEXT CHECK (
+    comparator IS NULL OR comparator IN ('in', 'gt', 'lt', 'age_lt')
+  ),
+  threshold NUMERIC,
+  label TEXT NOT NULL CHECK (char_length(btrim(label)) BETWEEN 1 AND 80),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (shelter_id, question_id)
+);
+
+COMMENT ON TABLE shelter_application_flags IS 'Per-rescue red-flag rules (#337). Off by default. Managers write only through set/clear RPCs. Never changes application status.';
+
+DROP TRIGGER IF EXISTS update_shelter_application_flags_updated_at ON shelter_application_flags;
+CREATE TRIGGER update_shelter_application_flags_updated_at
+  BEFORE UPDATE ON shelter_application_flags
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE shelter_application_flags ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Shelter staff read own flags" ON shelter_application_flags;
+CREATE POLICY "Shelter staff read own flags" ON shelter_application_flags
+  FOR SELECT TO authenticated
+  USING (is_shelter_staff(shelter_id));
+
+CREATE OR REPLACE FUNCTION set_shelter_application_flag(
+  p_shelter_id UUID,
+  p_question_id TEXT,
+  p_answers JSONB,
+  p_comparator TEXT,
+  p_threshold NUMERIC,
+  p_label TEXT
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID := auth.uid();
+  v_label TEXT := btrim(COALESCE(p_label, ''));
+  v_flaggable BOOLEAN;
+  v_retired TIMESTAMPTZ;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'not authenticated';
+  END IF;
+  IF p_shelter_id IS NULL THEN
+    RAISE EXCEPTION 'invalid_shelter';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM shelter_members
+    WHERE user_id = v_uid
+      AND shelter_id = p_shelter_id
+      AND role = 'manager'
+  ) THEN
+    RAISE EXCEPTION 'not_a_manager';
+  END IF;
+
+  SELECT is_flaggable, retired_at
+    INTO v_flaggable, v_retired
+    FROM application_questions
+    WHERE id = p_question_id;
+  IF NOT FOUND OR v_retired IS NOT NULL THEN
+    RAISE EXCEPTION 'invalid_question';
+  END IF;
+  IF v_flaggable IS NOT TRUE THEN
+    RAISE EXCEPTION 'not_flaggable';
+  END IF;
+  IF char_length(v_label) < 1 OR char_length(v_label) > 80 THEN
+    RAISE EXCEPTION 'invalid_label';
+  END IF;
+  IF p_comparator IS NOT NULL
+     AND p_comparator NOT IN ('in', 'gt', 'lt', 'age_lt') THEN
+    RAISE EXCEPTION 'invalid_rule';
+  END IF;
+  IF p_comparator IN ('gt', 'lt', 'age_lt') AND p_threshold IS NULL THEN
+    RAISE EXCEPTION 'invalid_rule';
+  END IF;
+  IF COALESCE(p_comparator, 'in') = 'in'
+     AND (p_answers IS NULL OR jsonb_typeof(p_answers) <> 'array'
+          OR jsonb_array_length(p_answers) < 1) THEN
+    RAISE EXCEPTION 'invalid_rule';
+  END IF;
+
+  INSERT INTO shelter_application_flags (
+    shelter_id, question_id, answers, comparator, threshold, label
+  ) VALUES (
+    p_shelter_id,
+    p_question_id,
+    COALESCE(p_answers, '[]'::jsonb),
+    COALESCE(p_comparator, 'in'),
+    p_threshold,
+    v_label
+  )
+  ON CONFLICT (shelter_id, question_id) DO UPDATE
+    SET answers = EXCLUDED.answers,
+        comparator = EXCLUDED.comparator,
+        threshold = EXCLUDED.threshold,
+        label = EXCLUDED.label;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION clear_shelter_application_flag(
+  p_shelter_id UUID,
+  p_question_id TEXT
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID := auth.uid();
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'not authenticated';
+  END IF;
+  IF p_shelter_id IS NULL THEN
+    RAISE EXCEPTION 'invalid_shelter';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM shelter_members
+    WHERE user_id = v_uid
+      AND shelter_id = p_shelter_id
+      AND role = 'manager'
+  ) THEN
+    RAISE EXCEPTION 'not_a_manager';
+  END IF;
+
+  DELETE FROM shelter_application_flags
+  WHERE shelter_id = p_shelter_id
+    AND question_id = p_question_id;
+END;
+$$;
+
+COMMENT ON FUNCTION set_shelter_application_flag(UUID, TEXT, JSONB, TEXT, NUMERIC, TEXT) IS
+  'Manager-only upsert of one red-flag rule (#337). Off by default; never changes status.';
+COMMENT ON FUNCTION clear_shelter_application_flag(UUID, TEXT) IS
+  'Manager-only removal of a red-flag rule. Applies to applications submitted after the change.';
+
+REVOKE ALL ON FUNCTION set_shelter_application_flag(UUID, TEXT, JSONB, TEXT, NUMERIC, TEXT) FROM PUBLIC;
+REVOKE ALL ON FUNCTION clear_shelter_application_flag(UUID, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION set_shelter_application_flag(UUID, TEXT, JSONB, TEXT, NUMERIC, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION clear_shelter_application_flag(UUID, TEXT) TO authenticated;
 
 -- ─── Realtime: live status tracker ──────────────────────────────────────────
 -- REPLICA IDENTITY FULL is required for Realtime UPDATE events; publication

@@ -814,6 +814,7 @@ export type Database = {
           species: string;
           status: string;
           video_url: string | null;
+          application_tags: string[];
         };
         Insert: {
           age_years?: number | null;
@@ -829,6 +830,7 @@ export type Database = {
           species?: string;
           status?: string;
           video_url?: string | null;
+          application_tags?: string[];
         };
         Update: {
           age_years?: number | null;
@@ -844,6 +846,7 @@ export type Database = {
           species?: string;
           status?: string;
           video_url?: string | null;
+          application_tags?: string[];
         };
         Relationships: [
           {
@@ -925,6 +928,51 @@ export type Database = {
           window_start?: string;
         };
         Relationships: [];
+      };
+      shelter_application_flags: {
+        Row: {
+          answers: Json;
+          comparator: string | null;
+          label: string;
+          question_id: string;
+          shelter_id: string;
+          threshold: number | null;
+          updated_at: string;
+        };
+        Insert: {
+          answers?: Json;
+          comparator?: string | null;
+          label: string;
+          question_id: string;
+          shelter_id: string;
+          threshold?: number | null;
+          updated_at?: string;
+        };
+        Update: {
+          answers?: Json;
+          comparator?: string | null;
+          label?: string;
+          question_id?: string;
+          shelter_id?: string;
+          threshold?: number | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'shelter_application_flags_question_id_fkey';
+            columns: ['question_id'];
+            isOneToOne: false;
+            referencedRelation: 'application_questions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'shelter_application_flags_shelter_id_fkey';
+            columns: ['shelter_id'];
+            isOneToOne: false;
+            referencedRelation: 'shelters';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       shelter_application_questions: {
         Row: {
@@ -1442,6 +1490,21 @@ export type Database = {
       set_shelter_application_questions: {
         Args: { p_question_ids: string[]; p_shelter_id: string };
         Returns: number;
+      };
+      set_shelter_application_flag: {
+        Args: {
+          p_answers: Json;
+          p_comparator: string;
+          p_label: string;
+          p_question_id: string;
+          p_shelter_id: string;
+          p_threshold: number | null;
+        };
+        Returns: undefined;
+      };
+      clear_shelter_application_flag: {
+        Args: { p_question_id: string; p_shelter_id: string };
+        Returns: undefined;
       };
       record_failed_attempt: {
         Args: {

@@ -8,10 +8,15 @@ import type {
   PetSize,
   PetSpecies,
   PetStatus,
+  PetTag,
 } from '@/types/applications';
 
 const PET_COLUMNS =
-  'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, video_url, transportable, created_at';
+  'id, shelter_id, name, species, breed, sex, age_years, size, photo_url, status, notes, video_url, transportable, application_tags, created_at';
+
+function withPetTags(pet: Pet): Pet {
+  return { ...pet, application_tags: pet.application_tags ?? [] };
+}
 
 export type PetWriteInput = {
   name: string;
@@ -26,6 +31,8 @@ export type PetWriteInput = {
   video_url?: string | null;
   /** Per-pet opt-out of the rescue's transport offer (#331). */
   transportable?: boolean;
+  /** Pet-specific question groups for this listing (#337). */
+  application_tags?: PetTag[];
 };
 
 /**
@@ -48,7 +55,7 @@ export class ShelterPetService {
     if (error) {
       throw new Error(`Failed to list pets: ${error.message}`);
     }
-    return (data ?? []) as Pet[];
+    return ((data ?? []) as Pet[]).map(withPetTags);
   }
 
   async getPet(petId: string): Promise<Pet | null> {
@@ -61,7 +68,7 @@ export class ShelterPetService {
     if (error) {
       throw new Error(`Failed to load pet: ${error.message}`);
     }
-    return data as Pet | null;
+    return data ? withPetTags(data as Pet) : null;
   }
 
   async createPet(shelterId: string, input: PetWriteInput): Promise<Pet> {
@@ -80,6 +87,7 @@ export class ShelterPetService {
         notes: input.notes?.trim() || null,
         video_url: input.video_url?.trim() || null,
         transportable: input.transportable ?? true,
+        application_tags: input.application_tags ?? [],
       })
       .select(PET_COLUMNS)
       .single();
@@ -87,7 +95,7 @@ export class ShelterPetService {
     if (error) {
       throw new Error(`Failed to create pet: ${error.message}`);
     }
-    return data as Pet;
+    return withPetTags(data as Pet);
   }
 
   async updatePet(
@@ -109,6 +117,8 @@ export class ShelterPetService {
       patch.video_url = input.video_url?.trim() || null;
     if (input.transportable !== undefined)
       patch.transportable = input.transportable;
+    if (input.application_tags !== undefined)
+      patch.application_tags = input.application_tags;
 
     let query = this.supabase.from('pets').update(patch).eq('id', petId);
     // Status is driven by the application RPCs; only overwrite it if it is
@@ -133,7 +143,7 @@ export class ShelterPetService {
       }
       throw new Error(`Failed to update pet: ${error.message}`);
     }
-    return data as Pet;
+    return withPetTags(data as Pet);
   }
 
   async getPetApplicationCount(petId: string): Promise<number> {

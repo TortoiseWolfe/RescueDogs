@@ -22,14 +22,20 @@ import {
 import type {
   ApplicationQuestion,
   QuestionCategory,
+  ShelterFlagRule,
 } from '@/types/applications';
+import { flagKind } from '@/lib/applications/flag-settings';
 import { useShelterMembership } from '../ShelterGate';
+import { RedFlagEditor } from './RedFlagEditor';
 
 const ERROR_MESSAGES: Record<string, string> = {
   not_a_manager: 'Only a manager of this rescue can change these questions.',
   invalid_shelter: 'We could not find this rescue. Reload and try again.',
   invalid_question: 'One of those questions is no longer in the bank.',
   invalid_questions: 'Too many questions at once. Hide a few and try again.',
+  not_flaggable: 'That question cannot be red-flagged.',
+  invalid_label: 'Enter a short label your staff will recognize.',
+  invalid_rule: 'Choose an answer or a limit for this flag.',
   unknown: 'Could not save your changes. Please try again.',
 };
 
@@ -48,19 +54,27 @@ export default function ShelterQuestionsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [flags, setFlags] = useState<Record<string, ShelterFlagRule>>({});
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [flagSaving, setFlagSaving] = useState(false);
+  const [flagError, setFlagError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const service = new ShelterApplicationService(supabase);
-      const [bank, ids] = await Promise.all([
+      const [bank, ids, flagRows] = await Promise.all([
         service.listApplicationQuestions(),
         service.listShownQuestionIds(shelterId),
+        service.listApplicationFlags(shelterId),
       ]);
       const next = new Set(ids);
       setQuestions(bank);
       setShownIds(next);
       setSavedIds(new Set(ids));
+      setFlags(
+        Object.fromEntries(flagRows.map((rule) => [rule.question_id, rule]))
+      );
       setError(null);
     } catch {
       setError('We could not load the question bank. Please try again.');
@@ -132,6 +146,55 @@ export default function ShelterQuestionsPage() {
   function onToggleQuestion(question: ApplicationQuestion) {
     if (!isManager || question.is_locked) return;
     setShownIds(toggleQuestion(question, shownIds));
+  }
+
+  const editingQuestion = questions.find(
+    (question) => question.id === editingId
+  );
+  const editingFlag = editingId ? (flags[editingId] ?? null) : null;
+
+  async function onSaveFlag(rule: ShelterFlagRule) {
+    if (!isManager) return;
+    setFlagError(null);
+    setFlagSaving(true);
+    try {
+      const service = new ShelterApplicationService(supabase);
+      await service.setApplicationFlag(shelterId, rule);
+      setFlags((current) => ({ ...current, [rule.question_id]: rule }));
+      setEditingId(null);
+    } catch (err) {
+      setFlagError(
+        err instanceof QuestionSettingsError
+          ? (ERROR_MESSAGES[err.code] ?? ERROR_MESSAGES.unknown)
+          : ERROR_MESSAGES.unknown
+      );
+    } finally {
+      setFlagSaving(false);
+    }
+  }
+
+  async function onClearFlag(questionId: string) {
+    if (!isManager) return;
+    setFlagError(null);
+    setFlagSaving(true);
+    try {
+      const service = new ShelterApplicationService(supabase);
+      await service.clearApplicationFlag(shelterId, questionId);
+      setFlags((current) => {
+        const next = { ...current };
+        delete next[questionId];
+        return next;
+      });
+      setEditingId(null);
+    } catch (err) {
+      setFlagError(
+        err instanceof QuestionSettingsError
+          ? (ERROR_MESSAGES[err.code] ?? ERROR_MESSAGES.unknown)
+          : ERROR_MESSAGES.unknown
+      );
+    } finally {
+      setFlagSaving(false);
+    }
   }
 
   if (loading) {
@@ -299,6 +362,11 @@ export default function ShelterQuestionsPage() {
                       </span>
                     ) : null}
                   </span>
+                  {flags[question.id] ? (
+                    <span className="badge badge-error text-error-content">
+                      Red flag: {flags[question.id].label}
+                    </span>
+                  ) : null}
                   {tags
                     .filter((tag) => tag !== 'Locked')
                     .map((tag) => (
@@ -306,12 +374,47 @@ export default function ShelterQuestionsPage() {
                         {tag}
                       </span>
                     ))}
+                  {flagKind(question) ? (
+                    <button
+                      type="button"
+                      className={`btn btn-sm min-h-11 ${
+                        flags[question.id] ? 'btn-error' : 'btn-ghost'
+                      }`}
+                      aria-label={
+                        flags[question.id]
+                          ? `Edit red flag for ${question.wording}`
+                          : `Add red flag for ${question.wording}`
+                      }
+                      onClick={() => {
+                        setFlagError(null);
+                        setEditingId(question.id);
+                      }}
+                    >
+                      Flag
+                    </button>
+                  ) : null}
                 </li>
               );
             })}
           </ul>
         </section>
       </div>
+
+      {editingQuestion ? (
+        <RedFlagEditor
+          question={editingQuestion}
+          initial={editingFlag}
+          isManager={isManager}
+          saving={flagSaving}
+          error={flagError}
+          onSave={(rule) => void onSaveFlag(rule)}
+          onClear={() => void onClearFlag(editingQuestion.id)}
+          onClose={() => {
+            setEditingId(null);
+            setFlagError(null);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

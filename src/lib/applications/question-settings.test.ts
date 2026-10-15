@@ -9,6 +9,7 @@ import {
   questionsForPreview,
   showCategory,
   shownCount,
+  shownCountForTag,
   toggleQuestion,
 } from './question-settings';
 
@@ -121,6 +122,13 @@ describe('question-settings', () => {
     );
     expect(cat).not.toContain('hou.insurance_breed');
     expect(cat).toContain('spc.senior_pace');
+  });
+
+  it('counts shown questions for a pet tag', () => {
+    expect(shownCountForTag(bank, new Set(['spc.senior_pace']), 'senior')).toBe(
+      1
+    );
+    expect(shownCountForTag(bank, new Set(), 'senior')).toBe(0);
   });
 
   it('labels locked, species, sensitivity, and renter follow-ups', () => {
