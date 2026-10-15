@@ -862,4 +862,34 @@ describe('ShelterApplicationService', () => {
       service.setShownQuestionIds(SHELTER_ID, [])
     ).rejects.toMatchObject({ code: 'not_a_manager' });
   });
+
+  it('setApplicationFlag calls the manager-only RPC (#337)', async () => {
+    mock.rpc.mockResolvedValue({ data: null, error: null });
+
+    await service.setApplicationFlag(SHELTER_ID, {
+      question_id: 'hou.landlord_allows',
+      answers: ['no', 'not_asked'],
+      comparator: 'in',
+      threshold: null,
+      label: "Landlord hasn't approved",
+    });
+    expect(mock.rpc).toHaveBeenCalledWith('set_shelter_application_flag', {
+      p_shelter_id: SHELTER_ID,
+      p_question_id: 'hou.landlord_allows',
+      p_answers: ['no', 'not_asked'],
+      p_comparator: 'in',
+      p_threshold: null,
+      p_label: "Landlord hasn't approved",
+    });
+  });
+
+  it('clearApplicationFlag calls the manager-only RPC (#337)', async () => {
+    mock.rpc.mockResolvedValue({ data: null, error: null });
+
+    await service.clearApplicationFlag(SHELTER_ID, 'hou.landlord_allows');
+    expect(mock.rpc).toHaveBeenCalledWith('clear_shelter_application_flag', {
+      p_shelter_id: SHELTER_ID,
+      p_question_id: 'hou.landlord_allows',
+    });
+  });
 });

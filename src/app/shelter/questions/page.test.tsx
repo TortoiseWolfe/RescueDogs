@@ -7,6 +7,9 @@ const serviceMocks = vi.hoisted(() => ({
   listApplicationQuestions: vi.fn(),
   listShownQuestionIds: vi.fn(),
   setShownQuestionIds: vi.fn(),
+  listApplicationFlags: vi.fn(),
+  setApplicationFlag: vi.fn(),
+  clearApplicationFlag: vi.fn(),
 }));
 
 const membership = vi.hoisted(() => ({
@@ -79,6 +82,9 @@ describe('shelter questions page', () => {
     serviceMocks.listApplicationQuestions.mockResolvedValue(BANK);
     serviceMocks.listShownQuestionIds.mockResolvedValue([]);
     serviceMocks.setShownQuestionIds.mockResolvedValue(1);
+    serviceMocks.listApplicationFlags.mockResolvedValue([]);
+    serviceMocks.setApplicationFlag.mockResolvedValue(undefined);
+    serviceMocks.clearApplicationFlag.mockResolvedValue(undefined);
   });
 
   it('shows locked questions and lets a manager add an extra, then save', async () => {
@@ -121,5 +127,26 @@ describe('shelter questions page', () => {
       await screen.findByText(/Only a manager can change which questions/)
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+  });
+
+  it('opens the red-flag editor for a flaggable question', async () => {
+    render(<ShelterQuestionsPage />);
+    expect(
+      await screen.findByRole('heading', { name: 'Application questions' })
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Add red flag for Does your landlord, HOA, or neighborhood have pet restrictions?',
+      })
+    );
+
+    expect(
+      screen.getByRole('heading', { name: 'Red flag' })
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Save flag' }));
+    await waitFor(() =>
+      expect(serviceMocks.setApplicationFlag).toHaveBeenCalled()
+    );
   });
 });

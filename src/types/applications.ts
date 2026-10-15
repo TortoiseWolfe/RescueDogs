@@ -152,6 +152,8 @@ export interface Pet {
    * alongside `shelters.transports` — never a copy of it.
    */
   transportable: boolean;
+  /** Pet-specific question groups for this listing (#337). */
+  application_tags?: PetTag[];
   created_at: string;
 }
 
@@ -335,6 +337,19 @@ export const PET_TAG_LABELS: Record<PetTag, string> = {
   senior: 'Senior',
   special_needs: 'Special needs',
 };
+
+export const PET_TAGS = Object.keys(PET_TAG_LABELS) as PetTag[];
+
+export type FlagComparator = 'in' | 'gt' | 'lt' | 'age_lt';
+
+/** One rescue's red-flag rule for a bank question (#337). */
+export interface ShelterFlagRule {
+  question_id: string;
+  answers: string[];
+  comparator: FlagComparator;
+  threshold: number | null;
+  label: string;
+}
 
 /** One row of the shared question bank (#337). */
 export interface ApplicationQuestion {

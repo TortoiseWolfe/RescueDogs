@@ -164,6 +164,10 @@ describe.skipIf(!hasRlsTestEnvironment())(
         .from('shelter_application_questions')
         .delete()
         .eq('shelter_id', SHELTER_ID);
+      await service
+        .from('shelter_application_flags')
+        .delete()
+        .eq('shelter_id', SHELTER_ID);
       await service.from('pets').delete().in('id', [DOG_1, DOG_2, CAT]);
       await service
         .from('shelter_members')
@@ -372,6 +376,93 @@ describe.skipIf(!hasRlsTestEnvironment())(
       );
       expect(ids).not.toContain(DOG_ONLY_EXTRA);
       expect(ids).toHaveLength(LOCKED_CORE.length);
+    });
+
+    it('staff cannot write red-flag rules; managers can', async () => {
+      const staffClient = await createAuthenticatedClient(
+        STAFF_EMAIL,
+        PASSWORD
+      );
+      const { error: staffError } = await staffClient.rpc(
+        'set_shelter_application_flag',
+        {
+          p_shelter_id: SHELTER_ID,
+          p_question_id: 'hou.landlord_allows',
+          p_answers: ['no'],
+          p_comparator: 'in',
+          p_threshold: null,
+          p_label: "Landlord hasn't approved",
+        }
+      );
+      expect(staffError).not.toBeNull();
+      expect(staffError!.message).toContain('not_a_manager');
+
+      const managerClient = await createAuthenticatedClient(
+        MANAGER_EMAIL,
+        PASSWORD
+      );
+      const { error } = await managerClient.rpc(
+        'set_shelter_application_flag',
+        {
+          p_shelter_id: SHELTER_ID,
+          p_question_id: 'hou.landlord_allows',
+          p_answers: ['no', 'not_asked'],
+          p_comparator: 'in',
+          p_threshold: null,
+          p_label: "Landlord hasn't approved",
+        }
+      );
+      expect(error).toBeNull();
+
+      const { data } = await managerClient
+        .from('shelter_application_flags')
+        .select('label')
+        .eq('shelter_id', SHELTER_ID);
+      expect(data).toEqual([{ label: "Landlord hasn't approved" }]);
+
+      const adopterClient = await createAuthenticatedClient(
+        ADOPTER_EMAIL,
+        PASSWORD
+      );
+      const { data: hidden } = await adopterClient
+        .from('shelter_application_flags')
+        .select('label')
+        .eq('shelter_id', SHELTER_ID);
+      expect(hidden).toHaveLength(0);
+    });
+
+    it('tagged pets add matching question groups to new applications', async () => {
+      const managerClient = await createAuthenticatedClient(
+        MANAGER_EMAIL,
+        PASSWORD
+      );
+      const { error } = await managerClient.rpc(
+        'set_shelter_application_questions',
+        {
+          p_shelter_id: SHELTER_ID,
+          p_question_ids: [
+            ANY_SPECIES_EXTRA,
+            DOG_ONLY_EXTRA,
+            'pts.sight.leash_only',
+          ],
+        }
+      );
+      expect(error).toBeNull();
+
+      await createServiceClient()
+        .from('pets')
+        .update({ application_tags: ['sighthound'] })
+        .eq('id', DOG_2);
+
+      const taggedIds = (await snapshotOf(await apply(DOG_2))).map(
+        (e) => e.question_id
+      );
+      expect(taggedIds).toContain('pts.sight.leash_only');
+
+      const catIds = (await snapshotOf(await apply(CAT))).map(
+        (e) => e.question_id
+      );
+      expect(catIds).not.toContain('pts.sight.leash_only');
     });
   }
 );
