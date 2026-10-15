@@ -396,6 +396,8 @@ export interface Application {
   profile_snapshot: ProfileSnapshot;
   /** Null for applications submitted before #337 or if the build failed. */
   answers_snapshot: AnswerSnapshotEntry[] | null;
+  /** Question ids omitted from answers_snapshot when the adopter declined to share (#446). */
+  snapshot_omit_question_ids?: string[];
   why_this_pet: string | null;
   status_changed_at: string;
   created_at: string;

@@ -4,6 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
   AdopterProfile,
   Application,
+  ApplicationQuestion,
   ApplicationWithPet,
   ApplicationWithPetAndHistory,
   AvailablePet,
@@ -46,6 +47,18 @@ export interface ApplicationSubmitInput {
   shelterId: string;
   profile: ProfileSnapshot;
   whyThisPet?: string;
+  /**
+   * Bank question ids to leave out of answers_snapshot (adopter declined to
+   * share saved third-party data — currently references). (#446)
+   */
+  snapshotOmitQuestionIds?: string[];
+  /** Extra / edited bank answers to upsert before insert. */
+  answers?: Record<string, unknown>;
+}
+
+export interface AdopterAnswerRow {
+  question_id: string;
+  value: unknown;
 }
 
 export type { BrowseLocationFilters };
@@ -230,14 +243,74 @@ export class ApplicationService {
     return (data as AdopterProfile) ?? null;
   }
 
+  /** Shared bank, minus retired questions (#337). Readable by anyone signed in. */
+  async listApplicationQuestions(): Promise<ApplicationQuestion[]> {
+    const { data, error } = await this.supabase
+      .from('application_questions')
+      .select(
+        'id, category, sort_order, wording, answer_type, choices, fields, follow_up, show_if, parent_id, species, pet_tag, sensitivity, is_locked, is_flaggable, always_optional, retired_at'
+      )
+      .is('retired_at', null)
+      .order('sort_order');
+
+    if (error) throw error;
+    return (data ?? []) as unknown as ApplicationQuestion[];
+  }
+
+  /** Extra question ids this rescue currently shows (locked are implied). */
+  async listShownQuestionIds(shelterId: string): Promise<string[]> {
+    const { data, error } = await this.supabase
+      .from('shelter_application_questions')
+      .select('question_id')
+      .eq('shelter_id', shelterId)
+      .eq('shown', true);
+
+    if (error) throw error;
+    return (data ?? []).map((row) => row.question_id);
+  }
+
+  /** Saved bank answers for reuse (#337 / #446). Own-row only under RLS. */
+  async listAdopterAnswers(userId: string): Promise<AdopterAnswerRow[]> {
+    const { data, error } = await this.supabase
+      .from('adopter_answers')
+      .select('question_id, value')
+      .eq('adopter_id', userId);
+
+    if (error) throw error;
+    return (data ?? []) as AdopterAnswerRow[];
+  }
+
+  /** Upsert bank answers the adopter just filled (#446). */
+  async upsertAdopterAnswers(
+    userId: string,
+    answers: Record<string, unknown>
+  ): Promise<void> {
+    const rows = Object.entries(answers).map(([question_id, value]) => ({
+      adopter_id: userId,
+      question_id,
+      value: value as never,
+    }));
+    if (rows.length === 0) return;
+
+    const { error } = await this.supabase
+      .from('adopter_answers')
+      .upsert(rows, { onConflict: 'adopter_id,question_id' });
+
+    if (error) throw error;
+  }
+
   /**
-   * Submit an application: refresh the reusable profile, then insert the
-   * application with the answers frozen as profile_snapshot.
+   * Submit an application: refresh the reusable profile (and optional bank
+   * answers), then insert. Postgres freezes answers_snapshot on insert.
    */
   async submitApplication(
     userId: string,
     input: ApplicationSubmitInput
   ): Promise<Application> {
+    if (input.answers && Object.keys(input.answers).length > 0) {
+      await this.upsertAdopterAnswers(userId, input.answers);
+    }
+
     const { error: profileError } = await this.supabase
       .from('adopter_profiles')
       .upsert({ id: userId, ...input.profile }, { onConflict: 'id' });
@@ -252,6 +325,7 @@ export class ApplicationService {
         shelter_id: input.shelterId,
         profile_snapshot: input.profile,
         why_this_pet: input.whyThisPet ?? null,
+        snapshot_omit_question_ids: input.snapshotOmitQuestionIds ?? [],
       })
       .select('*')
       .single();

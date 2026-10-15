@@ -1,6 +1,12 @@
 'use client';
 
-import React, { Suspense, useCallback, useEffect, useState } from 'react';
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { clearFormDraft } from '@/hooks/useFormDraft';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/auth/ProtectedRoute/ProtectedRoute';
@@ -8,38 +14,13 @@ import SoftCoBrand from '@/components/molecular/SoftCoBrand';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { ApplicationService } from '@/services/applications';
-import ApplicationForm from '@/components/forms/ApplicationForm';
+import type { AvailablePet } from '@/types/applications';
+import type { ApplicationQuestion } from '@/types/applications';
 import {
-  toProfileSnapshot,
-  type ApplicationFormData,
-} from '@/schemas/application.schema';
-import type { AdopterProfile, AvailablePet } from '@/types/applications';
+  AdopterApplicationFlow,
+  type AdopterApplicationSubmitPayload,
+} from './AdopterApplicationFlow';
 import SearchParamsReader from './SearchParamsReader';
-
-/** Map a saved adopter profile to form default values (nulls → undefined). */
-function profileToDefaults(
-  profile: AdopterProfile
-): Partial<ApplicationFormData> {
-  return {
-    full_name: profile.full_name,
-    phone: profile.phone ?? undefined,
-    address_line: profile.address_line ?? undefined,
-    city: profile.city ?? undefined,
-    state: profile.state ?? undefined,
-    zip: profile.zip ?? undefined,
-    housing_type: profile.housing_type,
-    landlord_approval: profile.landlord_approval ?? undefined,
-    landlord_contact: profile.landlord_contact ?? undefined,
-    has_yard: profile.has_yard,
-    yard_fenced: profile.yard_fenced ?? undefined,
-    household_adults: profile.household_adults,
-    household_children: profile.household_children,
-    other_pets: profile.other_pets ?? undefined,
-    vet_name: profile.vet_name ?? undefined,
-    vet_phone: profile.vet_phone ?? undefined,
-    experience: profile.experience ?? undefined,
-  };
-}
 
 function AdoptContent() {
   const { user, isLoading: authLoading } = useAuth();
@@ -47,9 +28,13 @@ function AdoptContent() {
   const [preselectedPetId, setPreselectedPetId] = useState<string | null>(null);
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const [pets, setPets] = useState<AvailablePet[]>([]);
-  const [defaults, setDefaults] = useState<
-    Partial<ApplicationFormData> | undefined
-  >(undefined);
+  const [bank, setBank] = useState<ApplicationQuestion[]>([]);
+  const [shownByShelter, setShownByShelter] = useState<Map<string, string[]>>(
+    new Map()
+  );
+  const [savedAnswers, setSavedAnswers] = useState<Map<string, unknown>>(
+    new Map()
+  );
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,13 +53,32 @@ function AdoptContent() {
     (async () => {
       try {
         const service = new ApplicationService(supabase);
-        const [availablePets, profile] = await Promise.all([
+        const [availablePets, answerRows, questions] = await Promise.all([
           service.getAvailablePets(),
-          service.getAdopterProfile(user.id),
+          service.listAdopterAnswers(user.id),
+          service.listApplicationQuestions(),
         ]);
         if (cancelled) return;
+
+        const shelterIds = [
+          ...new Set(availablePets.map((pet) => pet.shelter_id)),
+        ];
+        const shownEntries = await Promise.all(
+          shelterIds.map(
+            async (shelterId) =>
+              [
+                shelterId,
+                await service.listShownQuestionIds(shelterId),
+              ] as const
+          )
+        );
+
         setPets(availablePets);
-        if (profile) setDefaults(profileToDefaults(profile));
+        setBank(questions);
+        setShownByShelter(new Map(shownEntries));
+        setSavedAnswers(
+          new Map(answerRows.map((row) => [row.question_id, row.value]))
+        );
         setError(null);
       } catch {
         if (!cancelled) {
@@ -101,27 +105,26 @@ function AdoptContent() {
     };
   }, [shelterName]);
 
+  const fallbackName = useMemo(() => {
+    const meta = user?.user_metadata as { full_name?: string } | undefined;
+    return meta?.full_name?.trim() || user?.email || 'Applicant';
+  }, [user]);
+
   const handleSubmit = useCallback(
-    async (data: ApplicationFormData) => {
+    async (payload: AdopterApplicationSubmitPayload) => {
       if (!user) return;
-      const pet = pets.find((p) => p.id === data.pet_id);
-      if (!pet) {
-        setError('That pet is no longer available — please pick another.');
-        return;
-      }
       setSubmitting(true);
       try {
         const service = new ApplicationService(supabase);
         const application = await service.submitApplication(user.id, {
-          petId: pet.id,
-          shelterId: pet.shelter_id,
-          profile: toProfileSnapshot(data),
-          whyThisPet: data.why_this_pet,
+          petId: payload.petId,
+          shelterId: payload.shelterId,
+          profile: payload.profile,
+          whyThisPet: payload.whyThisPet,
+          answers: payload.answers,
+          snapshotOmitQuestionIds: payload.snapshotOmitQuestionIds,
         });
-        // Clear HERE, not in the form: the catch below swallows failures, so a form
-        // that cleared after awaiting this handler would destroy a seventeen-field
-        // application at precisely the moment submission had failed (#310).
-        if (user) clearFormDraft(`adopt:application:${user.id}`);
+        clearFormDraft(`adopt:application:${user.id}`);
         router.push(`/applications/status?id=${application.id}`);
       } catch (err) {
         const code = (err as { code?: string })?.code;
@@ -133,7 +136,7 @@ function AdoptContent() {
         setSubmitting(false);
       }
     },
-    [user, pets, router]
+    [user, router]
   );
 
   if (authLoading || loading) {
@@ -176,14 +179,16 @@ function AdoptContent() {
           </div>
         </div>
       ) : (
-        <ApplicationForm
+        <AdopterApplicationFlow
           pets={pets}
-          defaultValues={defaults}
           preselectedPetId={preselectedPetId ?? undefined}
+          savedAnswers={savedAnswers}
+          bank={bank}
+          shownByShelter={shownByShelter}
+          fallbackName={fallbackName}
+          submitting={submitting}
           onPetIdChange={handlePetIdChange}
           onSubmit={handleSubmit}
-          draftKey={user ? `adopt:application:${user.id}` : null}
-          submitting={submitting}
         />
       )}
     </div>

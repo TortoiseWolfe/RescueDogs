@@ -332,6 +332,7 @@ describe('ApplicationService', () => {
       shelter_id: SHELTER_ID,
       profile_snapshot: profile,
       why_this_pet: 'Best dog',
+      snapshot_omit_question_ids: [],
     });
     expect(result).toEqual(insertedApp);
   });
