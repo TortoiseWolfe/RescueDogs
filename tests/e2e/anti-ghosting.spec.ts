@@ -96,7 +96,10 @@ test.describe('anti-ghosting loop', () => {
     ).toBeVisible({ timeout: 20000 });
 
     // Per-application "why this pet" is never reused — always asked.
-    const whyThisPet = adopterPage.locator('#bank-app-why-this-pet');
+    // Prefer role/name: the bank field id is easy to miss in the static export.
+    const whyThisPet = adopterPage.getByRole('textbox', {
+      name: /why this pet/i,
+    });
     await expect(whyThisPet).toBeVisible({ timeout: 20000 });
     await whyThisPet.fill('Noodle would complete our tiny-dog household.');
 
@@ -104,10 +107,13 @@ test.describe('anti-ghosting loop', () => {
       .getByRole('button', { name: /review application/i })
       .click();
 
-    // Review shows the reused locked-core answer from Dana's saved profile.
-    await expect(adopterPage.getByText('Dana Adopter')).toBeVisible({
-      timeout: 20000,
-    });
+    // Review lists reused locked-core answers (Full name → Dana Adopter).
+    await expect(
+      adopterPage.getByRole('heading', { name: /already on file/i })
+    ).toBeVisible({ timeout: 20000 });
+    await expect(
+      adopterPage.getByText('Dana Adopter', { exact: true })
+    ).toBeVisible();
 
     await adopterPage
       .getByRole('button', { name: /submit application/i })

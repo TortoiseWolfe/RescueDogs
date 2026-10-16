@@ -63,6 +63,7 @@ export function BankQuestionField({
       {question.answer_type === 'long_text' ? (
         <textarea
           id={id}
+          data-testid={id}
           className={`textarea textarea-bordered w-full ${error ? 'textarea-error' : ''}`}
           rows={4}
           value={typeof value === 'string' ? value : ''}
