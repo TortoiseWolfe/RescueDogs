@@ -230,6 +230,7 @@ export type Database = {
           pet_id: string;
           profile_snapshot: Json;
           shelter_id: string;
+          snapshot_omit_question_ids: string[];
           status: string;
           status_changed_at: string;
           why_this_pet: string | null;
@@ -242,6 +243,7 @@ export type Database = {
           pet_id: string;
           profile_snapshot: Json;
           shelter_id: string;
+          snapshot_omit_question_ids?: string[];
           status?: string;
           status_changed_at?: string;
           why_this_pet?: string | null;
@@ -254,6 +256,7 @@ export type Database = {
           pet_id?: string;
           profile_snapshot?: Json;
           shelter_id?: string;
+          snapshot_omit_question_ids?: string[];
           status?: string;
           status_changed_at?: string;
           why_this_pet?: string | null;

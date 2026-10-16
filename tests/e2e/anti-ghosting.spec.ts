@@ -87,16 +87,33 @@ test.describe('anti-ghosting loop', () => {
     await adopterPage.goto(`/adopt?pet=${NOODLE_ID}`);
     await adopterPage.waitForLoadState('domcontentloaded');
 
-    // Universal application: saved profile answers prefill the form
-    const fullName = adopterPage.locator('[name="full_name"]');
-    await expect(fullName).toHaveValue('Dana Adopter', { timeout: 20000 });
+    // Phase 3 (#446): pet comes from ?pet=, reused answers skip the ask step.
+    await expect(adopterPage.getByText(/Applying for.*Noodle/i)).toBeVisible({
+      timeout: 20000,
+    });
+    await expect(
+      adopterPage.getByText(/\d+ of \d+ already answered/i)
+    ).toBeVisible({ timeout: 20000 });
 
-    // Pet preselected from the ?pet= param
-    await expect(adopterPage.locator('[name="pet_id"]')).toHaveValue(NOODLE_ID);
+    // Per-application "why this pet" is never reused — always asked.
+    // Prefer role/name: the bank field id is easy to miss in the static export.
+    const whyThisPet = adopterPage.getByRole('textbox', {
+      name: /why this pet/i,
+    });
+    await expect(whyThisPet).toBeVisible({ timeout: 20000 });
+    await whyThisPet.fill('Noodle would complete our tiny-dog household.');
 
     await adopterPage
-      .locator('[name="why_this_pet"]')
-      .fill('Noodle would complete our tiny-dog household.');
+      .getByRole('button', { name: /review application/i })
+      .click();
+
+    // Review lists reused locked-core answers (Full name → Dana Adopter).
+    await expect(
+      adopterPage.getByRole('heading', { name: /already on file/i })
+    ).toBeVisible({ timeout: 20000 });
+    await expect(
+      adopterPage.getByText('Dana Adopter', { exact: true })
+    ).toBeVisible();
 
     await adopterPage
       .getByRole('button', { name: /submit application/i })

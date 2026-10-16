@@ -4324,6 +4324,14 @@ ALTER TABLE applications
 
 COMMENT ON COLUMN applications.answers_snapshot IS 'Questions the rescue showed at submit time, with wording and the adopter''s answers (#337). Always written by set_application_answers_snapshot; NULL for applications submitted before #337.';
 
+-- Adopter may omit saved third-party answers (references) from this rescue's
+-- copy when they decline to share on the review step (#446).
+ALTER TABLE applications
+  ADD COLUMN IF NOT EXISTS snapshot_omit_question_ids TEXT[] NOT NULL DEFAULT '{}';
+
+COMMENT ON COLUMN applications.snapshot_omit_question_ids IS
+  'Question ids left out of answers_snapshot at submit (adopter declined to share). Written by the adopter on INSERT; never edited afterward.';
+
 ALTER TABLE application_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE shelter_application_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE adopter_answers ENABLE ROW LEVEL SECURITY;
@@ -4608,13 +4616,17 @@ FROM adopter_profiles p
 CROSS JOIN LATERAL adopter_profile_answers(p) m
 ON CONFLICT (adopter_id, question_id) DO NOTHING;
 
+-- Drop the pre-#446 4-arg signature so only the omit-aware overload remains.
+DROP FUNCTION IF EXISTS build_application_answers_snapshot(UUID, UUID, UUID, TEXT);
+
 -- The rescue's questions for this pet, with the adopter's answers. Repeat
 -- answers (current pets) keep only the row fields the rescue asked for.
 CREATE OR REPLACE FUNCTION build_application_answers_snapshot(
   p_adopter UUID,
   p_shelter UUID,
   p_pet UUID,
-  p_why TEXT
+  p_why TEXT,
+  p_omit_ids TEXT[] DEFAULT '{}'::text[]
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -4628,6 +4640,7 @@ DECLARE
   v_tags TEXT[];
   v_email TEXT;
   v_result JSONB;
+  v_omit TEXT[] := COALESCE(p_omit_ids, '{}'::text[]);
 BEGIN
   SELECT species, name, application_tags
     INTO v_species, v_pet_name, v_tags
@@ -4638,6 +4651,7 @@ BEGIN
     SELECT q.*
     FROM application_questions q
     WHERE q.retired_at IS NULL
+      AND NOT (q.id = ANY (v_omit))
       AND (
         q.pet_tag IS NULL
         OR q.pet_tag = ANY(COALESCE(v_tags, '{}'))
@@ -4714,10 +4728,10 @@ BEGIN
 END;
 $$;
 
-COMMENT ON FUNCTION build_application_answers_snapshot(UUID, UUID, UUID, TEXT) IS
-  'Principle III (#337): locked + rescue-shown questions for the pet''s species, with the adopter''s answers. The only path by which saved answers reach a rescue.';
+COMMENT ON FUNCTION build_application_answers_snapshot(UUID, UUID, UUID, TEXT, TEXT[]) IS
+  'Principle III (#337): locked + rescue-shown questions for the pet''s species, with the adopter''s answers. p_omit_ids drops questions the adopter declined to share (#446). The only path by which saved answers reach a rescue.';
 
-REVOKE ALL ON FUNCTION build_application_answers_snapshot(UUID, UUID, UUID, TEXT) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION build_application_answers_snapshot(UUID, UUID, UUID, TEXT, TEXT[]) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION adopter_profile_answers(adopter_profiles) FROM PUBLIC, anon, authenticated;
 
 -- Always overwrite: a client cannot add, drop, or edit snapshot answers.
@@ -4732,7 +4746,11 @@ AS $$
 BEGIN
   BEGIN
     NEW.answers_snapshot := build_application_answers_snapshot(
-      NEW.adopter_id, NEW.shelter_id, NEW.pet_id, NEW.why_this_pet);
+      NEW.adopter_id,
+      NEW.shelter_id,
+      NEW.pet_id,
+      NEW.why_this_pet,
+      COALESCE(NEW.snapshot_omit_question_ids, '{}'::text[]));
   EXCEPTION WHEN OTHERS THEN
     RAISE WARNING 'answers_snapshot build failed for application %: %', NEW.id, SQLERRM;
     NEW.answers_snapshot := NULL;
