@@ -165,6 +165,41 @@ describe('ApplicationDetail', () => {
       expect(screen.queryByRole('img')).not.toBeInTheDocument();
     });
 
+    it('shows red-flag badges without hiding status controls (#448)', () => {
+      render(
+        <ApplicationDetail
+          application={makeApplication({
+            answers_snapshot: [
+              {
+                question_id: 'pet.ever_given_up',
+                category: 'pets',
+                wording: 'Have you ever given up a pet?',
+                answer_type: 'yes_no',
+                choices: null,
+                fields: null,
+                value: true,
+              },
+            ],
+          })}
+          onAdvance={vi.fn()}
+          flagRules={[
+            {
+              question_id: 'pet.ever_given_up',
+              answers: ['yes'],
+              comparator: 'in',
+              threshold: null,
+              label: 'Gave up a pet before',
+            },
+          ]}
+        />
+      );
+      expect(screen.getByText('Gave up a pet before')).toBeInTheDocument();
+      expect(
+        screen.getByText(/do not reject the application/i)
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('status-dropdown')).toBeInTheDocument();
+    });
+
     it('shows the current status badge', () => {
       render(
         <ApplicationDetail

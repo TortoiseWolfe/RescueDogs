@@ -270,6 +270,46 @@ describe('ApplicationsTable', () => {
     expect(link).toHaveAttribute('href', '/shelter/application?id=app-2');
   });
 
+  it('shows staff red-flag badges from the frozen snapshot (#448)', () => {
+    render(
+      <ApplicationsTable
+        applications={[
+          makeApplication({
+            id: 'app-flagged',
+            answers_snapshot: [
+              {
+                question_id: 'elg.date_of_birth',
+                category: 'eligibility',
+                wording: 'Date of birth',
+                answer_type: 'date',
+                choices: null,
+                fields: null,
+                value: `${new Date().getUTCFullYear() - 19}-06-01`,
+              },
+            ],
+          }),
+        ]}
+        statusFilter="all"
+        onFilterChange={vi.fn()}
+        flagRules={[
+          {
+            question_id: 'elg.date_of_birth',
+            answers: [],
+            comparator: 'age_lt',
+            threshold: 21,
+            label: 'Under 21',
+          },
+        ]}
+      />
+    );
+
+    const table = screen.getByRole('table');
+    expect(within(table).getByText('Under 21')).toBeInTheDocument();
+    expect(
+      within(table).getByRole('list', { name: 'Red flags' })
+    ).toBeInTheDocument();
+  });
+
   it('applies custom className when provided', () => {
     render(
       <ApplicationsTable

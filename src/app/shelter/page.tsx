@@ -9,6 +9,7 @@ import { useShelterMembership } from './ShelterGate';
 import type {
   ApplicationStatus,
   ApplicationWithPet,
+  ShelterFlagRule,
 } from '@/types/applications';
 
 /**
@@ -20,6 +21,7 @@ import type {
 export default function ShelterPipelinePage() {
   const { shelterId } = useShelterMembership();
   const [applications, setApplications] = useState<ApplicationWithPet[]>([]);
+  const [flagRules, setFlagRules] = useState<ShelterFlagRule[]>([]);
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'all'>(
     'all'
   );
@@ -29,7 +31,12 @@ export default function ShelterPipelinePage() {
   const fetchApplications = useCallback(async () => {
     try {
       const service = new ShelterApplicationService(supabase);
-      setApplications(await service.listShelterApplications(shelterId));
+      const [rows, flags] = await Promise.all([
+        service.listShelterApplications(shelterId),
+        service.listApplicationFlags(shelterId),
+      ]);
+      setApplications(rows);
+      setFlagRules(flags);
       setError(null);
     } catch {
       setError('Could not load applications. Please try again.');
@@ -70,6 +77,7 @@ export default function ShelterPipelinePage() {
         applications={applications}
         statusFilter={statusFilter}
         onFilterChange={setStatusFilter}
+        flagRules={flagRules}
       />
       <AddStaffForm />
     </>

@@ -4980,6 +4980,74 @@ REVOKE ALL ON FUNCTION clear_shelter_application_flag(UUID, TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION set_shelter_application_flag(UUID, TEXT, JSONB, TEXT, NUMERIC, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION clear_shelter_application_flag(UUID, TEXT) TO authenticated;
 
+-- 90 days after close: strip third-party details from the rescue copy only.
+-- Adopter-owned adopter_answers are never touched (#448 / 049 US6).
+CREATE OR REPLACE FUNCTION purge_closed_application_third_party(
+  p_now TIMESTAMPTZ DEFAULT NOW()
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  r RECORD;
+  v_count INTEGER := 0;
+  v_ids TEXT[];
+  v_strip_vet BOOLEAN;
+BEGIN
+  FOR r IN
+    SELECT a.id, a.status, COALESCE(p.status, '') AS pet_status
+    FROM applications a
+    LEFT JOIN pets p ON p.id = a.pet_id
+    WHERE a.status IN ('approved', 'not_selected', 'withdrawn')
+      AND a.status_changed_at <= p_now - INTERVAL '90 days'
+  LOOP
+    v_ids := ARRAY['hou.landlord_contact', 'ref.personal'];
+    v_strip_vet := NOT (r.status = 'approved' AND r.pet_status = 'adopted');
+    IF v_strip_vet THEN
+      v_ids := v_ids || ARRAY['vet.contact'];
+    END IF;
+
+    UPDATE applications
+    SET
+      answers_snapshot = CASE
+        WHEN answers_snapshot IS NULL THEN NULL
+        ELSE (
+          SELECT COALESCE(jsonb_agg(
+            CASE
+              WHEN elem->>'question_id' = ANY (v_ids)
+                THEN jsonb_set(elem, '{value}', 'null'::jsonb)
+              ELSE elem
+            END
+            ORDER BY ordinality
+          ), '[]'::jsonb)
+          FROM jsonb_array_elements(answers_snapshot)
+            WITH ORDINALITY AS t(elem, ordinality)
+        )
+      END,
+      profile_snapshot = COALESCE(profile_snapshot, '{}'::jsonb)
+        || jsonb_build_object('landlord_contact', NULL)
+        || CASE
+             WHEN v_strip_vet THEN
+               jsonb_build_object('vet_name', NULL, 'vet_phone', NULL)
+             ELSE '{}'::jsonb
+           END
+    WHERE id = r.id;
+
+    v_count := v_count + 1;
+  END LOOP;
+
+  RETURN v_count;
+END;
+$$;
+
+COMMENT ON FUNCTION purge_closed_application_third_party(TIMESTAMPTZ) IS
+  'Staff copy only (#448): 90 days after close, null landlord/references; null vet unless the pet was adopted.';
+
+REVOKE ALL ON FUNCTION purge_closed_application_third_party(TIMESTAMPTZ) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION purge_closed_application_third_party(TIMESTAMPTZ) TO service_role;
+
 -- ─── Realtime: live status tracker ──────────────────────────────────────────
 -- REPLICA IDENTITY FULL is required for Realtime UPDATE events; publication
 -- membership is required for postgres_changes delivery. Events respect the

@@ -2,6 +2,7 @@ import React from 'react';
 import StatusBadge from '@/components/atomic/StatusBadge';
 import StatusDropdown from '@/components/molecular/StatusDropdown';
 import { HOUSING_TYPE_OPTIONS } from '@/schemas/application.schema';
+import { triggeredFlagLabels } from '@/lib/applications/flag-settings';
 import {
   STATUS_LABELS,
   isRenting,
@@ -9,6 +10,7 @@ import {
   type ApplicationWithPetAndHistory,
   type PetSpecies,
   type ProfileSnapshot,
+  type ShelterFlagRule,
   type StatusHistoryEntry,
 } from '@/types/applications';
 
@@ -39,6 +41,8 @@ export interface ApplicationDetailProps {
   onMessage?: () => void | Promise<void>;
   /** Disables the Message CTA while a thread is opening. */
   messaging?: boolean;
+  /** Rescue flag rules — staff-only badges from the frozen snapshot (#448). */
+  flagRules?: ShelterFlagRule[];
   /** Additional CSS classes */
   className?: string;
 }
@@ -165,6 +169,7 @@ export default function ApplicationDetail({
   onFinalizeAdoption,
   onMessage,
   messaging = false,
+  flagRules = [],
   className = '',
 }: ApplicationDetailProps) {
   const uid = React.useId();
@@ -199,6 +204,11 @@ export default function ApplicationDetail({
     Boolean(onFinalizeAdoption) &&
     application.status === 'approved' &&
     pet?.status !== 'adopted';
+
+  const flagLabels = triggeredFlagLabels(
+    flagRules,
+    application.answers_snapshot
+  );
 
   return (
     <article
@@ -249,6 +259,24 @@ export default function ApplicationDetail({
             <StatusBadge status={application.status} className="badge-lg" />
           </div>
         </div>
+        {flagLabels.length > 0 ? (
+          <div className="px-8 pb-6">
+            <p className="mb-2 text-sm font-medium">Red flags</p>
+            <ul className="flex flex-wrap gap-1" aria-label="Red flags">
+              {flagLabels.map((label) => (
+                <li key={label}>
+                  <span className="badge badge-error badge-outline">
+                    {label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-sm opacity-70">
+              These do not reject the application. Follow up with the adopter as
+              you see fit.
+            </p>
+          </div>
+        ) : null}
       </header>
 
       {/* Why this pet */}

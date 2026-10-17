@@ -1,11 +1,13 @@
 import React from 'react';
 import Link from 'next/link';
 import StatusBadge from '@/components/atomic/StatusBadge';
+import { triggeredFlagLabels } from '@/lib/applications/flag-settings';
 import {
   STATUS_LABELS,
   STATUS_ORDER,
   type ApplicationStatus,
   type ApplicationWithPet,
+  type ShelterFlagRule,
 } from '@/types/applications';
 
 /**
@@ -25,6 +27,8 @@ export interface ApplicationsTableProps {
   statusFilter: ApplicationStatus | 'all';
   /** Called when a filter tab is clicked */
   onFilterChange: (filter: ApplicationStatus | 'all') => void;
+  /** Rescue flag rules — staff-only badges from the frozen snapshot (#448). */
+  flagRules?: ShelterFlagRule[];
   /** Additional CSS classes */
   className?: string;
 }
@@ -63,10 +67,24 @@ function ApplicationReviewLink({
  *
  * @category organisms
  */
+function StaffFlagBadges({ labels }: { labels: readonly string[] }) {
+  if (labels.length === 0) return null;
+  return (
+    <ul className="mt-1 flex flex-wrap gap-1" aria-label="Red flags">
+      {labels.map((label) => (
+        <li key={label}>
+          <span className="badge badge-error badge-outline">{label}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function ApplicationsTable({
   applications,
   statusFilter,
   onFilterChange,
+  flagRules = [],
   className = '',
 }: ApplicationsTableProps) {
   const countsByStatus = applications.reduce<
@@ -166,6 +184,12 @@ export default function ApplicationsTable({
                       <div className="text-base-content/80 mt-1 text-sm">
                         {application.profile_snapshot.full_name}
                       </div>
+                      <StaffFlagBadges
+                        labels={triggeredFlagLabels(
+                          flagRules,
+                          application.answers_snapshot
+                        )}
+                      />
                     </div>
                     <StatusBadge status={application.status} />
                   </div>
@@ -208,7 +232,15 @@ export default function ApplicationsTable({
                         </div>
                       )}
                     </td>
-                    <td>{application.profile_snapshot.full_name}</td>
+                    <td>
+                      {application.profile_snapshot.full_name}
+                      <StaffFlagBadges
+                        labels={triggeredFlagLabels(
+                          flagRules,
+                          application.answers_snapshot
+                        )}
+                      />
+                    </td>
                     <td>
                       <StatusBadge status={application.status} />
                     </td>
