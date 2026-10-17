@@ -7,6 +7,7 @@ const serviceMocks = vi.hoisted(() => ({
   getApplicantEmail: vi.fn(),
   advanceStatus: vi.fn(),
   finalizeAdoption: vi.fn(),
+  listApplicationFlags: vi.fn(),
 }));
 
 vi.mock('@/services/applications', () => ({
@@ -62,6 +63,7 @@ describe('shelter application page', () => {
     vi.clearAllMocks();
     advanceOutcome.rejected = false;
     serviceMocks.getApplicantEmail.mockResolvedValue('a@example.com');
+    serviceMocks.listApplicationFlags.mockResolvedValue([]);
   });
 
   it('shows the load error with Retry, not "not found", when the load fails (#410)', async () => {

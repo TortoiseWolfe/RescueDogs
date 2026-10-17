@@ -10,6 +10,7 @@ import ApplicationDetail from '@/components/organisms/ApplicationDetail';
 import type {
   ApplicationStatus,
   ApplicationWithPetAndHistory,
+  ShelterFlagRule,
 } from '@/types/applications';
 import SearchParamsReader from './SearchParamsReader';
 
@@ -19,6 +20,7 @@ function ShelterApplicationContent() {
   const [initialized, setInitialized] = useState(false);
   const [application, setApplication] =
     useState<ApplicationWithPetAndHistory | null>(null);
+  const [flagRules, setFlagRules] = useState<ShelterFlagRule[]>([]);
   const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [advancing, setAdvancing] = useState(false);
@@ -40,6 +42,9 @@ function ShelterApplicationContent() {
       ]);
       setApplication(app);
       setApplicantEmail(email);
+      if (app?.shelter_id) {
+        setFlagRules(await service.listApplicationFlags(app.shelter_id));
+      }
       setError(null);
     } catch {
       setError('Could not load this application.');
@@ -173,6 +178,7 @@ function ShelterApplicationContent() {
             onFinalizeAdoption={handleFinalizeAdoption}
             onMessage={handleMessage}
             messaging={messaging}
+            flagRules={flagRules}
           />
         </>
       )}

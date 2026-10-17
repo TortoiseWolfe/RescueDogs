@@ -1509,6 +1509,10 @@ export type Database = {
         Args: { p_question_id: string; p_shelter_id: string };
         Returns: undefined;
       };
+      purge_closed_application_third_party: {
+        Args: { p_now?: string };
+        Returns: number;
+      };
       record_failed_attempt: {
         Args: {
           p_attempt_type: string;

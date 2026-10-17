@@ -1,4 +1,5 @@
 import type {
+  AnswerSnapshotEntry,
   ApplicationQuestion,
   FlagComparator,
   ShelterFlagRule,
@@ -155,4 +156,98 @@ export function flagSummary(rule: ShelterFlagRule): string {
   if (rule.comparator === 'lt') return `Fewer than ${rule.threshold}`;
   if (rule.comparator === 'age_lt') return `Under ${rule.threshold}`;
   return rule.answers.join(', ');
+}
+
+function snapshotValue(
+  snapshot: readonly AnswerSnapshotEntry[] | null | undefined,
+  questionId: string
+): unknown {
+  return snapshot?.find((entry) => entry.question_id === questionId)?.value;
+}
+
+function choiceValues(value: unknown): string[] {
+  if (value === true) return ['yes'];
+  if (value === false) return ['no'];
+  if (typeof value === 'string' || typeof value === 'number') {
+    return [String(value)];
+  }
+  if (Array.isArray(value)) return value.map(String);
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    if ('value' in record) return choiceValues(record.value);
+  }
+  return [];
+}
+
+function numericValue(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  if (
+    value &&
+    typeof value === 'object' &&
+    Array.isArray((value as { rows?: unknown }).rows)
+  ) {
+    return (value as { rows: unknown[] }).rows.length;
+  }
+  return null;
+}
+
+function ageYears(isoDate: string, asOf = new Date()): number | null {
+  const dob = new Date(isoDate);
+  if (Number.isNaN(dob.getTime())) return null;
+  let age = asOf.getUTCFullYear() - dob.getUTCFullYear();
+  const month = asOf.getUTCMonth() - dob.getUTCMonth();
+  if (month < 0 || (month === 0 && asOf.getUTCDate() < dob.getUTCDate())) {
+    age -= 1;
+  }
+  return age;
+}
+
+/** True when this rescue's rule fires on the frozen snapshot (never live answers). */
+export function ruleMatchesSnapshot(
+  rule: ShelterFlagRule,
+  snapshot: readonly AnswerSnapshotEntry[] | null | undefined
+): boolean {
+  if (!snapshot || snapshot.length === 0) return false;
+  const present = snapshot.some(
+    (entry) => entry.question_id === rule.question_id
+  );
+  if (!present) return false;
+
+  const value = snapshotValue(snapshot, rule.question_id);
+
+  if (rule.comparator === 'in') {
+    const got = choiceValues(value);
+    return rule.answers.some((answer) => got.includes(answer));
+  }
+
+  if (rule.comparator === 'age_lt') {
+    if (rule.threshold === null || typeof value !== 'string') return false;
+    const age = ageYears(value);
+    return age !== null && age < rule.threshold;
+  }
+
+  const amount =
+    value === null || value === undefined ? 0 : numericValue(value);
+  if (amount === null || rule.threshold === null) return false;
+  if (rule.comparator === 'gt') return amount > rule.threshold;
+  if (rule.comparator === 'lt') return amount < rule.threshold;
+  return false;
+}
+
+/** Staff-facing labels for flags that fire on this application. */
+export function triggeredFlagLabels(
+  rules: readonly ShelterFlagRule[],
+  snapshot: readonly AnswerSnapshotEntry[] | null | undefined
+): string[] {
+  const labels: string[] = [];
+  for (const rule of rules) {
+    if (!ruleMatchesSnapshot(rule, snapshot)) continue;
+    const label = rule.label.trim();
+    if (label && !labels.includes(label)) labels.push(label);
+  }
+  return labels;
 }
