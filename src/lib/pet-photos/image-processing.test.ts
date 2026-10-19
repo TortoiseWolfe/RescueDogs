@@ -50,6 +50,35 @@ describe('createCroppedPetPhoto output format (#427)', () => {
     const blob = await createCroppedPetPhoto('blob:test', area);
     expect(blob.type).toBe('image/jpeg');
   });
+
+  it('fills the canvas white before drawing so letterboxed areas stay white (#437)', async () => {
+    vi.stubGlobal('Image', LoadedImage);
+    stubCanvasEncoder((requested) => requested);
+
+    const fillRect = vi.fn();
+    const drawImage = vi.fn();
+    const ctx = {
+      fillStyle: '',
+      fillRect,
+      drawImage,
+    };
+    const sharedGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = vi
+      .fn()
+      .mockReturnValue(ctx) as typeof sharedGetContext;
+
+    try {
+      await createCroppedPetPhoto('blob:test', area);
+      expect(ctx.fillStyle).toBe('#ffffff');
+      expect(fillRect).toHaveBeenCalledWith(0, 0, 1200, 900);
+      expect(drawImage).toHaveBeenCalled();
+      expect(fillRect.mock.invocationCallOrder[0]).toBeLessThan(
+        drawImage.mock.invocationCallOrder[0]
+      );
+    } finally {
+      HTMLCanvasElement.prototype.getContext = sharedGetContext;
+    }
+  });
 });
 
 describe('petPhotoPreviewTargetSize (#284)', () => {

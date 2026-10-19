@@ -663,6 +663,7 @@ export const PetPhotoManager = forwardRef<
                 onZoomChange={(value) => setZoom(clampPetPhotoZoom(value))}
                 onCropComplete={onCropComplete}
                 onMediaLoaded={onMediaLoaded}
+                restrictPosition={false}
               />
             </div>
             <label className="mb-4 flex flex-col gap-2">
