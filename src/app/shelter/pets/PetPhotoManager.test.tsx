@@ -15,6 +15,10 @@ configure({ asyncUtilTimeout: 5000 });
 // sit well above asyncUtilTimeout or the test is killed mid-wait.
 const FLOW_TIMEOUT = { timeout: 20_000 };
 
+const cropperLastProps = vi.hoisted(() => ({
+  restrictPosition: undefined as boolean | undefined,
+}));
+
 // The cropper is a canvas-driven third party. Like the real one, the stand-in
 // reports a crop area whenever its image changes, which enables "Use photo".
 // React may keep it mounted between queued photos, so reporting only on mount
@@ -24,10 +28,13 @@ vi.mock('react-easy-crop', () => ({
   default: function CropperStub({
     image,
     onCropComplete,
+    restrictPosition,
   }: {
     image: string;
     onCropComplete: (area: unknown, pixels: unknown) => void;
+    restrictPosition?: boolean;
   }) {
+    cropperLastProps.restrictPosition = restrictPosition;
     useEffect(() => {
       const timer = setTimeout(() => {
         onCropComplete({}, { x: 0, y: 0, width: 400, height: 300 });
@@ -242,6 +249,16 @@ describe('PetPhotoManager multi-select (#338)', FLOW_TIMEOUT, () => {
 
     expect(input.multiple).toBe(true);
     expect(screen.getByRole('button', { name: 'Add photos' })).toBeTruthy();
+  });
+
+  it('lets the cropper drag the photo inside the 4:3 frame (#437)', async () => {
+    const { container } = render(
+      <PetPhotoManager shelterId="test-shelter" petId={null} />
+    );
+
+    pickFiles(container, ['a.jpg']);
+    expect(await screen.findByRole('dialog')).toBeTruthy();
+    expect(cropperLastProps.restrictPosition).toBe(false);
   });
 
   it('crops each picked photo in turn and stages the ones kept', async () => {

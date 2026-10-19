@@ -113,6 +113,9 @@ export async function createCroppedPetPhoto(
   canvas.width = OUTPUT_WIDTH;
   canvas.height = OUTPUT_HEIGHT;
 
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
+
   ctx.drawImage(
     image,
     croppedAreaPixels.x,
