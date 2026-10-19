@@ -147,6 +147,34 @@ export class AddStaffError extends Error {
   }
 }
 
+/** Reasons remove_shelter_staff can refuse (#421). */
+export const REMOVE_STAFF_ERROR_CODES = [
+  'not_a_manager',
+  'cannot_remove_self',
+  'not_a_member',
+  'cannot_remove_manager',
+] as const;
+export type RemoveStaffErrorCode =
+  | (typeof REMOVE_STAFF_ERROR_CODES)[number]
+  | 'unknown';
+export class RemoveStaffError extends Error {
+  readonly code: RemoveStaffErrorCode;
+
+  constructor(code: RemoveStaffErrorCode) {
+    super(code);
+    this.name = 'RemoveStaffError';
+    this.code = code;
+  }
+}
+
+export interface ShelterTeamMember {
+  userId: string;
+  email: string;
+  displayName: string | null;
+  role: ShelterRole;
+  joinedAt: string;
+}
+
 /**
  * Shelter-staff-side data access. Reads are scoped by the
  * is_shelter_staff() RLS policies; the only mutation is the
@@ -321,6 +349,45 @@ export class ShelterApplicationService {
       message.includes(candidate)
     );
     throw new AddStaffError(code ?? 'unknown');
+  }
+
+  /** Manager-only roster for this rescue (#421). */
+  async listShelterTeam(shelterId: string): Promise<ShelterTeamMember[]> {
+    const { data, error } = await this.supabase.rpc('list_shelter_team', {
+      p_shelter_id: shelterId,
+    });
+    if (error) throw error;
+
+    const rows = (data ?? []) as Array<{
+      user_id: string;
+      email: string | null;
+      display_name: string | null;
+      role: string;
+      joined_at: string;
+    }>;
+
+    return rows.map((row) => ({
+      userId: row.user_id,
+      email: row.email ?? '',
+      displayName: row.display_name,
+      role: row.role as ShelterRole,
+      joinedAt: row.joined_at,
+    }));
+  }
+
+  /** Manager-only removal of a staff member (#421). Cannot remove managers or self. */
+  async removeStaff(shelterId: string, userId: string): Promise<void> {
+    const { error } = await this.supabase.rpc('remove_shelter_staff', {
+      p_shelter_id: shelterId,
+      p_user_id: userId,
+    });
+    if (!error) return;
+
+    const message = error.message ?? '';
+    const code = REMOVE_STAFF_ERROR_CODES.find((candidate) =>
+      message.includes(candidate)
+    );
+    throw new RemoveStaffError(code ?? 'unknown');
   }
 
   /** The shelter's pipeline, optionally filtered by status. */

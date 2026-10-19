@@ -5,8 +5,10 @@ export type {
   AddStaffErrorCode,
   CreateMyShelterInput,
   QuestionSettingsErrorCode,
+  RemoveStaffErrorCode,
   ShelterMembershipInfo,
   ShelterProfileInput,
+  ShelterTeamMember,
   ShelterUpdateErrorCode,
   UpdateMyShelterInput,
 } from './shelter-application-service';
@@ -16,6 +18,8 @@ export {
   AlreadyAMemberError,
   QuestionSettingsError,
   QUESTION_SETTINGS_ERROR_CODES,
+  RemoveStaffError,
+  REMOVE_STAFF_ERROR_CODES,
   ShelterUpdateError,
   SHELTER_UPDATE_ERROR_CODES,
 } from './shelter-application-service';

@@ -3606,6 +3606,104 @@ COMMENT ON FUNCTION add_shelter_staff_by_email(TEXT, UUID) IS
 REVOKE ALL ON FUNCTION add_shelter_staff_by_email(TEXT, UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION add_shelter_staff_by_email(TEXT, UUID) TO authenticated;
 
+-- ─── Manager views and removes teammates ─────────────────────────────────
+-- shelter_members only lets a user see their own rows, so the roster and the
+-- removal both go through definer RPCs that check the caller is a manager of
+-- p_shelter_id. Managers remove staff only: removing a manager or yourself is
+-- refused, so a rescue can never be left without a manager. Self-leave is
+-- #389's leave_shelter.
+
+CREATE OR REPLACE FUNCTION list_shelter_team(p_shelter_id UUID)
+RETURNS TABLE (
+  user_id UUID,
+  email TEXT,
+  display_name TEXT,
+  role TEXT,
+  joined_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'not authenticated';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM shelter_members m
+    WHERE m.shelter_id = p_shelter_id
+      AND m.user_id = auth.uid()
+      AND m.role = 'manager'
+  ) THEN
+    RAISE EXCEPTION 'not_a_manager';
+  END IF;
+
+  RETURN QUERY
+  SELECT m.user_id,
+         u.email::TEXT,
+         p.display_name::TEXT,
+         m.role,
+         m.created_at
+  FROM shelter_members m
+  JOIN auth.users u ON u.id = m.user_id
+  LEFT JOIN user_profiles p ON p.id = m.user_id
+  WHERE m.shelter_id = p_shelter_id
+  ORDER BY (m.role = 'manager') DESC, m.created_at;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION list_shelter_team(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION list_shelter_team(UUID) TO authenticated;
+
+CREATE OR REPLACE FUNCTION remove_shelter_staff(
+  p_shelter_id UUID,
+  p_user_id UUID
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID := auth.uid();
+  v_target_role TEXT;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'not authenticated';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM shelter_members
+    WHERE shelter_id = p_shelter_id AND user_id = v_uid AND role = 'manager'
+  ) THEN
+    RAISE EXCEPTION 'not_a_manager';
+  END IF;
+
+  IF p_user_id = v_uid THEN
+    RAISE EXCEPTION 'cannot_remove_self';
+  END IF;
+
+  SELECT shelter_members.role INTO v_target_role
+  FROM shelter_members
+  WHERE shelter_id = p_shelter_id AND user_id = p_user_id;
+
+  IF v_target_role IS NULL THEN
+    RAISE EXCEPTION 'not_a_member';
+  END IF;
+
+  IF v_target_role = 'manager' THEN
+    RAISE EXCEPTION 'cannot_remove_manager';
+  END IF;
+
+  DELETE FROM shelter_members
+  WHERE shelter_id = p_shelter_id AND user_id = p_user_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION remove_shelter_staff(UUID, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION remove_shelter_staff(UUID, UUID) TO authenticated;
+
 -- ─── Status transitions: SECURITY DEFINER RPCs (the only write path) ───────
 -- applications has NO client UPDATE/DELETE policies; with output:'export'
 -- there is no server runtime, so Postgres is the only trusted layer.

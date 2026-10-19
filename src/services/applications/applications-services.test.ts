@@ -691,6 +691,77 @@ describe('ShelterApplicationService', () => {
     }
   );
 
+  it('listShelterTeam calls the RPC and maps snake_case rows (#421)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: [
+        {
+          user_id: USER_ID,
+          email: 'manager@example.com',
+          display_name: 'Pat Manager',
+          role: 'manager',
+          joined_at: '2026-01-01T00:00:00Z',
+        },
+      ],
+      error: null,
+    });
+
+    const result = await service.listShelterTeam(SHELTER_ID);
+
+    expect(mock.rpc).toHaveBeenCalledWith('list_shelter_team', {
+      p_shelter_id: SHELTER_ID,
+    });
+    expect(result).toEqual([
+      {
+        userId: USER_ID,
+        email: 'manager@example.com',
+        displayName: 'Pat Manager',
+        role: 'manager',
+        joinedAt: '2026-01-01T00:00:00Z',
+      },
+    ]);
+  });
+
+  it('removeStaff calls the RPC with p_ argument names (#421)', async () => {
+    mock.rpc.mockResolvedValue({ data: null, error: null });
+
+    await service.removeStaff(SHELTER_ID, USER_ID);
+
+    expect(mock.rpc).toHaveBeenCalledWith('remove_shelter_staff', {
+      p_shelter_id: SHELTER_ID,
+      p_user_id: USER_ID,
+    });
+  });
+
+  it.each([
+    ['not_a_manager', 'not_a_manager'],
+    ['cannot_remove_self', 'cannot_remove_self'],
+    ['not_a_member', 'not_a_member'],
+    ['cannot_remove_manager', 'cannot_remove_manager'],
+  ])(
+    'removeStaff maps the %s RPC failure to a typed code (#421)',
+    async (message, code) => {
+      mock.rpc.mockResolvedValue({
+        data: null,
+        error: { message: `... ${message} ...` },
+      });
+
+      await expect(
+        service.removeStaff(SHELTER_ID, USER_ID)
+      ).rejects.toMatchObject({ name: 'RemoveStaffError', code });
+    }
+  );
+
+  it('removeStaff falls back to unknown for unrecognised failures (#421)', async () => {
+    mock.rpc.mockResolvedValue({
+      data: null,
+      error: { message: 'connection reset by peer' },
+    });
+
+    await expect(
+      service.removeStaff(SHELTER_ID, USER_ID)
+    ).rejects.toMatchObject({ name: 'RemoveStaffError', code: 'unknown' });
+  });
+
   it('addStaffByEmail falls back to unknown for unrecognised failures (#220)', async () => {
     mock.rpc.mockResolvedValue({
       data: null,

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase/client';
 import { ShelterApplicationService } from '@/services/applications';
 import ApplicationsTable from '@/components/organisms/ApplicationsTable';
 import AddStaffForm from './AddStaffForm';
+import TeamList from './TeamList';
 import { useShelterMembership } from './ShelterGate';
 import type {
   ApplicationStatus,
@@ -27,6 +28,7 @@ export default function ShelterPipelinePage() {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [teamRefresh, setTeamRefresh] = useState(0);
 
   const fetchApplications = useCallback(async () => {
     try {
@@ -79,7 +81,8 @@ export default function ShelterPipelinePage() {
         onFilterChange={setStatusFilter}
         flagRules={flagRules}
       />
-      <AddStaffForm />
+      <TeamList refreshKey={teamRefresh} />
+      <AddStaffForm onAdded={() => setTeamRefresh((n) => n + 1)} />
     </>
   );
 }
