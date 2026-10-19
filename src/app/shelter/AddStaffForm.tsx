@@ -27,7 +27,11 @@ const FAILURE_COPY: Record<AddStaffErrorCode, string> = {
  * security boundary. The invitee must already have a Raised Paws account;
  * there is no server on GitHub Pages to send an invite email.
  */
-export default function AddStaffForm() {
+export default function AddStaffForm({
+  onAdded,
+}: {
+  onAdded?: () => void;
+} = {}) {
   const { role, shelterId } = useShelterMembership();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +50,7 @@ export default function AddStaffForm() {
       await service.addStaffByEmail(email, shelterId);
       setAdded(email.trim());
       setEmail('');
+      onAdded?.();
     } catch (err) {
       setError(
         FAILURE_COPY[

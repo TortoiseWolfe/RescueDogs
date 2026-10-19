@@ -1490,6 +1490,20 @@ export type Database = {
         Args: { check_user_id?: string; p_shelter: string };
         Returns: boolean;
       };
+      list_shelter_team: {
+        Args: { p_shelter_id: string };
+        Returns: {
+          display_name: string | null;
+          email: string | null;
+          joined_at: string;
+          role: string;
+          user_id: string;
+        }[];
+      };
+      remove_shelter_staff: {
+        Args: { p_shelter_id: string; p_user_id: string };
+        Returns: undefined;
+      };
       set_shelter_application_questions: {
         Args: { p_question_ids: string[]; p_shelter_id: string };
         Returns: number;
