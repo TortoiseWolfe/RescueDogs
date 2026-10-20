@@ -2621,3 +2621,48 @@ export async function clearPaymentQueue(page: Page): Promise<void> {
     });
   });
 }
+
+/** A throwaway user with a live session and no encryption keys. */
+export interface IsolatedAccount {
+  user: TestUser;
+  session: InjectableSession;
+}
+
+/**
+ * Create a throwaway user and a session for it, for specs that write to the
+ * user's own account (avatar, profile) and so must not share the primary
+ * test user's storageState session: a sign-out anywhere in the suite is a
+ * global sign-out for that user and revokes the shared session mid-run
+ * (updateUser then answers 403 session_not_found). Inject with
+ * {@link injectAuthSessionOnPage}; tear down with deleteTestUser.
+ *
+ * Throws if the admin client or sign-in is unavailable: a seed that cannot
+ * run is a failed test, not a skip.
+ */
+export async function seedIsolatedAccount(
+  prefix = 'iso-acct'
+): Promise<IsolatedAccount> {
+  const user = await createTestUser(
+    generateTestEmail(prefix),
+    DEFAULT_TEST_PASSWORD
+  );
+  if (!user) {
+    throw new Error(
+      'seedIsolatedAccount: could not create the user (admin client unavailable?)'
+    );
+  }
+  const result = await obtainAuthSession(user.email, user.password);
+  if (!result.ok) {
+    await deleteTestUser(user.id);
+    throw new Error(`seedIsolatedAccount: sign-in failed: ${result.error}`);
+  }
+  return {
+    user,
+    session: {
+      access_token: result.session.access_token,
+      refresh_token: result.session.refresh_token,
+      expires_at: result.session.expires_at ?? 0,
+      user: result.session.user,
+    },
+  };
+}
