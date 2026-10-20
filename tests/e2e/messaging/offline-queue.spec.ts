@@ -121,7 +121,6 @@ test.describe('Offline Message Queue', () => {
 
   test.beforeEach(async () => {
     fixture = await seedIsolatedConversation();
-    test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
   });
 
   test.afterEach(async () => {
@@ -361,10 +360,10 @@ test.describe('Offline Message Queue', () => {
     browser,
   }) => {
     const adminClient = getAdminClient();
-    test.skip(
-      !adminClient,
-      'Skipping conflict resolution test - Supabase admin client not available'
-    );
+    expect(
+      adminClient,
+      'SUPABASE_SERVICE_ROLE_KEY is required: this test reads the database directly'
+    ).toBeTruthy();
 
     const conversationId = fixture!.conversationId;
 
