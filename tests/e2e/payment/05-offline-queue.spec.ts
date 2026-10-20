@@ -213,11 +213,7 @@ test.describe('Offline Payment Queue', () => {
     await clearPaymentQueue(page);
   });
 
-  // KEPT (fixme, not skip): "Retry now" cannot create the payment today. The
-  // drain upserts payment_intents with onConflict: 'idempotency_key' against a
-  // PARTIAL unique index, which Postgres refuses to infer (42P10), so every
-  // drain fails. Tracked in #477; flip to test() when that lands.
-  test.fixme('should drain the queue on Retry (#477)', async ({ page }) => {
+  test('should drain the queue on Retry (#477)', async ({ page }) => {
     const admin = requireAdminClient('05-offline-queue');
     await openHubPanel(page);
 

@@ -62,6 +62,19 @@ describe('PaymentQueuePanel', () => {
     expect(screen.getByTestId('queue-clear')).toBeDisabled();
   });
 
+  it('does not list drained (completed) items as queued', async () => {
+    mockQueue.getQueue.mockResolvedValue([
+      makeItem({ id: 1, status: 'completed' }),
+    ]);
+    render(<PaymentQueuePanel pollIntervalMs={999999} />);
+    await waitFor(() =>
+      expect(screen.getByTestId('queue-count')).toHaveTextContent(
+        /no queued payments/i
+      )
+    );
+    expect(screen.queryByTestId('queue-items')).not.toBeInTheDocument();
+  });
+
   it('lists queued items with their retry counts', async () => {
     mockQueue.getQueue.mockResolvedValue([
       makeItem({ id: 1, retries: 2 }),

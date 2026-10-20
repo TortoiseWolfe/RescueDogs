@@ -40,9 +40,8 @@ function makeParent(overrides: Partial<PaymentIntent> = {}): PaymentIntent {
 }
 
 // ── Mock surface ───────────────────────────────────────────────────────
-// Captures the upsert payload + onConflict options for assertions.
-const upsertCalls: Array<{ payload: Record<string, unknown>; opts: unknown }> =
-  [];
+// Captures the insert payload for assertions.
+const upsertCalls: Array<{ payload: Record<string, unknown> }> = [];
 let parentIntent: PaymentIntent = makeParent();
 let upsertResult: { data: unknown; error: unknown } = {
   data: { id: 'child-2' },
@@ -68,8 +67,8 @@ vi.mock('@/lib/supabase/client', () => ({
           ),
         })),
       })),
-      upsert: vi.fn((payload: Record<string, unknown>, opts: unknown) => {
-        upsertCalls.push({ payload, opts });
+      insert: vi.fn((payload: Record<string, unknown>) => {
+        upsertCalls.push({ payload });
         return {
           select: vi.fn(() => ({
             maybeSingle: vi.fn(() => Promise.resolve(upsertResult)),
@@ -96,27 +95,34 @@ beforeEach(() => {
   upsertResult = { data: { id: 'child-2' }, error: null };
 });
 
-describe('retryFailedPayment — idempotency-key reuse (#43)', () => {
-  it("reuses the parent's idempotency_key in the new intent", async () => {
-    parentIntent = makeParent({ idempotency_key: 'shared-key-42' });
+describe('retryFailedPayment — per-attempt idempotency key (#43, #477)', () => {
+  it("derives the child's key from the parent id and attempt number, not the parent's key", async () => {
+    parentIntent = makeParent({
+      idempotency_key: 'shared-key-42',
+      retry_count: 1,
+    });
     await retryFailedPayment('parent-1');
     expect(upsertCalls).toHaveLength(1);
-    expect(upsertCalls[0].payload.idempotency_key).toBe('shared-key-42');
+    expect(upsertCalls[0].payload.idempotency_key).toBe('parent-1:retry-2');
   });
 
-  it("uses upsert(onConflict: 'idempotency_key', ignoreDuplicates: true) so double-clicks dedupe server-side", async () => {
+  it('sends the same key for the same attempt so a double-click dedupes server-side', async () => {
     await retryFailedPayment('parent-1');
-    expect(upsertCalls[0].opts).toEqual({
-      onConflict: 'idempotency_key',
-      ignoreDuplicates: true,
-    });
+    await retryFailedPayment('parent-1');
+    expect(upsertCalls[0].payload.idempotency_key).toBe(
+      upsertCalls[1].payload.idempotency_key
+    );
   });
 
-  it('generates a fresh key only if parent has none (legacy intent)', async () => {
+  it('uses a plain insert: a bare ON CONFLICT cannot infer the partial unique index', async () => {
+    await retryFailedPayment('parent-1');
+    expect(upsertCalls[0].payload).not.toHaveProperty('onConflict');
+  });
+
+  it('keys a legacy parent (no idempotency_key) the same way', async () => {
     parentIntent = makeParent({ idempotency_key: null });
     await retryFailedPayment('parent-1');
-    const sent = upsertCalls[0].payload.idempotency_key as string;
-    expect(sent).toMatch(/^[0-9a-f-]{36}$/i); // UUID
+    expect(upsertCalls[0].payload.idempotency_key).toBe('parent-1:retry-1');
   });
 });
 
@@ -197,17 +203,24 @@ describe('retryFailedPayment — expiry guard', () => {
 });
 
 describe('retryFailedPayment — dedupe-conflict path', () => {
-  it('returns the parent intent when the upsert hits ON CONFLICT (no double-charge)', async () => {
-    upsertResult = { data: null, error: null }; // ON CONFLICT DO NOTHING fired
+  it('returns the parent intent when the insert hits the unique index (no double-charge)', async () => {
+    upsertResult = { data: null, error: { code: '23505' } };
     const result = await retryFailedPayment('parent-1');
     expect(result.id).toBe('parent-1');
   });
 
   it('records the conflict in the audit log so admins can see the dedupe', async () => {
-    upsertResult = { data: null, error: null };
+    upsertResult = { data: null, error: { code: '23505' } };
     await retryFailedPayment('parent-1');
     expect(auditCalls).toHaveLength(1);
     expect((auditCalls[0] as { deduped: boolean }).deduped).toBe(true);
+  });
+
+  it('still throws on any other insert error', async () => {
+    upsertResult = { data: null, error: { code: '42501', message: 'denied' } };
+    await expect(retryFailedPayment('parent-1')).rejects.toMatchObject({
+      code: '42501',
+    });
   });
 });
 
