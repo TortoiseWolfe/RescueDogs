@@ -2,16 +2,15 @@
  * Integration Test: One-Time Payment (Stripe) - T055
  * Tests Stripe payment UI and consent flow
  *
- * NOTE: Tests that require actual Stripe Checkout redirect are skipped
- * because CI does not have NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY configured.
- * These tests should be run locally with Stripe test keys for full coverage.
+ * The hosted Stripe Checkout page cannot be driven from CI, so the checkout
+ * test stops at our own boundary: it mocks the create-stripe-checkout edge
+ * function and asserts the request the app sends. The declined-card and
+ * cancelled-checkout cases happen on Stripe's page (declined) or have no
+ * notice in the app yet (cancelled, see #478), so they have no test here.
  */
 
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
-
-// Check if Stripe is configured
-const isStripeConfigured = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
 test.describe('Stripe One-Time Payment Flow', () => {
   test.describe.configure({ timeout: 60000 });
@@ -45,43 +44,63 @@ test.describe('Stripe One-Time Payment Flow', () => {
       .waitFor({ state: 'visible', timeout: 15000 });
   });
 
-  // Skip tests that require actual Stripe integration
-  test.skip('should complete one-time payment successfully', async ({
+  test('should create a payment intent and call create-stripe-checkout', async ({
     page,
   }) => {
-    // This test requires actual Stripe Checkout redirect
-    // Run locally with NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY configured
-    test.skip(
-      !isStripeConfigured,
-      'Stripe API keys not configured - run locally for full payment flow tests'
+    // Hosted Checkout is Stripe's page; we stop at the edge-function call.
+    // The mock returns a fake session, so Stripe.js's redirect then fails and
+    // the app stays on /payment-demo, which is what keeps this deterministic.
+    let body: { payment_intent_id?: string } = {};
+    let hasAuth = false;
+    await page.route(
+      '**/functions/v1/create-stripe-checkout',
+      async (route) => {
+        const req = route.request();
+        if (req.method() === 'OPTIONS') {
+          await route.fulfill({
+            status: 204,
+            headers: {
+              'access-control-allow-origin': '*',
+              'access-control-allow-headers': '*',
+              'access-control-allow-methods': 'POST, OPTIONS',
+            },
+          });
+          return;
+        }
+        body = req.postDataJSON();
+        hasAuth = !!req.headers()['authorization'];
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          headers: { 'access-control-allow-origin': '*' },
+          body: JSON.stringify({ sessionId: 'cs_test_e2e_not_a_session' }),
+        });
+      }
     );
 
-    // Grant consent
     await page.getByRole('button', { name: /Accept/i }).click();
     await page
       .getByRole('heading', { name: /Step 2/i })
       .waitFor({ timeout: 5000 });
 
-    await page.getByRole('tab', { name: /stripe/i }).click();
-    await page.getByRole('button', { name: /pay/i }).click();
-
-    await page.waitForURL(/checkout\.stripe\.com/, { timeout: 10000 });
-  });
-
-  test.skip('should handle payment cancellation gracefully', async ({
-    page,
-  }) => {
-    test.skip(
-      !isStripeConfigured,
-      'Stripe API keys not configured - skipping Checkout flow test'
+    await page
+      .getByRole('tab', { name: /stripe/i })
+      .first()
+      .click();
+    const request = page.waitForRequest(
+      (r) =>
+        r.url().includes('/functions/v1/create-stripe-checkout') &&
+        r.method() === 'POST',
+      { timeout: 30000 }
     );
-  });
+    await page.getByRole('button', { name: /Pay \$20\.00/i }).click();
+    await request;
 
-  test.skip('should display error for declined card', async ({ page }) => {
-    test.skip(
-      !isStripeConfigured,
-      'Stripe API keys not configured - skipping Checkout flow test'
+    // The id sent is the payment_intents row the app just inserted.
+    expect(body.payment_intent_id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     );
+    expect(hasAuth).toBe(true);
   });
 
   test('should enforce payment consent requirement', async ({ page }) => {
@@ -139,13 +158,5 @@ test.describe('Stripe One-Time Payment Flow', () => {
     const paypalTab = page.getByRole('tab', { name: /paypal/i }).first();
     await paypalTab.click();
     await expect(paypalTab).toHaveClass(/tab-active/);
-  });
-
-  test.skip('should show offline queue indicator when offline', async ({
-    page,
-    context,
-  }) => {
-    // Skip: Offline queue feature may not be fully implemented
-    test.skip(true, 'Offline queue feature not yet implemented');
   });
 });

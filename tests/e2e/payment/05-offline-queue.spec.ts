@@ -79,27 +79,11 @@ test.describe('Offline Payment Queue', () => {
     // payment hub's Overview tab (/payment). With an empty queue the test user
     // sees the empty state + disabled controls; this asserts the panel + its
     // affordances are wired (no payment provider/creds needed — queue is client-side).
-    await page.goto('/payment', { waitUntil: 'networkidle' });
-    if (page.url().includes('/sign-in')) {
-      await page.waitForTimeout(3000);
-      await page.goto('/payment', { waitUntil: 'networkidle' });
-    }
-    await dismissCookieBanner(page);
-
-    // The panel only renders when a provider is configured (the queue itself
-    // works regardless). When unconfigured, assert the page at least loads.
-    const panel = page.getByTestId('payment-queue-panel');
-    if (await panel.count()) {
-      await expect(panel).toBeVisible({ timeout: 30000 });
-      await expect(page.getByTestId('queue-count')).toBeVisible();
-      // Empty queue → retry + clear are present but disabled.
-      await expect(page.getByTestId('queue-retry')).toBeDisabled();
-      await expect(page.getByTestId('queue-clear')).toBeDisabled();
-    } else {
-      await expect(
-        page.getByRole('heading', { name: 'Payments', level: 1 })
-      ).toBeVisible({ timeout: 30000 });
-    }
+    await openHubPanel(page);
+    await expect(page.getByTestId('queue-count')).toBeVisible();
+    // Empty queue → retry + clear are present but disabled.
+    await expect(page.getByTestId('queue-retry')).toBeDisabled();
+    await expect(page.getByTestId('queue-clear')).toBeDisabled();
   });
 
   // ── Populated-queue flows ────────────────────────────────────────────────
@@ -124,7 +108,7 @@ test.describe('Offline Payment Queue', () => {
     page,
     context,
   }) => {
-    const panel = await openHubPanel(page);
+    await openHubPanel(page);
 
     // Seed + render the queue while ONLINE (reloading offline errors with
     // ERR_INTERNET_DISCONNECTED). IndexedDB rows persist across the offline
@@ -161,7 +145,7 @@ test.describe('Offline Payment Queue', () => {
   });
 
   test('should handle multiple queued payments', async ({ page }) => {
-    const panel = await openHubPanel(page);
+    await openHubPanel(page);
 
     await seedPaymentQueue(page, [
       { type: 'payment_intent' },
@@ -179,7 +163,7 @@ test.describe('Offline Payment Queue', () => {
   });
 
   test('should persist queue across page reloads', async ({ page }) => {
-    const panel = await openHubPanel(page);
+    await openHubPanel(page);
 
     await seedPaymentQueue(page, [
       { type: 'payment_intent' },
@@ -196,7 +180,7 @@ test.describe('Offline Payment Queue', () => {
   });
 
   test('should show retry count on queued items', async ({ page }) => {
-    const panel = await openHubPanel(page);
+    await openHubPanel(page);
 
     // A pending item that has already failed twice renders "Attempt 2/5". We
     // assert the DISPLAYED retry count/error, not wall-clock backoff timing
@@ -214,7 +198,7 @@ test.describe('Offline Payment Queue', () => {
   });
 
   test('should show Max-retries badge after max attempts', async ({ page }) => {
-    const panel = await openHubPanel(page);
+    await openHubPanel(page);
 
     // retries >= maxRetries(5) → the panel shows a "Max retries" badge-error.
     await seedPaymentQueue(page, [
@@ -232,61 +216,57 @@ test.describe('Offline Payment Queue', () => {
   // KEPT (fixme, not skip): "Retry now" cannot create the payment today. The
   // drain upserts payment_intents with onConflict: 'idempotency_key' against a
   // PARTIAL unique index, which Postgres refuses to infer (42P10), so every
-  // drain fails. Tracked in ISSUE_DRAIN; flip to test() when that lands.
-  test.fixme(
-    'should drain the queue on Retry (ISSUE_DRAIN)',
-    async ({ page }) => {
-      const admin = requireAdminClient('05-offline-queue');
-      await openHubPanel(page);
+  // drain fails. Tracked in #477; flip to test() when that lands.
+  test.fixme('should drain the queue on Retry (#477)', async ({ page }) => {
+    const admin = requireAdminClient('05-offline-queue');
+    await openHubPanel(page);
 
-      const buyerEmail = `queue-drain-${Date.now()}@example.com`;
-      try {
-        const written = await seedPaymentQueue(page, [
-          {
-            type: 'payment_intent',
-            data: {
-              amount: 2000,
-              currency: 'usd',
-              type: 'one_time',
-              customer_email: buyerEmail,
-              idempotency_key: crypto.randomUUID(),
-            },
+    const buyerEmail = `queue-drain-${Date.now()}@example.com`;
+    try {
+      const written = await seedPaymentQueue(page, [
+        {
+          type: 'payment_intent',
+          data: {
+            amount: 2000,
+            currency: 'usd',
+            type: 'one_time',
+            customer_email: buyerEmail,
+            idempotency_key: crypto.randomUUID(),
           },
-        ]);
-        expect(written).toBe(1);
-        await page.reload({ waitUntil: 'networkidle' });
-        await dismissCookieBanner(page);
-        await expect(page.getByTestId('queue-count')).toContainText(
-          '1 pending',
-          { timeout: 15000 }
-        );
+        },
+      ]);
+      expect(written).toBe(1);
+      await page.reload({ waitUntil: 'networkidle' });
+      await dismissCookieBanner(page);
+      await expect(page.getByTestId('queue-count')).toContainText('1 pending', {
+        timeout: 15000,
+      });
 
-        await page.getByTestId('queue-retry').click();
+      await page.getByTestId('queue-retry').click();
 
-        await expect(page.getByTestId('queue-count')).toContainText(
-          'No queued payments',
-          { timeout: 30000 }
-        );
+      await expect(page.getByTestId('queue-count')).toContainText(
+        'No queued payments',
+        { timeout: 30000 }
+      );
 
-        const { data, error } = await admin
-          .from('payment_intents')
-          .select('id, amount, type')
-          .eq('customer_email', buyerEmail);
-        expect(error).toBeNull();
-        expect(data).toHaveLength(1);
-        expect(data![0].type).toBe('one_time');
-      } finally {
-        await clearPaymentQueue(page);
-        await admin
-          .from('payment_intents')
-          .delete()
-          .eq('customer_email', buyerEmail);
-      }
+      const { data, error } = await admin
+        .from('payment_intents')
+        .select('id, amount, type')
+        .eq('customer_email', buyerEmail);
+      expect(error).toBeNull();
+      expect(data).toHaveLength(1);
+      expect(data![0].type).toBe('one_time');
+    } finally {
+      await clearPaymentQueue(page);
+      await admin
+        .from('payment_intents')
+        .delete()
+        .eq('customer_email', buyerEmail);
     }
-  );
+  });
 
   test('should clear the queue manually', async ({ page }) => {
-    const panel = await openHubPanel(page);
+    await openHubPanel(page);
 
     await seedPaymentQueue(page, [
       { type: 'payment_intent' },
