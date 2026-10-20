@@ -20,12 +20,6 @@ import { dismissCookieBanner } from '../utils/test-user-factory';
 
 // Auth comes from storageState (setup project) - no sign-in needed
 test.describe('Avatar Upload Flow', () => {
-  // Avatar upload requires Supabase Storage — Save button doesn't dismiss modal in CI
-  // because the upload to storage fails silently without a configured bucket
-  test.skip(
-    !!process.env.CI,
-    'Avatar upload requires Supabase Storage — skipped in CI'
-  );
   test.beforeEach(async ({ page }) => {
     // Navigate to Account Settings (already authenticated via storageState)
     await page.goto('/account');
@@ -96,11 +90,7 @@ test.describe('Avatar Upload Flow', () => {
       const errorText = await errorMessage
         .textContent()
         .catch(() => 'Unknown error');
-      test.skip(
-        true,
-        `Upload failed (Supabase storage may not be configured): ${errorText}`
-      );
-      return;
+      throw new Error(`Avatar upload failed: ${errorText}`);
     }
 
     // Verify upload succeeded by checking avatar URL changed
