@@ -47,7 +47,12 @@ const STALE_LAST_MESSAGE = new Date(
 const STALE_CONV_ID = 'eeeeeeee-eeee-4eee-aeee-000000000e2e';
 
 test.describe('Admin Conversation List E2E', () => {
-  test.skip(!!process.env.CI, 'Skipped in CI: requires local Docker Supabase');
+  // Kept skip, waits on #383: these need the local Docker Supabase stack with
+  // the admin seed, and CI has no such lane (it runs against the shared project).
+  test.skip(
+    !!process.env.CI,
+    'Waits on #383: needs a local-Supabase E2E lane, not available in CI'
+  );
   test.describe.configure({ mode: 'serial' });
 
   let serviceClient: SupabaseClient;
