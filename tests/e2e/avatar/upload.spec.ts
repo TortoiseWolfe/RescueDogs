@@ -9,20 +9,33 @@
  * - Validation error handling
  *
  * Prerequisites:
- * - Test user authenticated
+ * - Admin client (SUPABASE_SERVICE_ROLE_KEY) to create a throwaway user
  * - Account Settings page accessible at /account-settings
  * - Test fixtures available at e2e/fixtures/avatars/
  */
 
 import { test, expect } from '@playwright/test';
 import path from 'path';
-import { dismissCookieBanner } from '../utils/test-user-factory';
+import {
+  deleteTestUser,
+  dismissCookieBanner,
+  injectAuthSessionOnPage,
+  seedIsolatedAccount,
+  type IsolatedAccount,
+} from '../utils/test-user-factory';
 
-// Auth comes from storageState (setup project) - no sign-in needed
+// Each test runs as its own throwaway user. The primary test user's shared
+// storageState session is revoked whenever another spec signs that user out
+// (a global sign-out), which made every upload here fail with a 403
+// session_not_found from updateUser after the file had already uploaded.
 test.describe('Avatar Upload Flow', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  let account: IsolatedAccount;
+
   test.beforeEach(async ({ page }) => {
-    // Navigate to Account Settings (already authenticated via storageState)
-    await page.goto('/account');
+    account = await seedIsolatedAccount('avatar');
+    await injectAuthSessionOnPage(page, account.session, '/account');
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
   });
@@ -36,6 +49,8 @@ test.describe('Avatar Upload Flow', () => {
       await removeButton.click({ force: true }); // Force click to bypass any modal backdrops
       await page.waitForTimeout(1000); // Wait for removal
     }
+
+    await deleteTestUser(account.user.id);
   });
 
   test('US1.1 - Upload new avatar with crop interface', async ({ page }) => {
