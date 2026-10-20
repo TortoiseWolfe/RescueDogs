@@ -1,14 +1,24 @@
 /**
  * Integration Test: Offline Queue - T059
- * Tests payment queuing when offline and automatic sync when reconnected
+ * Tests payment queuing when offline and the queue panel's rendered state.
  *
- * NOTE: Most tests are skipped because offline queue UI is not fully implemented.
- * The backend supports offline queuing but the UI doesn't expose queue counts
- * or status messages as expected by these tests.
+ * The offline-queue UI (PaymentQueuePanel on the /payment hub) is shipped, and
+ * the queue is a client-side Dexie store we seed directly via
+ * seedPaymentQueue(), so the populated-queue flows drive real queue rows and
+ * assert what the panel shows (count, per-item retry badge, online/offline,
+ * clear). No payment provider or credentials are needed. The panel only mounts
+ * when a provider is configured; CI sets dummy Stripe/PayPal keys so it renders
+ * (see e2e.yml), and a panel that fails to render fails the test.
  */
 
 import { test, expect } from '@playwright/test';
-import { dismissCookieBanner } from '../utils/test-user-factory';
+import type { Page } from '@playwright/test';
+import {
+  dismissCookieBanner,
+  seedPaymentQueue,
+  clearPaymentQueue,
+  requireAdminClient,
+} from '../utils/test-user-factory';
 
 test.describe('Offline Payment Queue', () => {
   test.describe.configure({ timeout: 60000 });
@@ -92,86 +102,208 @@ test.describe('Offline Payment Queue', () => {
     }
   });
 
-  // The flows below drive a POPULATED queue (offline-enqueue, sync, retry,
-  // max-retry, overflow, clear). The UI now exists (PaymentQueuePanel on
-  // /payment/dashboard) — the remaining blocker is SEEDING the queue, which
-  // needs either a real payment attempt (provider creds) or a direct Dexie
-  // IndexedDB fixture. Un-skip once a queue-seed fixture lands. (Was
-  // "UI not yet implemented" — that part is done.)
-  test.skip('should queue payment when offline', async ({ page, context }) => {
-    test.skip(true, 'Needs a queue-seed fixture or provider creds to enqueue');
-  });
+  // ── Populated-queue flows ────────────────────────────────────────────────
+  // Open the /payment hub and return the PaymentQueuePanel locator. The panel
+  // must render: its absence is a failure, not a reason to skip.
+  async function openHubPanel(page: Page) {
+    await page.goto('/payment', { waitUntil: 'networkidle' });
+    if (page.url().includes('/sign-in')) {
+      await page.waitForTimeout(3000);
+      await page.goto('/payment', { waitUntil: 'networkidle' });
+    }
+    await dismissCookieBanner(page);
+    const panel = page.getByTestId('payment-queue-panel');
+    await expect(
+      panel,
+      'PaymentQueuePanel did not render on /payment'
+    ).toBeVisible({ timeout: 30000 });
+    return panel;
+  }
 
-  test.skip('should automatically sync queue when coming online', async ({
+  test('should show queued items and the Offline badge when offline', async ({
     page,
     context,
   }) => {
-    // Skip: Queue sync status not displayed in current UI
-    test.skip(true, 'Needs a queue-seed fixture or provider creds to enqueue');
-  });
+    const panel = await openHubPanel(page);
 
-  test.skip('should handle multiple queued payments', async ({
-    page,
-    context,
-  }) => {
-    // Skip: Queue count not displayed in current UI
-    test.skip(true, 'Needs a queue-seed fixture to enqueue multiple items');
-  });
+    // Seed + render the queue while ONLINE (reloading offline errors with
+    // ERR_INTERNET_DISCONNECTED). IndexedDB rows persist across the offline
+    // toggle, and the panel polls getQueue() every 5s, so once we go offline
+    // the panel shows the queued item AND flips the badge to "Offline".
+    await seedPaymentQueue(page, [{ type: 'payment_intent' }]);
+    await page.reload({ waitUntil: 'networkidle' });
+    await dismissCookieBanner(page);
+    await expect(page.getByTestId('queue-count')).toContainText('1 pending', {
+      timeout: 15000,
+    });
 
-  test.skip('should persist queue across page reloads', async ({
-    page,
-    context,
-  }) => {
-    // Skip: Queue persistence status not displayed
-    test.skip(
-      true,
-      'Needs a queue-seed fixture (Dexie) to populate before reload'
+    await context.setOffline(true);
+    // setOffline() drops the network at the CDP layer but does NOT reliably
+    // flip navigator.onLine / fire the `offline` DOM event in Firefox/WebKit
+    // (only Chromium honors it for the JS API). useOfflineStatus listens for
+    // the `offline` window event, so dispatch it explicitly for cross-browser
+    // determinism (same rationale as the WebKit scroll-event dispatch in
+    // CLAUDE.md).
+    await page.evaluate(() =>
+      window.dispatchEvent(new Event('offline', { bubbles: true }))
     );
-  });
+    await expect(page.getByTestId('queue-conn-state')).toHaveText(/Offline/i, {
+      timeout: 15000,
+    });
+    // The queued item remains listed while offline.
+    await expect(page.getByTestId('queue-items').locator('li')).toHaveCount(1);
 
-  test.skip('should retry failed queue items with exponential backoff', async ({
-    page,
-    context,
-  }) => {
-    // Skip: Retry status not displayed
-    test.skip(true, 'Needs a seeded failed item to exercise backoff/retry UI');
-  });
-
-  test.skip('should remove queued items after max retry attempts', async ({
-    page,
-    context,
-  }) => {
-    // Skip: Retry status not displayed
-    test.skip(
-      true,
-      'Needs a seeded item at maxRetries to assert the Max-retries badge'
+    await context.setOffline(false);
+    await page.evaluate(() =>
+      window.dispatchEvent(new Event('online', { bubbles: true }))
     );
+    await clearPaymentQueue(page);
   });
 
-  test.skip('should show queue status in payment history', async ({
-    page,
-    context,
-  }) => {
-    // Skip: /payment/history route doesn't exist
-    test.skip(
-      true,
-      'Separate /payment/history surface; queue status lives on /payment/dashboard now'
+  test('should handle multiple queued payments', async ({ page }) => {
+    const panel = await openHubPanel(page);
+
+    await seedPaymentQueue(page, [
+      { type: 'payment_intent' },
+      { type: 'payment_intent' },
+      { type: 'subscription_update' },
+    ]);
+    await page.reload({ waitUntil: 'networkidle' });
+    await dismissCookieBanner(page);
+
+    await expect(page.getByTestId('queue-count')).toContainText('3 pending', {
+      timeout: 15000,
+    });
+    await expect(page.getByTestId('queue-items').locator('li')).toHaveCount(3);
+    await clearPaymentQueue(page);
+  });
+
+  test('should persist queue across page reloads', async ({ page }) => {
+    const panel = await openHubPanel(page);
+
+    await seedPaymentQueue(page, [
+      { type: 'payment_intent' },
+      { type: 'payment_intent' },
+    ]);
+    // IndexedDB survives navigation by nature; the panel re-reads it on mount.
+    await page.reload({ waitUntil: 'networkidle' });
+    await dismissCookieBanner(page);
+
+    await expect(page.getByTestId('queue-items').locator('li')).toHaveCount(2, {
+      timeout: 15000,
+    });
+    await clearPaymentQueue(page);
+  });
+
+  test('should show retry count on queued items', async ({ page }) => {
+    const panel = await openHubPanel(page);
+
+    // A pending item that has already failed twice renders "Attempt 2/5". We
+    // assert the DISPLAYED retry count/error, not wall-clock backoff timing
+    // (which is flaky in E2E — the backoff logic itself is unit-tested).
+    await seedPaymentQueue(page, [
+      { type: 'payment_intent', retries: 2, lastError: 'network error' },
+    ]);
+    await page.reload({ waitUntil: 'networkidle' });
+    await dismissCookieBanner(page);
+
+    const item = page.getByTestId('queue-items').locator('li').first();
+    await expect(item).toContainText('Attempt 2/5', { timeout: 15000 });
+    await expect(item).toContainText('network error');
+    await clearPaymentQueue(page);
+  });
+
+  test('should show Max-retries badge after max attempts', async ({ page }) => {
+    const panel = await openHubPanel(page);
+
+    // retries >= maxRetries(5) → the panel shows a "Max retries" badge-error.
+    await seedPaymentQueue(page, [
+      { type: 'payment_intent', status: 'failed', retries: 5 },
+    ]);
+    await page.reload({ waitUntil: 'networkidle' });
+    await dismissCookieBanner(page);
+
+    const badge = page.getByTestId('queue-items').locator('li .badge').first();
+    await expect(badge).toHaveText(/Max retries/i, { timeout: 15000 });
+    await expect(badge).toHaveClass(/badge-error/);
+    await clearPaymentQueue(page);
+  });
+
+  // KEPT (fixme, not skip): "Retry now" cannot create the payment today. The
+  // drain upserts payment_intents with onConflict: 'idempotency_key' against a
+  // PARTIAL unique index, which Postgres refuses to infer (42P10), so every
+  // drain fails. Tracked in ISSUE_DRAIN; flip to test() when that lands.
+  test.fixme(
+    'should drain the queue on Retry (ISSUE_DRAIN)',
+    async ({ page }) => {
+      const admin = requireAdminClient('05-offline-queue');
+      await openHubPanel(page);
+
+      const buyerEmail = `queue-drain-${Date.now()}@example.com`;
+      try {
+        const written = await seedPaymentQueue(page, [
+          {
+            type: 'payment_intent',
+            data: {
+              amount: 2000,
+              currency: 'usd',
+              type: 'one_time',
+              customer_email: buyerEmail,
+              idempotency_key: crypto.randomUUID(),
+            },
+          },
+        ]);
+        expect(written).toBe(1);
+        await page.reload({ waitUntil: 'networkidle' });
+        await dismissCookieBanner(page);
+        await expect(page.getByTestId('queue-count')).toContainText(
+          '1 pending',
+          { timeout: 15000 }
+        );
+
+        await page.getByTestId('queue-retry').click();
+
+        await expect(page.getByTestId('queue-count')).toContainText(
+          'No queued payments',
+          { timeout: 30000 }
+        );
+
+        const { data, error } = await admin
+          .from('payment_intents')
+          .select('id, amount, type')
+          .eq('customer_email', buyerEmail);
+        expect(error).toBeNull();
+        expect(data).toHaveLength(1);
+        expect(data![0].type).toBe('one_time');
+      } finally {
+        await clearPaymentQueue(page);
+        await admin
+          .from('payment_intents')
+          .delete()
+          .eq('customer_email', buyerEmail);
+      }
+    }
+  );
+
+  test('should clear the queue manually', async ({ page }) => {
+    const panel = await openHubPanel(page);
+
+    await seedPaymentQueue(page, [
+      { type: 'payment_intent' },
+      { type: 'payment_intent' },
+    ]);
+    await page.reload({ waitUntil: 'networkidle' });
+    await dismissCookieBanner(page);
+    await expect(page.getByTestId('queue-items').locator('li')).toHaveCount(2, {
+      timeout: 15000,
+    });
+
+    await page.getByTestId('queue-clear').click();
+    await page.getByTestId('queue-clear-confirm-yes').click();
+    await expect(page.getByTestId('queue-count')).toContainText(
+      'No queued payments',
+      { timeout: 15000 }
     );
-  });
-
-  test.skip('should handle queue overflow gracefully', async ({
-    page,
-    context,
-  }) => {
-    // Skip: Queue overflow alert not implemented
-    test.skip(true, 'Overflow/storage-warning handling not in scope for #4');
-  });
-
-  test.skip('should clear queue manually', async ({ page, context }) => {
-    // Skip: Clear queue button not implemented
-    test.skip(
-      true,
-      'Clear button EXISTS (PaymentQueuePanel); needs a queue-seed fixture to assert the clear flow end-to-end'
-    );
+    await clearPaymentQueue(page);
   });
 });

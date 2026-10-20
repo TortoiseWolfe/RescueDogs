@@ -118,6 +118,24 @@ export function getAdminClient(): SupabaseClient | null {
 }
 
 /**
+ * The admin client, or a thrown Error naming what could not be seeded.
+ *
+ * Seed helpers used to return null when this was missing and every spec then wrote
+ * `test.skip(!fixture, ...)`, so a run with no service-role key reported the whole
+ * suite as skipped-and-green (#1378). A seed that cannot run is a failed test.
+ */
+export function requireAdminClient(seeding: string): SupabaseClient {
+  const client = getAdminClient();
+  if (!client) {
+    throw new Error(
+      `${seeding}: admin client unavailable — SUPABASE_SERVICE_ROLE_KEY and ` +
+        `SUPABASE_ADMIN_URL/NEXT_PUBLIC_SUPABASE_URL must be set`
+    );
+  }
+  return client;
+}
+
+/**
  * Create a test user with auto-confirmed email
  *
  * @param email - User email address
@@ -2093,7 +2111,8 @@ export interface IsolatedSubscription {
  * @param opts.graceDays    days from today for `grace_period_expires` when the
  *                          status is grace_period/past_due (default 5).
  *
- * Returns null if the admin client / anon key is unavailable. Tear down with
+ * Throws if the admin client / anon key is unavailable: a seed that cannot
+ * run is a failed test, not a skip. Tear down with
  * {@link deleteIsolatedSubscription} — the subscriptions FK is NO ACTION (not
  * cascade) and deleteTestUser does not touch subscriptions, so the row MUST be
  * deleted before the user or the auth-user delete fails on the FK.
@@ -2105,16 +2124,17 @@ export async function seedIsolatedSubscription(
     graceDays?: number;
     prefix?: string;
   }
-): Promise<IsolatedSubscription | null> {
-  const admin = getAdminClient();
-  if (!admin) return null;
+): Promise<IsolatedSubscription> {
+  const admin = requireAdminClient('seedIsolatedSubscription');
 
   const stamp = Date.now().toString().slice(-8);
   const provider = opts?.provider ?? 'stripe';
   const prefix = opts?.prefix ?? 'iso-sub';
 
   const created = await createKeyedUserWithSession(prefix, 'isos', stamp);
-  if (!created) return null;
+  if (!created) {
+    throw new Error('seedIsolatedSubscription: could not create the test user');
+  }
 
   // grace_period_expires is a TEXT YYYY-MM-DD; only meaningful for the
   // grace_period / past_due states the UI renders a countdown for.
@@ -2144,12 +2164,10 @@ export async function seedIsolatedSubscription(
     .single();
 
   if (error || !row) {
-    console.warn(
-      'seedIsolatedSubscription: subscription insert failed:',
-      error?.message
-    );
     await deleteTestUser(created.user.id);
-    return null;
+    throw new Error(
+      `seedIsolatedSubscription: subscription insert failed: ${error?.message}`
+    );
   }
 
   console.log(
@@ -2205,14 +2223,15 @@ export interface IsolatedPayment {
  */
 export async function seedIsolatedPayment(opts?: {
   prefix?: string;
-}): Promise<IsolatedPayment | null> {
-  const admin = getAdminClient();
-  if (!admin) return null;
+}): Promise<IsolatedPayment> {
+  const admin = requireAdminClient('seedIsolatedPayment');
 
   const stamp = Date.now().toString().slice(-8);
   const prefix = opts?.prefix ?? 'iso-pay';
   const created = await createKeyedUserWithSession(prefix, 'isop', stamp);
-  if (!created) return null;
+  if (!created) {
+    throw new Error('seedIsolatedPayment: could not create the test user');
+  }
 
   // Parent intent (payment_results.intent_id → payment_intents, ON DELETE CASCADE).
   const insertIntent = async () => {
@@ -2258,9 +2277,8 @@ export async function seedIsolatedPayment(opts?: {
     intentId = await insertIntent();
     resultId = await insertResult(intentId);
   } catch (e) {
-    console.warn('seedIsolatedPayment:', (e as Error).message);
     await deleteTestUser(created.user.id);
-    return null;
+    throw new Error(`seedIsolatedPayment: ${(e as Error).message}`);
   }
 
   console.log(`✓ Isolated payment ${resultId} (user ${created.user.id})`);
@@ -2480,4 +2498,126 @@ export async function resetEncryptionKeys(
   // → EncryptionKeyGate shows ReAuthModal → correct salt from DB.
   await page.reload({ waitUntil: 'domcontentloaded' });
   console.log(`[resetEncryptionKeys] Reset keys for ${email}`);
+}
+
+/**
+ * A payment-queue row to seed, as consumed by the PaymentQueuePanel UI. Mirrors
+ * `PaymentQueueItem` (src/lib/offline-queue/types.ts) minus the auto-`id`.
+ */
+export interface SeedPaymentQueueItem {
+  type: 'payment_intent' | 'subscription_update';
+  data?: Record<string, unknown>;
+  status?: 'pending' | 'processing' | 'failed' | 'completed';
+  retries?: number;
+  lastError?: string;
+  userId?: string;
+}
+
+/**
+ * Seed the offline PAYMENT queue directly in the browser's IndexedDB so tests
+ * can exercise a POPULATED PaymentQueuePanel without a real payment attempt or
+ * provider creds. The queue is a plain client-side Dexie store — DB
+ * `PaymentQueueV2`, object store `queuedOperations`, key `++id` (see
+ * src/lib/offline-queue/payment-adapter.ts) — so a readwrite `add()` per row is
+ * all it takes. No server round-trip, no encryption.
+ *
+ * The app instantiates `paymentQueue` (creating the DB + store) on first load,
+ * so call this AFTER the payment hub / demo page has mounted. The panel polls
+ * `getQueue()` every 5s; reload or wait one interval after seeding to see it.
+ *
+ * @returns the number of rows written (0 if the store didn't exist yet).
+ */
+export async function seedPaymentQueue(
+  page: Page,
+  items: SeedPaymentQueueItem[]
+): Promise<number> {
+  return page.evaluate(async (rows) => {
+    return new Promise<number>((resolve) => {
+      try {
+        const open = indexedDB.open('PaymentQueueV2');
+        open.onsuccess = () => {
+          const db = open.result;
+          if (!db.objectStoreNames.contains('queuedOperations')) {
+            // App hasn't created the store yet — nothing we can seed.
+            db.close();
+            resolve(0);
+            return;
+          }
+          const tx = db.transaction('queuedOperations', 'readwrite');
+          const store = tx.objectStore('queuedOperations');
+          let written = 0;
+          for (const r of rows) {
+            // Dexie auto-assigns id (++id); omit it. createdAt/status/retries
+            // default to a sensible pending row when not supplied.
+            store.add({
+              type: r.type,
+              data: r.data ?? {},
+              status: r.status ?? 'pending',
+              retries: r.retries ?? 0,
+              createdAt: Date.now(),
+              ...(r.lastError ? { lastError: r.lastError } : {}),
+              ...(r.userId ? { userId: r.userId } : {}),
+            });
+            written++;
+          }
+          tx.oncomplete = () => {
+            db.close();
+            resolve(written);
+          };
+          tx.onerror = () => {
+            db.close();
+            resolve(0);
+          };
+        };
+        open.onerror = () => resolve(0);
+        // If the DB doesn't exist yet, abort the upgrade so we don't create a
+        // store-less DB the app then can't upgrade. Signals "not ready".
+        open.onupgradeneeded = (ev) => {
+          (ev.target as IDBOpenDBRequest).transaction?.abort();
+          resolve(0);
+        };
+      } catch {
+        resolve(0);
+      }
+    });
+  }, items);
+}
+
+/**
+ * Empty the offline payment queue in the browser's IndexedDB (teardown for
+ * {@link seedPaymentQueue}). Safe if the store doesn't exist.
+ */
+export async function clearPaymentQueue(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve) => {
+      try {
+        const open = indexedDB.open('PaymentQueueV2');
+        open.onsuccess = () => {
+          const db = open.result;
+          if (!db.objectStoreNames.contains('queuedOperations')) {
+            db.close();
+            resolve();
+            return;
+          }
+          const tx = db.transaction('queuedOperations', 'readwrite');
+          tx.objectStore('queuedOperations').clear();
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => {
+            db.close();
+            resolve();
+          };
+        };
+        open.onerror = () => resolve();
+        open.onupgradeneeded = (ev) => {
+          (ev.target as IDBOpenDBRequest).transaction?.abort();
+          resolve();
+        };
+      } catch {
+        resolve();
+      }
+    });
+  });
 }
