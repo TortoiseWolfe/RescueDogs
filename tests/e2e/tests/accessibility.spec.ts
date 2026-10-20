@@ -302,17 +302,19 @@ test.describe('Accessibility', () => {
   });
 
   test('links have distinguishable text', async ({ page }) => {
-    const links = page.locator('a');
-    const linkCount = await links.count();
+    // One in-page snapshot: the old count()-then-nth(i) loop raced client
+    // re-renders and timed out waiting for an <a> that no longer existed.
+    const links = await page.locator('a').evaluateAll((els) =>
+      els.map((el) => ({
+        text: el.textContent,
+        href: el.getAttribute('href'),
+      }))
+    );
 
     const linkTexts = new Set();
     const linkHrefs = new Set();
 
-    for (let i = 0; i < linkCount; i++) {
-      const link = links.nth(i);
-      const text = await link.textContent();
-      const href = await link.getAttribute('href');
-
+    for (const { text, href } of links) {
       if (text && href) {
         const combo = `${text.trim()}-${href}`;
 
