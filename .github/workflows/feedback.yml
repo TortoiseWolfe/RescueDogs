@@ -1,0 +1,61 @@
+# A customer's report becomes a tracked issue within the hour, with nobody remembering to.
+#
+# THE CREDENTIAL IS THE WHOLE DESIGN DECISION. This job needs to read `public.feedback`,
+# which has no select policy for any client role -- deliberately, because a queue a signed-in
+# visitor could read is a list of other people's complaints. So it holds a service key.
+#
+# IT MUST BE A DEDICATED ONE, NOT THE EXISTING `SUPABASE_SERVICE_ROLE_KEY` SECRET.
+# `ci.yml` deliberately withholds that key from the test job (#298); reusing it here would
+# mean revoking the feedback reader also breaks E2E, and rotating it for E2E silently breaks
+# this. One key, one job, revocable alone.
+#
+# THE GITHUB TOKEN NEVER REACHES A SUPABASE SERVER. Filing happens here, with the run's own
+# `GITHUB_TOKEN`, which is repo-scoped and expires with the run.
+#
+# `contents: read`, NOT `write`. This job does not commit the screenshots -- see the long
+# note in `scripts/ci/feedback-to-issues.mjs`. Both repos are public and a screenshot of this
+# product can carry an adopter's address, phone, landlord or vet details.
+#
+# IT IS NOT A GATE. Exiting non-zero because a customer found a bug would make a green board
+# a claim about customer silence. It fails only when it cannot READ the table, because "no
+# reports" and "I could not look" are different facts that look identical from outside.
+name: Customer feedback -> issues
+
+on:
+  schedule:
+    # :17 rather than :00 -- scheduled runs at the top of the hour are the ones GitHub
+    # delays most, and an hour of lag on a bug report is the whole point of this job.
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+# Serialised, because dedupe reads the issues list. A scheduled run and a manual dispatch
+# overlapping would both read "not filed yet" for the same row and file it twice.
+concurrency:
+  group: feedback
+  cancel-in-progress: false
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  file:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned explicitly and matching smoke.yml, the closest sibling job -- this repo has
+      # no .nvmrc and no `engines`, so every workflow names its own version.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      # No install step, deliberately: the script uses Node built-ins only, and a
+      # dependency surface is not something to add around a job holding a database
+      # credential. Every script in scripts/ci/ follows that rule.
+      - name: File any new reports
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_FEEDBACK_KEY }}
+        run: node scripts/ci/feedback-to-issues.mjs
