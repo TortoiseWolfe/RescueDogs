@@ -2,6 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { ApplicationQuestion } from '@/types/applications';
+import {
+  questionSettingsDraftKey,
+  saveQuestionSettingsDraft,
+} from '@/lib/applications/question-settings-draft';
 
 const serviceMocks = vi.hoisted(() => ({
   listApplicationQuestions: vi.fn(),
@@ -78,6 +82,7 @@ const BANK: ApplicationQuestion[] = [
 describe('shelter questions page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     membership.role = 'manager';
     serviceMocks.listApplicationQuestions.mockResolvedValue(BANK);
     serviceMocks.listShownQuestionIds.mockResolvedValue([]);
@@ -127,6 +132,59 @@ describe('shelter questions page', () => {
       await screen.findByText(/Only a manager can change which questions/)
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Reset' })).toBeDisabled();
+  });
+
+  it('always labels the category as Shown, even when extras are off (#476)', async () => {
+    render(<ShelterQuestionsPage />);
+    expect(
+      await screen.findByRole('heading', { name: 'Application questions' })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Shown: 1 of 2/)).toBeInTheDocument();
+    expect(screen.queryByText(/Hidden:/)).not.toBeInTheDocument();
+  });
+
+  it('restores an unsaved draft from this window (#476)', async () => {
+    saveQuestionSettingsDraft('shelter-1', {
+      shownIds: ['hou.restrictions'],
+      remembered: {},
+    });
+    render(<ShelterQuestionsPage />);
+    expect(
+      await screen.findByRole('heading', { name: 'Application questions' })
+    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Save changes' })).toBeEnabled()
+    );
+    expect(screen.getByText(/Shown: 2 of 2/)).toBeInTheDocument();
+  });
+
+  it('Reset restores the locked core and leaves Save enabled when extras were saved (#476)', async () => {
+    serviceMocks.listShownQuestionIds.mockResolvedValue(['hou.restrictions']);
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    render(<ShelterQuestionsPage />);
+    expect(
+      await screen.findByRole('heading', { name: 'Application questions' })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Shown: 2 of 2/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reset' }));
+    await waitFor(() =>
+      expect(screen.getByText(/Shown: 1 of 2/)).toBeInTheDocument()
+    );
+    const save = screen.getByRole('button', { name: 'Save changes' });
+    expect(save).toBeEnabled();
+    fireEvent.click(save);
+    await waitFor(() =>
+      expect(serviceMocks.setShownQuestionIds).toHaveBeenCalledWith(
+        'shelter-1',
+        []
+      )
+    );
+    expect(
+      sessionStorage.getItem(questionSettingsDraftKey('shelter-1'))
+    ).toBeNull();
+    confirm.mockRestore();
   });
 
   it('opens the red-flag editor for a flaggable question', async () => {
