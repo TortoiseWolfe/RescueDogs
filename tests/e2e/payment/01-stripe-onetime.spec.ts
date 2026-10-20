@@ -50,13 +50,10 @@ test.describe('Stripe One-Time Payment Flow', () => {
     // Hosted Checkout is Stripe's page; we stop at the edge-function call.
     // The mock returns a fake session, so Stripe.js's redirect then fails and
     // the app stays on /payment-demo, which is what keeps this deterministic.
-    let body: { payment_intent_id?: string } = {};
-    let hasAuth = false;
     await page.route(
       '**/functions/v1/create-stripe-checkout',
       async (route) => {
-        const req = route.request();
-        if (req.method() === 'OPTIONS') {
+        if (route.request().method() === 'OPTIONS') {
           await route.fulfill({
             status: 204,
             headers: {
@@ -67,8 +64,6 @@ test.describe('Stripe One-Time Payment Flow', () => {
           });
           return;
         }
-        body = req.postDataJSON();
-        hasAuth = !!req.headers()['authorization'];
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -94,7 +89,9 @@ test.describe('Stripe One-Time Payment Flow', () => {
       { timeout: 30000 }
     );
     await page.getByRole('button', { name: /Pay \$20\.00/i }).click();
-    await request;
+    const sent = await request;
+    const body = sent.postDataJSON() as { payment_intent_id?: string };
+    const hasAuth = !!(await sent.allHeaders())['authorization'];
 
     // The id sent is the payment_intents row the app just inserted.
     expect(body.payment_intent_id).toMatch(
