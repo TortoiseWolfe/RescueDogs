@@ -1,0 +1,189 @@
+name: Local Supabase
+
+# The admin dashboard specs and the admin RPC contract test need two things the
+# shared hosted project cannot give them: an admin whose JWT we mint, and the
+# demo data in supabase/seed-admin-demo.sql. So they run here, against a
+# throwaway Supabase stack brought up from docker-compose.yml's `supabase`
+# profile (#383).
+#
+# Separate from e2e.yml on purpose:
+#  - it talks to its OWN database, so it does not join the e2e-supabase mutex
+#    and cannot race (or be raced by) the hosted E2E runs;
+#  - it holds no repository secrets. Every key below is the public Supabase
+#    self-hosting demo key from .env.local-supabase.
+#
+# The same specs are not defined in e2e.yml (see tests/e2e/utils/local-supabase.ts),
+# so no lane reports them as skipped.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+      - 'tests/rls/**'
+      - 'tests/contract/admin/**'
+      - 'tests/e2e/admin/**'
+      - 'tests/e2e/utils/local-supabase.ts'
+      - 'src/**'
+      - 'scripts/seed-*.ts'
+      - 'docker-compose.yml'
+      - 'docker/supabase/**'
+      - 'vitest.rls.config.ts'
+      - '.github/workflows/local-supabase.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: local-supabase-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  local-supabase:
+    name: RLS + admin (local Supabase)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Local demo env (compose, build and tests share one set of keys)
+        run: |
+          # .env.local-supabase is tracked and holds only the public demo keys.
+          cp .env.local-supabase .env
+          sed -i 's|host\.docker\.internal|localhost|g' .env
+          grep -E '^(NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY|TEST_USER_)' .env.local-supabase >> "$GITHUB_ENV"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321"
+            echo "SUPABASE_ADMIN_URL=http://localhost:54321"
+          } >> "$GITHUB_ENV"
+
+      - name: Bring up local Supabase
+        run: |
+          docker compose --profile supabase up -d \
+            supabase-db supabase-kong supabase-auth supabase-rest \
+            supabase-realtime supabase-storage
+
+      - name: Wait for the stack to answer
+        run: |
+          set +e
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 \
+              -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+              http://localhost:54321/auth/v1/health)
+            [ "$code" = "200" ] && { echo "auth ready after ${i} attempt(s)"; exit 0; }
+            sleep 3
+          done
+          echo "::error::local Supabase never became ready (last=$code)"
+          docker compose --profile supabase logs --tail=100
+          exit 1
+
+      - name: Assert schema fidelity before trusting any result
+        run: |
+          # docker-compose.yml mounts the SAME monolithic migration production
+          # uses. If that silently stops applying, every test below would run
+          # against an empty database.
+          n=$(docker compose exec -T supabase-db psql -U postgres -d postgres -tAc \
+                "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'")
+          echo "public tables: $n"
+          [ "$n" -ge 17 ] || { echo "::error::expected >=17 public tables, got $n; the migration did not apply"; exit 1; }
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.16.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Seed the E2E users
+        run: pnpm exec tsx scripts/seed-test-users.ts
+
+      - name: Seed the admin demo data
+        run: |
+          set -euo pipefail
+          docker compose exec -T supabase-db \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/seed-admin-demo.sql
+
+          # NON-VACUITY. The seed is idempotent (ON CONFLICT DO NOTHING), so a
+          # no-op run and a successful one look the same. admin-user-pagination
+          # needs more than PAGE_SIZE (50) non-admin profiles, and the search
+          # specs need the NAMES to have landed, not just the rows.
+          n=$(docker compose exec -T supabase-db psql -U postgres -d postgres -tAc \
+            "SELECT count(*) FROM user_profiles WHERE is_admin = FALSE;")
+          alice=$(docker compose exec -T supabase-db psql -U postgres -d postgres -tAc \
+            "SELECT count(*) FROM user_profiles WHERE username = 'alice' AND display_name = 'Alice Johnson';")
+          admin=$(docker compose exec -T supabase-db psql -U postgres -d postgres -tAc \
+            "SELECT count(*) FROM auth.users WHERE email = 'admin@rescuedogs.com' AND (raw_app_meta_data->>'is_admin')::boolean;")
+          echo "non-admin profiles: $n, alice: $alice, admin with claim: $admin"
+          if [ "$n" -le 50 ] || [ "$alice" -ne 1 ] || [ "$admin" -ne 1 ]; then
+            echo "::error::admin demo seed incomplete (need >50 non-admin profiles, alice, and an admin with the is_admin claim)"
+            exit 1
+          fi
+
+      - name: RLS suite and admin RPC contract
+        run: pnpm test:rls
+
+      - name: Build the app against the local stack
+        run: pnpm build
+        env:
+          # Serve the build from the root, as e2e.yml does.
+          DISABLE_BASE_PATH: 'true'
+          GITHUB_ACTIONS: false
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Admin E2E
+        run: |
+          npx serve out -l 3000 > serve.log 2>&1 &
+          npx wait-on http://localhost:3000 --timeout 60000
+          pnpm exec playwright test tests/e2e/admin --project=chromium-gen \
+            --reporter=line,json
+        env:
+          CI: 'true'
+          # The setup project does the full per-job setup (second user, keys,
+          # connections). Here each job owns its database, so nothing races.
+          AUTH_SETUP_JOB: 'true'
+          SKIP_WEBSERVER: 'true'
+          BASE_URL: http://localhost:3000
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results.json
+
+      - name: The admin specs must have run, and none may be skipped
+        if: always()
+        run: |
+          # A lane that collects nothing is green and proves nothing: the specs
+          # are defined only when SUPABASE_ADMIN_URL is set (#383).
+          python3 - <<'PY'
+          import json, sys
+          r = json.load(open('results.json'))
+          s = r['stats']
+          print(f"expected={s['expected']} unexpected={s['unexpected']} flaky={s['flaky']} skipped={s['skipped']}")
+          ok = s['expected'] >= 29 and s['unexpected'] == 0 and s['flaky'] == 0 and s['skipped'] == 0
+          if not ok:
+              sys.exit('admin lane: need >=29 passing tests with 0 failed, 0 flaky, 0 skipped')
+          PY
+
+      - name: Dump stack logs on failure
+        if: failure()
+        run: docker compose --profile supabase logs --tail=200
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: local-supabase-playwright-report
+          path: |
+            playwright-report/
+            test-results/
+            results.json
+          retention-days: 7
+          if-no-files-found: ignore

@@ -317,15 +317,16 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
--- 6. SET ADMIN FLAG ON TEST USER (ensure app_metadata has is_admin)
+-- 6. SET ADMIN FLAG ON THE ADMIN USER (ensure app_metadata has is_admin)
 -- ============================================================================
--- The admin RPCs check auth.jwt()->'app_metadata'->>'is_admin'. This is set
--- during login if user_profiles.is_admin is true. Ensure the existing test
--- user has it in raw_app_meta_data so the JWT includes it.
+-- The admin RPCs check auth.jwt()->'app_metadata'->>'is_admin'. Ensure the
+-- seeded admin (scripts/seed-test-users.ts) has it in raw_app_meta_data so the
+-- JWT includes it. test@example.com must stay NON-admin: the admin contract
+-- test uses it as its non-admin caller (#383).
 
 UPDATE auth.users
 SET raw_app_meta_data = raw_app_meta_data || '{"is_admin": true}'::jsonb
-WHERE email = 'test@example.com'
+WHERE email = 'admin@rescuedogs.com'
   AND NOT (raw_app_meta_data ? 'is_admin');
 
 COMMIT;

@@ -8,7 +8,7 @@
  * 4. Next button disabled on last page
  *
  * Requires: local Supabase with seed-admin-demo.sql applied (50+ users),
- * admin user test@example.com with is_admin app_metadata.
+ * admin user admin@rescuedogs.com with is_admin app_metadata.
  *
  * Run from inside the Docker container:
  *   docker exec -e SKIP_WEBSERVER=1 -e BASE_URL=http://localhost:3000 \
@@ -17,14 +17,18 @@
 
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
+import { describeOnLocalSupabase } from '../utils/local-supabase';
 
-const ADMIN_EMAIL = 'test@example.com';
-const ADMIN_PASSWORD = 'TestPassword123!';
+// The same admin the contract test uses (seed-test-users.ts creates it);
+// TEST_USER_PRIMARY_EMAIL stays a genuine non-admin.
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || 'admin@rescuedogs.com';
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'AdminPassword123!';
 
 // Next.js basePath — empty in local dev, '/RescueDogs' in CI/prod
 const BP = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-// Local-only spec (skipped in CI). The Node test process reaches local Kong via
+// Runs only against the local Supabase stack (see ../utils/local-supabase.ts).
+// The Node test process reaches local Kong via
 // SUPABASE_ADMIN_URL (compose-internal supabase-kong:8000); the browser reaches
 // it via NEXT_PUBLIC_SUPABASE_URL (host.docker.internal:54321). No proxy /
 // --host-resolver-rules hack needed — see #121.
@@ -32,13 +36,7 @@ const SUPABASE_ADMIN_URL =
   process.env.SUPABASE_ADMIN_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-test.describe('Admin User Pagination E2E', () => {
-  // Kept skip, waits on #383: these need the local Docker Supabase stack with
-  // the admin seed, and CI has no such lane (it runs against the shared project).
-  test.skip(
-    !!process.env.CI,
-    'Waits on #383: needs a local-Supabase E2E lane, not available in CI'
-  );
+describeOnLocalSupabase('Admin User Pagination E2E', () => {
   test.describe.configure({ mode: 'serial' });
 
   test.beforeEach(async ({ page }) => {
