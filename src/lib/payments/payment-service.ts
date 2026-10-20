@@ -360,13 +360,14 @@ export async function retryFailedPayment(
     throw new PaymentRetryCoolingError(COOLING_PERIOD_MS - elapsedMs);
   }
 
-  // Each retry gets its own key, derived from the parent and the attempt
-  // number. Reusing the parent's key would collide with the parent's own row
-  // (the retry would always read as a duplicate and no child would exist),
-  // while a doubled click on the same retry sends the same derived key twice
-  // and is deduped by the unique index.
+  // Each retry gets its own key, derived from the parent's key (client-
+  // generated, so only the owner knows it) and the attempt number. Reusing the
+  // parent's key as-is would collide with the parent's own row (the retry would
+  // always read as a duplicate and no child would exist), while a doubled click
+  // on the same retry sends the same derived key twice and is deduped by the
+  // unique index. A legacy parent with no key falls back to its id.
   const newRetryCount = parent.retry_count + 1;
-  const idempotencyKey = `${parent.id}:retry-${newRetryCount}`;
+  const idempotencyKey = `${parent.idempotency_key ?? parent.id}:retry-${newRetryCount}`;
 
   // Plain insert, not upsert(onConflict: 'idempotency_key'): the only unique
   // index on that column is partial (WHERE idempotency_key IS NOT NULL), and
@@ -394,6 +395,18 @@ export async function retryFailedPayment(
 
   const deduped = insertError?.code === UNIQUE_VIOLATION;
   if (insertError && !deduped) throw insertError;
+  if (deduped) {
+    // The duplicate must be this user's own earlier retry. RLS hides other
+    // users' rows, so a key that was taken by someone else finds nothing here
+    // and the retry fails loudly instead of silently doing nothing.
+    const { data: existing } = await supabase
+      .from('payment_intents')
+      .select('id')
+      .eq('idempotency_key', idempotencyKey)
+      .eq('parent_intent_id', parent.id)
+      .maybeSingle();
+    if (!existing) throw insertError;
+  }
 
   // NFR-007: audit. Non-throwing — never break the user flow over an
   // audit-log write failure.

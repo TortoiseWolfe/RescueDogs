@@ -181,7 +181,16 @@ export class PaymentQueueAdapter extends BaseOfflineQueue<PaymentQueueItem> {
     if (error?.code === '23505') {
       // A prior attempt already created this row server-side. Mark the
       // queue row completed via the dedupe path; the user is not
-      // double-charged.
+      // double-charged. RLS hides other users' rows, so a key someone else
+      // took finds nothing here and fails loudly instead of being swallowed.
+      const { data: existing } = await supabase
+        .from('payment_intents')
+        .select('id')
+        .eq('idempotency_key', idempotencyKey)
+        .maybeSingle();
+      if (!existing) {
+        throw new Error(`Failed to create payment intent: ${error.message}`);
+      }
       return { status: 'conflicted' };
     }
 

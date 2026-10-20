@@ -19,6 +19,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 // Per-call insert mock so each test can specify the response shape.
 //   await supabase.from('payment_intents').insert(payload)
 const mockInsert = vi.fn();
+// Post-23505 lookup: the row a duplicate key collided with (RLS: own rows only).
+const mockExisting = vi.fn();
 const mockFrom = vi.fn();
 
 // Reconfigure the chain in beforeEach so each test starts from a known
@@ -44,7 +46,15 @@ describe('PaymentQueueAdapter (idempotent INSERT path, #52)', () => {
 
   beforeEach(async () => {
     mockInsert.mockReset();
-    mockFrom.mockReset().mockReturnValue({ insert: mockInsert });
+    mockExisting
+      .mockReset()
+      .mockResolvedValue({ data: { id: 'x' }, error: null });
+    mockFrom.mockReset().mockReturnValue({
+      insert: mockInsert,
+      select: () => ({
+        eq: () => ({ maybeSingle: mockExisting }),
+      }),
+    });
 
     adapter = new PaymentQueueAdapter();
     await adapter.clear();
@@ -101,6 +111,28 @@ describe('PaymentQueueAdapter (idempotent INSERT path, #52)', () => {
     // fired — the user's work is done from their perspective.
     const all = await adapter.getQueue();
     expect(all[0].status).toBe('completed');
+  });
+
+  it('fails the row when the duplicate key is not visible to this user', async () => {
+    mockInsert.mockResolvedValueOnce({
+      error: { code: '23505', message: 'duplicate key value' },
+    });
+    mockExisting.mockResolvedValueOnce({ data: null, error: null });
+
+    await adapter.queuePaymentIntent(
+      {
+        amount: 1000,
+        currency: 'usd',
+        type: 'one_time',
+        customer_email: 'a@example.com',
+        idempotency_key: 'squatted-key',
+      },
+      'test-user-1'
+    );
+    const result = await adapter.sync();
+
+    expect(result.conflicted).toBe(0);
+    expect(result.failed).toBe(1);
   });
 
   it('fails the queue row on any other insert error', async () => {

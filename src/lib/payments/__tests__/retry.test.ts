@@ -48,6 +48,8 @@ let upsertResult: { data: unknown; error: unknown } = {
   error: null,
 };
 const auditCalls: Array<unknown> = [];
+// What the post-23505 lookup finds (null = the key belongs to someone else).
+let existingRow: unknown = { id: 'child-1' };
 
 vi.mock('@/lib/supabase/client', () => ({
   supabase: {
@@ -65,6 +67,11 @@ vi.mock('@/lib/supabase/client', () => ({
           single: vi.fn(() =>
             Promise.resolve({ data: parentIntent, error: null })
           ),
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn(() =>
+              Promise.resolve({ data: existingRow, error: null })
+            ),
+          })),
         })),
       })),
       insert: vi.fn((payload: Record<string, unknown>) => {
@@ -93,17 +100,20 @@ beforeEach(() => {
   auditCalls.length = 0;
   parentIntent = makeParent();
   upsertResult = { data: { id: 'child-2' }, error: null };
+  existingRow = { id: 'child-1' };
 });
 
 describe('retryFailedPayment — per-attempt idempotency key (#43, #477)', () => {
-  it("derives the child's key from the parent id and attempt number, not the parent's key", async () => {
+  it("derives the child's key from the parent's key and the attempt number, never the bare parent key", async () => {
     parentIntent = makeParent({
       idempotency_key: 'shared-key-42',
       retry_count: 1,
     });
     await retryFailedPayment('parent-1');
     expect(upsertCalls).toHaveLength(1);
-    expect(upsertCalls[0].payload.idempotency_key).toBe('parent-1:retry-2');
+    expect(upsertCalls[0].payload.idempotency_key).toBe(
+      'shared-key-42:retry-2'
+    );
   });
 
   it('sends the same key for the same attempt so a double-click dedupes server-side', async () => {
@@ -214,6 +224,14 @@ describe('retryFailedPayment — dedupe-conflict path', () => {
     await retryFailedPayment('parent-1');
     expect(auditCalls).toHaveLength(1);
     expect((auditCalls[0] as { deduped: boolean }).deduped).toBe(true);
+  });
+
+  it("throws when the duplicate key is not this user's own earlier retry", async () => {
+    upsertResult = { data: null, error: { code: '23505' } };
+    existingRow = null; // RLS hides a row someone else created
+    await expect(retryFailedPayment('parent-1')).rejects.toMatchObject({
+      code: '23505',
+    });
   });
 
   it('still throws on any other insert error', async () => {
