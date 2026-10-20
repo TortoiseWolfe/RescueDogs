@@ -85,7 +85,6 @@ test.describe('Feature 013 — OAuth Messaging Password', () => {
 
   test.beforeEach(async () => {
     fixture = await seedIsolatedConversation();
-    test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
   });
 
   test.afterEach(async () => {

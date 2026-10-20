@@ -163,7 +163,6 @@ test.describe('Message Editing', () => {
 
   test.beforeEach(async () => {
     fixture = await seedIsolatedConversation();
-    test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
   });
 
   test.afterEach(async () => {
@@ -322,7 +321,6 @@ test.describe('Message Deletion', () => {
 
   test.beforeEach(async () => {
     fixture = await seedIsolatedConversation();
-    test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
   });
 
   test.afterEach(async () => {
@@ -490,7 +488,6 @@ test.describe('Time Window Restrictions', () => {
 
   test.beforeEach(async () => {
     fixture = await seedIsolatedConversation();
-    test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
   });
 
   test.afterEach(async () => {
@@ -527,7 +524,10 @@ test.describe('Time Window Restrictions', () => {
     browser,
   }) => {
     const adminClient = getAdminClient();
-    test.skip(!adminClient, 'admin client not configured');
+    expect(
+      adminClient,
+      'SUPABASE_SERVICE_ROLE_KEY is required: this test reads the database directly'
+    ).toBeTruthy();
 
     const viewer = await openAsViewer(browser, fixture!);
     forwardConsole(viewer.page, 'viewer');
@@ -667,7 +667,6 @@ test.describe('Accessibility', () => {
 
   test.beforeEach(async () => {
     fixture = await seedIsolatedConversation();
-    test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
   });
 
   test.afterEach(async () => {

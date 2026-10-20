@@ -55,14 +55,15 @@ async function waitForUIStability(page: Page) {
 let setupSucceeded = false;
 
 test.beforeAll(async ({ browser }) => {
-  // Build the isolated, static scroll fixture (issue #109). No-ops gracefully
-  // if credentials/admin client are unavailable, preserving the skip path.
-  if (PRIMARY_EMAIL) {
-    scrollFixture = await seedScrollFixture(
-      PRIMARY_EMAIL,
-      SCROLL_FIXTURE_MESSAGE_COUNT
-    );
+  // Build the isolated, static scroll fixture (issue #109). A missing admin
+  // client or credential throws here and fails the file; it does not skip.
+  if (!PRIMARY_EMAIL) {
+    throw new Error('PRIMARY_EMAIL is required to seed the scroll fixture');
   }
+  scrollFixture = await seedScrollFixture(
+    PRIMARY_EMAIL,
+    SCROLL_FIXTURE_MESSAGE_COUNT
+  );
 
   const context = await browser.newContext({
     storageState: './tests/e2e/fixtures/storage-state-auth.json',
@@ -88,6 +89,10 @@ test.beforeAll(async ({ browser }) => {
   } finally {
     await context.close();
   }
+  expect(
+    setupSucceeded,
+    'the test user has no conversation in the list: the shared messaging seed did not run'
+  ).toBe(true);
 });
 
 test.afterAll(async () => {
@@ -164,7 +169,6 @@ test.describe('Messaging Scroll - User Story 1: View Message Input', () => {
   test('T003: Message input visible on mobile viewport (375x667)', async ({
     page,
   }) => {
-    test.skip(!setupSucceeded, 'No conversations for test user in CI');
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('about:blank').catch(() => {});
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });
@@ -190,7 +194,6 @@ test.describe('Messaging Scroll - User Story 1: View Message Input', () => {
   test('T004: Message input visible on tablet viewport (768x1024)', async ({
     page,
   }) => {
-    test.skip(!setupSucceeded, 'No conversations for test user in CI');
     await page.setViewportSize(VIEWPORTS.tablet);
     await page.goto('about:blank').catch(() => {});
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });
@@ -213,7 +216,6 @@ test.describe('Messaging Scroll - User Story 1: View Message Input', () => {
   test('T005: Message input visible on desktop viewport (1280x800)', async ({
     page,
   }) => {
-    test.skip(!setupSucceeded, 'No conversations for test user in CI');
     await page.setViewportSize(VIEWPORTS.desktop);
     await page.goto('about:blank').catch(() => {});
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });
@@ -247,7 +249,6 @@ test.describe('Messaging Scroll - User Story 2: Scroll Through Messages', () => 
   test('T006: Scroll container constrained to MessageThread', async ({
     page,
   }) => {
-    test.skip(!setupSucceeded, 'No conversations for test user in CI');
     await page.setViewportSize(VIEWPORTS.desktop);
     await page.goto('about:blank').catch(() => {});
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });
@@ -299,13 +300,6 @@ test.describe('Messaging Scroll - User Story 3: Jump to Bottom Button', () => {
   test('T007-T008: Jump button appears when scrolled and does not overlap input', async ({
     page,
   }) => {
-    // Requires the isolated, tall scroll fixture (issue #109). Skip with a
-    // CLEAR, logged reason if it couldn't be built (e.g. admin client / creds
-    // unavailable) — never a silent pass that hides zero coverage.
-    test.skip(
-      !scrollFixture,
-      'Scroll fixture unavailable (no admin client / credentials) — cannot build a scrollable thread'
-    );
     const conversationId = scrollFixture!.conversationId;
 
     await page.setViewportSize(VIEWPORTS.desktop);
@@ -403,7 +397,6 @@ test.describe('Messaging Scroll - User Story 3: Jump to Bottom Button', () => {
   });
 
   test('T009: Jump button click scrolls to bottom', async ({ page }) => {
-    test.skip(!setupSucceeded, 'No conversations for test user in CI');
     await page.setViewportSize(VIEWPORTS.desktop);
     await page.goto('about:blank').catch(() => {});
     await page.goto('/messages', { waitUntil: 'domcontentloaded' });

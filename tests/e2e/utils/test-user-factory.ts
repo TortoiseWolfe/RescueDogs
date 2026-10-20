@@ -1274,7 +1274,7 @@ export interface ScrollFixture {
 
 const SCROLL_FIXTURE_MARKER = '-scroll-fixture';
 
-export async function seedScrollFixture(
+async function seedScrollFixtureOrNull(
   viewerEmail: string,
   messageCount = 30
 ): Promise<ScrollFixture | null> {
@@ -1365,6 +1365,25 @@ export async function seedScrollFixture(
 }
 
 /**
+ * seedScrollFixture, throwing instead of returning null. A seed that cannot run is a
+ * failed test, not a skip: callers used to turn null into test.skip(!fixture),
+ * which hid a broken seed or a missing admin key behind a green run. The
+ * reason is in the console.warn lines the seed logs just before it gives up.
+ */
+export async function seedScrollFixture(
+  viewerEmail: string,
+  messageCount = 30
+): Promise<ScrollFixture> {
+  const seeded = await seedScrollFixtureOrNull(viewerEmail, messageCount);
+  if (!seeded) {
+    throw new Error(
+      'seedScrollFixture: seed failed (admin client unavailable or a Supabase call failed; see the warning above)'
+    );
+  }
+  return seeded;
+}
+
+/**
  * Tear down the scroll fixture created by seedScrollFixture(). Deleting the
  * throwaway user cascade-deletes its conversation and messages (FK ON DELETE
  * CASCADE), so nothing is left behind. Safe to call with null.
@@ -1426,7 +1445,7 @@ export interface IsolatedConversation {
  * Argon2id at ARGON2_CONFIG.TIME_COST=3, UNCHANGED — never lower it, it breaks
  * stored-key verification). Returns null if the admin client is unavailable.
  */
-export async function seedIsolatedConversation(
+async function seedIsolatedConversationOrNull(
   messageCount = 0,
   opts?: { viewerPrefix?: string; partnerPrefix?: string }
 ): Promise<IsolatedConversation | null> {
@@ -1566,6 +1585,25 @@ export async function seedIsolatedConversation(
     viewerSession,
     partnerSession,
   };
+}
+
+/**
+ * seedIsolatedConversation, throwing instead of returning null. A seed that cannot run is a
+ * failed test, not a skip: callers used to turn null into test.skip(!fixture),
+ * which hid a broken seed or a missing admin key behind a green run. The
+ * reason is in the console.warn lines the seed logs just before it gives up.
+ */
+export async function seedIsolatedConversation(
+  messageCount = 0,
+  opts?: { viewerPrefix?: string; partnerPrefix?: string }
+): Promise<IsolatedConversation> {
+  const seeded = await seedIsolatedConversationOrNull(messageCount, opts);
+  if (!seeded) {
+    throw new Error(
+      'seedIsolatedConversation: seed failed (admin client unavailable or a Supabase call failed; see the warning above)'
+    );
+  }
+  return seeded;
 }
 
 /**
@@ -1877,7 +1915,7 @@ export interface IsolatedConnection {
  *                `connectionId` is the empty string.
  * Returns null if the admin client / anon key is unavailable.
  */
-export async function seedIsolatedConnection(
+async function seedIsolatedConnectionOrNull(
   status: 'pending' | 'accepted' | 'blocked' | 'declined' | 'none' = 'pending',
   opts?: { requesterPrefix?: string; addresseePrefix?: string }
 ): Promise<IsolatedConnection | null> {
@@ -1942,6 +1980,25 @@ export async function seedIsolatedConnection(
 }
 
 /**
+ * seedIsolatedConnection, throwing instead of returning null. A seed that cannot run is a
+ * failed test, not a skip: callers used to turn null into test.skip(!fixture),
+ * which hid a broken seed or a missing admin key behind a green run. The
+ * reason is in the console.warn lines the seed logs just before it gives up.
+ */
+export async function seedIsolatedConnection(
+  status: 'pending' | 'accepted' | 'blocked' | 'declined' | 'none' = 'pending',
+  opts?: { requesterPrefix?: string; addresseePrefix?: string }
+): Promise<IsolatedConnection> {
+  const seeded = await seedIsolatedConnectionOrNull(status, opts);
+  if (!seeded) {
+    throw new Error(
+      'seedIsolatedConnection: seed failed (admin client unavailable or a Supabase call failed; see the warning above)'
+    );
+  }
+  return seeded;
+}
+
+/**
  * Tear down an isolated connection. Deleting both throwaway users cascade-deletes
  * the connection (FK ON DELETE CASCADE). Safe with null.
  */
@@ -1978,7 +2035,7 @@ export interface IsolatedGroup {
  * (falls back gracefully if that table is absent on older schemas). Returns null
  * if the admin client / anon key is unavailable or the conversation can't be made.
  */
-export async function seedIsolatedGroup(
+async function seedIsolatedGroupOrNull(
   participantCount = 3,
   opts?: { prefix?: string }
 ): Promise<IsolatedGroup | null> {
@@ -2058,6 +2115,25 @@ export async function seedIsolatedGroup(
     `✓ Isolated group ${conversationId} (${participantCount} members)`
   );
   return { participants, conversationId };
+}
+
+/**
+ * seedIsolatedGroup, throwing instead of returning null. A seed that cannot run is a
+ * failed test, not a skip: callers used to turn null into test.skip(!fixture),
+ * which hid a broken seed or a missing admin key behind a green run. The
+ * reason is in the console.warn lines the seed logs just before it gives up.
+ */
+export async function seedIsolatedGroup(
+  participantCount = 3,
+  opts?: { prefix?: string }
+): Promise<IsolatedGroup> {
+  const seeded = await seedIsolatedGroupOrNull(participantCount, opts);
+  if (!seeded) {
+    throw new Error(
+      'seedIsolatedGroup: seed failed (admin client unavailable or a Supabase call failed; see the warning above)'
+    );
+  }
+  return seeded;
 }
 
 /**
