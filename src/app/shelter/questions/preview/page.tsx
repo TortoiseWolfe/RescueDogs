@@ -10,6 +10,7 @@ import {
   QUESTION_CATEGORIES,
   questionsForPreview,
 } from '@/lib/applications/question-settings';
+import { loadQuestionSettingsDraft } from '@/lib/applications/question-settings-draft';
 import type {
   ApplicationQuestion,
   PetTag,
@@ -39,6 +40,7 @@ export default function ShelterQuestionsPreviewPage() {
   const [openCategory, setOpenCategory] = useState<QuestionCategory>('housing');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [previewingDraft, setPreviewingDraft] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -48,8 +50,10 @@ export default function ShelterQuestionsPreviewPage() {
         service.listApplicationQuestions(),
         service.listShownQuestionIds(shelterId),
       ]);
+      const draft = loadQuestionSettingsDraft(shelterId);
       setQuestions(bank);
-      setShownIds(new Set(ids));
+      setShownIds(new Set(draft?.shownIds ?? ids));
+      setPreviewingDraft(Boolean(draft));
       setError(null);
     } catch {
       setError('We could not load the preview. Please try again.');
@@ -109,8 +113,9 @@ export default function ShelterQuestionsPreviewPage() {
         className="alert bg-base-200 border-primary border-l-4"
       >
         <span>
-          Preview: this is exactly what adopters will see. Nothing here can be
-          filled in or sent.
+          {previewingDraft
+            ? 'Previewing unsaved changes. Save on the editor to apply them to new applications. Nothing here can be filled in or sent.'
+            : 'Preview: this is exactly what adopters will see. Nothing here can be filled in or sent.'}
         </span>
         <Link href="/shelter/questions" className="btn btn-primary min-h-11">
           Back to editing
