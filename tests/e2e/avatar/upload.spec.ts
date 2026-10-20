@@ -152,8 +152,24 @@ test.describe('Avatar Upload Flow', () => {
 
     const cropModal = page.getByRole('dialog', { name: /crop/i });
     await expect(cropModal).toBeVisible({ timeout: 5000 });
+
+    // The avatar shows as soon as the upload lands, but AccountSettings then
+    // refreshes the session and refetches the profile. A second upload started
+    // inside that window can lose its change event to the re-render (CI flake),
+    // so wait for the refresh to finish before going on.
+    const sessionRefreshed = page.waitForResponse((r) =>
+      r.url().includes('/auth/v1/token?grant_type=refresh_token')
+    );
+    const profileRefetched = page.waitForResponse(
+      (r) =>
+        r.request().method() === 'GET' &&
+        r.url().includes('/rest/v1/user_profiles?select=*')
+    );
     await page.getByRole('button', { name: /save/i }).click();
     await expect(cropModal).toBeHidden({ timeout: 30000 });
+    await sessionRefreshed;
+    await profileRefetched;
+    await page.waitForLoadState('networkidle');
 
     // Wait for first avatar to appear and get its URL
     await expect(accountAvatar).toBeVisible();
