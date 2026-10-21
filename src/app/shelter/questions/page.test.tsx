@@ -187,6 +187,25 @@ describe('shelter questions page', () => {
     confirm.mockRestore();
   });
 
+  it('keeps tags under the question so they do not sit mid-sentence on a phone (#476)', async () => {
+    render(<ShelterQuestionsPage />);
+    expect(
+      await screen.findByRole('heading', { name: 'Application questions' })
+    ).toBeInTheDocument();
+
+    const wording = screen.getByText(
+      'Does your landlord, HOA, or neighborhood have pet restrictions?'
+    );
+    const row = wording.closest('li');
+    const flag = screen.getByRole('button', {
+      name: 'Add red flag for Does your landlord, HOA, or neighborhood have pet restrictions?',
+    });
+    expect(row?.className).toContain('items-start');
+    expect(row?.className).not.toMatch(/\bflex-wrap\b/);
+    expect(wording.tagName).toBe('P');
+    expect(wording.parentElement).toContainElement(flag);
+  });
+
   it('opens the red-flag editor for a flaggable question', async () => {
     render(<ShelterQuestionsPage />);
     expect(
