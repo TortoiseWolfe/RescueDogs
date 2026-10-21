@@ -449,10 +449,18 @@ describe.skipIf(!hasRlsTestEnvironment())(
       );
       expect(error).toBeNull();
 
-      await createServiceClient()
+      const service = createServiceClient();
+      await service
         .from('pets')
         .update({ application_tags: ['sighthound'] })
         .eq('id', DOG_2);
+      // one_application_per_pet: the earlier test already applied for these
+      // two pets as the same adopter, so clear those rows before applying again.
+      await service
+        .from('applications')
+        .delete()
+        .eq('adopter_id', adopter.id)
+        .in('pet_id', [DOG_2, CAT]);
 
       const taggedIds = (await snapshotOf(await apply(DOG_2))).map(
         (e) => e.question_id

@@ -129,6 +129,14 @@ jobs:
             exit 1
           fi
 
+      - name: Seed the rescue demo data
+        run: |
+          # tests/rls/application-rls.test.ts builds on the demo shelter
+          # (2222...01) and its adopter and staff accounts.
+          docker compose exec -T supabase-db \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/seed-rescue-demo.sql
+
       - name: RLS suite and admin RPC contract
         run: pnpm test:rls
 
