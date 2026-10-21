@@ -4157,11 +4157,36 @@ $$;
 COMMENT ON FUNCTION queue_rescue_welcome_email() IS
   'On email confirm: async send-rescue-welcome-email via pg_net (#316). Skips e2e/test recipients.';
 
+-- Local-profile caveat (same cause as the test-user seed above): on a fresh
+-- local initdb GoTrue has not yet run its migrations, so auth.users still has
+-- the base image's 2016-era columns and no email_confirmed_at. `UPDATE OF
+-- email_confirmed_at` then fails with 42703 and, under ON_ERROR_STOP, aborts
+-- the rest of this file -- the local stack could not boot at all. We must not
+-- forward-fill the column (GoTrue's own ADD COLUMN would then crash), so where
+-- it is absent we fall back to an unqualified AFTER UPDATE. The function's
+-- first lines return immediately unless the email flipped to confirmed, so the
+-- two forms behave identically; on Supabase Cloud the column exists and the
+-- trigger is created exactly as before.
 DROP TRIGGER IF EXISTS on_auth_user_email_confirmed_welcome ON auth.users;
-CREATE TRIGGER on_auth_user_email_confirmed_welcome
-  AFTER UPDATE OF email_confirmed_at ON auth.users
-  FOR EACH ROW
-  EXECUTE FUNCTION queue_rescue_welcome_email();
+DO $welcome_trigger$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'auth' AND table_name = 'users'
+      AND column_name = 'email_confirmed_at'
+  ) THEN
+    CREATE TRIGGER on_auth_user_email_confirmed_welcome
+      AFTER UPDATE OF email_confirmed_at ON auth.users
+      FOR EACH ROW
+      EXECUTE FUNCTION queue_rescue_welcome_email();
+  ELSE
+    CREATE TRIGGER on_auth_user_email_confirmed_welcome
+      AFTER UPDATE ON auth.users
+      FOR EACH ROW
+      EXECUTE FUNCTION queue_rescue_welcome_email();
+  END IF;
+END
+$welcome_trigger$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created_welcome_if_confirmed ON auth.users;
 CREATE TRIGGER on_auth_user_created_welcome_if_confirmed
