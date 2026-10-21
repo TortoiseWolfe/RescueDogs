@@ -143,7 +143,11 @@ export class PaymentQueueAdapter extends BaseOfflineQueue<PaymentQueueItem> {
       } = await supabase.auth.getUser();
 
       if (authError || !user) {
-        throw new Error('Must be authenticated to execute payment intent');
+        throw new Error(
+          `Must be authenticated to execute payment intent${
+            authError ? ` (${authError.message})` : ''
+          }`
+        );
       }
       userId = user.id;
     }
