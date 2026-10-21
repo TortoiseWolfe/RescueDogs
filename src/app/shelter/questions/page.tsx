@@ -386,20 +386,25 @@ export default function ShelterQuestionsPage() {
           <ul className="divide-base-300 divide-y">
             {openQuestions.map((question) => {
               const shown = isQuestionShown(question, shownIds);
-              const tags = questionTags(question);
+              const extraTags = questionTags(question).filter(
+                (tag) => tag !== 'Locked'
+              );
+              const canFlag = Boolean(flagKind(question));
+              const hasMeta =
+                Boolean(flags[question.id]) || extraTags.length > 0 || canFlag;
               return (
                 <li
                   key={question.id}
-                  className="flex min-h-11 flex-wrap items-center gap-2 py-3"
+                  className="flex min-h-11 items-start gap-2 py-3"
                 >
                   {question.is_locked ? (
-                    <span className="badge badge-neutral min-h-11 px-3">
+                    <span className="badge badge-neutral min-h-11 shrink-0 px-3">
                       Locked
                     </span>
                   ) : (
                     <button
                       type="button"
-                      className="btn btn-sm min-h-11 min-w-11"
+                      className="btn btn-sm min-h-11 min-w-11 shrink-0"
                       disabled={!isManager}
                       aria-pressed={shown}
                       aria-label={
@@ -417,47 +422,51 @@ export default function ShelterQuestionsPage() {
                       </span>
                     </button>
                   )}
-                  <span
-                    className={`flex-1 ${shown ? '' : 'text-base-content/60'}`}
+                  <div
+                    className={`min-w-0 flex-1 ${
+                      shown ? '' : 'text-base-content/60'
+                    }`}
                   >
-                    {question.wording}
+                    <p>{question.wording}</p>
                     {question.parent_id ? (
                       <span className="text-base-content/70 block text-sm">
                         Extra field on {question.parent_id}
                       </span>
                     ) : null}
-                  </span>
-                  {flags[question.id] ? (
-                    <span className="badge badge-error text-error-content">
-                      Red flag: {flags[question.id].label}
-                    </span>
-                  ) : null}
-                  {tags
-                    .filter((tag) => tag !== 'Locked')
-                    .map((tag) => (
-                      <span key={tag} className="badge badge-ghost">
-                        {tag}
-                      </span>
-                    ))}
-                  {flagKind(question) ? (
-                    <button
-                      type="button"
-                      className={`btn btn-sm min-h-11 ${
-                        flags[question.id] ? 'btn-error' : 'btn-ghost'
-                      }`}
-                      aria-label={
-                        flags[question.id]
-                          ? `Edit red flag for ${question.wording}`
-                          : `Add red flag for ${question.wording}`
-                      }
-                      onClick={() => {
-                        setFlagError(null);
-                        setEditingId(question.id);
-                      }}
-                    >
-                      Flag
-                    </button>
-                  ) : null}
+                    {hasMeta ? (
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        {flags[question.id] ? (
+                          <span className="badge badge-error text-error-content">
+                            Red flag: {flags[question.id].label}
+                          </span>
+                        ) : null}
+                        {extraTags.map((tag) => (
+                          <span key={tag} className="badge badge-ghost">
+                            {tag}
+                          </span>
+                        ))}
+                        {canFlag ? (
+                          <button
+                            type="button"
+                            className={`btn btn-sm min-h-11 ${
+                              flags[question.id] ? 'btn-error' : 'btn-ghost'
+                            }`}
+                            aria-label={
+                              flags[question.id]
+                                ? `Edit red flag for ${question.wording}`
+                                : `Add red flag for ${question.wording}`
+                            }
+                            onClick={() => {
+                              setFlagError(null);
+                              setEditingId(question.id);
+                            }}
+                          >
+                            Flag
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
                 </li>
               );
             })}
