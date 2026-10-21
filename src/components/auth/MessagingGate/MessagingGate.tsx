@@ -4,6 +4,10 @@ import React, { useState, useRef, type ReactNode } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { isOAuthUser } from '@/lib/auth/oauth-utils';
+import CaptchaWidget, {
+  type CaptchaWidgetHandle,
+} from '@/components/auth/CaptchaWidget';
+import { captchaConfig } from '@/config/captcha.config';
 
 export interface MessagingGateProps {
   /** Child content to render when email is verified */
@@ -23,6 +27,9 @@ export default function MessagingGate({ children }: MessagingGateProps) {
   const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendError, setResendError] = useState<string | null>(null);
+  // Hooks stay above the early returns below.
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<CaptchaWidgetHandle>(null);
 
   // Track if user was ever authenticated in this component's lifetime.
   // Supabase token refresh briefly sets user=null and removes the auth
@@ -78,6 +85,11 @@ export default function MessagingGate({ children }: MessagingGateProps) {
   const handleResend = async () => {
     if (!user?.email) return;
 
+    if (captchaConfig.enabled && !captchaToken) {
+      setResendError('Please complete the bot check first.');
+      return;
+    }
+
     setResending(true);
     setResendError(null);
     setResendSuccess(false);
@@ -85,11 +97,14 @@ export default function MessagingGate({ children }: MessagingGateProps) {
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email: user!.email!,
+      ...(captchaToken ? { options: { captchaToken } } : {}),
     });
 
     setResending(false);
 
     if (error) {
+      // Turnstile tokens are single-use; a spent one would block every retry.
+      captchaRef.current?.reset();
       setResendError(error.message);
     } else {
       setResendSuccess(true);
@@ -151,6 +166,7 @@ export default function MessagingGate({ children }: MessagingGateProps) {
             </div>
           ) : (
             <div className="card-actions mt-6">
+              <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
               <button
                 onClick={handleResend}
                 disabled={resending}

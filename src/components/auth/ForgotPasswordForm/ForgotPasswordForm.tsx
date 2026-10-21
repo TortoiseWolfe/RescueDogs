@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import {
   checkRateLimit,
@@ -12,6 +12,10 @@ import {
 import { validateEmail } from '@/lib/auth/email-validator';
 import { logAuthEvent } from '@/lib/auth/audit-logger';
 import { getRedirectUrl } from '@/config/project.config';
+import CaptchaWidget, {
+  type CaptchaWidgetHandle,
+} from '@/components/auth/CaptchaWidget';
+import { captchaConfig } from '@/config/captcha.config';
 
 export interface ForgotPasswordFormProps {
   /** Callback on success */
@@ -35,6 +39,8 @@ export default function ForgotPasswordForm({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<CaptchaWidgetHandle>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,18 +67,29 @@ export default function ForgotPasswordForm({
       return;
     }
 
+    // Supabase Bot Protection rejects a token-less /recover with captcha_failed.
+    // Block before the request so it never counts toward the reset lockout.
+    if (captchaConfig.enabled && !captchaToken) {
+      setError('Please complete the bot check before sending the link.');
+      return;
+    }
+
     setLoading(true);
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email,
       {
         redirectTo: getRedirectUrl('/reset-password'),
+        ...(captchaToken ? { captchaToken } : {}),
       }
     );
 
     setLoading(false);
 
     if (resetError) {
+      // Turnstile tokens are single-use; a spent one would block every retry.
+      captchaRef.current?.reset();
+
       if (isAuthRequestRateLimited(resetError)) {
         await logAuthEvent({
           event_type: 'password_reset_request',
@@ -136,6 +153,8 @@ export default function ForgotPasswordForm({
           disabled={loading}
         />
       </div>
+
+      <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
 
       {error && (
         <div className="alert alert-error" role="alert" aria-live="assertive">
