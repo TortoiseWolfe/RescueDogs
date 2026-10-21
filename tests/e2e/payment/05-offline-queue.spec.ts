@@ -18,6 +18,9 @@ import {
   seedPaymentQueue,
   clearPaymentQueue,
   requireAdminClient,
+  seedIsolatedAccount,
+  openAuthedPage,
+  deleteTestUser,
 } from '../utils/test-user-factory';
 
 test.describe('Offline Payment Queue', () => {
@@ -213,12 +216,18 @@ test.describe('Offline Payment Queue', () => {
     await clearPaymentQueue(page);
   });
 
-  test('should drain the queue on Retry (#477)', async ({ page }) => {
+  test('should drain the queue on Retry (#477)', async ({ browser }) => {
     const admin = requireAdminClient('05-offline-queue');
-    await openHubPanel(page);
+    // The shared storage-state session can be revoked by parallel specs that
+    // share its refresh token, which made the adapter's getUser() fail with
+    // "Auth session missing!". This test owns its user and session instead.
+    const account = await seedIsolatedAccount('queue-drain');
+    const opened = await openAuthedPage(browser, account.session);
+    const page = opened.page;
 
     const buyerEmail = `queue-drain-${Date.now()}@example.com`;
     try {
+      await openHubPanel(page);
       const written = await seedPaymentQueue(page, [
         {
           type: 'payment_intent',
@@ -258,6 +267,8 @@ test.describe('Offline Payment Queue', () => {
         .from('payment_intents')
         .delete()
         .eq('customer_email', buyerEmail);
+      await opened.close();
+      await deleteTestUser(account.user.id);
     }
   });
 
