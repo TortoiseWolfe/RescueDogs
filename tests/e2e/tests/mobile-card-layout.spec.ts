@@ -45,16 +45,24 @@ test.describe('Mobile Card Layout', () => {
     );
     await expect(cards).toHaveCount(3);
 
-    const box1 = await cards.nth(0).boundingBox();
-    const box2 = await cards.nth(1).boundingBox();
+    // The section first renders the default trio, then swaps in live listings
+    // once Supabase answers. A card replaced between the two boundingBox()
+    // reads yields null, so re-measure the pair together until it settles.
+    await expect(async () => {
+      const box1 = await cards.nth(0).boundingBox();
+      const box2 = await cards.nth(1).boundingBox();
 
-    expect(box1, 'First pet card should be visible').toBeTruthy();
-    expect(box2, 'Second pet card should be visible').toBeTruthy();
+      expect(box1, 'First pet card should be visible').toBeTruthy();
+      expect(box2, 'Second pet card should be visible').toBeTruthy();
 
-    // Vertical stacking: second card should be below first
-    expect(box2!.y, 'Cards should stack vertically on mobile').toBeGreaterThan(
-      box1!.y + box1!.height - 10 // Allow small overlap for spacing
-    );
+      // Vertical stacking: second card should be below first
+      expect(
+        box2!.y,
+        'Cards should stack vertically on mobile'
+      ).toBeGreaterThan(
+        box1!.y + box1!.height - 10 // Allow small overlap for spacing
+      );
+    }).toPass({ timeout: 10000 });
   });
 
   test('Cards use grid layout on tablet (768px+)', async ({ page }) => {
