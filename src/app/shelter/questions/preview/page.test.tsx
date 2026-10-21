@@ -16,6 +16,7 @@ vi.mock('../../ShelterGate', () => ({
   useShelterMembership: () => ({ shelterId: 'shelter-1', role: 'manager' }),
 }));
 
+import { saveQuestionSettingsDraft } from '@/lib/applications/question-settings-draft';
 import ShelterQuestionsPreviewPage from './page';
 
 const BANK: ApplicationQuestion[] = [
@@ -65,6 +66,7 @@ const BANK: ApplicationQuestion[] = [
 describe('shelter questions preview page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     serviceMocks.listApplicationQuestions.mockResolvedValue(BANK);
     serviceMocks.listShownQuestionIds.mockResolvedValue([
       'hou.insurance_breed',
@@ -91,5 +93,21 @@ describe('shelter questions preview page', () => {
       screen.queryByText('Does your insurance restrict dog breeds?')
     ).not.toBeInTheDocument();
     expect(screen.getByText('1 question for a cat')).toBeInTheDocument();
+  });
+
+  it('overlays an unsaved draft so Preview matches the editor (#476)', async () => {
+    serviceMocks.listShownQuestionIds.mockResolvedValue([]);
+    saveQuestionSettingsDraft('shelter-1', {
+      shownIds: ['hou.insurance_breed'],
+      remembered: {},
+    });
+    render(<ShelterQuestionsPreviewPage />);
+
+    expect(
+      await screen.findByText(/Previewing unsaved changes/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Does your insurance restrict dog breeds?')
+    ).toBeInTheDocument();
   });
 });

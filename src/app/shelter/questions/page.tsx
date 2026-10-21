@@ -19,6 +19,11 @@ import {
   shownCount,
   toggleQuestion,
 } from '@/lib/applications/question-settings';
+import {
+  clearQuestionSettingsDraft,
+  loadQuestionSettingsDraft,
+  saveQuestionSettingsDraft,
+} from '@/lib/applications/question-settings-draft';
 import type {
   ApplicationQuestion,
   QuestionCategory,
@@ -58,9 +63,11 @@ export default function ShelterQuestionsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [flagSaving, setFlagSaving] = useState(false);
   const [flagError, setFlagError] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setHydrated(false);
     try {
       const service = new ShelterApplicationService(supabase);
       const [bank, ids, flagRows] = await Promise.all([
@@ -69,9 +76,16 @@ export default function ShelterQuestionsPage() {
         service.listApplicationFlags(shelterId),
       ]);
       const next = new Set(ids);
+      const draft = loadQuestionSettingsDraft(shelterId);
       setQuestions(bank);
-      setShownIds(next);
       setSavedIds(new Set(ids));
+      if (draft) {
+        setShownIds(new Set(draft.shownIds));
+        setRemembered(draft.remembered ?? {});
+      } else {
+        setShownIds(next);
+        setRemembered({});
+      }
       setFlags(
         Object.fromEntries(flagRows.map((rule) => [rule.question_id, rule]))
       );
@@ -80,6 +94,7 @@ export default function ShelterQuestionsPage() {
       setError('We could not load the question bank. Please try again.');
     } finally {
       setLoading(false);
+      setHydrated(true);
     }
   }, [shelterId]);
 
@@ -99,6 +114,18 @@ export default function ShelterQuestionsPage() {
     return false;
   }, [shownIds, savedIds]);
 
+  useEffect(() => {
+    if (!hydrated || !isManager) return;
+    if (dirty) {
+      saveQuestionSettingsDraft(shelterId, {
+        shownIds: [...shownIds],
+        remembered,
+      });
+    } else {
+      clearQuestionSettingsDraft(shelterId);
+    }
+  }, [hydrated, dirty, shownIds, remembered, isManager, shelterId]);
+
   const openQuestions = useMemo(
     () => questions.filter((question) => question.category === openCategory),
     [questions, openCategory]
@@ -113,6 +140,7 @@ export default function ShelterQuestionsPage() {
       const service = new ShelterApplicationService(supabase);
       await service.setShownQuestionIds(shelterId, [...shownIds]);
       setSavedIds(new Set(shownIds));
+      clearQuestionSettingsDraft(shelterId);
       setSaved(true);
     } catch (err) {
       setError(
@@ -146,6 +174,19 @@ export default function ShelterQuestionsPage() {
   function onToggleQuestion(question: ApplicationQuestion) {
     if (!isManager || question.is_locked) return;
     setShownIds(toggleQuestion(question, shownIds));
+  }
+
+  function onReset() {
+    if (!isManager) return;
+    if (
+      !window.confirm(
+        'Restore the locked-core questions only? You still need to Save for this to apply to new applications.'
+      )
+    ) {
+      return;
+    }
+    setShownIds(new Set());
+    setRemembered({});
   }
 
   const editingQuestion = questions.find(
@@ -230,6 +271,14 @@ export default function ShelterQuestionsPage() {
           </Link>
           <button
             type="button"
+            className="btn btn-ghost min-h-11"
+            disabled={!isManager || saving}
+            onClick={onReset}
+          >
+            Reset
+          </button>
+          <button
+            type="button"
             className="btn btn-primary min-h-11"
             disabled={saving || !isManager || !dirty}
             onClick={() => void onSave()}
@@ -263,6 +312,13 @@ export default function ShelterQuestionsPage() {
         </div>
       ) : null}
 
+      {dirty && isManager ? (
+        <p className="text-base-content/70 text-sm">
+          Unsaved changes stay until you close this window. Save to apply them
+          to new applications.
+        </p>
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-[18rem_1fr]">
         <nav
           aria-label="Question categories"
@@ -286,20 +342,15 @@ export default function ShelterQuestionsPage() {
                   onClick={() => setOpenCategory(category)}
                   aria-current={selected ? 'true' : undefined}
                 >
-                  <span className="font-semibold">
+                  <span className="text-sm font-semibold">
                     {CATEGORY_LABELS[category]}
                   </span>
-                  <span className="text-base-content/70 block text-xs leading-snug">
-                    <span className="block text-xs">
-                      {state === 'hidden' ? 'Hidden' : 'Shown'}:{' '}
-                      {state === 'hidden'
-                        ? `0 of ${counts.total}`
-                        : `${counts.shown} of ${counts.total}`}
+                  <span className="text-base-content/70 mt-0.5 block !text-xs leading-snug">
+                    <span className="block">
+                      Shown: {counts.shown} of {counts.total}
                     </span>
                     {counts.locked ? (
-                      <span className="block text-xs">
-                        Locked: {counts.locked}
-                      </span>
+                      <span className="block">Locked: {counts.locked}</span>
                     ) : null}
                   </span>
                 </button>
@@ -315,7 +366,9 @@ export default function ShelterQuestionsPage() {
                     }
                     onClick={() => onToggleCategory(category)}
                   >
-                    {state === 'shown' ? '−' : '+'}
+                    <span className="text-2xl leading-none" aria-hidden="true">
+                      {state === 'shown' ? '−' : '+'}
+                    </span>
                   </button>
                 )}
               </div>
@@ -333,20 +386,25 @@ export default function ShelterQuestionsPage() {
           <ul className="divide-base-300 divide-y">
             {openQuestions.map((question) => {
               const shown = isQuestionShown(question, shownIds);
-              const tags = questionTags(question);
+              const extraTags = questionTags(question).filter(
+                (tag) => tag !== 'Locked'
+              );
+              const canFlag = Boolean(flagKind(question));
+              const hasMeta =
+                Boolean(flags[question.id]) || extraTags.length > 0 || canFlag;
               return (
                 <li
                   key={question.id}
-                  className="flex min-h-11 flex-wrap items-center gap-2 py-3"
+                  className="flex min-h-11 items-start gap-2 py-3"
                 >
                   {question.is_locked ? (
-                    <span className="badge badge-neutral min-h-11 px-3">
+                    <span className="badge badge-neutral min-h-11 shrink-0 px-3">
                       Locked
                     </span>
                   ) : (
                     <button
                       type="button"
-                      className="btn btn-sm min-h-11 min-w-11"
+                      className="btn btn-sm min-h-11 min-w-11 shrink-0"
                       disabled={!isManager}
                       aria-pressed={shown}
                       aria-label={
@@ -356,50 +414,59 @@ export default function ShelterQuestionsPage() {
                       }
                       onClick={() => onToggleQuestion(question)}
                     >
-                      {shown ? '−' : '+'}
+                      <span
+                        className="text-2xl leading-none"
+                        aria-hidden="true"
+                      >
+                        {shown ? '−' : '+'}
+                      </span>
                     </button>
                   )}
-                  <span
-                    className={`flex-1 ${shown ? '' : 'text-base-content/60'}`}
+                  <div
+                    className={`min-w-0 flex-1 ${
+                      shown ? '' : 'text-base-content/60'
+                    }`}
                   >
-                    {question.wording}
+                    <p>{question.wording}</p>
                     {question.parent_id ? (
                       <span className="text-base-content/70 block text-sm">
                         Extra field on {question.parent_id}
                       </span>
                     ) : null}
-                  </span>
-                  {flags[question.id] ? (
-                    <span className="badge badge-error text-error-content">
-                      Red flag: {flags[question.id].label}
-                    </span>
-                  ) : null}
-                  {tags
-                    .filter((tag) => tag !== 'Locked')
-                    .map((tag) => (
-                      <span key={tag} className="badge badge-ghost">
-                        {tag}
-                      </span>
-                    ))}
-                  {flagKind(question) ? (
-                    <button
-                      type="button"
-                      className={`btn btn-sm min-h-11 ${
-                        flags[question.id] ? 'btn-error' : 'btn-ghost'
-                      }`}
-                      aria-label={
-                        flags[question.id]
-                          ? `Edit red flag for ${question.wording}`
-                          : `Add red flag for ${question.wording}`
-                      }
-                      onClick={() => {
-                        setFlagError(null);
-                        setEditingId(question.id);
-                      }}
-                    >
-                      Flag
-                    </button>
-                  ) : null}
+                    {hasMeta ? (
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        {flags[question.id] ? (
+                          <span className="badge badge-error text-error-content">
+                            Red flag: {flags[question.id].label}
+                          </span>
+                        ) : null}
+                        {extraTags.map((tag) => (
+                          <span key={tag} className="badge badge-ghost">
+                            {tag}
+                          </span>
+                        ))}
+                        {canFlag ? (
+                          <button
+                            type="button"
+                            className={`btn btn-sm min-h-11 ${
+                              flags[question.id] ? 'btn-error' : 'btn-ghost'
+                            }`}
+                            aria-label={
+                              flags[question.id]
+                                ? `Edit red flag for ${question.wording}`
+                                : `Add red flag for ${question.wording}`
+                            }
+                            onClick={() => {
+                              setFlagError(null);
+                              setEditingId(question.id);
+                            }}
+                          >
+                            Flag
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
                 </li>
               );
             })}
