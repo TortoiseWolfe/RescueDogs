@@ -20,13 +20,17 @@
 import { test, expect } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { STALE_THRESHOLD_MS } from '../../../src/components/organisms/AdminConversationList/AdminConversationList';
+import { describeOnLocalSupabase } from '../utils/local-supabase';
 
-const ADMIN_EMAIL = 'test@example.com';
-const ADMIN_PASSWORD = 'TestPassword123!';
+// The same admin the contract test uses (seed-test-users.ts creates it);
+// TEST_USER_PRIMARY_EMAIL stays a genuine non-admin.
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || 'admin@rescuedogs.com';
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'AdminPassword123!';
 
 const BP = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-// Local-only spec (skipped in CI). The Node test process reaches local Kong via
+// Runs only against the local Supabase stack (see ../utils/local-supabase.ts).
+// The Node test process reaches local Kong via
 // SUPABASE_ADMIN_URL (compose-internal supabase-kong:8000); the browser reaches
 // it via NEXT_PUBLIC_SUPABASE_URL (host.docker.internal:54321). No proxy /
 // --host-resolver-rules hack needed — see #121.
@@ -46,8 +50,7 @@ const STALE_LAST_MESSAGE = new Date(
 // = 4, variant nibble = a) in case anything downstream validates format.
 const STALE_CONV_ID = 'eeeeeeee-eeee-4eee-aeee-000000000e2e';
 
-test.describe('Admin Conversation List E2E', () => {
-  test.skip(!!process.env.CI, 'Skipped in CI: requires local Docker Supabase');
+describeOnLocalSupabase('Admin Conversation List E2E', () => {
   test.describe.configure({ mode: 'serial' });
 
   let serviceClient: SupabaseClient;

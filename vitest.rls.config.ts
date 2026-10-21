@@ -13,7 +13,11 @@ import path from 'path';
  */
 export default defineConfig({
   test: {
-    include: ['tests/rls/**/*.test.ts'],
+    include: [
+      'tests/rls/**/*.test.ts',
+      // Needs a live backend with the admin RPCs; vitest.config.ts excludes it.
+      'tests/contract/admin/admin-access.contract.test.ts',
+    ],
     globals: true,
     testTimeout: 30000,
     hookTimeout: 30000,

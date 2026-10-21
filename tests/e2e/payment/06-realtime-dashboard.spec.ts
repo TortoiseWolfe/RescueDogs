@@ -1,17 +1,17 @@
 /**
  * Integration Test: Dashboard Real-Time Updates - T060
- * Tests Supabase realtime subscription for payment status updates
+ * Tests Supabase realtime subscription for payment status updates.
  *
- * NOTE: Most tests are skipped because:
- * 1. /payment/dashboard route doesn't exist (only /payment-demo)
- * 2. Real-time status updates require actual payment processing
- * 3. Tests assume UI elements that aren't implemented
+ * Every test here seeds rows with the service-role client and watches the
+ * payment hub (/payment) react; no payment provider or credentials are needed.
+ * Realtime features the hub does not have yet (reconnect UI, batched-update
+ * pill, realtime error alert, trend chart) have no test here until they ship.
  */
 
 import { test, expect } from '@playwright/test';
 import {
   dismissCookieBanner,
-  getAdminClient,
+  requireAdminClient,
   seedIsolatedPayment,
   deleteIsolatedPayment,
   openPaymentHubAs,
@@ -78,16 +78,6 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     ).toBeVisible();
   });
 
-  test.skip('should show real-time payment status updates', async ({
-    page,
-  }) => {
-    // Skip: Requires actual payment processing and real-time updates
-    test.skip(
-      true,
-      'Real-time payment status updates require actual Stripe integration'
-    );
-  });
-
   test('should update payment list when new payment added', async ({
     browser,
   }) => {
@@ -98,8 +88,6 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
     try {
       fixture = await seedIsolatedPayment();
-      test.skip(!fixture, 'Admin client unavailable to seed payment');
-      if (!fixture) return;
 
       opened = await openPaymentHubAs(browser, fixture.session);
       const { page } = opened;
@@ -114,11 +102,49 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     }
   });
 
-  test.skip('should update webhook verification status in real-time', async ({
-    page,
+  test('should update webhook verification status in real-time', async ({
+    browser,
   }) => {
-    // Skip: Requires actual webhook processing
-    test.skip(true, 'Webhook verification requires actual Stripe webhooks');
+    // The webhook is the only thing that sets webhook_verified, and what the
+    // buyer sees is that column. Seed the row UNVERIFIED (what a redirect-only
+    // payment looks like), open the hub as its owner, then do server-side what
+    // the stripe-webhook function does - a service-role UPDATE - and assert the
+    // indicator flips live. No provider involved.
+    let fixture: IsolatedPayment | null = null;
+    let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
+    try {
+      fixture = await seedIsolatedPayment();
+      const admin = requireAdminClient('06-realtime-dashboard');
+
+      const unverify = await admin
+        .from('payment_results')
+        .update({ webhook_verified: false, verification_method: 'redirect' })
+        .eq('id', fixture.resultId);
+      expect(unverify.error).toBeNull();
+
+      opened = await openPaymentHubAs(browser, fixture.session);
+      const { page } = opened;
+      const notVerified = page.locator('[aria-label="Webhook not verified"]');
+      const verified = page.locator('[aria-label="Webhook verified"]');
+
+      await expect(notVerified).toHaveCount(1, { timeout: 30000 });
+      await expect(verified).toHaveCount(0);
+      await expect(page.getByTestId('realtime-status')).toHaveText(/Live/i, {
+        timeout: 30000,
+      });
+
+      const verify = await admin
+        .from('payment_results')
+        .update({ webhook_verified: true, verification_method: 'webhook' })
+        .eq('id', fixture.resultId);
+      expect(verify.error).toBeNull();
+
+      await expect(verified).toHaveCount(1, { timeout: 15000 });
+      await expect(notVerified).toHaveCount(0);
+    } finally {
+      if (opened) await opened.close();
+      await deleteIsolatedPayment(fixture);
+    }
   });
 
   test('should handle subscription status changes in real-time', async ({
@@ -133,9 +159,7 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
       fixture = await seedIsolatedSubscription('active', {
         provider: 'stripe',
       });
-      const admin = getAdminClient();
-      test.skip(!fixture || !admin, 'Admin client unavailable to seed');
-      if (!fixture || !admin) return;
+      const admin = requireAdminClient('06-realtime-dashboard');
 
       opened = await openSubscriptionsAs(browser, fixture);
       const { page } = opened;
@@ -167,8 +191,6 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
     try {
       fixture = await seedIsolatedPayment();
-      test.skip(!fixture, 'Admin client unavailable to seed payment');
-      if (!fixture) return;
 
       opened = await openPaymentHubAs(browser, fixture.session);
       const { page } = opened;
@@ -196,8 +218,6 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
     let opened: Awaited<ReturnType<typeof openPaymentHubAs>> | null = null;
     try {
       fixture = await seedIsolatedPayment();
-      test.skip(!fixture, 'Admin client unavailable to seed payment');
-      if (!fixture) return;
 
       opened = await openPaymentHubAs(browser, fixture.session);
       const status = opened.page.getByTestId('realtime-status');
@@ -207,28 +227,5 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
       if (opened) await opened.close();
       await deleteIsolatedPayment(fixture);
     }
-  });
-
-  test.skip('should automatically reconnect after disconnect', async ({
-    page,
-    context,
-  }) => {
-    // Skip: Reconnection UI not implemented
-    test.skip(true, 'Reconnection UI not yet implemented');
-  });
-
-  test.skip('should batch multiple rapid updates', async ({ page }) => {
-    // Skip: Batch update UI not implemented
-    test.skip(true, 'Batch update UI not yet implemented');
-  });
-
-  test.skip('should show real-time error notifications', async ({ page }) => {
-    // Skip: Error notification for real-time events not implemented
-    test.skip(true, 'Real-time error notifications not yet implemented');
-  });
-
-  test.skip('should update chart/graphs in real-time', async ({ page }) => {
-    // Skip: Payment chart not implemented
-    test.skip(true, 'Payment chart not yet implemented');
   });
 });

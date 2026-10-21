@@ -9,7 +9,7 @@
  * - Messaging: conversation stats, top senders
  *
  * Requires: local Supabase with seed-admin-demo.sql applied,
- * admin user test@example.com with is_admin app_metadata.
+ * admin user admin@rescuedogs.com with is_admin app_metadata.
  *
  * Run from inside the Docker container:
  *   docker exec -e SKIP_WEBSERVER=1 -e BASE_URL=http://localhost:3000 \
@@ -18,14 +18,18 @@
 
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
+import { describeOnLocalSupabase } from '../utils/local-supabase';
 
-const ADMIN_EMAIL = 'test@example.com';
-const ADMIN_PASSWORD = 'TestPassword123!';
+// The same admin the contract test uses (seed-test-users.ts creates it);
+// TEST_USER_PRIMARY_EMAIL stays a genuine non-admin.
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || 'admin@rescuedogs.com';
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'AdminPassword123!';
 
-// Next.js basePath — all routes must be prefixed
-const BP = '/RescueDogs';
+// Next.js basePath — empty when served at the root (local dev and the E2E build)
+const BP = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-// Local-only spec (skipped in CI). The Node test process reaches local Kong via
+// Runs only against the local Supabase stack (see ../utils/local-supabase.ts).
+// The Node test process reaches local Kong via
 // SUPABASE_ADMIN_URL (compose-internal supabase-kong:8000); the browser reaches
 // it via NEXT_PUBLIC_SUPABASE_URL (host.docker.internal:54321). The old
 // page.route interception that rewrote localhost:54321 → a hardcoded container
@@ -34,8 +38,7 @@ const SUPABASE_ADMIN_URL =
   process.env.SUPABASE_ADMIN_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-test.describe('Admin Dashboard E2E', () => {
-  test.skip(!!process.env.CI, 'Skipped in CI: requires local Docker Supabase');
+describeOnLocalSupabase('Admin Dashboard E2E', () => {
   test.describe.configure({ mode: 'serial' });
 
   test.beforeEach(async ({ page }) => {

@@ -83,7 +83,6 @@ test.describe('Virtual Scrolling Performance', () => {
   test.beforeEach(async () => {
     // Pre-seed a large history so the virtualizer / pagination UI is exercised.
     fixture = await seedIsolatedConversation(SEEDED_MESSAGE_COUNT);
-    test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
   });
 
   test.afterEach(async () => {
@@ -181,7 +180,6 @@ test.describe('Keyboard Navigation', () => {
 
   test.beforeEach(async () => {
     fixture = await seedIsolatedConversation(SEEDED_MESSAGE_COUNT);
-    test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
   });
 
   test.afterEach(async () => {
@@ -229,7 +227,6 @@ test.describe('Scroll Restoration', () => {
 
   test.beforeEach(async () => {
     fixture = await seedIsolatedConversation(SEEDED_MESSAGE_COUNT);
-    test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
   });
 
   test.afterEach(async () => {

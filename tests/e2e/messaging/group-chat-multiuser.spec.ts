@@ -44,7 +44,6 @@ test.describe('Group Chat E2E', () => {
   test.beforeEach(async () => {
     // One accepted connection → the viewer has exactly one selectable member.
     fixture = await seedIsolatedConnection('accepted');
-    test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
   });
 
   test.afterEach(async () => {

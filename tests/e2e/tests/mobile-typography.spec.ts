@@ -36,7 +36,9 @@ test.describe('Mobile Typography', () => {
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto('/blog/countdown-timer-tutorial', {
+      waitUntil: 'domcontentloaded',
+    });
     await dismissCookieBanner(page);
     await waitForLayoutStability(page);
 
@@ -59,7 +61,9 @@ test.describe('Mobile Typography', () => {
 
   test('Line height is comfortable (≥1.5)', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto('/blog/countdown-timer-tutorial', {
+      waitUntil: 'domcontentloaded',
+    });
     await dismissCookieBanner(page);
     await waitForLayoutStability(page);
 
@@ -83,7 +87,9 @@ test.describe('Mobile Typography', () => {
 
   test('Headings scale appropriately on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto('/blog/countdown-timer-tutorial', {
+      waitUntil: 'domcontentloaded',
+    });
     await dismissCookieBanner(page);
     await waitForLayoutStability(page);
 
@@ -131,7 +137,7 @@ test.describe('Mobile Typography', () => {
   }) => {
     // Test at minimum width
     await page.setViewportSize({ width: 320, height: 568 });
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
     await waitForLayoutStability(page);
 
     const h1 = page.locator('h1').first();
@@ -159,7 +165,7 @@ test.describe('Mobile Typography', () => {
 
   test('Small text is avoided or has min-font-size', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
     await waitForLayoutStability(page);
 
     // Get all text elements
@@ -195,7 +201,7 @@ test.describe('Mobile Typography', () => {
   test('Text remains readable in landscape orientation', async ({ page }) => {
     // Landscape mobile (844x390)
     await page.setViewportSize({ width: 844, height: 390 });
-    await page.goto('/blog');
+    await page.goto('/blog', { waitUntil: 'domcontentloaded' });
     await waitForLayoutStability(page);
 
     const bodyText = page.locator('p').first();
@@ -215,7 +221,9 @@ test.describe('Mobile Typography', () => {
 
   test('Text does not overflow containers on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/blog/countdown-timer-tutorial');
+    await page.goto('/blog/countdown-timer-tutorial', {
+      waitUntil: 'domcontentloaded',
+    });
     await dismissCookieBanner(page);
     await waitForLayoutStability(page);
 

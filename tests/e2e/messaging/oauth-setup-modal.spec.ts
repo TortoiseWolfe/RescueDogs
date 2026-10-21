@@ -85,7 +85,6 @@ test.describe('Feature 013 — OAuth Messaging Password', () => {
 
   test.beforeEach(async () => {
     fixture = await seedIsolatedConversation();
-    test.skip(!fixture, 'isolation seed failed (no admin client / anon key?)');
   });
 
   test.afterEach(async () => {
@@ -125,13 +124,5 @@ test.describe('Feature 013 — OAuth Messaging Password', () => {
     } finally {
       await viewer.close();
     }
-  });
-
-  test.skip('US-1: OAuth user with no keys sees setup mode', async () => {
-    // Removed with #60 — device keys bootstrap without a messaging password.
-  });
-
-  test.skip('US-2: OAuth user with keys sees unlock mode + provider badge', async () => {
-    // Removed with #60 — see #106 for cross-device recovery without a password UI.
   });
 });

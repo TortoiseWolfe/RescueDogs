@@ -1,53 +1,14 @@
 /**
  * Performance Test: Payment System - T061
- * Tests system performance under load
- *
- * NOTE: Most tests are skipped because:
- * 1. They require actual Stripe integration
- * 2. /payment/dashboard and /payment/history routes don't exist
- * 3. Proper load testing should use tools like k6 or Artillery
+ * Page-level timing for the payment demo. Load testing, frame-rate and bundle
+ * size checks are not browser E2E work (use k6 / Lighthouse for those), so they
+ * have no placeholder here.
  */
 
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 
 test.describe('Payment System Performance', () => {
-  test.skip('should handle concurrent payment requests', async ({
-    browser,
-  }) => {
-    // Skip: Requires actual Stripe integration for meaningful results
-    test.skip(true, 'Stripe API keys not configured - use k6 for load testing');
-  });
-
-  test.skip('should load dashboard quickly with many payments', async ({
-    page,
-  }) => {
-    // Skip: /payment/dashboard route doesn't exist
-    test.skip(true, 'Payment dashboard page not yet implemented');
-  });
-
-  test.skip('should handle rapid payment status updates efficiently', async ({
-    page,
-  }) => {
-    // Skip: /payment/dashboard route doesn't exist
-    test.skip(true, 'Payment dashboard page not yet implemented');
-  });
-
-  test.skip('should paginate large payment lists efficiently', async ({
-    page,
-  }) => {
-    // Skip: /payment/history route doesn't exist
-    test.skip(true, 'Payment history page not yet implemented');
-  });
-
-  test.skip('should handle offline queue efficiently', async ({
-    page,
-    context,
-  }) => {
-    // Skip: Offline queue sync UI not implemented
-    test.skip(true, 'Offline queue sync UI not yet implemented');
-  });
-
   test('should load payment demo page within reasonable time', async ({
     page,
   }) => {
@@ -106,15 +67,5 @@ test.describe('Payment System Performance', () => {
 
     // Consent transition should be fast (under 2 seconds)
     expect(consentTime).toBeLessThan(2000);
-  });
-
-  test.skip('should maintain 60fps during animations', async ({ page }) => {
-    // Skip: FPS measurement is flaky and browser-dependent
-    test.skip(true, 'FPS testing is not reliable in E2E tests');
-  });
-
-  test.skip('should bundle payment scripts efficiently', async ({ page }) => {
-    // Skip: Requires actual Stripe script loading
-    test.skip(true, 'Script bundling test requires Stripe integration');
   });
 });

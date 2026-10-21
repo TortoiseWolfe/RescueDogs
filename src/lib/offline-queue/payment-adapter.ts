@@ -143,7 +143,11 @@ export class PaymentQueueAdapter extends BaseOfflineQueue<PaymentQueueItem> {
       } = await supabase.auth.getUser();
 
       if (authError || !user) {
-        throw new Error('Must be authenticated to execute payment intent');
+        throw new Error(
+          `Must be authenticated to execute payment intent${
+            authError ? ` (${authError.message})` : ''
+          }`
+        );
       }
       userId = user.id;
     }
@@ -162,34 +166,40 @@ export class PaymentQueueAdapter extends BaseOfflineQueue<PaymentQueueItem> {
       );
     }
 
-    const { data: inserted, error } = await supabase
-      .from('payment_intents')
-      .upsert(
-        {
-          amount: data.amount as number,
-          currency: data.currency as string,
-          type: data.type as string,
-          interval: (data.interval as string) || null,
-          customer_email: data.customer_email as string,
-          description: (data.description as string) || null,
-          metadata: (data.metadata || {}) as Json,
-          template_user_id: userId,
-          idempotency_key: idempotencyKey,
-        },
-        { onConflict: 'idempotency_key', ignoreDuplicates: true }
-      )
-      .select('id')
-      .maybeSingle();
+    // Plain insert, not upsert(onConflict: 'idempotency_key'): the unique
+    // index on that column is partial, and PostgreSQL cannot infer a partial
+    // index from a bare ON CONFLICT column list, so the upsert failed every
+    // time (#477). A duplicate key comes back as 23505.
+    const { error } = await supabase.from('payment_intents').insert({
+      amount: data.amount as number,
+      currency: data.currency as string,
+      type: data.type as string,
+      interval: (data.interval as string) || null,
+      customer_email: data.customer_email as string,
+      description: (data.description as string) || null,
+      metadata: (data.metadata || {}) as Json,
+      template_user_id: userId,
+      idempotency_key: idempotencyKey,
+    });
+
+    if (error?.code === '23505') {
+      // A prior attempt already created this row server-side. Mark the
+      // queue row completed via the dedupe path; the user is not
+      // double-charged. RLS hides other users' rows, so a key someone else
+      // took finds nothing here and fails loudly instead of being swallowed.
+      const { data: existing } = await supabase
+        .from('payment_intents')
+        .select('id')
+        .eq('idempotency_key', idempotencyKey)
+        .maybeSingle();
+      if (!existing) {
+        throw new Error(`Failed to create payment intent: ${error.message}`);
+      }
+      return { status: 'conflicted' };
+    }
 
     if (error) {
       throw new Error(`Failed to create payment intent: ${error.message}`);
-    }
-
-    if (!inserted) {
-      // ON CONFLICT DO NOTHING fired — a prior attempt already created
-      // this row server-side. Mark the queue row completed via the
-      // dedupe path; the user is not double-charged.
-      return { status: 'conflicted' };
     }
 
     return { status: 'completed' };

@@ -226,9 +226,4 @@ test.describe('GDPR Payment Consent Flow', () => {
     const step2 = page.getByRole('heading', { name: /Step 2/i });
     await expect(step2).toBeVisible({ timeout: 15000 });
   });
-
-  test.skip('should allow consent reset', async ({ page }) => {
-    // Skip: Consent reset feature may not be implemented in /account
-    test.skip(true, 'Consent reset feature not yet implemented');
-  });
 });

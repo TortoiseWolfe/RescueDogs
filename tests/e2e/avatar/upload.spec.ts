@@ -9,26 +9,33 @@
  * - Validation error handling
  *
  * Prerequisites:
- * - Test user authenticated
+ * - Admin client (SUPABASE_SERVICE_ROLE_KEY) to create a throwaway user
  * - Account Settings page accessible at /account-settings
  * - Test fixtures available at e2e/fixtures/avatars/
  */
 
 import { test, expect } from '@playwright/test';
 import path from 'path';
-import { dismissCookieBanner } from '../utils/test-user-factory';
+import {
+  deleteTestUser,
+  dismissCookieBanner,
+  injectAuthSessionOnPage,
+  seedIsolatedAccount,
+  type IsolatedAccount,
+} from '../utils/test-user-factory';
 
-// Auth comes from storageState (setup project) - no sign-in needed
+// Each test runs as its own throwaway user. The primary test user's shared
+// storageState session is revoked whenever another spec signs that user out
+// (a global sign-out), which made every upload here fail with a 403
+// session_not_found from updateUser after the file had already uploaded.
 test.describe('Avatar Upload Flow', () => {
-  // Avatar upload requires Supabase Storage — Save button doesn't dismiss modal in CI
-  // because the upload to storage fails silently without a configured bucket
-  test.skip(
-    !!process.env.CI,
-    'Avatar upload requires Supabase Storage — skipped in CI'
-  );
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  let account: IsolatedAccount;
+
   test.beforeEach(async ({ page }) => {
-    // Navigate to Account Settings (already authenticated via storageState)
-    await page.goto('/account');
+    account = await seedIsolatedAccount('avatar');
+    await injectAuthSessionOnPage(page, account.session, '/account');
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
   });
@@ -42,6 +49,8 @@ test.describe('Avatar Upload Flow', () => {
       await removeButton.click({ force: true }); // Force click to bypass any modal backdrops
       await page.waitForTimeout(1000); // Wait for removal
     }
+
+    await deleteTestUser(account.user.id);
   });
 
   test('US1.1 - Upload new avatar with crop interface', async ({ page }) => {
@@ -96,11 +105,7 @@ test.describe('Avatar Upload Flow', () => {
       const errorText = await errorMessage
         .textContent()
         .catch(() => 'Unknown error');
-      test.skip(
-        true,
-        `Upload failed (Supabase storage may not be configured): ${errorText}`
-      );
-      return;
+      throw new Error(`Avatar upload failed: ${errorText}`);
     }
 
     // Verify upload succeeded by checking avatar URL changed
@@ -147,8 +152,24 @@ test.describe('Avatar Upload Flow', () => {
 
     const cropModal = page.getByRole('dialog', { name: /crop/i });
     await expect(cropModal).toBeVisible({ timeout: 5000 });
+
+    // The avatar shows as soon as the upload lands, but AccountSettings then
+    // refreshes the session and refetches the profile. A second upload started
+    // inside that window can lose its change event to the re-render (CI flake),
+    // so wait for the refresh to finish before going on.
+    const sessionRefreshed = page.waitForResponse((r) =>
+      r.url().includes('/auth/v1/token?grant_type=refresh_token')
+    );
+    const profileRefetched = page.waitForResponse(
+      (r) =>
+        r.request().method() === 'GET' &&
+        r.url().includes('/rest/v1/user_profiles?select=*')
+    );
     await page.getByRole('button', { name: /save/i }).click();
     await expect(cropModal).toBeHidden({ timeout: 30000 });
+    await sessionRefreshed;
+    await profileRefetched;
+    await page.waitForLoadState('networkidle');
 
     // Wait for first avatar to appear and get its URL
     await expect(accountAvatar).toBeVisible();

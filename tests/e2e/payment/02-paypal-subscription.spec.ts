@@ -2,15 +2,15 @@
  * Integration Test: Subscription Creation (PayPal) - T056
  * Tests PayPal payment UI components
  *
- * NOTE: Tests that require actual PayPal Checkout redirect are skipped
- * because CI does not have PayPal API keys configured.
- * These tests should be run locally with PayPal sandbox credentials for full coverage.
+ * Two tests below are test.fixme: they need a live PayPal sandbox account and a
+ * deployed cancel-subscription function, which CI does not have (issue #480).
+ * Everything else runs against seeded rows and the rendered UI.
  */
 
 import { test, expect } from '@playwright/test';
 import {
   dismissCookieBanner,
-  getAdminClient,
+  requireAdminClient,
   seedIsolatedSubscription,
   deleteIsolatedSubscription,
   openSubscriptionsAs,
@@ -49,12 +49,16 @@ test.describe('PayPal Subscription Creation Flow', () => {
       .waitFor({ state: 'visible', timeout: 15000 });
   });
 
-  test.skip('should create PayPal subscription successfully', async ({
-    page,
-  }) => {
-    // Skip: Requires actual PayPal integration
-    test.skip(true, 'PayPal API keys not configured - skipping flow test');
-  });
+  // Waits on #480: a PayPal sandbox client id/secret as repository secrets.
+  // e2e.yml sets a dummy client id, so the button renders but PayPal's SDK
+  // rejects it when the subscription is created.
+  test.fixme(
+    'should create PayPal subscription successfully (#480)',
+    async () => {
+      // Grant consent, click "PayPal $15.00", approve in the sandbox popup, and
+      // assert a subscriptions row appears for the user.
+    }
+  );
 
   test('should show PayPal provider tab', async ({ page }) => {
     // Grant consent
@@ -112,20 +116,13 @@ test.describe('PayPal Subscription Creation Flow', () => {
 
   // The grace-period + duplicate-prevention flows below run against a SEEDED
   // subscription row via the per-test fixture (seedIsolatedSubscription —
-  // service-role insert + cleanup, no provider creds). Cancel + failed-retry
-  // remain skipped: cancel drives the cancel-subscription edge function and
-  // failed-retry needs PayPal sandbox keys.
+  // service-role insert + cleanup, no provider creds). Cancel is the exception:
+  // it drives the cancel-subscription edge function against a real provider.
 
-  test.skip('should allow subscription cancellation', async ({ page }) => {
-    // Fixture exists (seedIsolatedSubscription) but cancel drives the
-    // cancel-subscription Edge Function end-to-end; un-skip once that flow is
-    // exercised against a deployed function with provider config.
-    test.skip(true, 'Cancel drives the cancel-subscription Edge Function');
-  });
-
-  test.skip('should handle failed payment retry logic', async ({ page }) => {
-    test.skip(true, 'Needs a seeded past_due/grace row + PayPal sandbox keys');
-  });
+  // Waits on #480: a deployed cancel-subscription function with PayPal sandbox
+  // config. Seed with seedIsolatedSubscription, click Cancel, and assert the
+  // row's status flips.
+  test.fixme('should allow subscription cancellation (#480)', async () => {});
 
   test('should show grace period warning', async ({ browser }) => {
     // Seed a grace_period subscription (expires in 5 days) for a throwaway user,
@@ -139,8 +136,6 @@ test.describe('PayPal Subscription Creation Flow', () => {
         graceDays: 5,
       });
       // No admin client / anon key (unconfigured env) → skip rather than fail.
-      test.skip(!fixture, 'Admin client unavailable to seed subscription');
-      if (!fixture) return;
 
       opened = await openSubscriptionsAs(browser, fixture);
       const { page } = opened;
@@ -172,12 +167,7 @@ test.describe('PayPal Subscription Creation Flow', () => {
       fixture = await seedIsolatedSubscription('active', {
         provider: 'stripe',
       });
-      const admin = getAdminClient();
-      test.skip(
-        !fixture || !admin,
-        'Admin client unavailable to seed subscription'
-      );
-      if (!fixture || !admin) return;
+      const admin = requireAdminClient('02-paypal-subscription');
 
       const { error } = await admin.from('subscriptions').insert({
         template_user_id: fixture.user.id,

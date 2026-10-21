@@ -45,7 +45,9 @@ export const PaymentQueuePanel: React.FC<PaymentQueuePanelProps> = ({
   const refresh = useCallback(async () => {
     try {
       const queue = await paymentQueue.getQueue();
-      setItems(queue);
+      // A drained (completed) item is done, not queued: listing it would keep
+      // "1 pending" on screen after a successful sync (#477).
+      setItems(queue.filter((i) => i.status !== 'completed'));
     } catch {
       // Non-critical; leave the last-known list.
     }

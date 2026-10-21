@@ -28,6 +28,9 @@ import { logPaymentRetryEvent } from './audit';
  */
 export const RETRY_LIMIT = 3;
 
+/** Postgres SQLSTATE for a unique-index violation (duplicate idempotency_key). */
+const UNIQUE_VIOLATION = '23505';
+
 /**
  * Cooling period between retries (FR-010). Measured from the parent
  * intent's `created_at`. Picked to be long enough to prevent trivial
@@ -357,40 +360,53 @@ export async function retryFailedPayment(
     throw new PaymentRetryCoolingError(COOLING_PERIOD_MS - elapsedMs);
   }
 
-  // Reuse parent's idempotency_key if present; if absent (legacy intents
-  // pre-PR #59), generate a fresh one so this retry chain still dedupes
-  // with itself. Same fallback pattern as payment-adapter.ts:155-163.
-  const idempotencyKey = parent.idempotency_key ?? crypto.randomUUID();
+  // Each retry gets its own key, derived from the parent's key (client-
+  // generated, so only the owner knows it) and the attempt number. Reusing the
+  // parent's key as-is would collide with the parent's own row (the retry would
+  // always read as a duplicate and no child would exist), while a doubled click
+  // on the same retry sends the same derived key twice and is deduped by the
+  // unique index. A legacy parent with no key falls back to its id.
   const newRetryCount = parent.retry_count + 1;
+  const idempotencyKey = `${parent.idempotency_key ?? parent.id}:retry-${newRetryCount}`;
 
-  // Upsert with ignoreDuplicates: a doubled click on the retry button (same
-  // idempotency_key reaching the server twice) returns a null row from the
-  // ON CONFLICT path instead of a 23505. We surface that as "the retry is
-  // a no-op, the original is still authoritative" by returning the parent.
+  // Plain insert, not upsert(onConflict: 'idempotency_key'): the only unique
+  // index on that column is partial (WHERE idempotency_key IS NOT NULL), and
+  // PostgreSQL cannot infer a partial index from a bare ON CONFLICT column
+  // list, so the upsert failed every time (#477). A duplicate key comes back
+  // as 23505; we surface that as "the retry is a no-op, the original is still
+  // authoritative" by returning the parent.
   const { data: child, error: insertError } = await supabase
     .from('payment_intents')
-    .upsert(
-      {
-        amount: parent.amount,
-        currency: parent.currency,
-        type: parent.type,
-        interval: parent.interval,
-        customer_email: parent.customer_email,
-        description: parent.description,
-        metadata: parent.metadata,
-        template_user_id: userId, // RLS WITH CHECK enforces this anyway
-        idempotency_key: idempotencyKey,
-        parent_intent_id: parent.id,
-        retry_count: newRetryCount,
-      },
-      { onConflict: 'idempotency_key', ignoreDuplicates: true }
-    )
+    .insert({
+      amount: parent.amount,
+      currency: parent.currency,
+      type: parent.type,
+      interval: parent.interval,
+      customer_email: parent.customer_email,
+      description: parent.description,
+      metadata: parent.metadata,
+      template_user_id: userId, // RLS WITH CHECK enforces this anyway
+      idempotency_key: idempotencyKey,
+      parent_intent_id: parent.id,
+      retry_count: newRetryCount,
+    })
     .select()
     .maybeSingle();
 
-  if (insertError) throw insertError;
-
-  const deduped = !child;
+  const deduped = insertError?.code === UNIQUE_VIOLATION;
+  if (insertError && !deduped) throw insertError;
+  if (deduped) {
+    // The duplicate must be this user's own earlier retry. RLS hides other
+    // users' rows, so a key that was taken by someone else finds nothing here
+    // and the retry fails loudly instead of silently doing nothing.
+    const { data: existing } = await supabase
+      .from('payment_intents')
+      .select('id')
+      .eq('idempotency_key', idempotencyKey)
+      .eq('parent_intent_id', parent.id)
+      .maybeSingle();
+    if (!existing) throw insertError;
+  }
 
   // NFR-007: audit. Non-throwing — never break the user flow over an
   // audit-log write failure.
