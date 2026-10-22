@@ -110,14 +110,17 @@ export default function ShelterQuestionsPreviewPage() {
     <div className="mx-auto max-w-6xl space-y-4">
       <div
         role="status"
-        className="alert bg-base-200 border-primary border-l-4"
+        className="alert bg-base-200 border-primary flex-col items-stretch gap-3 border-l-4 p-4 sm:flex-row sm:items-center"
       >
-        <span>
+        <span className="flex-1">
           {previewingDraft
             ? 'Previewing unsaved changes. Save on the editor to apply them to new applications. Nothing here can be filled in or sent.'
             : 'Preview: this is exactly what adopters will see. Nothing here can be filled in or sent.'}
         </span>
-        <Link href="/shelter/questions" className="btn btn-primary min-h-11">
+        <Link
+          href="/shelter/questions"
+          className="btn btn-primary min-h-11 w-full shrink-0 whitespace-nowrap sm:w-auto"
+        >
           Back to editing
         </Link>
       </div>

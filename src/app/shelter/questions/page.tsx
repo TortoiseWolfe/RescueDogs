@@ -44,6 +44,32 @@ const ERROR_MESSAGES: Record<string, string> = {
   unknown: 'Could not save your changes. Please try again.',
 };
 
+function ShownToggle({
+  checked,
+  disabled,
+  label,
+  onToggle,
+}: {
+  checked: boolean;
+  disabled: boolean;
+  label: string;
+  onToggle: () => void;
+}) {
+  return (
+    <label className="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center">
+      <input
+        type="checkbox"
+        role="switch"
+        className="toggle toggle-primary"
+        checked={checked}
+        disabled={disabled}
+        aria-label={label}
+        onChange={onToggle}
+      />
+    </label>
+  );
+}
+
 export default function ShelterQuestionsPage() {
   const { shelterId, role } = useShelterMembership();
   const isManager = role === 'manager';
@@ -355,21 +381,16 @@ export default function ShelterQuestionsPage() {
                   </span>
                 </button>
                 {state === 'locked' ? null : (
-                  <button
-                    type="button"
-                    className="btn btn-sm min-h-11 min-w-11"
+                  <ShownToggle
+                    checked={state === 'shown'}
                     disabled={!isManager}
-                    aria-label={
+                    label={
                       state === 'shown'
                         ? `Hide ${CATEGORY_LABELS[category]}`
                         : `Show ${CATEGORY_LABELS[category]}`
                     }
-                    onClick={() => onToggleCategory(category)}
-                  >
-                    <span className="text-2xl leading-none" aria-hidden="true">
-                      {state === 'shown' ? '−' : '+'}
-                    </span>
-                  </button>
+                    onToggle={() => onToggleCategory(category)}
+                  />
                 )}
               </div>
             );
@@ -402,41 +423,31 @@ export default function ShelterQuestionsPage() {
                       Locked
                     </span>
                   ) : (
-                    <button
-                      type="button"
-                      className="btn btn-sm min-h-11 min-w-11 shrink-0"
+                    <ShownToggle
+                      checked={shown}
                       disabled={!isManager}
-                      aria-pressed={shown}
-                      aria-label={
+                      label={
                         shown
                           ? `Hide ${question.wording}`
                           : `Show ${question.wording}`
                       }
-                      onClick={() => onToggleQuestion(question)}
-                    >
-                      <span
-                        className="text-2xl leading-none"
-                        aria-hidden="true"
-                      >
-                        {shown ? '−' : '+'}
-                      </span>
-                    </button>
+                      onToggle={() => onToggleQuestion(question)}
+                    />
                   )}
                   <div
                     className={`min-w-0 flex-1 ${
                       shown ? '' : 'text-base-content/60'
+                    } ${
+                      question.parent_id
+                        ? 'border-base-300 border-l-2 pl-3'
+                        : ''
                     }`}
                   >
                     <p>{question.wording}</p>
-                    {question.parent_id ? (
-                      <span className="text-base-content/70 block text-sm">
-                        Extra field on {question.parent_id}
-                      </span>
-                    ) : null}
                     {hasMeta ? (
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         {flags[question.id] ? (
-                          <span className="badge badge-error text-error-content">
+                          <span className="badge badge-error text-error-content h-auto min-h-11 max-w-full px-3 py-2 text-left leading-snug whitespace-normal">
                             Red flag: {flags[question.id].label}
                           </span>
                         ) : null}

@@ -105,7 +105,7 @@ describe('shelter questions page', () => {
     expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
 
     fireEvent.click(
-      screen.getByRole('button', {
+      screen.getByRole('switch', {
         name: 'Show Does your landlord, HOA, or neighborhood have pet restrictions?',
       })
     );
@@ -225,5 +225,49 @@ describe('shelter questions page', () => {
     await waitFor(() =>
       expect(serviceMocks.setApplicationFlag).toHaveBeenCalled()
     );
+  });
+
+  it('shows the full red-flag label instead of clipping it (#491)', async () => {
+    serviceMocks.listApplicationFlags.mockResolvedValue([
+      {
+        question_id: 'hou.restrictions',
+        answers: ['yes'],
+        comparator: 'equals',
+        threshold: null,
+        label: 'Needs a closer look',
+      },
+    ]);
+    render(<ShelterQuestionsPage />);
+    expect(
+      await screen.findByText('Red flag: Needs a closer look')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Red flag: Needs a closer look').className).toMatch(
+      /whitespace-normal/
+    );
+  });
+
+  it('does not show Extra field on pet.current (#491)', async () => {
+    serviceMocks.listApplicationQuestions.mockResolvedValue([
+      ...BANK,
+      {
+        ...BANK[1],
+        id: 'pet.current.vaccines',
+        category: 'pets',
+        wording: 'Is this pet current on vaccinations?',
+        parent_id: 'pet.current',
+        is_locked: false,
+        is_flaggable: false,
+      },
+    ]);
+    render(<ShelterQuestionsPage />);
+    expect(
+      await screen.findByRole('heading', { name: 'Application questions' })
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Pets/ }));
+    expect(
+      await screen.findByText('Is this pet current on vaccinations?')
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Extra field on/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/pet\.current/)).not.toBeInTheDocument();
   });
 });

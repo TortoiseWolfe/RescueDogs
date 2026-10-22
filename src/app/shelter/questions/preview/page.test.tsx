@@ -80,6 +80,9 @@ describe('shelter questions preview page', () => {
       await screen.findByText(/Preview: this is exactly what adopters will see/)
     ).toBeInTheDocument();
     expect(
+      screen.getByRole('link', { name: 'Back to editing' })
+    ).toBeInTheDocument();
+    expect(
       screen.getByText('What type of home do you live in?')
     ).toBeInTheDocument();
     expect(
