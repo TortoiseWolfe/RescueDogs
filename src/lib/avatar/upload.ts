@@ -203,8 +203,10 @@ export async function uploadWithRetry(
       return result;
     }
 
-    // Don't retry on authentication or permission errors
+    // Don't retry on authentication or permission errors. uploadAvatar
+    // reports a signed-out user as "Auth session missing", so match that too.
     if (
+      result.error.includes('session missing') ||
       result.error.includes('authenticated') ||
       result.error.includes('permission')
     ) {
