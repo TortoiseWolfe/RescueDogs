@@ -71,7 +71,9 @@ export default function EmailVerificationNotice({
   }
 
   return (
-    <div className={`alert alert-warning${className ? ` ${className}` : ''}`}>
+    <div
+      className={`alert alert-warning alert-vertical${className ? ` ${className}` : ''}`}
+    >
       <span>Please verify your email address.</span>
       <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
       <button
