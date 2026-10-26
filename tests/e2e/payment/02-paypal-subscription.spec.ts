@@ -135,7 +135,8 @@ test.describe('PayPal Subscription Creation Flow', () => {
         provider: 'stripe',
         graceDays: 5,
       });
-      // No admin client / anon key (unconfigured env) → skip rather than fail.
+      // seedIsolatedSubscription throws when the admin client is unconfigured:
+      // fail, never skip.
 
       opened = await openSubscriptionsAs(browser, fixture);
       const { page } = opened;
