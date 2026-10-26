@@ -272,6 +272,8 @@ describe('uploadWithRetry', () => {
 
     expect(result.url).toBe('');
     expect(result.error).toContain('session missing');
-    // Should fail immediately without retries
+    // Should fail immediately without retries or backoff delay
+    expect(mockGetSession).toHaveBeenCalledTimes(1);
+    expect(result.error).not.toContain('attempts');
   });
 });
