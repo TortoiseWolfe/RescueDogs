@@ -88,7 +88,10 @@
     "cleanup:intents": "tsx scripts/cleanup-expired-intents.ts",
     "retry:webhooks": "tsx scripts/retry-failed-webhooks.ts",
     "gitleaks": "gitleaks detect --source . --config .gitleaks.toml",
-    "gitleaks:staged": "gitleaks protect --staged --config .gitleaks.toml"
+    "gitleaks:staged": "gitleaks protect --staged --config .gitleaks.toml",
+    "feedback:file": "node --env-file=.env scripts/ci/feedback-to-issues.mjs",
+    "feedback:file:dry": "node --env-file=.env scripts/ci/feedback-to-issues.mjs --dry",
+    "feedback:shot": "node --env-file=.env scripts/ci/feedback-shot.mjs"
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",
