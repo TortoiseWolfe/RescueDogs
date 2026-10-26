@@ -30,7 +30,7 @@ export interface PaymentRetryAuditParams {
   /** null when the retry was deduped by the unique idempotency_key index */
   newIntentId: string | null;
   retryCount: number;
-  /** true when the upsert hit ON CONFLICT (server-side dedupe) */
+  /** true when the insert hit the unique key (23505, server-side dedupe) */
   deduped: boolean;
   errorCategory?: PaymentErrorCategory;
   /** How the retry was initiated. Defaults to 'same_provider'. */

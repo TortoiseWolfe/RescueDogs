@@ -55,10 +55,10 @@ export class PaymentQueueAdapter extends BaseOfflineQueue<PaymentQueueItem> {
    *
    * If `data.idempotency_key` is not supplied, a fresh UUID is generated
    * here at queue-time. The same key is reused across every retry of this
-   * row, which combined with the partial unique index on
-   * payment_intents.idempotency_key turns the server-side INSERT into an
-   * idempotent ON CONFLICT DO NOTHING — a retry whose prior attempt
-   * already succeeded becomes a no-op rather than a duplicate charge (#52).
+   * row. The partial unique index on payment_intents.idempotency_key makes
+   * a second INSERT with the same key fail with 23505, which
+   * executePaymentIntent reports as conflicted, so a retry whose prior
+   * attempt already succeeded is a no-op, not a duplicate charge (#52).
    */
   async queuePaymentIntent(
     data: {
@@ -124,11 +124,11 @@ export class PaymentQueueAdapter extends BaseOfflineQueue<PaymentQueueItem> {
    * was authenticated when they made the payment). Falls back to
    * auth.getUser() if no userId was stored, matching fork behaviour.
    *
-   * Uses upsert with ignoreDuplicates so the server-side INSERT is
-   * idempotent across retries: a queued item whose prior attempt
-   * already wrote the row produces a zero-row response, which we
-   * surface as `{ status: 'conflicted' }` so the queue marks the row
-   * completed without double-charging. See #52.
+   * Uses a plain INSERT (the partial unique index cannot back an
+   * ON CONFLICT column list, #477). A queued item whose prior attempt
+   * already wrote the row fails with 23505, which we surface as
+   * `{ status: 'conflicted' }` so the queue marks the row completed
+   * without double-charging. See #52.
    */
   private async executePaymentIntent(
     data: Record<string, unknown>,

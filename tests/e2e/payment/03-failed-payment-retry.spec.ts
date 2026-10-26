@@ -4,9 +4,9 @@
  *
  * The failed-payment surfaces are driven by seeded rows (a failed
  * payment_results row with error_code card_declined, plus the intent's
- * retry_count), so no real Stripe decline is needed. The Retry button itself
- * cannot succeed today (#477), and RescueDogs has no subscription dunning
- * retry control (#478), so neither has a test here.
+ * retry_count), so no real Stripe decline is needed. The Retry button's
+ * insert was fixed in #487 (#477); an E2E for the Retry flow and the
+ * subscription dunning retry control are both tracked in #478.
  */
 
 import { test, expect, type Page } from '@playwright/test';

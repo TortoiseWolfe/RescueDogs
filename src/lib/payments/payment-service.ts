@@ -307,10 +307,10 @@ export async function getPaymentHistory(
  * Retry a failed payment (#43, B1).
  *
  * Creates a new INSERT-only payment_intent row that:
- *   - reuses the parent's `idempotency_key` so the partial unique index
- *     turns a server-side race (double-click, two tabs) into a no-op
- *     instead of a duplicate charge — same pattern as the offline-queue
- *     adapter (`src/lib/offline-queue/payment-adapter.ts:165-195`)
+ *   - carries a key derived from the parent's (`<parent key>:retry-<n>`),
+ *     so a doubled click on the same retry hits the partial unique index
+ *     and comes back as 23505, which returns the parent instead of making
+ *     a second charge (the offline-queue adapter handles 23505 the same way)
  *   - links to the parent via `parent_intent_id`
  *   - bumps `retry_count` so the cap (FR-009) is enforced on the next click
  *
@@ -418,7 +418,7 @@ export async function retryFailedPayment(
     deduped,
   });
 
-  // ON CONFLICT fired — the prior attempt's row is the truth.
+  // Duplicate key (23505): the prior attempt's row is the truth.
   if (deduped) {
     return parent as PaymentIntent;
   }
