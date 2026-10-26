@@ -53,16 +53,13 @@ describe('Footer (#74 / #65)', () => {
     expect(home).toHaveAttribute('href', '/');
   });
 
-  it('links to Blog in the footer as a pill (#65)', () => {
+  it('does not link to Blog in the footer (#493)', () => {
     render(<Footer />);
 
-    const blogs = screen.getAllByRole('link', { name: /^blog$/i });
-    expect(blogs.length).toBeGreaterThanOrEqual(1);
-    expect(blogs[0]).toHaveAttribute('href', '/blog');
-    expect(blogs[0].className).toMatch(/bg-white/);
+    expect(screen.queryByRole('link', { name: /^blog$/i })).toBeNull();
   });
 
-  it('links to Contact beside Blog in the footer (#128)', () => {
+  it('links to Contact in the footer (#128)', () => {
     render(<Footer />);
 
     const contacts = screen.getAllByRole('link', { name: /^contact$/i });
@@ -88,7 +85,7 @@ describe('Footer (#74 / #65)', () => {
     );
   });
 
-  it('links to Follow between Blog and Contact (#129)', () => {
+  it('links to Follow beside Contact in the footer (#129)', () => {
     render(<Footer />);
 
     const follows = screen.getAllByRole('link', { name: /^follow$/i });

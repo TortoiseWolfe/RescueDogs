@@ -295,4 +295,5 @@ export default async function SEODashboardPage() {
 export const metadata = {
   title: 'SEO Dashboard - Blog',
   description: 'Analyze and improve SEO performance of your blog posts',
+  robots: { index: false, follow: false },
 };

@@ -7,6 +7,7 @@ import { getProjectConfig } from '@/config/project.config';
 export const metadata: Metadata = {
   title: 'Blog Tags | Raised Paws',
   description: 'Browse all blog post tags and topics',
+  robots: { index: false, follow: false },
   openGraph: {
     title: 'Blog Tags',
     description: 'Browse all blog post tags and topics',
