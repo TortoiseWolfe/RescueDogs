@@ -22,8 +22,9 @@ test.describe('Cross-Page Navigation', () => {
       page.locator('h1').filter({ hasText: /Theme/i })
     ).toBeVisible();
 
-    // Navigate to Blog via footer pill (#65 moved Blog out of header chrome)
-    await page.locator('footer a[href*="blog"]').first().click();
+    // Blog is hidden from footer chrome (#493) — reach /blog directly so
+    // multi-page navigation coverage still includes the route.
+    await page.goto('/blog', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
     await expect(page).toHaveURL(/\/blog/);
 
@@ -55,8 +56,9 @@ test.describe('Cross-Page Navigation', () => {
     await page.goto('/themes', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/themes/);
 
-    // Navigate to blog via footer (#65) and wait for URL
-    await page.locator('footer a[href*="blog"]').first().click();
+    // Blog is hidden from footer (#493) — goto keeps history coverage without
+    // depending on a site-chrome Blog link.
+    await page.goto('/blog', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/blog/);
 
     // Go back to themes
@@ -383,11 +385,11 @@ test.describe('Cross-Page Navigation', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
 
-    // Blog is a footer pill (#65), not a header chrome link
-    await page.locator('footer a[href*="blog"]').first().click();
-    await expect(page).toHaveURL(/\/blog/);
+    // Contact remains a footer pill after Blog was hidden (#493 / #128)
+    await page.locator('footer a[href*="contact"]').first().click();
+    await expect(page).toHaveURL(/\/contact/);
 
-    const blogLink = page.locator('footer a[href*="blog"]').first();
-    await expect(blogLink).toHaveAttribute('aria-current', 'page');
+    const contactLink = page.locator('footer a[href*="contact"]').first();
+    await expect(contactLink).toHaveAttribute('aria-current', 'page');
   });
 });
