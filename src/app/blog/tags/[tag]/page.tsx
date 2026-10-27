@@ -33,6 +33,7 @@ export async function generateMetadata({
   return {
     title: `Posts tagged "${properTag}" | Raised Paws Blog`,
     description: `Browse all blog posts tagged with ${properTag}`,
+    robots: { index: false, follow: false },
     openGraph: {
       title: `Posts tagged "${properTag}"`,
       description: `Browse all blog posts tagged with ${properTag}`,

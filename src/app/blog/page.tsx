@@ -99,4 +99,5 @@ export default async function BlogPage() {
 export const metadata = {
   title: 'Blog',
   description: 'Read our latest blog posts and insights',
+  robots: { index: false, follow: false },
 };
