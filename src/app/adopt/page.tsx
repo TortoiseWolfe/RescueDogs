@@ -186,6 +186,7 @@ function AdoptContent() {
           bank={bank}
           shownByShelter={shownByShelter}
           fallbackName={fallbackName}
+          draftKey={user ? `adopt:application:${user.id}` : null}
           submitting={submitting}
           onPetIdChange={handlePetIdChange}
           onSubmit={handleSubmit}

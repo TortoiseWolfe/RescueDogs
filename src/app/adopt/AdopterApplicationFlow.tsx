@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CATEGORY_LABELS,
   type ApplicationQuestion,
@@ -20,6 +20,8 @@ import {
 } from '@/lib/applications/application-flow';
 import { profileSnapshotFromAnswers } from '@/lib/applications/profile-from-answers';
 import { QUESTION_CATEGORIES } from '@/lib/applications/question-settings';
+import { useFormDraft } from '@/hooks/useFormDraft';
+import { DraftNotice } from '../shelter/pets/DraftNotice';
 import { BankQuestionField } from './BankQuestionField';
 
 export type AdopterApplicationSubmitPayload = {
@@ -33,6 +35,25 @@ export type AdopterApplicationSubmitPayload = {
 
 type Step = 'pet' | 'questions' | 'review';
 
+/** What is kept on the device for an unfinished application (#310). */
+type FlowDraft = {
+  petId: string;
+  answers: Record<string, unknown>;
+  shareReferences: boolean;
+};
+
+function isFlowDraft(value: unknown): value is FlowDraft {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.petId === 'string' &&
+    typeof candidate.shareReferences === 'boolean' &&
+    !!candidate.answers &&
+    typeof candidate.answers === 'object' &&
+    !Array.isArray(candidate.answers)
+  );
+}
+
 export function AdopterApplicationFlow({
   pets,
   preselectedPetId,
@@ -40,6 +61,7 @@ export function AdopterApplicationFlow({
   bank,
   shownByShelter,
   fallbackName,
+  draftKey,
   submitting,
   onPetIdChange,
   onSubmit,
@@ -50,6 +72,7 @@ export function AdopterApplicationFlow({
   bank: ApplicationQuestion[];
   shownByShelter: ReadonlyMap<string, string[]>;
   fallbackName: string;
+  draftKey?: string | null;
   submitting?: boolean;
   onPetIdChange?: (petId: string) => void;
   onSubmit: (payload: AdopterApplicationSubmitPayload) => void | Promise<void>;
@@ -61,6 +84,49 @@ export function AdopterApplicationFlow({
   const [draft, setDraft] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [shareReferences, setShareReferences] = useState(true);
+
+  // Keep an unfinished application on the device so leaving the page (to find
+  // a document, say) does not lose it (#310). sensitive: true keeps it in
+  // sessionStorage only, because the answers include a home address and phone.
+  const draftValue = useMemo<FlowDraft>(
+    () => ({ petId, answers: draft, shareReferences }),
+    [petId, draft, shareReferences]
+  );
+  const {
+    restored: restoredDraft,
+    savedAt: draftSavedAt,
+    clearDraft,
+  } = useFormDraft<FlowDraft>(
+    draftKey ?? 'adopt:application:anonymous',
+    draftValue,
+    {
+      enabled: Boolean(draftKey),
+      sensitive: true,
+      validate: isFlowDraft,
+      shouldSave: (value) => Object.keys(value.answers).length > 0,
+    }
+  );
+  const appliedDraft = useRef(false);
+  const [restoredFromDraft, setRestoredFromDraft] = useState(false);
+
+  useEffect(() => {
+    if (!restoredDraft || appliedDraft.current) return;
+    appliedDraft.current = true;
+    setDraft(restoredDraft.answers);
+    setShareReferences(restoredDraft.shareReferences);
+    // The draft is keyed per adopter, not per pet. A ?pet= link always wins
+    // over the pet saved in the draft, and a saved pet that is no longer
+    // available is not restored.
+    if (
+      !preselectedPetId &&
+      pets.some((item) => item.id === restoredDraft.petId)
+    ) {
+      setPetId(restoredDraft.petId);
+      setStep('questions');
+      onPetIdChange?.(restoredDraft.petId);
+    }
+    setRestoredFromDraft(true);
+  }, [restoredDraft, preselectedPetId, pets, onPetIdChange]);
 
   useEffect(() => {
     if (preselectedPetId) {
@@ -115,6 +181,7 @@ export function AdopterApplicationFlow({
     setPetId(nextId);
     onPetIdChange?.(nextId);
     setDraft({});
+    clearDraft();
     setErrors({});
     setShareReferences(true);
     setStep('questions');
@@ -185,6 +252,20 @@ export function AdopterApplicationFlow({
 
   return (
     <div className="space-y-6">
+      {draftKey ? (
+        <DraftNotice
+          savedAt={draftSavedAt}
+          restored={restoredFromDraft}
+          onDiscard={() => {
+            clearDraft();
+            setDraft({});
+            setShareReferences(true);
+            setErrors({});
+            setRestoredFromDraft(false);
+          }}
+        />
+      ) : null}
+
       {banner && step !== 'pet' ? (
         <div role="status" className="alert bg-base-200">
           <span>{banner}</span>
