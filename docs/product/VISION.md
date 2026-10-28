@@ -261,7 +261,7 @@ connectors only when we have real API access or a partnership:
 - **RescueGroups.org** — documented API; common distribution hub for rescues
 - **ShelterBuddy** — API appears available; access often via their support team
 - **Shelterluv / PetPoint** — typically approved integration keys / partnership,
-  not an open DIY developer route
+  not an open DIY developer route (see locked Shelterluv notes below)
 - **Petfinder** — listing sync remains a scale/paid-integration option (Tier B)
 
 **Provenance (design for sync before you sync):** preserve original platform,
@@ -274,6 +274,25 @@ the pets they are actively taking applications for. For **applications**, Raised
 Paws is the system of record for new intake and live status; we do not pull old
 applications out of their existing systems. Supplemental shelter PDFs or forms
 can remain, but status tracking lives in our pipeline.
+
+#### Shelterluv — locked (not a shortcut past pilots)
+
+Shelterluv (and similar PMS APIs) can help **inventory sync**. They do **not**
+replace recruiting Pilot Partners. Quiet pilots are an outreach / workflow
+problem, not a “catalog isn’t big enough” problem.
+
+| Decision                        | Rule                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **When**                        | After (or as a favor for) a **willing partner that already runs Shelterluv** and will give us a key — week-2 polish for that pilot, not week-0 GTM.                                                                                                                                                                                           |
+| **What we sync**                | **Read** adoptable animals (details, photos, status) into Raised Paws pet rows. Keys are **per-organization**; there is no silent “pull every Shelterluv rescue” growth hack.                                                                                                                                                                 |
+| **What we do not do**           | Do **not** scrape or list a rescue’s animals without a relationship and permission. Do **not** deep-link Apply into Shelterluv’s native forms as the primary path — that collapses us into every iframe listing site and breaks Principle I (status dies outside our tracker). Do **not** iframe their gallery as the Raised Paws homepage.   |
+| **Applications**                | Stay in Raised Paws (universal app → pipeline → live status). Delivery back to a Shelterluv-centric staff workflow may be email/dashboard handoff if they still live there day-to-day — but **Raised Paws remains SoR for status**. Their public API is not a reliable write path into Application Manager.                                   |
+| **Monetization / partner risk** | Do **not** process adoption fees in a way that bypasses their payment rails, and do **not** pitch Raised Paws as a drop-in replacement for Shelterluv’s Application Manager. Frame us as a pre-vetting + anti-ghosting layer that still feeds serious applicants to the rescue. Official partner status is a **later** conversation, if ever. |
+| **First partner preference**    | Unchanged: prefer a **small foster- or breed-based rescue** that can paste a link this week — not a Humane Society already happy on PetPoint/Shelterluv (see [First partner](#first-partner-who-we-ask)).                                                                                                                                     |
+
+**Productive next step remains:** get 1–2 pilots on the tracker loop. Offer
+Shelterluv animal **read-sync** only when a pilot already lives there and asks
+for less double-entry.
 
 ### Pet photos & location
 
@@ -595,6 +614,7 @@ and must restate Principle V.
 
 | Date       | Change                                                                                                                                                                                     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-10-28 | Shelterluv locked: read-only pet sync for a willing partner only — not a GTM shortcut past pilots; apps stay in Raised Paws; no unsolicited listings / Apply deep-links into Shelterluv    |
 | 2026-09-05 | Horizon D: park local groomer/dog-walker directory; waitlist/content only until pillar 3 is proven                                                                                         |
 | 2026-09-05 | Import ladder (CSV/paste → connectors → conflict-aware sync); RescueGroups / ShelterBuddy / Shelterluv as early candidates; provenance fields called out                                   |
 | 2026-08-18 | First partner = small foster/breed group; foster is GTM not next build; inventory vs in-flight cohort; apply-link channels (no webmaster / no bare homepage); founding-pilot cost language |

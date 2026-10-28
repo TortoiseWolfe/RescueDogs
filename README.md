@@ -53,7 +53,12 @@ of record** for intake, pipeline, and status — not a link-out to their Google
 Form / Shelterluv app as the primary Apply button (that breaks the tracker).
 Shelters may still keep a required PDF or packet as a pipeline checklist step;
 status stays here. “Apply at the shelter, only track here” is a last resort
-that burns staff time and is not the founding bet.
+that burns staff time and is not the founding bet. Shelterluv (and similar) may
+later **read-sync** adoptable pets for a willing partner that already uses them —
+that is inventory sync after a pilot exists, **not** a shortcut past recruiting
+partners. Locked rules:
+[Shelterluv — locked](./docs/product/VISION.md#shelterluv--locked-not-a-shortcut-past-pilots)
+in VISION.
 
 **Nonprofit timing (#148).** Do **not** form a 501(c)(3) yet — we’re early, and
 the paperwork is expensive without near-term grants or tax-deductible donors.
@@ -280,7 +285,7 @@ These secrets enable full E2E test coverage. Without them, E2E tests will be ski
 | `TEST_USER_SECONDARY_PASSWORD` | Secondary test user password                                           |
 | `TEST_USER_TERTIARY_EMAIL`     | Tertiary test user for group chat tests                                |
 | `TEST_USER_TERTIARY_PASSWORD`  | Tertiary test user password                                            |
-| `TEST_EMAIL_DOMAIN`            | Email domain for generated test emails (e.g., `person29@example.com`)     |
+| `TEST_EMAIL_DOMAIN`            | Email domain for generated test emails (e.g., `person29@example.com`)  |
 
 **Note**: Supabase validates email domains have MX records. Use Gmail plus aliases (`person25@example.com`) instead of `@example.com` which is always blocked.
 
