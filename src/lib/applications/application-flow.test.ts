@@ -97,6 +97,26 @@ describe('partitionApplicationQuestions', () => {
       part.unanswered.some((item) => item.id === 'hou.landlord_allows')
     ).toBe(true);
   });
+
+  it('keeps a question in the ask list while its draft answer is being typed', () => {
+    const saved = new Map<string, unknown>();
+    const live = new Map<string, unknown>([['hou.restrictions', 'n']]);
+    const part = partitionApplicationQuestions(bank, saved, live);
+    expect(part.unanswered.some((item) => item.id === 'hou.restrictions')).toBe(
+      true
+    );
+    expect(part.answered).toEqual([]);
+  });
+
+  it('uses live answers only to decide show_if visibility', () => {
+    const saved = new Map<string, unknown>();
+    const live = new Map<string, unknown>([['hou.own_rent', 'rent']]);
+    const part = partitionApplicationQuestions(bank, saved, live);
+    expect(
+      part.unanswered.some((item) => item.id === 'hou.landlord_allows')
+    ).toBe(true);
+    expect(part.answeredCount).toBe(0);
+  });
 });
 
 describe('questionsForApplication', () => {
