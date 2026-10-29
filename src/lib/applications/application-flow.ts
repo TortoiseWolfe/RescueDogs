@@ -103,14 +103,17 @@ export interface ApplicationPartition {
 
 /**
  * Split the rescue's shown questions into reused vs still-needed.
- * `answers` should be saved answers merged with any in-progress draft.
+ * `saved` decides what is already on file. `live` (saved answers merged with
+ * the in-progress draft) only decides which show_if questions are visible, so
+ * typing into a question never moves it out of the ask list.
  */
 export function partitionApplicationQuestions(
   shown: readonly ApplicationQuestion[],
-  answers: ReadonlyMap<string, unknown>
+  saved: ReadonlyMap<string, unknown>,
+  live: ReadonlyMap<string, unknown> = saved
 ): ApplicationPartition {
   const visible = shown.filter((question) =>
-    matchesShowIf(question.show_if, answers)
+    matchesShowIf(question.show_if, live)
   );
 
   const answered: ApplicationQuestion[] = [];
@@ -121,7 +124,7 @@ export function partitionApplicationQuestions(
       unanswered.push(question);
       continue;
     }
-    if (hasAnsweredValue(answers.get(question.id))) {
+    if (hasAnsweredValue(saved.get(question.id))) {
       answered.push(question);
     } else {
       unanswered.push(question);

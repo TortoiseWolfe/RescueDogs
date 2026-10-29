@@ -157,8 +157,13 @@ export function AdopterApplicationFlow({
   }, [savedAnswers, draft]);
 
   const partition = useMemo(
-    () => partitionApplicationQuestions(shownQuestions, mergedAnswers),
-    [shownQuestions, mergedAnswers]
+    () =>
+      partitionApplicationQuestions(
+        shownQuestions,
+        savedAnswers,
+        mergedAnswers
+      ),
+    [shownQuestions, savedAnswers, mergedAnswers]
   );
 
   const banner = reuseProgressLabel(
