@@ -51,6 +51,7 @@ const LOCKED_CORE = [
   'hou.landlord_contact',
   'yrd.has_yard',
   'yrd.fenced',
+  'pet.has_current',
   'pet.current',
   'vet.contact',
   'trn.experience_level',

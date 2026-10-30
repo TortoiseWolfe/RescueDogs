@@ -97,6 +97,15 @@ test.describe('anti-ghosting loop', () => {
       )
     ).toBeVisible({ timeout: 20000 });
 
+    // Locked Yes/No gate (#509) — seed adopter may not have pet.has_current saved.
+    // Answer No so the current-pets repeater stays hidden and validation can pass.
+    await adopterPage
+      .getByRole('group', {
+        name: /do you have pets living in your home/i,
+      })
+      .getByRole('button', { name: /^no$/i })
+      .click();
+
     // Per-application "why this pet" is never reused — always asked.
     // Prefer role/name: the bank field id is easy to miss in the static export.
     const whyThisPet = adopterPage.getByRole('textbox', {
@@ -110,6 +119,8 @@ test.describe('anti-ghosting loop', () => {
       .click();
 
     // Review lists reused locked-core answers (Full name → Dana Adopter).
+    // Prefills are also editable on the questions step (#509); review still
+    // surfaces the saved name under Already on file when it was not retyped.
     await expect(
       adopterPage.getByRole('heading', { name: /already on file/i })
     ).toBeVisible({ timeout: 20000 });
