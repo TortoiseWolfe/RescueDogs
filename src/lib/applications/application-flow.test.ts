@@ -77,7 +77,7 @@ describe('partitionApplicationQuestions', () => {
     ]);
     expect(part.answeredCount).toBe(1);
     expect(reuseProgressLabel(part.answeredCount, part.totalCount)).toBe(
-      '1 of 3 already answered'
+      "We'll reuse 1 of 3 answers — change anything that needs updating."
     );
   });
 
@@ -116,6 +116,49 @@ describe('partitionApplicationQuestions', () => {
       part.unanswered.some((item) => item.id === 'hou.landlord_allows')
     ).toBe(true);
     expect(part.answeredCount).toBe(0);
+  });
+
+  it('hides pet.current when pet.has_current is No (#509)', () => {
+    const petsBank = [
+      q({
+        id: 'pet.has_current',
+        category: 'pets',
+        answer_type: 'yes_no',
+        is_locked: true,
+      }),
+      q({
+        id: 'pet.current',
+        category: 'pets',
+        answer_type: 'repeat',
+        is_locked: true,
+        show_if: { question: 'pet.has_current', in: [true] },
+      }),
+      q({
+        id: 'pet.current_adjust',
+        category: 'pets',
+        show_if: { question: 'pet.has_current', in: [true] },
+      }),
+    ];
+    const liveNo = new Map<string, unknown>([['pet.has_current', false]]);
+    const hidden = partitionApplicationQuestions(petsBank, liveNo, liveNo);
+    const hiddenIds = [
+      ...hidden.answered.map((item) => item.id),
+      ...hidden.unanswered.map((item) => item.id),
+    ];
+    expect(hiddenIds).toEqual(['pet.has_current']);
+    expect(hidden.answered.map((item) => item.id)).toEqual(['pet.has_current']);
+
+    const liveYes = new Map<string, unknown>([['pet.has_current', true]]);
+    const shown = partitionApplicationQuestions(petsBank, liveYes, liveYes);
+    const shownIds = [
+      ...shown.answered.map((item) => item.id),
+      ...shown.unanswered.map((item) => item.id),
+    ];
+    expect(shownIds).toEqual([
+      'pet.has_current',
+      'pet.current',
+      'pet.current_adjust',
+    ]);
   });
 });
 
