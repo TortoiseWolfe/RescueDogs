@@ -13,6 +13,7 @@ import {
   REFERENCE_QUESTION_ID,
   formatAnswerForReview,
   hasAnsweredValue,
+  matchesShowIf,
   needsReferenceShareConfirm,
   partitionApplicationQuestions,
   questionsForApplication,
@@ -172,6 +173,19 @@ export function AdopterApplicationFlow({
   );
 
   // Pet comes from the picker; email is taken from the signed-in account.
+  // Full form: every visible question, prefilled and editable (#509).
+  const formQuestions = useMemo(
+    () =>
+      shownQuestions.filter(
+        (question) =>
+          matchesShowIf(question.show_if, mergedAnswers) &&
+          question.id !== 'app.pet_interest' &&
+          question.id !== 'con.email'
+      ),
+    [shownQuestions, mergedAnswers]
+  );
+
+  // Review "New answers" — never-reuse + not yet saved on file.
   const askQuestions = partition.unanswered.filter(
     (question) =>
       question.id !== 'app.pet_interest' && question.id !== 'con.email'
@@ -193,7 +207,18 @@ export function AdopterApplicationFlow({
   }
 
   function setAnswer(questionId: string, value: unknown) {
-    setDraft((current) => ({ ...current, [questionId]: value }));
+    setDraft((current) => {
+      const next: Record<string, unknown> = {
+        ...current,
+        [questionId]: value,
+      };
+      // Saying No clears pet detail so a later Yes does not revive stale rows.
+      if (questionId === 'pet.has_current' && value === false) {
+        delete next['pet.current'];
+        delete next['pet.current_adjust'];
+      }
+      return next;
+    });
     setErrors((current) => {
       if (!current[questionId]) return current;
       const next = { ...current };
@@ -204,7 +229,7 @@ export function AdopterApplicationFlow({
 
   function validateQuestions(): boolean {
     const nextErrors: Record<string, string> = {};
-    for (const question of askQuestions) {
+    for (const question of formQuestions) {
       if (question.always_optional) continue;
       const value = mergedAnswers.get(question.id);
       if (!hasAnsweredValue(value)) {
@@ -250,9 +275,9 @@ export function AdopterApplicationFlow({
     questions: partition.answered.filter((item) => item.category === category),
   })).filter((group) => group.questions.length > 0);
 
-  const askByCategory = QUESTION_CATEGORIES.map((category) => ({
+  const formByCategory = QUESTION_CATEGORIES.map((category) => ({
     category,
-    questions: askQuestions.filter((item) => item.category === category),
+    questions: formQuestions.filter((item) => item.category === category),
   })).filter((group) => group.questions.length > 0);
 
   return (
@@ -314,13 +339,13 @@ export function AdopterApplicationFlow({
             </button>
           </div>
 
-          {askByCategory.length === 0 ? (
+          {formByCategory.length === 0 ? (
             <p className="text-sm opacity-70">
               You already answered everything this rescue asks. Review and send
               next.
             </p>
           ) : (
-            askByCategory.map((group) => (
+            formByCategory.map((group) => (
               <section key={group.category} className="space-y-4">
                 <h2 className="text-lg font-semibold">
                   {CATEGORY_LABELS[group.category as QuestionCategory]}
@@ -403,7 +428,7 @@ export function AdopterApplicationFlow({
                         <dd className="text-sm opacity-80">
                           {formatAnswerForReview(
                             question,
-                            savedAnswers.get(question.id)
+                            mergedAnswers.get(question.id)
                           )}
                         </dd>
                       </div>

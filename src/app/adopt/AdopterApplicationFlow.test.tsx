@@ -145,4 +145,11 @@ describe('AdopterApplicationFlow draft', () => {
     expect(sessionStorage.length).toBe(0);
     expect(screen.queryByTestId('draft-notice')).toBeNull();
   });
+
+  it('prefills saved answers on the questions step so they can be edited (#509)', () => {
+    renderFlow({
+      savedAnswers: new Map([['con.full_name', 'Dana Saved']]),
+    });
+    expect(screen.getByLabelText(/Full name/)).toHaveValue('Dana Saved');
+  });
 });

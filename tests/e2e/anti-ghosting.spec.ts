@@ -92,7 +92,9 @@ test.describe('anti-ghosting loop', () => {
       timeout: 20000,
     });
     await expect(
-      adopterPage.getByText(/\d+ of \d+ already answered/i)
+      adopterPage.getByText(
+        /We'll reuse \d+ of \d+ answers — change anything that needs updating/i
+      )
     ).toBeVisible({ timeout: 20000 });
 
     // Per-application "why this pet" is never reused — always asked.

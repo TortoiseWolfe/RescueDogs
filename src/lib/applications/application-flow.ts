@@ -95,7 +95,7 @@ export interface ApplicationPartition {
   answered: ApplicationQuestion[];
   /** Shown questions the adopter still needs to fill (includes never-reuse). */
   unanswered: ApplicationQuestion[];
-  /** Count used in "X of Y already answered" (excludes never-reuse). */
+  /** Count used in the reuse banner (excludes never-reuse). */
   answeredCount: number;
   /** Total shown top-level questions (includes never-reuse). */
   totalCount: number;
@@ -145,7 +145,7 @@ export function reuseProgressLabel(
   totalCount: number
 ): string | null {
   if (answeredCount <= 0 || totalCount <= 0) return null;
-  return `${answeredCount} of ${totalCount} already answered`;
+  return `We'll reuse ${answeredCount} of ${totalCount} answers — change anything that needs updating.`;
 }
 
 export const REFERENCE_QUESTION_ID = 'ref.personal';
