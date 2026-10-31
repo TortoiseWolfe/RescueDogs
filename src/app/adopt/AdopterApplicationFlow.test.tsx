@@ -39,6 +39,15 @@ const nameQuestion: ApplicationQuestion = {
   retired_at: null,
 };
 
+const adultsQuestion: ApplicationQuestion = {
+  ...nameQuestion,
+  id: 'hh.adults_count',
+  category: 'household',
+  sort_order: 401,
+  wording: 'How many adults live in your home?',
+  answer_type: 'number',
+};
+
 const pets = [
   { id: 'pet-1', shelter_id: 'shelter-1', name: 'Biscuit', species: 'dog' },
   { id: 'pet-2', shelter_id: 'shelter-1', name: 'Mochi', species: 'dog' },
@@ -151,5 +160,31 @@ describe('AdopterApplicationFlow draft', () => {
       savedAnswers: new Map([['con.full_name', 'Dana Saved']]),
     });
     expect(screen.getByLabelText(/Full name/)).toHaveValue('Dana Saved');
+  });
+
+  it('shows a profile-limit message on a saved one-character name (#460)', () => {
+    renderFlow({
+      savedAnswers: new Map([['con.full_name', 'D']]),
+    });
+    expect(screen.getByLabelText(/Full name/)).toHaveValue('D');
+    expect(
+      screen.getByText('Enter a name between 2 and 100 characters')
+    ).toBeTruthy();
+  });
+
+  it('blocks Review when a saved household count is outside the table limit (#460)', () => {
+    renderFlow({
+      bank: [nameQuestion, adultsQuestion],
+      shownByShelter: new Map([
+        ['shelter-1', ['con.full_name', 'hh.adults_count']],
+      ]),
+      savedAnswers: new Map<string, unknown>([
+        ['con.full_name', 'Dana Adopter'],
+        ['hh.adults_count', 25],
+      ]),
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Review application' }));
+    expect(screen.getByText('Enter a whole number from 1 to 20')).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'New answers' })).toBeNull();
   });
 });
