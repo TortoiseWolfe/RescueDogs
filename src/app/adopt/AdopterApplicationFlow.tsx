@@ -19,7 +19,10 @@ import {
   questionsForApplication,
   reuseProgressLabel,
 } from '@/lib/applications/application-flow';
-import { profileSnapshotFromAnswers } from '@/lib/applications/profile-from-answers';
+import {
+  profileAnswerErrors,
+  profileSnapshotFromAnswers,
+} from '@/lib/applications/profile-from-answers';
 import { QUESTION_CATEGORIES } from '@/lib/applications/question-settings';
 import { useFormDraft } from '@/hooks/useFormDraft';
 import { DraftNotice } from '../shelter/pets/DraftNotice';
@@ -172,6 +175,19 @@ export function AdopterApplicationFlow({
     partition.totalCount
   );
 
+  // A saved answer that now breaks a profile limit (a household count of 0 or
+  // 25, say) is asked again. Otherwise it would sit under "Already on file"
+  // and the adopter could never correct it.
+  const savedInvalidIds = useMemo(
+    () => new Set(Object.keys(profileAnswerErrors(savedAnswers))),
+    [savedAnswers]
+  );
+
+  const profileErrors = useMemo(
+    () => profileAnswerErrors(mergedAnswers),
+    [mergedAnswers]
+  );
+
   // Pet comes from the picker; email is taken from the signed-in account.
   // Full form: every visible question, prefilled and editable (#509).
   const formQuestions = useMemo(
@@ -185,11 +201,22 @@ export function AdopterApplicationFlow({
     [shownQuestions, mergedAnswers]
   );
 
-  // Review "New answers" — never-reuse + not yet saved on file.
-  const askQuestions = partition.unanswered.filter(
-    (question) =>
-      question.id !== 'app.pet_interest' && question.id !== 'con.email'
-  );
+  // Review "New answers" — never-reuse + not yet saved on file, plus any
+  // saved answer that now breaks a profile CHECK constraint (#460).
+  const askQuestions = useMemo(() => {
+    const asked = partition.unanswered.filter(
+      (question) =>
+        question.id !== 'app.pet_interest' && question.id !== 'con.email'
+    );
+    const askedIds = new Set(asked.map((question) => question.id));
+    const askedAgain = bank.filter(
+      (question) =>
+        savedInvalidIds.has(question.id) && !askedIds.has(question.id)
+    );
+    return [...asked, ...askedAgain].sort(
+      (a, b) => a.sort_order - b.sort_order
+    );
+  }, [partition.unanswered, bank, savedInvalidIds]);
 
   const needsRefsConfirm = needsReferenceShareConfirm(
     shownQuestions,
@@ -236,6 +263,11 @@ export function AdopterApplicationFlow({
         nextErrors[question.id] = 'This question needs an answer';
       }
     }
+    for (const [questionId, message] of Object.entries(
+      profileAnswerErrors(mergedAnswers)
+    )) {
+      if (!nextErrors[questionId]) nextErrors[questionId] = message;
+    }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
@@ -272,7 +304,9 @@ export function AdopterApplicationFlow({
 
   const answeredByCategory = QUESTION_CATEGORIES.map((category) => ({
     category,
-    questions: partition.answered.filter((item) => item.category === category),
+    questions: partition.answered.filter(
+      (item) => item.category === category && !savedInvalidIds.has(item.id)
+    ),
   })).filter((group) => group.questions.length > 0);
 
   const formByCategory = QUESTION_CATEGORIES.map((category) => ({
@@ -357,7 +391,7 @@ export function AdopterApplicationFlow({
                     value={mergedAnswers.get(question.id)}
                     onChange={(next) => setAnswer(question.id, next)}
                     visibleBank={bank}
-                    error={errors[question.id]}
+                    error={errors[question.id] ?? profileErrors[question.id]}
                   />
                 ))}
               </section>

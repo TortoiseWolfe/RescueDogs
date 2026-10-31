@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { profileSnapshotFromAnswers } from './profile-from-answers';
+import {
+  profileAnswerErrors,
+  profileSnapshotFromAnswers,
+} from './profile-from-answers';
 
 describe('profileSnapshotFromAnswers', () => {
   it('maps bank answers onto the legacy profile snapshot', () => {
@@ -48,5 +51,65 @@ describe('profileSnapshotFromAnswers', () => {
     expect(profileSnapshotFromAnswers(new Map(), 'Fallback').full_name).toBe(
       'Fallback'
     );
+  });
+});
+
+describe('profileAnswerErrors', () => {
+  it('accepts values the adopter_profiles table allows', () => {
+    const answers = new Map<string, unknown>([
+      ['con.full_name', 'Dana Adopter'],
+      ['hh.adults_count', 20],
+      ['hh.children_count', 0],
+    ]);
+    expect(profileAnswerErrors(answers)).toEqual({});
+  });
+
+  it('does not treat missing or blank answers as errors', () => {
+    expect(profileAnswerErrors(new Map())).toEqual({});
+    expect(
+      profileAnswerErrors(
+        new Map<string, unknown>([
+          ['con.full_name', '   '],
+          ['hh.adults_count', null],
+          ['hh.children_count', ''],
+        ])
+      )
+    ).toEqual({});
+  });
+
+  it('flags household counts outside the table limits', () => {
+    const errors = profileAnswerErrors(
+      new Map<string, unknown>([
+        ['hh.adults_count', 0],
+        ['hh.children_count', 21],
+      ])
+    );
+    expect(Object.keys(errors).sort()).toEqual([
+      'hh.adults_count',
+      'hh.children_count',
+    ]);
+    expect(
+      profileAnswerErrors(new Map<string, unknown>([['hh.adults_count', 25]]))
+    ).toHaveProperty('hh.adults_count');
+    expect(
+      profileAnswerErrors(new Map<string, unknown>([['hh.children_count', -1]]))
+    ).toHaveProperty('hh.children_count');
+  });
+
+  it('flags a fractional household count instead of rounding it', () => {
+    expect(
+      profileAnswerErrors(new Map<string, unknown>([['hh.adults_count', 2.5]]))
+    ).toHaveProperty('hh.adults_count');
+  });
+
+  it('flags a one-character or over-long name', () => {
+    expect(
+      profileAnswerErrors(new Map<string, unknown>([['con.full_name', 'D']]))
+    ).toHaveProperty('con.full_name');
+    expect(
+      profileAnswerErrors(
+        new Map<string, unknown>([['con.full_name', 'x'.repeat(101)]])
+      )
+    ).toHaveProperty('con.full_name');
   });
 });
