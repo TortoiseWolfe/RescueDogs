@@ -159,6 +159,23 @@ describe('shelter questions page', () => {
     expect(screen.getByText(/Shown: 2 of 2/)).toBeInTheDocument();
   });
 
+  it('keeps the unsaved draft when the load fails', async () => {
+    saveQuestionSettingsDraft('shelter-1', {
+      shownIds: ['hou.restrictions'],
+      remembered: {},
+    });
+    serviceMocks.listShownQuestionIds.mockRejectedValue(new Error('offline'));
+    render(<ShelterQuestionsPage />);
+    expect(
+      await screen.findByText(
+        'We could not load the question bank. Please try again.'
+      )
+    ).toBeInTheDocument();
+    expect(
+      sessionStorage.getItem(questionSettingsDraftKey('shelter-1'))
+    ).not.toBeNull();
+  });
+
   it('Reset restores the locked core and leaves Save enabled when extras were saved (#476)', async () => {
     serviceMocks.listShownQuestionIds.mockResolvedValue(['hou.restrictions']);
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);

@@ -116,11 +116,13 @@ export default function ShelterQuestionsPage() {
         Object.fromEntries(flagRows.map((rule) => [rule.question_id, rule]))
       );
       setError(null);
+      // Only after the state is restored: the draft-sync effect clears the
+      // draft whenever hydrated && !dirty, so a failed load must never set it.
+      setHydrated(true);
     } catch {
       setError('We could not load the question bank. Please try again.');
     } finally {
       setLoading(false);
-      setHydrated(true);
     }
   }, [shelterId]);
 
