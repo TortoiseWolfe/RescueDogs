@@ -49,13 +49,13 @@
   --color-error-content: #ffffff;
 
   --radius-selector: 999px;
-  --radius-field: 1rem;
-  --radius-box: 1.625rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
-  --depth: 1;
-  --noise: 1;
+  --depth: 0;
+  --noise: 0;
 }
 
 @plugin "daisyui/theme" {
@@ -87,13 +87,13 @@
   --color-error-content: #0c1929;
 
   --radius-selector: 999px;
-  --radius-field: 1rem;
-  --radius-box: 1.625rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
-  --depth: 1;
-  --noise: 1;
+  --depth: 0;
+  --noise: 0;
 }
 
 /* Brand "ink" — the readable orange for TEXT on a base-100 surface.
@@ -139,25 +139,33 @@
 [data-theme='trusted-care-light'] .card,
 [data-theme='trusted-care-dark'] .card {
   box-shadow:
-    0 22px 44px color-mix(in oklch, var(--color-primary) 18%, transparent),
-    0 4px 10px rgb(0 0 0 / 0.08);
+    0 8px 24px color-mix(in oklch, var(--color-primary) 10%, transparent),
+    0 1px 3px rgb(0 0 0 / 0.08);
 }
 
 [data-theme='trusted-care-light'] .btn,
 [data-theme='trusted-care-dark'] .btn {
   font-family: var(--font-fredoka), var(--font-nunito), system-ui, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   box-shadow:
-    0 10px 18px color-mix(in oklch, var(--color-primary) 22%, transparent),
-    0 4px 0 color-mix(in oklch, var(--color-primary) 58%, black);
+    0 4px 10px color-mix(in oklch, var(--color-primary) 14%, transparent),
+    0 2px 0 color-mix(in oklch, var(--color-primary) 58%, black);
 }
 
 [data-theme='trusted-care-light'] .btn:hover,
 [data-theme='trusted-care-dark'] .btn:hover {
   transform: translateY(-1px);
   box-shadow:
-    0 14px 24px color-mix(in oklch, var(--color-primary) 28%, transparent),
-    0 5px 0 color-mix(in oklch, var(--color-primary) 58%, black);
+    0 6px 14px color-mix(in oklch, var(--color-primary) 20%, transparent),
+    0 3px 0 color-mix(in oklch, var(--color-primary) 58%, black);
+}
+
+[data-theme='trusted-care-light'] .btn:is(.btn-ghost, .btn-link),
+[data-theme='trusted-care-dark'] .btn:is(.btn-ghost, .btn-link),
+[data-theme='trusted-care-light'] .btn:is(.btn-ghost, .btn-link):hover,
+[data-theme='trusted-care-dark'] .btn:is(.btn-ghost, .btn-link):hover {
+  box-shadow: none;
+  transform: none;
 }
 
 /* DaisyUI's .stat-title and .stat-desc ship with base-content at 60% alpha,
@@ -319,10 +327,11 @@
     var(--font-nunito), system-ui, -apple-system, BlinkMacSystemFont,
     'Segoe UI', sans-serif;
   --font-display:
-    var(--font-baloo), var(--font-fredoka), var(--font-nunito), system-ui,
-    sans-serif;
+    var(--font-nunito), system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
   --font-friendly:
-    var(--font-fredoka), var(--font-nunito), system-ui, sans-serif;
+    var(--font-nunito), system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
 
   /* Base scale factor - controlled by accessibility settings */
   --font-scale-factor: 1;

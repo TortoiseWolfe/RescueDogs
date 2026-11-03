@@ -42,7 +42,7 @@ export default function ContactPage() {
 
       <div className="relative mx-auto max-w-4xl">
         <div className="mb-8 text-center">
-          <h1 className="font-display mb-3 !text-2xl font-extrabold tracking-tight text-[#1e3a8a] sm:!text-4xl md:!text-5xl">
+          <h1 className="font-display mb-3 !text-2xl font-bold tracking-tight text-[#1e3a8a] sm:!text-3xl md:!text-4xl">
             Contact Raised Paws
           </h1>
           <p className="text-base-content/85 text-base sm:text-lg md:text-xl">
@@ -127,7 +127,7 @@ export default function ContactPage() {
               aria-hidden="true"
               className="absolute -inset-1 rounded-[1.35rem] bg-gradient-to-br from-[#f97316] via-[#fb923c] to-[#ea580c] opacity-90 blur-[1px]"
             />
-            <div className="bg-base-100 relative rounded-[1.25rem] border-2 border-[#f97316]/80 p-1 shadow-[0_12px_28px_rgba(249,115,22,0.28),0_4px_0_#ea580c]">
+            <div className="bg-base-100 relative rounded-[1.25rem] border-2 border-[#f97316]/80 p-1 shadow-[0_8px_24px_rgba(249,115,22,0.22)]">
               <div className="bg-base-100 rounded-[1.05rem] p-4 sm:p-6">
                 <ContactForm />
               </div>

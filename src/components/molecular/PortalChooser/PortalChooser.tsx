@@ -93,7 +93,7 @@ export default function PortalChooser({
             onClick={() => handleSelect(door.portal)}
             className={`border-base-300 bg-base-100 hover:border-primary focus-visible:outline-primary flex min-h-11 flex-col rounded-2xl border-2 p-6 text-left shadow-sm transition-colors ${door.accent}`}
           >
-            <h2 className="font-display text-base-content text-2xl font-extrabold">
+            <h2 className="font-display text-base-content text-2xl font-bold tracking-tight">
               {door.title}
             </h2>
             <p className="text-base-content/80 mt-2 flex-1 text-base leading-relaxed">

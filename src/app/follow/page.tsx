@@ -38,7 +38,7 @@ export default function FollowPage() {
           <p className="font-friendly text-sm font-bold tracking-wide text-[var(--brand-ink)] uppercase">
             Early interest
           </p>
-          <h1 className="font-display mt-2 !text-2xl font-extrabold tracking-tight text-[#1e3a8a] sm:!text-4xl md:!text-5xl">
+          <h1 className="font-display mt-2 !text-2xl font-bold tracking-tight text-[#1e3a8a] sm:!text-3xl md:!text-4xl">
             Follow Raised Paws
           </h1>
           <p className="text-base-content/85 mx-auto mt-4 max-w-xl text-base sm:text-lg">

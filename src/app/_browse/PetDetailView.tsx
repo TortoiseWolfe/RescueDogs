@@ -170,7 +170,7 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
               <span aria-hidden="true">{copy.emoji} </span>
               Available for adoption
             </p>
-            <h1 className="font-display mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl">
+            <h1 className="font-display mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
               {pet.name}
             </h1>
             <p className="text-base-content/80 mt-2 text-lg">
