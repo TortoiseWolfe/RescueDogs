@@ -111,12 +111,12 @@ export default function Home() {
               </div>
               <h1
                 id="hero-heading"
-                className="font-display mb-5 text-4xl leading-tight font-extrabold tracking-tight break-normal text-white drop-shadow-[0_8px_0_rgba(0,0,0,0.14)] sm:text-6xl sm:leading-none xl:text-7xl"
+                className="font-display mb-5 text-3xl leading-tight font-bold tracking-tight break-normal text-white sm:text-4xl sm:leading-tight xl:text-5xl"
               >
                 Track your pet adoption applications.
               </h1>
 
-              <p className="mb-8 text-lg leading-relaxed font-semibold break-normal text-[#f97316] sm:text-xl">
+              <p className="mb-8 text-lg leading-relaxed font-medium break-normal text-[#f97316] sm:text-xl">
                 Apply once, watch every status update live, and give shelters
                 &amp; rescues a simple pipeline.
               </p>
@@ -124,13 +124,13 @@ export default function Home() {
               <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center">
                 <Link
                   href="/get-started?choose=1&intent=signup"
-                  className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto sm:text-base"
+                  className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_6px_14px_rgba(249,115,22,0.3),0_2px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_8px_18px_rgba(249,115,22,0.35),0_3px_0_#ea580c] sm:w-auto sm:text-base"
                 >
                   Create Account
                 </Link>
                 <Link
                   href="/get-started?demo=1&choose=1"
-                  className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_10px_18px_rgba(249,115,22,0.35),0_4px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_14px_24px_rgba(249,115,22,0.4),0_5px_0_#ea580c] sm:w-auto sm:text-base"
+                  className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_6px_14px_rgba(249,115,22,0.3),0_2px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_8px_18px_rgba(249,115,22,0.35),0_3px_0_#ea580c] sm:w-auto sm:text-base"
                 >
                   Try Demo
                 </Link>
@@ -145,9 +145,9 @@ export default function Home() {
               - Photo size: `max-w-md` / `xl:max-w-[640px]` on the column
           */}
           <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 xl:-mt-8 xl:max-w-[640px] xl:items-stretch">
-            <div className="relative aspect-[4/3] w-full animate-[floaty_5s_ease-in-out_infinite] xl:mt-2">
-              <div className="absolute inset-0 rotate-1 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl sm:rotate-3" />
-              <div className="absolute inset-2 rotate-1 overflow-hidden rounded-[1.625rem] sm:rotate-3">
+            <div className="relative aspect-[4/3] w-full xl:mt-2">
+              <div className="absolute inset-0 rotate-1 rounded-[1.5rem] border-4 border-[#f97316] bg-white shadow-xl" />
+              <div className="absolute inset-1 rotate-1 overflow-hidden rounded-[1.25rem]">
                 <Image
                   src={`${detectedConfig.basePath}/hero-held-paws.png`}
                   alt="A smiling adopter with a rescued dog and cat in a sunny park"
@@ -181,7 +181,7 @@ export default function Home() {
         <div className="mx-auto max-w-6xl text-center">
           <h2
             id="how-it-works-heading"
-            className="font-display text-base-content mb-10 text-4xl font-extrabold sm:text-5xl"
+            className="font-display text-base-content mb-10 text-3xl font-bold tracking-tight sm:text-4xl"
           >
             How adopting works
           </h2>
@@ -189,16 +189,14 @@ export default function Home() {
             {STEPS.map((step) => (
               <div key={step.number} className="px-3">
                 <div
-                  className={`font-display mx-auto mb-5 grid h-24 w-24 place-items-center rounded-full text-5xl font-extrabold shadow-xl ${step.bg}`}
+                  className={`font-display mx-auto mb-5 grid h-16 w-16 place-items-center rounded-full text-3xl font-bold shadow-md ${step.bg}`}
                 >
                   {step.number}
                 </div>
-                <h3 className="font-friendly text-base-content text-2xl font-bold">
+                <h3 className="font-friendly text-base-content text-xl font-bold">
                   {step.title}
                 </h3>
-                <p className="text-base-content/95 mt-2 font-semibold">
-                  {step.detail}
-                </p>
+                <p className="text-base-content/95 mt-2">{step.detail}</p>
               </div>
             ))}
           </div>
@@ -219,11 +217,11 @@ export default function Home() {
           {STATS.map((stat) => (
             <div key={stat.label}>
               <div
-                className={`font-display text-4xl font-extrabold drop-shadow-sm sm:text-5xl ${stat.tone}`}
+                className={`font-display text-3xl font-bold tracking-tight sm:text-4xl ${stat.tone}`}
               >
                 {stat.value}
               </div>
-              <p className="text-base-content/95 font-bold">{stat.label}</p>
+              <p className="text-base-content/95 font-semibold">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -239,11 +237,11 @@ export default function Home() {
         <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#f97316] p-8 text-white shadow-2xl sm:p-10">
           <h2
             id="live-loop-heading"
-            className="font-display text-3xl font-extrabold sm:text-4xl"
+            className="font-display text-2xl font-bold tracking-tight sm:text-3xl"
           >
             Want to see the live rescue loop?
           </h2>
-          <p className="mt-3 w-full text-base font-bold text-[#172554] sm:text-lg">
+          <p className="mt-3 w-full text-base font-semibold text-[#172554] sm:text-lg">
             Choose the adopter or shelter door, sign in with a prefilled demo
             account, then walk the real loop: submit or review an application,
             move statuses in the shelter pipeline, and watch updates sync live
@@ -254,7 +252,7 @@ export default function Home() {
           <div className="mt-5 flex justify-center">
             <Link
               href="/get-started?demo=1&choose=1"
-              className="btn btn-lg min-h-12 bg-white px-10 text-lg font-bold text-[#1e3a8a] hover:bg-[#e8edf7]"
+              className="btn min-h-12 bg-white px-8 text-base font-bold text-[#1e3a8a] hover:bg-[#e8edf7]"
             >
               Try Demo
             </Link>

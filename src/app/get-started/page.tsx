@@ -83,7 +83,7 @@ export default function GetStartedPage() {
   return (
     <main className="container mx-auto max-w-4xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <div className="mb-8 text-center">
-        <h1 className="font-display text-3xl font-extrabold sm:text-4xl">
+        <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           {intent === 'sign-up'
             ? 'Create an Account'
             : demoMode

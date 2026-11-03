@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { projectConfig } from '@/config/project.config';
 
 const heroCtaClassName =
-  'btn btn-lg min-h-11 border-0 bg-white px-8 font-bold text-[#1e3a8a] hover:bg-[#e8edf7]';
+  'btn min-h-11 border-0 bg-white px-6 text-base font-bold text-[#1e3a8a] hover:bg-[#e8edf7]';
 
 export const metadata: Metadata = {
   title: 'For shelters & rescues - Raised Paws',
@@ -19,7 +19,7 @@ export default function ForSheltersPage() {
           <p className="font-friendly text-sm font-bold tracking-wide text-[#f97316] uppercase">
             For Shelters &amp; Rescues
           </p>
-          <h1 className="font-display mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl">
+          <h1 className="font-display mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
             A simple pipeline that keeps adopters in the loop
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-white/90 sm:text-xl">
@@ -54,7 +54,7 @@ export default function ForSheltersPage() {
       </section>
 
       <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-        <h2 className="font-display text-base-content text-2xl font-extrabold sm:text-3xl">
+        <h2 className="font-display text-base-content text-2xl font-bold tracking-tight">
           Built for volunteer capacity
         </h2>
         <ul className="text-base-content/80 mt-6 space-y-4 text-lg leading-relaxed">

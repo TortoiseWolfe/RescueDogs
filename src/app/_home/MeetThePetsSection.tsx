@@ -56,7 +56,7 @@ export default function MeetThePetsSection() {
       <div className="mx-auto max-w-6xl text-center">
         <h2
           id="meet-pets-heading"
-          className="font-display text-base-content text-4xl font-extrabold sm:text-5xl"
+          className="font-display text-base-content text-3xl font-bold tracking-tight sm:text-4xl"
         >
           Say hello!
         </h2>

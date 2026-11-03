@@ -66,19 +66,6 @@ const fredoka = localFont({
   ],
 });
 
-const baloo = localFont({
-  src: [
-    { path: './fonts/baloo2-500.woff2', weight: '500', style: 'normal' },
-    { path: './fonts/baloo2-600.woff2', weight: '600', style: 'normal' },
-    { path: './fonts/baloo2-700.woff2', weight: '700', style: 'normal' },
-    { path: './fonts/baloo2-800.woff2', weight: '800', style: 'normal' },
-  ],
-  variable: '--font-baloo',
-  display: 'swap',
-  preload: true,
-  fallback: ['Nunito', 'system-ui', 'sans-serif'],
-});
-
 const geistMono = localFont({
   src: [
     { path: './fonts/geist-mono-400.woff2', weight: '400', style: 'normal' },
@@ -166,7 +153,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${nunito.variable} ${fredoka.variable} ${baloo.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
+        className={`${nunito.variable} ${fredoka.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
         suppressHydrationWarning
       >
         <ThemeScript />

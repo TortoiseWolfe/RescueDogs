@@ -229,12 +229,12 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
         <section className="bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-5 text-white sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl text-center lg:text-left">
             {shelterName ? (
-              <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
+              <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
                 <span aria-hidden="true">{copy.emoji} </span>
                 {listTitle}
               </h1>
             ) : (
-              <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
+              <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
                 <span aria-hidden="true">{copy.emoji} </span>
                 Browse{' '}
                 <span className="text-[#f97316]">{copy.speciesLabel}</span>
