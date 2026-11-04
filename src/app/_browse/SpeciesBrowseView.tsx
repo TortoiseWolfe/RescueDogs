@@ -22,7 +22,7 @@ import {
   zipStateMismatchNote,
 } from '@/lib/browse/transport';
 import { petDetailPath } from '@/lib/browse/pet-links';
-import { basicsLabel, locationLabel } from './browse-labels';
+import { basicsParts, locationLabel } from './browse-labels';
 import BrowseSearchParamsReader from './BrowseSearchParamsReader';
 
 export type SpeciesBrowseKind = 'dogs' | 'cats';
@@ -467,6 +467,10 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {pets.map((pet) => {
                 const place = locationLabel(pet);
+                const basics = basicsParts(pet);
+                const hasBasics = Boolean(
+                  basics.breed || basics.size || basics.age
+                );
                 const detailHref = petDetailPath(dbSpecies, pet.id);
                 const transportBadge = transportBadgeLabel(
                   pet,
@@ -504,33 +508,72 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                             {pet.name}
                           </Link>
                         </h3>
-                        <p className="text-base-content/80 text-sm">
-                          {basicsLabel(pet)}
-                        </p>
+                        {hasBasics ? (
+                          <dl className="text-base-content/80 leading-tight">
+                            {basics.breed ? (
+                              <div>
+                                <dt className="sr-only">Breed</dt>
+                                <dd className="text-sm font-medium">
+                                  {basics.breed}
+                                </dd>
+                              </div>
+                            ) : null}
+                            {basics.size ? (
+                              <div>
+                                <dt className="sr-only">Size</dt>
+                                <dd className="text-xs">
+                                  <span className="text-base-content/50">
+                                    Size:{' '}
+                                  </span>
+                                  {basics.size}
+                                </dd>
+                              </div>
+                            ) : null}
+                            {basics.age ? (
+                              <div>
+                                <dt className="sr-only">Age</dt>
+                                <dd className="text-xs">
+                                  <span className="text-base-content/50">
+                                    Age:{' '}
+                                  </span>
+                                  {basics.age}
+                                </dd>
+                              </div>
+                            ) : null}
+                          </dl>
+                        ) : (
+                          <p className="text-base-content/80 text-sm">
+                            Details coming soon
+                          </p>
+                        )}
                         {pet.notes?.trim() ? (
-                          <p className="text-base-content/70 line-clamp-3 text-sm leading-relaxed">
+                          <p className="text-base-content/50 mt-1 line-clamp-2 text-[0.7rem] leading-snug">
                             {pet.notes.trim()}
                           </p>
                         ) : null}
-                        {place && (
-                          <p className="text-base-content/60 text-sm">
-                            {transportBadge ? `Located in ${place}` : place}
-                          </p>
-                        )}
-                        {/* This pet is not local, so say so before the adopter
-                            gets attached to a dog 1,500 miles away (#331). */}
-                        {transportBadge && (
-                          <p className="badge badge-outline badge-primary h-auto py-1 text-xs whitespace-normal">
-                            {transportBadge}
-                          </p>
-                        )}
-                        <div className="card-actions mt-auto">
-                          <Link
-                            href={detailHref}
-                            className="btn btn-primary min-h-11 w-full sm:w-auto"
-                          >
-                            Meet {pet.name}
-                          </Link>
+                        <div className="mt-auto flex flex-col gap-2 pt-3">
+                          {/* This pet is not local, so say so before the adopter
+                              gets attached to a dog 1,500 miles away (#331). */}
+                          {transportBadge && (
+                            <p className="badge badge-outline badge-primary h-auto py-1 text-xs whitespace-normal">
+                              {transportBadge}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                            {place ? (
+                              <p className="text-base-content/80 min-w-0 flex-1 text-sm leading-snug font-medium">
+                                {transportBadge ? `Located in ${place}` : place}
+                              </p>
+                            ) : (
+                              <span className="min-w-0 flex-1" />
+                            )}
+                            <Link
+                              href={detailHref}
+                              className="btn btn-primary min-h-11 shrink-0"
+                            >
+                              Meet {pet.name}
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </article>

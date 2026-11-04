@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { combineAgeYears, formatPetAgeLabel, splitAgeYears } from './pet-age';
+import {
+  combineAgeYears,
+  formatPetAgeLabel,
+  formatPetAgePhrase,
+  splitAgeYears,
+} from './pet-age';
 
 describe('pet-age (#272)', () => {
   describe('splitAgeYears', () => {
@@ -50,6 +55,22 @@ describe('pet-age (#272)', () => {
 
     it('formats years and months', () => {
       expect(formatPetAgeLabel(2.25)).toBe('2 yr 3 mo');
+    });
+  });
+
+  describe('formatPetAgePhrase', () => {
+    it('formats months only', () => {
+      expect(formatPetAgePhrase(0.5)).toBe('6 months');
+    });
+
+    it('formats years only', () => {
+      expect(formatPetAgePhrase(2)).toBe('2 years');
+      expect(formatPetAgePhrase(1)).toBe('1 year');
+    });
+
+    it('formats years and months', () => {
+      expect(formatPetAgePhrase(2.25)).toBe('2 years 3 months');
+      expect(formatPetAgePhrase(1.5)).toBe('1 year 6 months');
     });
   });
 });

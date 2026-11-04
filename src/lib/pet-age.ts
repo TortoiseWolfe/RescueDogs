@@ -43,3 +43,18 @@ export function formatPetAgeLabel(
   if (months === 0) return `${years} yr`;
   return `${years} yr ${months} mo`;
 }
+
+/** Card copy: "2 years", "1 year 6 months", "6 months". */
+export function formatPetAgePhrase(
+  ageYears: number | null | undefined
+): string | null {
+  const parts = splitAgeYears(ageYears);
+  if (!parts) return null;
+  const { years, months } = parts;
+  if (years === 0 && months === 0) return null;
+  const yearBit =
+    years === 0 ? null : `${years} ${years === 1 ? 'year' : 'years'}`;
+  const monthBit =
+    months === 0 ? null : `${months} ${months === 1 ? 'month' : 'months'}`;
+  return [yearBit, monthBit].filter(Boolean).join(' ');
+}

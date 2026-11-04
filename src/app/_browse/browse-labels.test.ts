@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { BrowsePet } from '@/types/applications';
-import { basicsLabel, locationLabel } from './browse-labels';
+import { basicsParts, locationLabel } from './browse-labels';
 
 const basePet: BrowsePet = {
   id: 'pet-1',
@@ -44,27 +44,44 @@ describe('browse pet labels (#112)', () => {
     ).toBe('Second Chance Rescue');
   });
 
-  it('formats breed, size, and age', () => {
-    expect(basicsLabel(basePet)).toBe('Beagle mix · medium · 2 yr');
+  it('formats breed, size, and age as stacked parts', () => {
+    expect(basicsParts(basePet)).toEqual({
+      breed: 'Beagle Mix',
+      size: 'Medium',
+      age: '2 years',
+    });
+  });
+
+  it('title-cases a slashed breed', () => {
+    expect(
+      basicsParts({
+        ...basePet,
+        breed: 'papillion/spaniel',
+      }).breed
+    ).toBe('Papillion/Spaniel');
   });
 
   it('formats months-only age (#272)', () => {
     expect(
-      basicsLabel({
+      basicsParts({
         ...basePet,
         age_years: 0.5,
-      })
-    ).toBe('Beagle mix · medium · 6 mo');
+      }).age
+    ).toBe('6 months');
   });
 
-  it('uses placeholder when no basics', () => {
+  it('uses empty parts when no basics', () => {
     expect(
-      basicsLabel({
+      basicsParts({
         ...basePet,
         breed: null,
         size: null,
         age_years: null,
       })
-    ).toBe('Details coming soon');
+    ).toEqual({
+      breed: null,
+      size: null,
+      age: null,
+    });
   });
 });
