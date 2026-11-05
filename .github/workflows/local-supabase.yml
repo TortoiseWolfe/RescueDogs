@@ -41,7 +41,8 @@ concurrency:
 jobs:
   local-supabase:
     name: RLS + admin (local Supabase)
-    runs-on: ubuntu-latest
+    # Playwright 1.55 has no ubuntu26.04 browsers; ubuntu-latest is 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
 
     steps:

@@ -42,6 +42,11 @@ concurrency:
   group: e2e-supabase-${{ github.repository }}
   cancel-in-progress: false
 
+# GitHub's ubuntu-latest became Ubuntu 26.04 (Oct–Nov 2026). Playwright 1.55
+# has no Chromium/Firefox/WebKit builds for ubuntu26.04-x64, so `playwright
+# install` dies before any spec runs. Pin 24.04 until we upgrade Playwright
+# to >= 1.61 and re-check WebKit on 26.04.
+
 env:
   # NOTE: the build + most jobs read these from `vars.*`. The per-browser REST
   # health-check curls (see the `secrets.NEXT_PUBLIC_SUPABASE_*` usages below)
@@ -67,7 +72,7 @@ jobs:
   # A path rule does not forget.
   ci-config-changed:
     name: Did this PR change the E2E config?
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
       changed: ${{ steps.check.outputs.changed }}
@@ -121,7 +126,7 @@ jobs:
   # ============================================
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     steps:
@@ -195,7 +200,7 @@ jobs:
     # dog — a webkit-only failure would mean photo drafts silently lose images for
     # exactly the users they were built for. Needs no Supabase and no build.
     name: IndexedDB Blob capability
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     steps:
@@ -229,7 +234,7 @@ jobs:
 
   smoke:
     name: Smoke Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     timeout-minutes: 15
 
@@ -330,7 +335,7 @@ jobs:
   # ============================================
   rate-limiting:
     name: Rate-Limiting Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: smoke
     timeout-minutes: 10
     continue-on-error: true
@@ -423,7 +428,7 @@ jobs:
   # ============================================
   auth-setup:
     name: Auth Setup
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: smoke
     timeout-minutes: 15
 
@@ -529,7 +534,7 @@ jobs:
   # ============================================
   e2e:
     name: E2E (${{ matrix.project }} ${{ matrix.shard }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [smoke, rate-limiting, auth-setup]
     timeout-minutes: 60
     strategy:
@@ -743,7 +748,7 @@ jobs:
   # ============================================
   e2e-firefox:
     name: E2E (${{ matrix.project }} ${{ matrix.shard }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Lever 1: depends only on the build/auth artifacts (same as e2e/chromium),
     # NOT on the chromium job — so all 3 browsers run in parallel.
     needs: [smoke, rate-limiting, auth-setup, ci-config-changed]
@@ -927,7 +932,7 @@ jobs:
   # ============================================
   e2e-webkit:
     name: E2E (${{ matrix.project }} ${{ matrix.shard }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Lever 1: depends only on build/auth artifacts, NOT firefox — all 3 parallel.
     needs: [smoke, rate-limiting, auth-setup, ci-config-changed]
     # Lever 2 (#294): see e2e-firefox above — skipped on PRs *and* on pushes to
@@ -1093,7 +1098,7 @@ jobs:
   # ============================================
   report:
     name: Test Report
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [e2e, e2e-firefox, e2e-webkit]
     if: always()
 
