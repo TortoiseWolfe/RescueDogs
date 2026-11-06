@@ -5,7 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   checkRateLimit,
   recordFailedAttempt,
-  formatLockoutTime,
+  getRateLimitBlockedMessage,
+  isRateLimitInfraFailure,
   isAuthRequestRateLimited,
   AUTH_REQUEST_RATE_LIMIT_MESSAGE,
 } from '@/lib/auth/rate-limit-check';
@@ -70,33 +71,19 @@ export default function SignInForm({
       return;
     }
 
-    // Check server-side rate limit (REQ-SEC-003)
-    // Fail-open: if rate limit check fails, allow sign-in attempt
-    let rateLimit: {
-      allowed: boolean;
-      remaining: number;
-      locked_until?: string | null;
-    } = {
-      allowed: true,
-      remaining: 5,
-    };
-    try {
-      rateLimit = await checkRateLimit(email, 'sign_in');
-    } catch (rateLimitError) {
-      logger.warn('Rate limit check failed, allowing sign-in attempt', {
-        error: rateLimitError,
-      });
-      // Continue with sign-in (fail-open for UX)
-    }
+    // Check server-side rate limit (REQ-SEC-003). checkRateLimit never throws:
+    // it fails closed, and an outage is told apart from a real lockout (#395).
+    const rateLimit = await checkRateLimit(email, 'sign_in');
 
     if (!rateLimit.allowed) {
-      const timeUntilReset = rateLimit.locked_until
-        ? formatLockoutTime(rateLimit.locked_until)
-        : '15 minutes';
       setError(
-        `Too many failed attempts. Your account has been temporarily locked. Please try again in ${timeUntilReset}.`
+        getRateLimitBlockedMessage(
+          rateLimit,
+          (timeUntilReset) =>
+            `Too many failed attempts. Your account has been temporarily locked. Please try again in ${timeUntilReset}.`
+        )
       );
-      setRemainingAttempts(0);
+      if (!isRateLimitInfraFailure(rateLimit)) setRemainingAttempts(0);
       return;
     }
 
