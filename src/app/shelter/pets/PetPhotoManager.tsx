@@ -136,15 +136,16 @@ export const PetPhotoManager = forwardRef<
    * page to fetch a second photo destroyed the first. Only meaningful before the pet
    * exists — once `petId` is set, photos upload immediately and live on the server.
    */
-  const startedPhotoRestore = useRef(false);
   // State, not a ref: the save effect below must re-run once the read finishes, and
   // it must NOT run before then or it would save `[]` over the rows being read.
   const [photoDraftRead, setPhotoDraftRead] = useState(false);
   const persistDraft = Boolean(draftKey) && petId === null;
 
   useEffect(() => {
-    if (!persistDraft || !draftKey || startedPhotoRestore.current) return;
-    startedPhotoRestore.current = true;
+    // No "already started" guard: StrictMode (and a changed key) runs this effect,
+    // cleans it up and runs it again. The cancelled flag drops the first read, so the
+    // second one must be allowed to start or photoDraftRead never flips.
+    if (!persistDraft || !draftKey) return;
     let cancelled = false;
     const created: string[] = [];
 
@@ -190,6 +191,18 @@ export const PetPhotoManager = forwardRef<
         URL.revokeObjectURL(cropPreviewUrlRef.current);
         cropPreviewUrlRef.current = null;
       }
+    };
+  }, []);
+
+  // Previews minted by confirmCrop() are not tracked by the restore effect, so revoke
+  // whatever is still staged when the manager goes away.
+  const stagedRef = useRef(staged);
+  useEffect(() => {
+    stagedRef.current = staged;
+  }, [staged]);
+  useEffect(() => {
+    return () => {
+      stagedRef.current.forEach((item) => URL.revokeObjectURL(item.preview));
     };
   }, []);
 

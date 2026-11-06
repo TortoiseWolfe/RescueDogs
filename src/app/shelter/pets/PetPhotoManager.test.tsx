@@ -167,6 +167,26 @@ describe('PetPhotoManager staged-photo drafts', () => {
     );
   });
 
+  it('restores the stored photos under React StrictMode', async () => {
+    // StrictMode runs mount effects twice. The first restore is cancelled, so the
+    // second must still run, or the draft is never read and never saved.
+    const KEY = freshKey();
+    await saveStagedPhotos(KEY, [photo('a'), photo('b')]);
+
+    const { container } = render(
+      <React.StrictMode>
+        <PetPhotoManager shelterId="test-shelter" petId={null} draftKey={KEY} />
+      </React.StrictMode>
+    );
+
+    await waitFor(
+      () => {
+        expect(container.querySelectorAll('img[src^="blob:"]')).toHaveLength(2);
+      },
+      { timeout: 5000 }
+    );
+  });
+
   it('persists nothing and reads nothing without a draftKey', async () => {
     // Omitting draftKey must preserve the old in-memory-only behaviour exactly.
     const KEY = freshKey();
@@ -369,6 +389,32 @@ describe('PetPhotoManager order arrows', FLOW_TIMEOUT, () => {
         'p1',
       ]);
     });
+  });
+
+  it('releases the staged previews when the manager unmounts', async () => {
+    const { container, unmount } = render(
+      <PetPhotoManager shelterId="test-shelter" petId={null} />
+    );
+
+    const input = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    fireEvent.change(input, {
+      target: { files: [new File(['a'], 'a.jpg', { type: 'image/jpeg' })] },
+    });
+    await clickWhenEnabled('Use photo');
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull();
+    });
+    const shown = Array.from(
+      container.querySelectorAll('img[src^="blob:"]')
+    ).map((img) => img.getAttribute('src'));
+    expect(shown).toHaveLength(1);
+
+    const revoke = vi.spyOn(URL, 'revokeObjectURL');
+    unmount();
+    expect(revoke).toHaveBeenCalledWith(shown[0]);
+    revoke.mockRestore();
   });
 
   it('reorders staged photos without talking to the server', async () => {
