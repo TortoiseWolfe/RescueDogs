@@ -123,6 +123,7 @@ function AdoptContent() {
           whyThisPet: payload.whyThisPet,
           answers: payload.answers,
           snapshotOmitQuestionIds: payload.snapshotOmitQuestionIds,
+          removeAnswerIds: payload.removeAnswerIds,
         });
         clearFormDraft(`adopt:application:${user.id}`);
         router.push(`/applications/status?id=${application.id}`);

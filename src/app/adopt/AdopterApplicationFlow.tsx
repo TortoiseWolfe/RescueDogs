@@ -35,6 +35,8 @@ export type AdopterApplicationSubmitPayload = {
   whyThisPet?: string;
   answers: Record<string, unknown>;
   snapshotOmitQuestionIds: string[];
+  /** Saved answers the adopter withdrew (cleared, or hidden by show_if). Deleted before insert. */
+  removeAnswerIds: string[];
 };
 
 type Step = 'pet' | 'questions' | 'review';
@@ -283,22 +285,42 @@ export function AdopterApplicationFlow({
     const why = mergedAnswers.get('app.why_this_pet');
     const whyThisPet = typeof why === 'string' ? why : undefined;
 
+    // A saved answer the adopter withdrew must not reach the rescue: either
+    // they cleared it (#514), or their own answers now hide it via show_if,
+    // e.g. pet.has_current = No hides pet.current (#513).
+    const withdrawn = new Set(
+      bank
+        .filter(
+          (question) =>
+            !matchesShowIf(question.show_if, mergedAnswers) ||
+            (question.id in draft && !hasAnsweredValue(draft[question.id]))
+        )
+        .map((question) => question.id)
+    );
+    const removeAnswerIds = [...withdrawn].filter((id) => savedAnswers.has(id));
+    const visibleAnswers = new Map(mergedAnswers);
+    for (const id of withdrawn) visibleAnswers.delete(id);
+
     const answersToSave: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(draft)) {
       if (key.startsWith('app.')) continue;
+      if (withdrawn.has(key)) continue;
       if (hasAnsweredValue(value)) answersToSave[key] = value;
     }
 
-    const omit =
-      needsRefsConfirm && !shareReferences ? [REFERENCE_QUESTION_ID] : [];
+    const omit = [
+      ...(needsRefsConfirm && !shareReferences ? [REFERENCE_QUESTION_ID] : []),
+      ...removeAnswerIds,
+    ];
 
     await onSubmit({
       petId: pet.id,
       shelterId: pet.shelter_id,
-      profile: profileSnapshotFromAnswers(mergedAnswers, fallbackName),
+      profile: profileSnapshotFromAnswers(visibleAnswers, fallbackName),
       whyThisPet,
       answers: answersToSave,
       snapshotOmitQuestionIds: omit,
+      removeAnswerIds,
     });
   }
 
