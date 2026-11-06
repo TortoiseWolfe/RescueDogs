@@ -59,7 +59,9 @@ export async function clearTestRateLimits(): Promise<boolean> {
     const { error } = await client
       .from('rate_limit_attempts')
       .delete()
-      .imatch('identifier', TEST_RATE_LIMIT_IDENTIFIER_PATTERN);
+      // supabase-js 1.21 has no typed imatch(); filter() sends the same
+      // PostgREST operator (identifier=imatch.<pattern>).
+      .filter('identifier', 'imatch', TEST_RATE_LIMIT_IDENTIFIER_PATTERN);
 
     if (error) {
       // Table might not exist or RLS might block - log but don't fail

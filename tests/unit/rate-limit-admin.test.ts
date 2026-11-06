@@ -10,7 +10,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const imatch = vi.fn();
+const filter = vi.fn();
 const gte = vi.fn();
 const del = vi.fn();
 
@@ -20,8 +20,8 @@ vi.mock('@supabase/supabase-js', () => ({
       delete: () => {
         del();
         return {
-          imatch: (...args: unknown[]) => {
-            imatch(...args);
+          filter: (...args: unknown[]) => {
+            filter(...args);
             return Promise.resolve({ error: null });
           },
           gte: (...args: unknown[]) => {
@@ -66,7 +66,7 @@ describe('TEST_RATE_LIMIT_IDENTIFIER_PATTERN', () => {
 
 describe('clearTestRateLimits', () => {
   beforeEach(() => {
-    imatch.mockClear();
+    filter.mockClear();
     gte.mockClear();
     del.mockClear();
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321';
@@ -77,8 +77,9 @@ describe('clearTestRateLimits', () => {
     const result = await admin.clearTestRateLimits();
 
     expect(result).toBe(true);
-    expect(imatch).toHaveBeenCalledWith(
+    expect(filter).toHaveBeenCalledWith(
       'identifier',
+      'imatch',
       admin.TEST_RATE_LIMIT_IDENTIFIER_PATTERN
     );
     expect(gte).not.toHaveBeenCalled();
