@@ -222,7 +222,13 @@ export const PetPhotoManager = forwardRef<
           if (uploaded.error) {
             throw new Error(uploaded.error);
           }
-          await service.addPhoto(newPetId, uploaded.url, i);
+          try {
+            await service.addPhoto(newPetId, uploaded.url, i);
+          } catch (err) {
+            // The file is in Storage but no row points at it (#372).
+            await service.removeStoredPhotos([uploaded.url]);
+            throw err;
+          }
           URL.revokeObjectURL(item.preview);
         }
         await service.syncPrimaryPhotoUrl(newPetId);
@@ -366,7 +372,14 @@ export const PetPhotoManager = forwardRef<
 
       const service = new PetPhotoService(supabase);
       const nextOrder = photos.length;
-      const row = await service.addPhoto(petId, uploaded.url, nextOrder);
+      let row: PetPhoto;
+      try {
+        row = await service.addPhoto(petId, uploaded.url, nextOrder);
+      } catch (err) {
+        // The file is in Storage but no row points at it (#372).
+        await service.removeStoredPhotos([uploaded.url]);
+        throw err;
+      }
       await service.syncPrimaryPhotoUrl(petId);
       setPhotos((prev) => [...prev, row]);
       await advanceCropQueue();
