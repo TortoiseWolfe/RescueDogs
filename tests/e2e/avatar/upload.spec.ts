@@ -36,7 +36,12 @@ test.describe('Avatar Upload Flow', () => {
   test.beforeEach(async ({ page }) => {
     account = await seedIsolatedAccount('avatar');
     await injectAuthSessionOnPage(page, account.session, '/account');
-    await page.waitForLoadState('networkidle');
+    // Wait for the card the tests use, not for a quiet network: on a slow
+    // backend the network stays busy past the 30 s test budget even though the
+    // page is ready, which timed out five tests in this hook.
+    await expect(
+      page.getByRole('heading', { name: 'Profile Picture' })
+    ).toBeVisible({ timeout: 20000 });
     await dismissCookieBanner(page);
   });
 
@@ -247,8 +252,11 @@ test.describe('Avatar Upload Flow', () => {
 
     await removeButton.click();
 
-    // Wait for removal to complete and reload to verify
-    await page.waitForTimeout(1000);
+    // Wait for removal to complete before reloading. Removing takes three
+    // calls to the backend (profile update, table update, file delete), and a
+    // reload after a fixed 1 s cut them short on a slow backend, leaving the
+    // old avatar in place. The button disappears once all three have finished.
+    await expect(removeButton).toBeHidden({ timeout: 20000 });
     await page.reload();
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
