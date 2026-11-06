@@ -1051,6 +1051,10 @@ function resolvePostAuthLanding(pageUrl: string): string {
  * production Turnstile does not solve on GitHub Actions IPs, so we obtain a
  * session via admin magic-link and inject it instead (#302).
  *
+ * On the injection path SignInForm never renders: the password is not
+ * checked and `rememberMe: true` is refused (see #457). Specs that
+ * need the real form must skip when isSupabaseCaptchaEnforced() is true.
+ *
  * @example
  * const result = await performSignIn(page, 'test@example.com', 'password');
  * if (!result.success) {
@@ -1067,6 +1071,16 @@ export async function performSignIn(
 
   // Captcha-enforced environments: skip the doomed UI path.
   if (await isSupabaseCaptchaEnforced()) {
+    // Injection never renders SignInForm, so it cannot honour the checkbox.
+    // Refuse loudly instead of letting a Remember Me test pass on a session
+    // the helper wrote itself (#457).
+    if (options.rememberMe === true) {
+      return {
+        success: false,
+        error:
+          'performSignIn: rememberMe needs the real SignInForm, but captcha is enforced so the session would be injected. Skip this test when isSupabaseCaptchaEnforced() is true (#457).',
+      };
+    }
     const landing = resolvePostAuthLanding(page.url());
     const obtained = await obtainAuthSession(email, password);
     if (!obtained.ok) {

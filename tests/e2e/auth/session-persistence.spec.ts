@@ -16,6 +16,7 @@ import {
   signOutViaDropdown,
   performSignIn,
 } from '../utils/test-user-factory';
+import { isSupabaseCaptchaEnforced } from '../../fixtures/captcha-auth';
 
 // Use pre-existing test user (must exist in Supabase)
 const testEmail = process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com';
@@ -41,6 +42,19 @@ test.describe('Session Persistence E2E', () => {
   test('should extend session duration with Remember Me checked', async ({
     page,
   }) => {
+    // #457: under captcha performSignIn injects the session and cannot
+    // tick the box, so this test would only assert a token the helper wrote.
+    if (await isSupabaseCaptchaEnforced()) {
+      test.info().annotations.push({
+        type: 'coverage-gap',
+        description:
+          'Remember Me not exercised: captcha enforced, session injected (#457)',
+      });
+      test.skip(
+        true,
+        'Remember Me needs the real SignInForm; captcha is enforced'
+      );
+    }
     // Sign in with Remember Me (already on sign-in page from beforeEach)
     const result = await performSignIn(page, testEmail, testPassword, {
       rememberMe: true,
@@ -133,12 +147,12 @@ test.describe('Session Persistence E2E', () => {
     });
     const page = await context.newPage();
 
-    // Sign in with Remember Me
+    // Persistence across a restart does not depend on the checkbox (the app
+    // ignores it today, see #394), so do not claim Remember Me here: that
+    // would be refused when the session is injected under captcha.
     await page.goto('/sign-in', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
-    const result = await performSignIn(page, testEmail, testPassword, {
-      rememberMe: true,
-    });
+    const result = await performSignIn(page, testEmail, testPassword);
     if (!result.success) {
       await context.close();
       throw new Error(`Sign-in failed: ${result.error}`);
