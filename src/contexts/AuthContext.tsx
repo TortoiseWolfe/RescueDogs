@@ -23,6 +23,7 @@ import {
 } from '@/lib/supabase/auth-storage';
 import { getInternalUrl, getRedirectUrl } from '@/config/project.config';
 import { useIdleTimeout } from '@/hooks/useIdleTimeout';
+import { clearFormDraft } from '@/hooks/useFormDraft';
 import { retryWithBackoff } from '@/lib/auth/retry-utils';
 import { ensureDisplayNameSeeded } from '@/lib/auth/oauth-utils';
 import { createLogger } from '@/lib/logger';
@@ -276,6 +277,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Capture before clearing — guests get SIGNED_OUT with no token too.
       // Redirecting them to `/` full-reloads the app in a loop (#76).
       const wasSignedIn = userRef.current != null;
+      const signedOutUserId = userRef.current?.id;
 
       setSession(session);
       setUser(session?.user ?? null);
@@ -287,6 +289,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // SIGNED_OUT (no session) must not hard-navigate — that roasted
       // production CPU for logged-out visitors on raisedpaws.com (#76).
       if (_event === 'SIGNED_OUT' && !isLocalSignOut.current) {
+        // Another tab signed out: drop this tab's unfinished application (#516).
+        if (signedOutUserId) {
+          clearFormDraft(`adopt:application:${signedOutUserId}`);
+        }
         // Never hijack the confirmation/OAuth landing page: during email
         // confirmation no auth-token exists yet, so a transient SIGNED_OUT
         // passes the validity guard above — and the callback page owns its
@@ -372,6 +378,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = useCallback(async (options?: { redirectTo?: string }) => {
     // Mark as local sign-out to prevent double redirect from onAuthStateChange
     isLocalSignOut.current = true;
+
+    // An unfinished adoption application holds address, phone and references.
+    // Clear it so a shared computer does not keep it after sign-out.
+    // clearFormDraft also cancels a pending unmount flush (#516).
+    const signingOutUserId = userRef.current?.id;
+    if (signingOutUserId) {
+      clearFormDraft(`adopt:application:${signingOutUserId}`);
+    }
 
     // FR-004: Clear local state FIRST (fail-safe)
     setUser(null);
