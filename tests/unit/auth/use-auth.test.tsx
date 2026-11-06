@@ -56,6 +56,12 @@ vi.mock('@/lib/supabase/client', () => {
   };
 });
 
+// #358: sign-out must empty the offline message queue
+const { clearQueueMock } = vi.hoisted(() => ({ clearQueueMock: vi.fn() }));
+vi.mock('@/services/messaging/offline-queue-service', () => ({
+  offlineQueueService: { clearQueue: clearQueueMock },
+}));
+
 // Unmock AuthContext to use real implementation for these unit tests
 vi.unmock('@/contexts/AuthContext');
 
@@ -141,6 +147,35 @@ describe('useAuth', () => {
       wrapper: AuthProvider,
     });
 
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    await result.current.signOut();
+
+    expect(supabase.auth.signOut).toHaveBeenCalled();
+  });
+
+  it('clears the offline message queue on sign-out (#358)', async () => {
+    clearQueueMock.mockResolvedValue(undefined);
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: AuthProvider,
+    });
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    await result.current.signOut();
+
+    expect(clearQueueMock).toHaveBeenCalledTimes(1);
+    expect(supabase.auth.signOut).toHaveBeenCalled();
+  });
+
+  it('still signs out when clearing the queue fails (#358)', async () => {
+    clearQueueMock.mockRejectedValue(new Error('IndexedDB blocked'));
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: AuthProvider,
+    });
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });

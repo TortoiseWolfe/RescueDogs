@@ -386,6 +386,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // localStorage after we remove it.
     markAuthSignOutBarrier();
 
+    // #358: unsent queued messages belong to the user who is leaving and
+    // would fail RLS for the next one; on a shared device they must not
+    // stay readable in IndexedDB. Loaded on demand so the messaging database
+    // stays out of the shared bundle. A failure here must not block sign-out.
+    try {
+      const { offlineQueueService } = await import(
+        '@/services/messaging/offline-queue-service'
+      );
+      await offlineQueueService.clearQueue();
+    } catch (err) {
+      logger.error('Failed to clear the messaging queue on sign-out', {
+        error: err,
+      });
+    }
+
     // Allow the storage adapter to remove auth tokens during sign-out
     setAllowAuthTokenRemoval(true);
 
