@@ -209,10 +209,18 @@ test.describe('Session Persistence E2E', () => {
     // One-shot storage check on the now-settled document (no poll, no nav in
     // flight → can't flake): the test named "should clear session" still
     // asserts the token is gone, but as a single read after the redirect.
-    const afterSignOut = await page.evaluate(() =>
-      JSON.stringify(window.localStorage)
+    const leakedAfterSignOut = await page.evaluate(() =>
+      Object.keys(window.localStorage).filter((key) => {
+        if (!key.includes('auth-token')) return false;
+        try {
+          const parsed = JSON.parse(window.localStorage.getItem(key) || '{}');
+          return Boolean(parsed?.access_token);
+        } catch {
+          return false; // not a session blob (for example a PKCE verifier)
+        }
+      })
     );
-    expect(afterSignOut).not.toMatch(/"access_token":"[^"]/);
+    expect(leakedAfterSignOut).toEqual([]);
   });
 
   test('should handle concurrent tab sessions correctly', async ({
@@ -294,10 +302,18 @@ test.describe('Session Persistence E2E', () => {
     // flaked from a stale client render while storage was empty, this would
     // diverge; if both fail together, the session survived sign-out (reading 1).
     if (authSynced) {
-      const sharedStorage = await page1.evaluate(() =>
-        JSON.stringify(window.localStorage)
+      const leakedInSharedStorage = await page1.evaluate(() =>
+        Object.keys(window.localStorage).filter((key) => {
+          if (!key.includes('auth-token')) return false;
+          try {
+            const parsed = JSON.parse(window.localStorage.getItem(key) || '{}');
+            return Boolean(parsed?.access_token);
+          } catch {
+            return false; // not a session blob (for example a PKCE verifier)
+          }
+        })
       );
-      expect(sharedStorage).not.toMatch(/"access_token":"[^"]/);
+      expect(leakedInSharedStorage).toEqual([]);
 
       await expect(async () => {
         await page2.reload({ waitUntil: 'domcontentloaded' });
