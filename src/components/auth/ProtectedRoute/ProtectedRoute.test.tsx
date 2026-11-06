@@ -113,4 +113,59 @@ describe('ProtectedRoute', () => {
       expect.stringContaining('/login?returnUrl=')
     );
   });
+
+  describe('query-string deep links (#366)', () => {
+    afterEach(() => {
+      window.history.replaceState({}, '', '/');
+    });
+
+    it('keeps the query string in the redirect returnUrl', () => {
+      window.history.replaceState({}, '', '/protected?id=abc-123');
+      render(
+        <ProtectedRoute>
+          <div>secret</div>
+        </ProtectedRoute>
+      );
+      act(() => {
+        vi.advanceTimersByTime(501);
+      });
+      expect(mockPush).toHaveBeenCalledWith(
+        '/sign-in?returnUrl=%2Fprotected%3Fid%3Dabc-123'
+      );
+    });
+
+    it('carries the same full returnUrl on the Sign In and Sign Up links', () => {
+      window.history.replaceState({}, '', '/protected?id=abc-123');
+      render(
+        <ProtectedRoute>
+          <div>secret</div>
+        </ProtectedRoute>
+      );
+      expect(screen.getByRole('link', { name: 'Sign In' })).toHaveAttribute(
+        'href',
+        '/sign-in?returnUrl=%2Fprotected%3Fid%3Dabc-123'
+      );
+      expect(screen.getByRole('link', { name: 'Sign Up' })).toHaveAttribute(
+        'href',
+        '/sign-up?returnUrl=%2Fprotected%3Fid%3Dabc-123'
+      );
+    });
+
+    it('leaves returnUrl as the bare path when there is no query string', () => {
+      window.history.replaceState({}, '', '/protected');
+      render(
+        <ProtectedRoute>
+          <div>secret</div>
+        </ProtectedRoute>
+      );
+      act(() => {
+        vi.advanceTimersByTime(501);
+      });
+      expect(mockPush).toHaveBeenCalledWith('/sign-in?returnUrl=%2Fprotected');
+      expect(screen.getByRole('link', { name: 'Sign In' })).toHaveAttribute(
+        'href',
+        '/sign-in?returnUrl=%2Fprotected'
+      );
+    });
+  });
 });
