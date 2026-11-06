@@ -11,7 +11,7 @@
  * Uses the demo seed accounts (supabase/seed-rescue-demo.sql), not the
  * shared storage-state test users — both contexts are created fresh.
  * Requires SUPABASE_SERVICE_ROLE_KEY for the pre-test cleanup that makes
- * the spec re-runnable (resets Noodle + the adopter's Noodle application).
+ * the spec re-runnable (resets this browser's pet + the adopter's application for it).
  */
 
 import { test, expect, type BrowserContext, type Page } from '@playwright/test';
@@ -26,7 +26,29 @@ const STAFF = { email: 'staff@demo.test', password: 'DemoPass123!' };
 
 // Fixed UUIDs from supabase/seed-rescue-demo.sql
 const ADOPTER_ID = '33333333-3333-3333-3333-333333333301';
-const NOODLE_ID = '44444444-4444-4444-4444-444444444404';
+
+// One pet per browser engine (#246). The three engines run as independent CI
+// jobs against ONE shared Supabase project, so a single hard-coded pet made
+// their beforeAll cleanups delete each other's application mid-test. Each
+// engine owns a different seeded pet; chromium keeps Noodle. Names must not
+// substring-collide (getByText/row-name matching), so no "Ink" or "Cloud".
+const PETS: Record<string, { id: string; name: string }> = {
+  'chromium-gen': {
+    id: '44444444-4444-4444-4444-444444444404',
+    name: 'Noodle',
+  },
+  'firefox-gen': {
+    id: '44444444-4444-4444-4444-444444444407',
+    name: 'Pickles',
+  },
+  'webkit-gen': {
+    id: '44444444-4444-4444-4444-444444444410',
+    name: 'Chili',
+  },
+};
+// Resolved in beforeAll (test.info() is unavailable at file scope); projects
+// outside the map fall back to chromium's pet, today's behaviour.
+let PET = PETS['chromium-gen'];
 
 test.describe('anti-ghosting loop', () => {
   test.describe.configure({ mode: 'serial' });
@@ -37,22 +59,20 @@ test.describe('anti-ghosting loop', () => {
   let adopterPage: Page;
   let staffPage: Page;
 
-  test.beforeAll(async ({ browser }) => {
-    // Re-runnability: remove any previous run's application for Noodle and
-    // make Noodle available again (approval flips pets.status to pending).
+  test.beforeAll(async ({ browser }, testInfo) => {
+    PET = PETS[testInfo.project.name] ?? PETS['chromium-gen'];
+    // Re-runnability: remove any previous run's application for this browser's
+    // pet and make that pet available again (approval flips pets.status to pending).
     // Best-effort: without SUPABASE_SERVICE_ROLE_KEY the spec still runs —
-    // it just requires a clean slate (no prior Noodle application).
+    // it just requires a clean slate (no prior application for this pet).
     const admin = getAdminClient();
     if (admin) {
       await admin
         .from('applications')
         .delete()
         .eq('adopter_id', ADOPTER_ID)
-        .eq('pet_id', NOODLE_ID);
-      await admin
-        .from('pets')
-        .update({ status: 'available' })
-        .eq('id', NOODLE_ID);
+        .eq('pet_id', PET.id);
+      await admin.from('pets').update({ status: 'available' }).eq('id', PET.id);
     } else {
       console.warn(
         'anti-ghosting: no SUPABASE_SERVICE_ROLE_KEY — skipping pre-test cleanup; re-runs need a manual reset'
@@ -84,11 +104,13 @@ test.describe('anti-ghosting loop', () => {
     );
     expect(signIn.success, `adopter sign-in: ${signIn.error}`).toBe(true);
 
-    await adopterPage.goto(`/adopt?pet=${NOODLE_ID}`);
+    await adopterPage.goto(`/adopt?pet=${PET.id}`);
     await adopterPage.waitForLoadState('domcontentloaded');
 
     // Phase 3 (#446): pet comes from ?pet=, reused answers skip the ask step.
-    await expect(adopterPage.getByText(/Applying for.*Noodle/i)).toBeVisible({
+    await expect(
+      adopterPage.getByText(new RegExp(`Applying for.*${PET.name}`, 'i'))
+    ).toBeVisible({
       timeout: 20000,
     });
     await expect(
@@ -112,7 +134,7 @@ test.describe('anti-ghosting loop', () => {
       name: /why this pet/i,
     });
     await expect(whyThisPet).toBeVisible({ timeout: 20000 });
-    await whyThisPet.fill('Noodle would complete our tiny-dog household.');
+    await whyThisPet.fill(`${PET.name} would complete our household.`);
 
     await adopterPage
       .getByRole('button', { name: /review application/i })
@@ -143,7 +165,9 @@ test.describe('anti-ghosting loop', () => {
     expect(applicationId).toBeTruthy();
 
     await expect(
-      adopterPage.getByRole('heading', { name: /application for noodle/i })
+      adopterPage.getByRole('heading', {
+        name: new RegExp(`application for ${PET.name}`, 'i'),
+      })
     ).toBeVisible({ timeout: 20000 });
 
     // Step 1 of the pipeline is current
@@ -162,14 +186,16 @@ test.describe('anti-ghosting loop', () => {
     });
     expect(signIn.success, `staff sign-in: ${signIn.error}`).toBe(true);
 
-    // Pipeline dashboard shows Noodle's application
+    // Pipeline dashboard shows this browser's pet application
     await staffPage.goto('/shelter');
     await expect(
       staffPage.getByRole('heading', { name: /second chance rescue/i })
     ).toBeVisible({ timeout: 20000 });
     // Mobile list + desktop table both render the pet name (#324); .first()
     // hits the md:hidden copy and stays "hidden" on the default viewport.
-    await expect(staffPage.getByRole('row', { name: /Noodle/ })).toBeVisible({
+    await expect(
+      staffPage.getByRole('row', { name: new RegExp(PET.name) })
+    ).toBeVisible({
       timeout: 20000,
     });
 
