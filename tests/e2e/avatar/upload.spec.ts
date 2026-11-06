@@ -447,9 +447,6 @@ test.describe('Avatar Upload Flow', () => {
     page,
     context,
   }) => {
-    // Simulate network failure during upload
-    await context.setOffline(true);
-
     const uploadButton = page.getByRole('button', { name: /upload avatar/i });
     const fileChooserPromise = page.waitForEvent('filechooser');
     await uploadButton.click();
@@ -461,7 +458,15 @@ test.describe('Avatar Upload Flow', () => {
     );
     await fileChooser.setFiles(testImagePath);
 
-    await page.getByRole('button', { name: /save/i }).click();
+    // Go offline once the crop dialog is up, so the interruption lands on the
+    // upload itself. Going offline before choosing the file made WebKit fail
+    // to read the chosen file at all (its offline mode blocks local file and
+    // blob reads), so the dialog never opened and Save never appeared (#504).
+    const saveButton = page.getByRole('button', { name: /save/i });
+    await expect(saveButton).toBeVisible({ timeout: 15000 });
+    await context.setOffline(true);
+
+    await saveButton.click();
 
     // TODO: Network error handling not yet implemented (T050 enhancement)
     // For now, upload silently fails when offline - no error message shown
