@@ -124,6 +124,34 @@ describe('shelter questions page', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps one name on each Show switch while its state changes (#496)', async () => {
+    render(<ShelterQuestionsPage />);
+    await screen.findByRole('heading', { name: 'Application questions' });
+
+    const wording =
+      'Does your landlord, HOA, or neighborhood have pet restrictions?';
+    const question = screen.getByRole('switch', { name: `Show ${wording}` });
+    const category = screen.getByRole('switch', { name: 'Show Housing' });
+    expect((question as HTMLInputElement).checked).toBe(false);
+
+    fireEvent.click(question);
+
+    // Same names after the change: a switch carries on/off in its state, not
+    // in a name that flips between "Hide ..." and "Show ...".
+    expect(
+      (
+        screen.getByRole('switch', {
+          name: `Show ${wording}`,
+        }) as HTMLInputElement
+      ).checked
+    ).toBe(true);
+    expect(screen.queryByRole('switch', { name: /^Hide / })).toBeNull();
+
+    fireEvent.click(category);
+    expect(screen.getByRole('switch', { name: 'Show Housing' })).toBeTruthy();
+    expect(screen.queryByRole('switch', { name: /^Hide / })).toBeNull();
+  });
+
   it('staff can view but not save', async () => {
     membership.role = 'staff';
     render(<ShelterQuestionsPage />);
