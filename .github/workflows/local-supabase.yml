@@ -25,6 +25,7 @@ on:
       - 'tests/rls/**'
       - 'tests/contract/admin/**'
       - 'tests/e2e/admin/**'
+      - 'tests/e2e/auth/**'
       - 'tests/e2e/utils/local-supabase.ts'
       - 'src/**'
       - 'scripts/seed-*.ts'
@@ -181,6 +182,37 @@ jobs:
               sys.exit('admin lane: need >=29 passing tests with 0 failed, 0 flaky, 0 skipped')
           PY
 
+      - name: Sign-up and rate-limit E2E (needs bot protection off)
+        run: |
+          # These specs are tagged @local-supabase. The hosted project enforces
+          # a captcha on sign-up, so e2e.yml leaves them out; here the captcha is
+          # off, so they run for real.
+          pnpm exec playwright test \
+            tests/e2e/auth/rate-limiting.spec.ts \
+            tests/e2e/auth/sign-up.spec.ts \
+            --project=rate-limiting --project=signup --no-deps \
+            --grep @local-supabase --reporter=line,json
+        env:
+          CI: 'true'
+          AUTH_SETUP_JOB: 'true'
+          SKIP_WEBSERVER: 'true'
+          BASE_URL: http://localhost:3000
+          E2E_MAIL_SINK_DOMAIN: sink.example.test
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results-signup.json
+
+      - name: The sign-up and rate-limit specs must have run, and none may be skipped
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          r = json.load(open('results-signup.json'))
+          s = r['stats']
+          print(f"expected={s['expected']} unexpected={s['unexpected']} flaky={s['flaky']} skipped={s['skipped']}")
+          ok = s['expected'] >= 6 and s['unexpected'] == 0 and s['flaky'] == 0 and s['skipped'] == 0
+          if not ok:
+              sys.exit('sign-up lane: need >=6 passing tests with 0 failed, 0 flaky, 0 skipped')
+          PY
+
       - name: Dump stack logs on failure
         if: failure()
         run: docker compose --profile supabase logs --tail=200
@@ -194,5 +226,6 @@ jobs:
             playwright-report/
             test-results/
             results.json
+            results-signup.json
           retention-days: 7
           if-no-files-found: ignore

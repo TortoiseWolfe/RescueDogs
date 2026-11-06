@@ -53,8 +53,7 @@
         "supabase/migrations/20251006_complete_monolithic_setup.sql (17 tables, all RLS-enabled)"
       ],
       "test_evidence": [
-        "tests/rls/payment-rls.test.ts",
-        "tests/e2e/security/oauth-csrf.spec.ts"
+        "tests/rls/payment-rls.test.ts"
       ],
       "wireframe_evidence": "1 design SVG, shipping=false",
       "gaps": [],
@@ -108,8 +107,7 @@
       ],
       "test_evidence": [
         "tests/e2e/auth/",
-        "tests/integration/auth/oauth-flow.test.ts",
-        "tests/e2e/security/oauth-csrf.spec.ts"
+        "tests/integration/auth/oauth-flow.test.ts"
       ],
       "wireframe_evidence": "6 SVGs shipping=true",
       "gaps": [],
