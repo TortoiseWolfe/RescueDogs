@@ -30,6 +30,10 @@ import {
 // session_not_found from updateUser after the file had already uploaded.
 test.describe('Avatar Upload Flow', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
+  // One upload makes about six calls to the hosted database. With all 24 browser
+  // jobs running together each call can take 6-10 s, so the default 30 s test
+  // budget runs out before the crop dialog closes. Healthy runs finish in 3 s.
+  test.describe.configure({ timeout: 120_000 });
 
   let account: IsolatedAccount;
 
@@ -101,7 +105,7 @@ test.describe('Avatar Upload Flow', () => {
     await saveButton.click();
 
     // Wait for modal to close (indicates upload attempt completed)
-    await expect(cropModal).toBeHidden({ timeout: 30000 });
+    await expect(cropModal).toBeHidden({ timeout: 60000 });
 
     // Check for error message - if present, upload failed
     const errorMessage = profilePictureCard.getByRole('alert');
@@ -171,7 +175,7 @@ test.describe('Avatar Upload Flow', () => {
         r.url().includes('/rest/v1/user_profiles?select=*')
     );
     await page.getByRole('button', { name: /save/i }).click();
-    await expect(cropModal).toBeHidden({ timeout: 30000 });
+    await expect(cropModal).toBeHidden({ timeout: 60000 });
     await sessionRefreshed;
     await profileRefetched;
     await page.waitForLoadState('networkidle');
@@ -194,7 +198,7 @@ test.describe('Avatar Upload Flow', () => {
 
     await expect(cropModal).toBeVisible({ timeout: 5000 });
     await page.getByRole('button', { name: /save/i }).click();
-    await expect(cropModal).toBeHidden({ timeout: 30000 });
+    await expect(cropModal).toBeHidden({ timeout: 60000 });
 
     // Verify new avatar URL is different from first
     await expect(async () => {
@@ -232,7 +236,7 @@ test.describe('Avatar Upload Flow', () => {
       const cropModal = page.getByRole('dialog', { name: /crop/i });
       await expect(cropModal).toBeVisible({ timeout: 5000 });
       await page.getByRole('button', { name: /save/i }).click();
-      await expect(cropModal).toBeHidden({ timeout: 30000 });
+      await expect(cropModal).toBeHidden({ timeout: 60000 });
       await expect(accountAvatar).toBeVisible({ timeout: 10000 });
     }
 
@@ -360,7 +364,7 @@ test.describe('Avatar Upload Flow', () => {
     const cropModal = page.getByRole('dialog', { name: /crop/i });
     await expect(cropModal).toBeVisible({ timeout: 5000 });
     await page.getByRole('button', { name: /save/i }).click();
-    await expect(cropModal).toBeHidden({ timeout: 30000 });
+    await expect(cropModal).toBeHidden({ timeout: 60000 });
 
     // Verify avatar in Account Page (Profile Picture card)
     await expect(accountAvatar).toBeVisible({ timeout: 10000 });
