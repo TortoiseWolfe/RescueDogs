@@ -1,32 +1,15 @@
 /**
  * Unit tests for shelter application notify email templates (#260).
- * Mirrors supabase/functions/_shared/email-templates.ts (Deno) logic.
+ * Imports the shipped templates from supabase/functions/_shared/email-templates.ts
+ * (the file has no imports, so Vitest loads it directly, as test-recipients does).
  */
 
 import { describe, it, expect } from 'vitest';
-
-// Keep in sync with email-templates.ts — vitest cannot import Deno modules directly.
-function getEmailSubject(type: string, data?: Record<string, string>): string {
-  if (type === 'shelter_new_application') {
-    return `New adoption application for ${data!.pet_name} — ${data!.shelter_name}`;
-  }
-  return 'Payment Notification';
-}
-
-function getEmailText(type: string, data: Record<string, string>): string {
-  if (type === 'shelter_new_application') {
-    return [
-      'New adoption application',
-      '',
-      `${data.applicant_name} applied to adopt ${data.pet_name}.`,
-      '',
-      `Review the application: ${data.application_url}`,
-      '',
-      `${data.shelter_name} · Raised Paws adoption portal`,
-    ].join('\n');
-  }
-  return `Payment Notification - Type: ${type}`;
-}
+import {
+  getEmailHtml,
+  getEmailSubject,
+  getEmailText,
+} from '../../supabase/functions/_shared/email-templates';
 
 const sample = {
   pet_name: 'Rocky',
@@ -47,5 +30,14 @@ describe('shelter_new_application email templates (#260)', () => {
     const text = getEmailText('shelter_new_application', sample);
     expect(text).toContain('Jane Doe applied to adopt Rocky');
     expect(text).toContain(sample.application_url);
+  });
+
+  it('html body escapes applicant-controlled fields', () => {
+    const html = getEmailHtml('shelter_new_application', {
+      ...sample,
+      applicant_name: '<script>alert(1)</script>',
+    });
+    expect(html).not.toContain('<script>');
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
   });
 });
