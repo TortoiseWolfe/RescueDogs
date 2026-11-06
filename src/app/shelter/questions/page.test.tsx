@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import React from 'react';
 import type { ApplicationQuestion } from '@/types/applications';
 import {
@@ -242,6 +248,50 @@ describe('shelter questions page', () => {
     await waitFor(() =>
       expect(serviceMocks.setApplicationFlag).toHaveBeenCalled()
     );
+  });
+
+  describe('number-type red flag editor (#471)', () => {
+    const HOURS: ApplicationQuestion = {
+      ...BANK[1],
+      id: 'lif.hours_alone',
+      category: 'housing',
+      sort_order: 1001,
+      wording: 'How many hours a day will the pet be alone?',
+      answer_type: 'number',
+    };
+
+    async function openHoursEditor() {
+      serviceMocks.listApplicationQuestions.mockResolvedValue([...BANK, HOURS]);
+      render(<ShelterQuestionsPage />);
+      fireEvent.click(
+        await screen.findByRole('button', {
+          name: 'Add red flag for How many hours a day will the pet be alone?',
+        })
+      );
+      return screen.getByRole('dialog', { name: 'Red flag' });
+    }
+
+    it('names the comparison and threshold controls and opens as a modal', async () => {
+      const showModal = vi.spyOn(HTMLDialogElement.prototype, 'showModal');
+      const dialog = await openHoursEditor();
+
+      expect(
+        within(dialog).getByRole('combobox', { name: 'Comparison' })
+      ).toBeInTheDocument();
+      expect(
+        within(dialog).getByRole('spinbutton', { name: 'Threshold' })
+      ).toBeInTheDocument();
+      expect(showModal).toHaveBeenCalled();
+      showModal.mockRestore();
+    });
+
+    it('closes on Escape', async () => {
+      const dialog = await openHoursEditor();
+
+      fireEvent(dialog, new Event('cancel', { cancelable: true }));
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   });
 
   it('shows the full red-flag label instead of clipping it (#491)', async () => {

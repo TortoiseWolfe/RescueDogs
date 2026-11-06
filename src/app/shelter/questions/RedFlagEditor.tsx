@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type {
   ApplicationQuestion,
   ShelterFlagRule,
@@ -38,9 +38,28 @@ export function RedFlagEditor({
     initial ?? emptyFlagDraft(question)
   );
 
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
   useEffect(() => {
     if (initial) setDraft(initial);
   }, [initial]);
+
+  // Open as a real modal: showModal() moves focus into the dialog and makes the
+  // page behind it inert (WCAG 2.4.3 / 4.1.2). Put focus back on the opener when
+  // the editor closes.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const opener =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    if (!dialog.open) dialog.showModal();
+    return () => {
+      if (dialog.open) dialog.close();
+      opener?.focus();
+    };
+  }, []);
 
   const choices = flagChoices(question);
   const canSave = isManager && isFlagRuleValid(question, draft) && !saving;
@@ -54,7 +73,16 @@ export function RedFlagEditor({
   }
 
   return (
-    <dialog className="modal modal-open" open aria-labelledby="red-flag-title">
+    <dialog
+      ref={dialogRef}
+      className="modal modal-open"
+      aria-labelledby="red-flag-title"
+      onCancel={(event) => {
+        // Escape: keep React in charge of closing so the editor state resets.
+        event.preventDefault();
+        if (!saving) onClose();
+      }}
+    >
       <div className="modal-box max-w-lg">
         <div className="flex items-start justify-between gap-2">
           <h2 id="red-flag-title" className="text-xl font-semibold">
@@ -109,11 +137,16 @@ export function RedFlagEditor({
 
         {kind === 'number' || kind === 'count' || kind === 'age' ? (
           <div className="mt-4">
-            <p className="text-base-content/70 mb-2">
+            <p id="red-flag-rule-label" className="text-base-content/70 mb-2">
               Raise a red flag when the answer is:
             </p>
-            <div className="flex flex-wrap items-center gap-2">
+            <div
+              role="group"
+              aria-labelledby="red-flag-rule-label"
+              className="flex flex-wrap items-center gap-2"
+            >
               <select
+                aria-label="Comparison"
                 className="select select-bordered min-h-11"
                 disabled={!isManager}
                 value={draft.comparator}
@@ -141,6 +174,7 @@ export function RedFlagEditor({
               </select>
               <input
                 type="number"
+                aria-label="Threshold"
                 className="input input-bordered min-h-11 w-24"
                 disabled={!isManager}
                 value={draft.threshold ?? ''}
