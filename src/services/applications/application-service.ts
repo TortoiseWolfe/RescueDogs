@@ -18,7 +18,7 @@ import {
   transportIncluded,
   type BrowseLocationFilters,
 } from '@/lib/browse/location-filters';
-import { transportStateFor } from '@/lib/browse/transport';
+import { explicitTransportState } from '@/lib/browse/transport-states';
 
 /** Embedded-pet columns selected with every application row. */
 const PET_EMBED = 'pets(id, name, species, breed, photo_url, status)';
@@ -40,6 +40,22 @@ function mergeBrowsePets(local: BrowsePet[], transported: BrowsePet[]) {
     if (!byId.has(pet.id)) byId.set(pet.id, pet);
   }
   return Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
+ * The adopter's state for the transport query (#331). A valid State filter
+ * needs no lookup. Only a ZIP-only search loads the ZIP table, and it loads on
+ * demand: a static import here would put the whole US ZIP database into every
+ * page that imports this service (homepage, sign-in, /adopt, /shelter/*).
+ */
+async function resolveTransportState(
+  state?: string,
+  centerZip?: string
+): Promise<string | undefined> {
+  const explicit = explicitTransportState(state);
+  if (explicit || !centerZip) return explicit;
+  const { transportStateFor } = await import('@/lib/browse/transport');
+  return transportStateFor(state, centerZip);
 }
 
 export interface ApplicationSubmitInput {
@@ -119,7 +135,7 @@ export class ApplicationService {
     });
 
     const transportState = transportIncluded(filters)
-      ? transportStateFor(state, centerZip)
+      ? await resolveTransportState(state, centerZip)
       : undefined;
     if (!transportState) return local;
 
