@@ -32,6 +32,7 @@ const createQueryBuilder = (result: QueryResult) => {
     'contains',
     'order',
     'limit',
+    'not',
   ]) {
     builder[method] = vi.fn().mockReturnValue(builder);
   }
@@ -199,6 +200,35 @@ describe('ApplicationService', () => {
 
     expect(mock.from).toHaveBeenCalledTimes(1);
     expect(builder.contains).not.toHaveBeenCalled();
+  });
+
+  it('getMeetThePets asks for a short photo-only slice (F22)', async () => {
+    const rows = [
+      {
+        id: PET_ID,
+        name: 'Miso',
+        species: 'cat',
+        breed: null,
+        age_years: 3,
+        photo_url: 'https://example.com/miso.webp',
+        notes: null,
+        status: 'available',
+      },
+    ];
+    const builder = createQueryBuilder({ data: rows, error: null });
+    mock.from.mockReturnValue(builder);
+
+    const result = await service.getMeetThePets('cat');
+
+    expect(mock.from).toHaveBeenCalledWith('pets');
+    expect(builder.select).toHaveBeenCalledWith(
+      'id, name, species, breed, age_years, photo_url, notes, status'
+    );
+    expect(builder.eq).toHaveBeenCalledWith('status', 'available');
+    expect(builder.eq).toHaveBeenCalledWith('species', 'cat');
+    expect(builder.not).toHaveBeenCalledWith('photo_url', 'is', null);
+    expect(builder.limit).toHaveBeenCalledWith(12);
+    expect(result).toEqual(rows);
   });
 
   it('listBrowseShelters returns distinct shelters with available pets (#280)', async () => {
