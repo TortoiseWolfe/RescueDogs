@@ -160,7 +160,7 @@ The repo-wide E2E mutex still cites it as its justification (`e2e.yml:36-41`):
 >
 > This section originally concluded that moving CI off the shared project "removes its remaining rationale entirely". That is wrong, and acting on it would break CI.
 >
-> `cleanupOldMessages` is indeed dead code. But another `beforeAll` performs a globally destructive write: **`clearAllRateLimits()`** (`tests/e2e/utils/rate-limit-admin.ts:47-50`) deletes **every row** of `rate_limit_attempts`, and `tests/e2e/security/brute-force.spec.ts:51-61` depends on the near-lockout rows it seeded surviving until its assertion. Two concurrent runs against one project: run 2's `beforeAll` wipes run 1's state and fails it. That is exactly the class of race the mutex was written for, and it outlives `cleanupOldMessages`.
+> `cleanupOldMessages` is indeed dead code. But another `beforeAll` performs a globally destructive write: **the table-wide rate-limit cleanup helper** (`tests/e2e/utils/rate-limit-admin.ts`, since replaced by `clearTestRateLimits()`, which deletes only rows the specs generated, #346) deletes **every row** of `rate_limit_attempts`, and `tests/e2e/security/brute-force.spec.ts:51-61` depends on the near-lockout rows it seeded surviving until its assertion. Two concurrent runs against one project: run 2's `beforeAll` wipes run 1's state and fails it. That is exactly the class of race the mutex was written for, and it outlives `cleanupOldMessages`.
 >
 > Fix that first (it is the same shared-project root cause), then reconsider the mutex.
 
@@ -216,11 +216,11 @@ If the local stack proves unstable in CI. Needs the migration and seeds kept in 
 >
 > **And that is currently blocked.** `ACCOUNTS.md` (workspace root, verified 2026-09-07 by live API call) states the binding rule, with Supabase's own refusal text quoted: the free limit is **2 ACTIVE projects per USER**, counted across every org where that user is Owner or Administrator — _not_ per org. _"Spreading across orgs does not raise it."_
 >
-> | account                  | owned-active           | headroom         |
-> | ------------------------ | ---------------------- | ---------------- |
-> | `spoketowork@gmail.com`  | 2 (SpokeToWork, runit) | **0 — at limit** |
-> | `jonpohlner@gmail.com`   | 1 (geoLARP)            | 1                |
-> | `person28@example.com` | 1 (ScriptHammer)       | 1                |
+> | account                 | owned-active           | headroom         |
+> | ----------------------- | ---------------------- | ---------------- |
+> | `spoketowork@gmail.com` | 2 (SpokeToWork, runit) | **0 — at limit** |
+> | `jonpohlner@gmail.com`  | 1 (geoLARP)            | 1                |
+> | `person28@example.com`  | 1 (ScriptHammer)       | 1                |
 >
 > So the real options are: use one of the other two accounts' single slot (against the file's own placement principle — a project belongs to the account matching its domain), or relocate `runit`, which `ACCOUNTS.md` names as _"the remaining thing standing between `spoketowork@gmail.com` and any headroom."_
 >
