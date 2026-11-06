@@ -13,8 +13,13 @@ top, ScriptHammer disciplines as Mandatory Constraints).
 **After every `git merge upstream/main`, re-run the rebrand and re-check:**
 
 ```bash
-./scripts/rebrand.sh RescueDogs TortoiseWolfe "Pet adoption application tracker" --preserve-ssh --keep-cname --force
+./scripts/rebrand.sh RescueDogs TortoiseWolfe "Pet adoption application tracker" --preserve-ssh --keep-cname --preserve-attribution --force
 ```
+
+The script replaces the upstream name (`--from NAME` overrides it). It exits 4
+and lists the files when an upstream name is left behind. A line that should
+keep the upstream name carries the marker `rebrand:keep`; the script, this file
+and the constitution are never rewritten.
 
 - `public/CNAME` **MUST exist** and contain the canonical domain
   `raisedpaws.com`. That file is what points GitHub Pages at the custom

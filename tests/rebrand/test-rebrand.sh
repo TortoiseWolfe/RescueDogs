@@ -22,6 +22,11 @@ else
     ACTUAL_REPO=false
 fi
 
+# The upstream name the script replaces by default. Built from two pieces so a
+# rebrand run can never match and rewrite it inside this file (#375).
+UPSTREAM="Script""Hammer"
+UPSTREAM_LOWER="script""hammer"
+
 # Test counters
 TESTS_RUN=0
 TESTS_PASSED=0
@@ -36,19 +41,19 @@ NC='\033[0m' # No Color
 # Test utilities
 log_pass() {
     echo -e "${GREEN}✓ PASS${NC}: $1"
-    ((TESTS_PASSED++))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
 }
 
 log_fail() {
     echo -e "${RED}✗ FAIL${NC}: $1"
     echo -e "  ${YELLOW}Expected${NC}: $2"
     echo -e "  ${YELLOW}Got${NC}: $3"
-    ((TESTS_FAILED++))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
 }
 
 run_test() {
     local test_name="$1"
-    ((TESTS_RUN++))
+    TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "\n${YELLOW}Running${NC}: $test_name"
 }
 
@@ -60,14 +65,14 @@ setup_temp_dir() {
     # Create mock RescueDogs repo structure in temp dir
     cd "$TEMP_DIR"
     git init -q
-    git remote add origin "https://github.com/TortoiseWolfe/RescueDogs.git"
+    git remote add origin "https://github.com/TortoiseWolfe/${UPSTREAM}.git"
 
-    # Create essential files with RescueDogs references
+    # Create essential files with upstream-name references
     mkdir -p src/components
-    echo '{"name": "rescuedogs", "description": "RescueDogs template"}' > package.json
-    echo "# RescueDogs" > README.md
-    echo "rescuedogs.com" > CNAME
-    echo "export const projectName = 'RescueDogs';" > src/components/Logo.tsx
+    echo "{\"name\": \"${UPSTREAM_LOWER}\", \"description\": \"${UPSTREAM} template\"}" > package.json
+    echo "# ${UPSTREAM}" > README.md
+    echo "${UPSTREAM_LOWER}.com" > CNAME
+    echo "export const projectName = '${UPSTREAM}';" > src/components/Logo.tsx
 
     # Copy the rebrand script to temp dir
     cp "$REBRAND_SCRIPT" "$TEMP_DIR/scripts/" 2>/dev/null || {
@@ -245,6 +250,102 @@ test_rerebrand_detection() {
 }
 
 # ============================================================================
+# #375: the default run replaces the upstream name, and never touches the
+# script, CLAUDE.md or the constitution, or lines tagged rebrand:keep
+# ============================================================================
+test_rewrites_upstream_name() {
+    run_test "test_rewrites_upstream_name"
+    setup_temp_dir
+
+    mkdir -p .specify/memory
+    echo "Fork of ${UPSTREAM}" > CLAUDE.md
+    echo "${UPSTREAM} rules" > .specify/memory/constitution.md
+    echo "// kept on purpose: ${UPSTREAM} rebrand:keep" > src/components/Kept.tsx
+    echo "export const other = '${UPSTREAM}';" >> src/components/Kept.tsx
+
+    local script_hash
+    script_hash=$(md5sum scripts/rebrand.sh | cut -d' ' -f1)
+
+    local output exit_code=0
+    output=$("$TEMP_DIR/scripts/rebrand.sh" "MyApp" "testuser" "Test desc" --force 2>&1) || exit_code=$?
+
+    if [ "$exit_code" -eq 0 ] && grep -q "export const projectName = 'MyApp';" src/components/Logo.tsx; then
+        log_pass "Default run rewrites the upstream name and exits 0"
+    else
+        log_fail "Default rewrite" "Logo.tsx says MyApp, exit 0" "exit $exit_code: $(cat src/components/Logo.tsx)"
+    fi
+
+    if [ "$script_hash" = "$(md5sum scripts/rebrand.sh | cut -d' ' -f1)" ] \
+        && grep -q "${UPSTREAM}" CLAUDE.md \
+        && grep -q "${UPSTREAM}" .specify/memory/constitution.md; then
+        log_pass "Script, CLAUDE.md and constitution are untouched"
+    else
+        log_fail "Protected files" "unchanged" "one of them changed"
+    fi
+
+    if grep -q "kept on purpose: ${UPSTREAM} rebrand:keep" src/components/Kept.tsx \
+        && grep -q "export const other = 'MyApp';" src/components/Kept.tsx; then
+        log_pass "A rebrand:keep line is kept and its neighbour is rewritten"
+    else
+        log_fail "Keep marker" "tagged line kept, other line rewritten" "$(cat src/components/Kept.tsx)"
+    fi
+
+    cd "$REPO_ROOT"
+}
+
+# ============================================================================
+# #375: a source name equal to the target name is refused with exit 1
+# ============================================================================
+test_same_name_refused() {
+    run_test "test_same_name_refused"
+    setup_temp_dir
+
+    local output exit_code=0
+    output=$("$TEMP_DIR/scripts/rebrand.sh" "RescueDogs" "testuser" "x" --from RescueDogs --dry-run 2>&1) || exit_code=$?
+
+    if [ "$exit_code" -eq 1 ] && echo "$output" | grep -q "Source and target names are identical"; then
+        log_pass "Identical source and target exits 1 with a clear message"
+    else
+        log_fail "Identical names" "exit 1 and message" "exit $exit_code: ${output:0:200}"
+    fi
+
+    cd "$REPO_ROOT"
+}
+
+# ============================================================================
+# #375: upstream names left behind fail a real run (exit 4) and name the file;
+# a dry run skips the check and still exits 0
+# ============================================================================
+test_residue_fails_the_run() {
+    run_test "test_residue_fails_the_run"
+    setup_temp_dir
+
+    # A target name that contains the upstream name leaves it behind
+    local output exit_code=0
+    output=$("$TEMP_DIR/scripts/rebrand.sh" "${UPSTREAM}Fork" "testuser" "Test desc" --force 2>&1) || exit_code=$?
+
+    if [ "$exit_code" -eq 4 ] && echo "$output" | grep -q "src/components/Logo.tsx"; then
+        log_pass "Leftover upstream name exits 4 and names the file"
+    else
+        log_fail "Residue check" "exit 4 naming src/components/Logo.tsx" "exit $exit_code: ${output:0:300}"
+    fi
+
+    cd "$REPO_ROOT"
+    setup_temp_dir
+
+    exit_code=0
+    "$TEMP_DIR/scripts/rebrand.sh" "${UPSTREAM}Fork" "testuser" "Test desc" --force --dry-run >/dev/null 2>&1 || exit_code=$?
+
+    if [ "$exit_code" -eq 0 ]; then
+        log_pass "Dry run skips the leftover check and exits 0"
+    else
+        log_fail "Dry run residue" "exit 0" "exit $exit_code"
+    fi
+
+    cd "$REPO_ROOT"
+}
+
+# ============================================================================
 # Test runner
 # ============================================================================
 run_all_tests() {
@@ -269,6 +370,9 @@ run_all_tests() {
     test_name_sanitization
     test_dry_run_no_changes
     test_rerebrand_detection
+    test_rewrites_upstream_name
+    test_same_name_refused
+    test_residue_fails_the_run
 
     echo ""
     echo "========================================"
@@ -297,6 +401,15 @@ if [ $# -eq 1 ]; then
             ;;
         test_rerebrand_detection)
             test_rerebrand_detection
+            ;;
+        test_rewrites_upstream_name)
+            test_rewrites_upstream_name
+            ;;
+        test_same_name_refused)
+            test_same_name_refused
+            ;;
+        test_residue_fails_the_run)
+            test_residue_fails_the_run
             ;;
         *)
             echo "Unknown test: $1"

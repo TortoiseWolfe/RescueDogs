@@ -36,7 +36,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Verify PageSpeed API Key
-        # Fork divergence from upstream ScriptHammer: missing key WARNS instead
+        # Fork divergence from upstream ScriptHammer: missing key WARNS instead rebrand:keep
         # of failing. The key only powers the /status page web-vitals metrics —
         # cosmetic for RescueDogs' MVP. Add the secret to restore metrics.
         run: |

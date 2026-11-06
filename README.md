@@ -6,7 +6,7 @@
 Adopters pour themselves into a five-page adoption application and never hear
 back. RescueDogs ends that: **one universal application, a pipeline dashboard
 a shelter volunteer can run, and a Domino's-style status tracker the
-applicant watches update live.** Built on the ScriptHammer template
+applicant watches update live.** Built on the ScriptHammer template <!-- rebrand:keep -->
 (Next.js 15 / React 19 / Supabase / DaisyUI, static export to GitHub Pages).
 
 Constitution: [`.specify/memory/constitution.md`](.specify/memory/constitution.md)
@@ -536,7 +536,7 @@ Run these specs in order (041 → 064). Copy a command to start the full SpecKit
 ### Priority 6: Code Quality
 
 ```
-/speckit.workflow SPEC-059: Large Component Refactoring - Refactor oversized components: GlobalNav.tsx, AccountSettings.tsx, MessageBubble.tsx. Add React.memo/useMemo where appropriate. Effort: 2-3 days. (CaptainShipCrew removed in #83 — unused ScriptHammer game UI.)
+/speckit.workflow SPEC-059: Large Component Refactoring - Refactor oversized components: GlobalNav.tsx, AccountSettings.tsx, MessageBubble.tsx. Add React.memo/useMemo where appropriate. Effort: 2-3 days. (CaptainShipCrew removed in #83 — unused ScriptHammer game UI.) rebrand:keep
 ```
 
 ```
@@ -558,7 +558,7 @@ Run these specs in order (041 → 064). Copy a command to start the full SpecKit
 ```
 
 ```
-~~SPEC-064: Game Component A11y Tests~~ — **Obsolete (#83)**. Dice / DiceTray / CaptainShipCrew stack deleted; unused ScriptHammer carryover.
+~~SPEC-064: Game Component A11y Tests~~ — **Obsolete (#83)**. Dice / DiceTray / CaptainShipCrew stack deleted; unused ScriptHammer carryover. <!-- rebrand:keep -->
 ```
 
 ## 🎯 Project Status

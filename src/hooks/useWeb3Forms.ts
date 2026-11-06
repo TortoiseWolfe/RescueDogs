@@ -219,7 +219,7 @@ export const useWeb3Forms = (
         // Submit form through email service (with failover and retry).
         //
         // The role is folded into the SUBJECT rather than sent as its own field.
-        // `EmailContactFormData` is shared with upstream ScriptHammer, which has
+        // `EmailContactFormData` is shared with upstream ScriptHammer, which has rebrand:keep
         // no `role` concept, and the ops inbox triages on the subject line anyway
         // (#128). Until now the live path dropped `role` on the floor, so every
         // submission arrived untriaged — while the unreachable Web3Forms path in

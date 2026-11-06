@@ -14,7 +14,7 @@ Measured on raisedpaws.com before the Cloudflare rule (2026-08-21 / rechecked
 | document (`/`)        | `max-age=600`   |
 | `/_next/static/css/*` | `max-age=14400` |
 
-Upstream ScriptHammer hit this eight times before fixing it. This fork ships
+Upstream ScriptHammer hit this eight times before fixing it. This fork ships <!-- rebrand:keep -->
 the same three layers.
 
 ## Layer 1 — Cloudflare (the cure) — dashboard, not git
