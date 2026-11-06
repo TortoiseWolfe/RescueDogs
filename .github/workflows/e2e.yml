@@ -311,7 +311,6 @@ jobs:
             tests/e2e/auth/sign-up.spec.ts \
             --project=signup \
             --no-deps \
-            --grep-invert @local-supabase \
             --reporter=list \
             --timeout=30000
         env:
@@ -409,7 +408,7 @@ jobs:
           echo "serve is responding on http://localhost:3000"
 
       - name: Run rate-limiting tests (ordered)
-        run: pnpm test:e2e --project=rate-limiting --project=brute-force --project=signup --grep-invert @local-supabase --reporter=list --trace=on-first-retry
+        run: pnpm test:e2e --project=rate-limiting --project=brute-force --project=signup --reporter=list --trace=on-first-retry
         env:
           CI: true
           PLAYWRIGHT_BROWSER: chromium

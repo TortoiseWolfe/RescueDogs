@@ -198,6 +198,7 @@ jobs:
           SKIP_WEBSERVER: 'true'
           BASE_URL: http://localhost:3000
           E2E_MAIL_SINK_DOMAIN: sink.example.test
+          E2E_LOCAL_SUPABASE: 'true'
           PLAYWRIGHT_JSON_OUTPUT_NAME: results-signup.json
 
       - name: The sign-up and rate-limit specs must have run, and none may be skipped
