@@ -138,3 +138,8 @@ tmp-logos/
 
 # graphify knowledge graph — generated, can be large; rebuild with `/graphify .`
 graphify-out/
+
+# Customer-report screenshots, fetched on demand by `pnpm feedback:shot`.
+# NEVER committed: this repo is public and a screenshot of this product can carry
+# an adopter's address, phone, landlord or vet details, or another person's words.
+.feedback-shots/
