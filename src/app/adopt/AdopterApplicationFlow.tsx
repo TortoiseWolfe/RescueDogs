@@ -391,7 +391,15 @@ export function AdopterApplicationFlow({
                     value={mergedAnswers.get(question.id)}
                     onChange={(next) => setAnswer(question.id, next)}
                     visibleBank={bank}
-                    error={errors[question.id] ?? profileErrors[question.id]}
+                    error={
+                      errors[question.id] ??
+                      // Live only for a saved answer that already breaks a
+                      // limit. A field being typed waits for Review, so the
+                      // role="alert" message is not read out per keystroke (#515).
+                      (savedInvalidIds.has(question.id)
+                        ? profileErrors[question.id]
+                        : undefined)
+                    }
                   />
                 ))}
               </section>
