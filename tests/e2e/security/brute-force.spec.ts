@@ -12,7 +12,7 @@
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
 import {
-  clearAllRateLimits,
+  clearTestRateLimits,
   seedFailedAttempts,
   isRateLimitAdminAvailable,
 } from '../utils/rate-limit-admin';
@@ -93,8 +93,12 @@ test.describe('Brute Force Prevention - REQ-SEC-003', () => {
 
   // Clear rate limits and generate test email before suite
   test.beforeAll(async () => {
-    await clearAllRateLimits();
+    await clearTestRateLimits();
     testEmail = generateBruteForceEmail('main');
+  });
+
+  test.afterAll(async () => {
+    await clearTestRateLimits();
   });
 
   test.beforeEach(async ({ page }, testInfo) => {
