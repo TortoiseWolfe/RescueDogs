@@ -52,7 +52,10 @@ function isRateLimitEmailConfigValid(): boolean {
  * These tests verify Supabase's rate limiting behavior from the user's perspective.
  * Tests run in SERIAL mode because rate limiting is IP-based.
  */
-test.describe('Rate Limiting - User Experience', () => {
+// Tagged @local-supabase: with Bot Protection on (the hosted project) these
+// can never reach the app's own limiter (#302), so e2e.yml leaves them out and
+// the local Supabase lane runs them.
+test.describe('Rate Limiting - User Experience @local-supabase', () => {
   const testPassword = 'WrongPassword123!';
 
   // Shared state for serial tests
@@ -72,14 +75,11 @@ test.describe('Rate Limiting - User Experience', () => {
     await clearTestRateLimits();
   });
 
-  test.beforeEach(async ({ page }, testInfo) => {
-    if (!isRateLimitEmailConfigValid()) {
-      testInfo.skip(
-        true,
-        'TEST_USER_PRIMARY_EMAIL not configured - rate limit tests require valid email domain'
-      );
-      return;
-    }
+  test.beforeEach(async ({ page }) => {
+    expect(
+      isRateLimitEmailConfigValid(),
+      'TEST_USER_PRIMARY_EMAIL not configured - rate limit tests require valid email domain'
+    ).toBe(true);
 
     // With Supabase Bot Protection on, every UI attempt is rejected by the
     // captcha check before credentials are evaluated, so the app's own
@@ -87,11 +87,9 @@ test.describe('Rate Limiting - User Experience', () => {
     // instead of a credentials/lockout message (#302). Broadening the
     // matcher here would make these tests pass while asserting nothing.
     if (await isSupabaseCaptchaEnforced()) {
-      testInfo.skip(
-        true,
-        'Supabase captcha is enforced - UI sign-in never reaches app rate limiting'
+      throw new Error(
+        'Supabase captcha is enforced - UI sign-in never reaches app rate limiting; run this through the @local-supabase lane'
       );
-      return;
     }
 
     await page.goto('/sign-in');
