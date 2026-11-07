@@ -188,3 +188,93 @@ describe('AdopterApplicationFlow draft', () => {
     expect(screen.queryByRole('heading', { name: 'New answers' })).toBeNull();
   });
 });
+
+const hasCurrentQuestion: ApplicationQuestion = {
+  ...nameQuestion,
+  id: 'pet.has_current',
+  category: 'pets',
+  sort_order: 701,
+  wording: 'Do you have pets living in your home now?',
+  answer_type: 'yes_no',
+};
+
+const currentPetsQuestion: ApplicationQuestion = {
+  ...nameQuestion,
+  id: 'pet.current',
+  category: 'pets',
+  sort_order: 702,
+  wording: 'Tell us about the pets in your home',
+  answer_type: 'repeat',
+  show_if: { question: 'pet.has_current', in: [true] },
+  is_locked: false,
+};
+
+const secondaryPhoneQuestion: ApplicationQuestion = {
+  ...nameQuestion,
+  id: 'con.phone_secondary',
+  category: 'contact',
+  sort_order: 130,
+  wording: 'Secondary phone',
+  answer_type: 'text',
+  always_optional: true,
+  is_locked: false,
+};
+
+describe('AdopterApplicationFlow withdrawn answers (#513 / #514)', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('omits saved pet.current when the adopter answers No to current pets (#513)', async () => {
+    const onSubmit = vi.fn();
+    renderFlow({
+      onSubmit,
+      bank: [nameQuestion, hasCurrentQuestion, currentPetsQuestion],
+      shownByShelter: new Map([
+        ['shelter-1', ['con.full_name', 'pet.has_current', 'pet.current']],
+      ]),
+      savedAnswers: new Map<string, unknown>([
+        ['con.full_name', 'Dana Adopter'],
+        ['pet.has_current', true],
+        ['pet.current', { legacy_note: '2 cats' }],
+      ]),
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'No' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Review application' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit application' }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    const payload = onSubmit.mock.calls[0][0];
+    expect(payload.removeAnswerIds).toContain('pet.current');
+    expect(payload.snapshotOmitQuestionIds).toContain('pet.current');
+    expect(payload.answers).not.toHaveProperty('pet.current');
+    expect(payload.profile.other_pets).toBeNull();
+  });
+
+  it('omits a cleared prefilled optional answer (#514)', async () => {
+    const onSubmit = vi.fn();
+    renderFlow({
+      onSubmit,
+      bank: [nameQuestion, secondaryPhoneQuestion],
+      shownByShelter: new Map([
+        ['shelter-1', ['con.full_name', 'con.phone_secondary']],
+      ]),
+      savedAnswers: new Map<string, unknown>([
+        ['con.full_name', 'Dana Adopter'],
+        ['con.phone_secondary', '555-0100'],
+      ]),
+    });
+
+    fireEvent.change(screen.getByLabelText(/Secondary phone/), {
+      target: { value: '' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Review application' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit application' }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    const payload = onSubmit.mock.calls[0][0];
+    expect(payload.removeAnswerIds).toContain('con.phone_secondary');
+    expect(payload.snapshotOmitQuestionIds).toContain('con.phone_secondary');
+  });
+});
