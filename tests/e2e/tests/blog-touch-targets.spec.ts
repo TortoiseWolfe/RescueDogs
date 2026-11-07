@@ -27,7 +27,12 @@ test.describe('Blog Touch Target Standards - iPhone 12', () => {
     page,
   }) => {
     await page.goto('/blog');
-    await page.waitForLoadState('networkidle');
+    // Wait for the page's own content, not for the network to go quiet:
+    // signed-in pages keep Supabase calls open for 30 s on a loaded backend.
+    await page
+      .locator('a[href*="/blog/"]')
+      .first()
+      .waitFor({ state: 'visible' });
 
     // Find all blog post card links
     const blogCards = await page.locator('a[href*="/blog/"]').all();
@@ -60,7 +65,10 @@ test.describe('Blog Touch Target Standards - iPhone 12', () => {
 
   test('Blog post interactive elements meet 44x44px', async ({ page }) => {
     await page.goto('/blog/countdown-timer-tutorial');
-    await page.waitForLoadState('networkidle');
+    await page
+      .getByRole('heading', { level: 1 })
+      .first()
+      .waitFor({ state: 'visible' });
 
     // Test buttons (SEO badge, TOC, etc.)
     // Exclude buttons inside code examples (.mockup-code, pre, code) — these

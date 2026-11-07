@@ -23,8 +23,12 @@ test.describe('Blog Post Mobile UX - iPhone 12', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to a blog post
     await page.goto('/blog/countdown-timer-tutorial');
-    // Wait for content to load
-    await page.waitForLoadState('networkidle');
+    // Wait for the post's own heading, not for the network to go quiet:
+    // signed-in pages keep Supabase calls open for 30 s on a loaded backend.
+    await page
+      .getByRole('heading', { level: 1 })
+      .first()
+      .waitFor({ state: 'visible' });
   });
 
   test('should display footer at bottom of page', async ({ page }) => {
