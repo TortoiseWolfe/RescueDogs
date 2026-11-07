@@ -31,14 +31,21 @@ describe('Demo visibility pages (#67 / #74)', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('lower demo band keeps white heading and navy support line (#74)', () => {
+  it('lower demo band puts dark ink on the orange fill (#241, was #74)', () => {
     render(<Home />);
 
-    expect(
-      screen.getByRole('heading', { name: /want to see the live rescue loop/i })
-    ).toBeInTheDocument();
+    const heading = screen.getByRole('heading', {
+      name: /want to see the live rescue loop/i,
+    });
+    // White on #f97316 is 2.80:1; accent-content (#040c14) is 7.02:1.
+    const band = heading.parentElement as HTMLElement;
+    expect(band.className).toMatch(/\bbg-accent\b/);
+    expect(band.className).toMatch(/\btext-accent-content\b/);
+    expect(band.className).not.toMatch(/text-white/);
+
+    // The support line inherits the band's ink instead of its own navy.
     const support = screen.getByText(/choose the adopter or shelter door/i);
-    expect(support.className).toMatch(/text-\[#172554\]/);
+    expect(support.className).not.toMatch(/text-\[#/);
   });
 
   it('for-adopters exposes Try Demo', () => {
