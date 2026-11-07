@@ -1,47 +1,13 @@
 /**
- * Unit coverage for #316 rescue welcome send guards
- * (mirrors supabase/functions/_shared/rescue-welcome-guards.ts).
+ * Unit coverage for #316 rescue welcome send guards. Imports the shipped
+ * supabase/functions/_shared/rescue-welcome-guards.ts instead of a copy.
  */
 
 import { describe, it, expect } from 'vitest';
-import { isTestRecipient } from '../../../../supabase/functions/_shared/test-recipients';
-
-type WelcomeUserLike = {
-  email?: string | null;
-  app_metadata?: Record<string, unknown> | null;
-  user_metadata?: Record<string, unknown> | null;
-};
-
-function shouldSkipRescueWelcomeEmail(
-  user: WelcomeUserLike
-): { skip: true; reason: string } | { skip: false } {
-  if (user.app_metadata?.e2e === true || user.user_metadata?.e2e === true) {
-    return { skip: true, reason: 'e2e' };
-  }
-
-  const email = (user.email ?? '').trim().toLowerCase();
-  if (!email) {
-    return { skip: true, reason: 'no_email' };
-  }
-
-  if (isTestRecipient(email)) {
-    return { skip: true, reason: 'test_email' };
-  }
-
-  return { skip: false };
-}
-
-function isResendQuotaError(status: number, body: unknown): boolean {
-  if (status === 429) return true;
-  const text = JSON.stringify(body ?? {}).toLowerCase();
-  return (
-    text.includes('quota') ||
-    text.includes('rate_limit') ||
-    text.includes('rate limit') ||
-    text.includes('too many') ||
-    text.includes('daily')
-  );
-}
+import {
+  isResendQuotaError,
+  shouldSkipRescueWelcomeEmail,
+} from '../../../../supabase/functions/_shared/rescue-welcome-guards';
 
 describe('rescue welcome send guards (#316)', () => {
   it('skips app_metadata.e2e users', () => {

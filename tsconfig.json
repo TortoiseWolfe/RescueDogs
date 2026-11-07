@@ -6,6 +6,9 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    // supabase/functions/_shared/*.ts (Deno) import siblings with a .ts extension and
+    // are now imported by unit tests. Legal only because noEmit is on.
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
