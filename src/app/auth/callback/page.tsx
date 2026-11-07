@@ -56,6 +56,11 @@ function AuthCallbackContent() {
       `URL has code: ${hasCode}, has error: ${!!authError}, isLoading: ${isLoading}, user: ${user?.email || 'null'}`
     );
 
+    // Cleared when this effect re-runs or unmounts, so a stale "no user"
+    // timer cannot fire after the session has arrived (#396).
+    let redirectTimer: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
+
     const handleAuthComplete = async () => {
       if (user) {
         // Populate OAuth profile before redirect (FR-001)
@@ -69,15 +74,16 @@ function AuthCallbackContent() {
           }
         }
 
+        // The profile update above is awaited: a newer render may have taken
+        // over (or the page unmounted) while it ran.
+        if (cancelled) return;
         logger.info('User authenticated, redirecting to profile');
         router.push('/profile');
       } else {
         logger.debug('No user after loading, waiting 2 more seconds...');
-        setTimeout(() => {
-          if (!user) {
-            logger.warn('Still no user, redirecting to sign-in');
-            router.push('/sign-in?error=auth_callback_failed');
-          }
+        redirectTimer = setTimeout(() => {
+          logger.warn('Still no user, redirecting to sign-in');
+          router.push('/sign-in?error=auth_callback_failed');
         }, 2000);
       }
     };
@@ -87,6 +93,11 @@ function AuthCallbackContent() {
     if (!isLoading && !authError) {
       handleAuthComplete();
     }
+
+    return () => {
+      cancelled = true;
+      if (redirectTimer) clearTimeout(redirectTimer);
+    };
   }, [user, isLoading, router]);
 
   if (errorDetails) {
