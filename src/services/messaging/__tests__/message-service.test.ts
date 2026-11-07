@@ -463,11 +463,17 @@ describe('MessageService', () => {
         expect.objectContaining({
           conversation_id: CONVERSATION_ID,
           sender_id: CURRENT_USER_ID,
-          content: 'offline message',
           encrypted_content: 'encrypted-content',
           initialization_vector: 'test-iv',
         })
       );
+
+      // #358: the IndexedDB queue holds ciphertext only, never the plaintext.
+      const queued = vi.mocked(offlineQueueService.queueMessage).mock
+        .calls[0][0];
+      expect(queued).not.toHaveProperty('content');
+      expect(queued).not.toHaveProperty('plaintext_content');
+      expect(JSON.stringify(queued)).not.toContain('offline message');
     });
 
     it('throws EncryptionLockedError when keys cannot be restored', async () => {

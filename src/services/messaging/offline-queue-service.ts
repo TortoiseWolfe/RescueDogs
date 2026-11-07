@@ -62,7 +62,6 @@ export class OfflineQueueService {
       | 'sender_id'
       | 'encrypted_content'
       | 'initialization_vector'
-      | 'content'
     >
   ): Promise<QueuedMessage> {
     const queuedMessage: QueuedMessage = {
@@ -141,6 +140,10 @@ export class OfflineQueueService {
     this.syncInProgress = true;
 
     try {
+      // Rows written by older builds still hold plaintext (#358). Remove it
+      // before anything else so even a sync that fails on auth cleans up.
+      await this.scrubPlaintext();
+
       const supabase = createClient();
       const msgClient = createMessagingClient(supabase);
 
@@ -272,6 +275,28 @@ export class OfflineQueueService {
       .where('synced')
       .equals(1)
       .delete();
+  }
+
+  /**
+   * Remove plaintext fields from every queued row (#358).
+   *
+   * Older builds saved `content` / `plaintext_content` next to the
+   * ciphertext. The sync path only reads the ciphertext, so the plaintext is
+   * dead weight that anyone with DevTools could read on a shared device.
+   *
+   * @returns Promise<number> - Number of rows that held plaintext
+   */
+  async scrubPlaintext(): Promise<number> {
+    let scrubbed = 0;
+    await messagingDb.messaging_queued_messages.toCollection().modify((row) => {
+      const legacy = row as unknown as Record<string, unknown>;
+      if ('content' in legacy || 'plaintext_content' in legacy) {
+        delete legacy.content;
+        delete legacy.plaintext_content;
+        scrubbed++;
+      }
+    });
+    return scrubbed;
   }
 
   /**

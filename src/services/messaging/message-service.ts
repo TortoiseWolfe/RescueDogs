@@ -335,7 +335,8 @@ export class MessageService {
           sender_id: user.id,
           encrypted_content: encrypted.ciphertext,
           initialization_vector: encrypted.iv,
-          content,
+          // Plaintext is NOT persisted: the pending bubble keeps it in React
+          // state (usePendingMessages.addPending) for this session only (#358).
         });
 
         // Return a placeholder message object
@@ -514,7 +515,8 @@ export class MessageService {
           sender_id: user.id,
           encrypted_content: encrypted.ciphertext,
           initialization_vector: encrypted.iv,
-          content,
+          // Plaintext is NOT persisted: the pending bubble keeps it in React
+          // state (usePendingMessages.addPending) for this session only (#358).
         });
 
         // Return a placeholder message object
