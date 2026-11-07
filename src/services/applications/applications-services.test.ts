@@ -28,6 +28,7 @@ const createQueryBuilder = (result: QueryResult) => {
     'upsert',
     'delete',
     'eq',
+    'in',
     'is',
     'contains',
     'order',
@@ -335,6 +336,37 @@ describe('ApplicationService', () => {
       snapshot_omit_question_ids: [],
     });
     expect(result).toEqual(insertedApp);
+  });
+
+  it('submitApplication deletes withdrawn answers before insert (#513 / #514)', async () => {
+    const profile = { full_name: 'Dana Adopter' } as never;
+    const insertedApp = { id: APP_ID, status: 'submitted' };
+    const answersBuilder = createQueryBuilder({ data: null, error: null });
+    const profileBuilder = createQueryBuilder({ data: null, error: null });
+    const appBuilder = createQueryBuilder({ data: insertedApp, error: null });
+    mock.from.mockImplementation((table: string) => {
+      if (table === 'adopter_answers') return answersBuilder;
+      if (table === 'adopter_profiles') return profileBuilder;
+      return appBuilder;
+    });
+
+    await service.submitApplication(USER_ID, {
+      petId: PET_ID,
+      shelterId: SHELTER_ID,
+      profile,
+      removeAnswerIds: ['pet.current'],
+    });
+
+    expect(mock.from).toHaveBeenCalledWith('adopter_answers');
+    expect(answersBuilder.delete).toHaveBeenCalled();
+    expect(answersBuilder.eq).toHaveBeenCalledWith('adopter_id', USER_ID);
+    expect(answersBuilder.in).toHaveBeenCalledWith('question_id', [
+      'pet.current',
+    ]);
+    expect(appBuilder.insert).toHaveBeenCalled();
+    const deleteOrder = answersBuilder.delete.mock.invocationCallOrder[0];
+    const insertOrder = appBuilder.insert.mock.invocationCallOrder[0];
+    expect(deleteOrder).toBeLessThan(insertOrder);
   });
 
   it('submitApplication surfaces profile upsert errors and skips the insert', async () => {
