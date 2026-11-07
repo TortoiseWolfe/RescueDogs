@@ -2,9 +2,11 @@
  * Integration Test: Subscription Creation (PayPal) - T056
  * Tests PayPal payment UI components
  *
- * Two tests below are test.fixme: they need a live PayPal sandbox account and a
- * deployed cancel-subscription function, which CI does not have (issue #480).
- * Everything else runs against seeded rows and the rendered UI.
+ * Everything here runs against seeded rows and the rendered UI. Creating a
+ * subscription and cancelling one need a live PayPal sandbox account and a
+ * deployed cancel-subscription function, which CI does not have; those two tests
+ * are tracked in issue #480 and get written when the sandbox exists (an empty
+ * test.fixme would only add a permanent skip to every run).
  */
 
 import { test, expect } from '@playwright/test';
@@ -48,17 +50,6 @@ test.describe('PayPal Subscription Creation Flow', () => {
       .first()
       .waitFor({ state: 'visible', timeout: 15000 });
   });
-
-  // Waits on #480: a PayPal sandbox client id/secret as repository secrets.
-  // e2e.yml sets a dummy client id, so the button renders but PayPal's SDK
-  // rejects it when the subscription is created.
-  test.fixme(
-    'should create PayPal subscription successfully (#480)',
-    async () => {
-      // Grant consent, click "PayPal $15.00", approve in the sandbox popup, and
-      // assert a subscriptions row appears for the user.
-    }
-  );
 
   test('should show PayPal provider tab', async ({ page }) => {
     // Grant consent
@@ -118,11 +109,6 @@ test.describe('PayPal Subscription Creation Flow', () => {
   // subscription row via the per-test fixture (seedIsolatedSubscription —
   // service-role insert + cleanup, no provider creds). Cancel is the exception:
   // it drives the cancel-subscription edge function against a real provider.
-
-  // Waits on #480: a deployed cancel-subscription function with PayPal sandbox
-  // config. Seed with seedIsolatedSubscription, click Cancel, and assert the
-  // row's status flips.
-  test.fixme('should allow subscription cancellation (#480)', async () => {});
 
   test('should show grace period warning', async ({ browser }) => {
     // Seed a grace_period subscription (expires in 5 days) for a throwaway user,
