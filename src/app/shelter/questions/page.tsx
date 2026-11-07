@@ -386,11 +386,7 @@ export default function ShelterQuestionsPage() {
                   <ShownToggle
                     checked={state === 'shown'}
                     disabled={!isManager}
-                    label={
-                      state === 'shown'
-                        ? `Hide ${CATEGORY_LABELS[category]}`
-                        : `Show ${CATEGORY_LABELS[category]}`
-                    }
+                    label={`Show ${CATEGORY_LABELS[category]}`}
                     onToggle={() => onToggleCategory(category)}
                   />
                 )}
@@ -428,11 +424,7 @@ export default function ShelterQuestionsPage() {
                     <ShownToggle
                       checked={shown}
                       disabled={!isManager}
-                      label={
-                        shown
-                          ? `Hide ${question.wording}`
-                          : `Show ${question.wording}`
-                      }
+                      label={`Show ${question.wording}`}
                       onToggle={() => onToggleQuestion(question)}
                     />
                   )}
