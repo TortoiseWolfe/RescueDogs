@@ -16,7 +16,6 @@ import {
   signOutViaDropdown,
   performSignIn,
 } from '../utils/test-user-factory';
-import { isSupabaseCaptchaEnforced } from '../../fixtures/captcha-auth';
 
 // Use pre-existing test user (must exist in Supabase)
 const testEmail = process.env.TEST_USER_PRIMARY_EMAIL || 'test@example.com';
@@ -39,22 +38,15 @@ test.describe('Session Persistence E2E', () => {
     await dismissCookieBanner(page);
   });
 
-  test('should extend session duration with Remember Me checked', async ({
+  // Tagged @local-supabase (#457). The hosted project enforces a captcha, so
+  // performSignIn can only write a session there and cannot tick the box; it
+  // now refuses rememberMe on that path, so this test would fail loudly if it
+  // ever ran against the hosted project. The Local Supabase workflow has the
+  // captcha off, so the real sign-in form runs and the checkbox is exercised.
+  // The hosted run leaves this test out (playwright.config.ts grepInvert).
+  test('should extend session duration with Remember Me checked @local-supabase', async ({
     page,
   }) => {
-    // #457: under captcha performSignIn injects the session and cannot
-    // tick the box, so this test would only assert a token the helper wrote.
-    if (await isSupabaseCaptchaEnforced()) {
-      test.info().annotations.push({
-        type: 'coverage-gap',
-        description:
-          'Remember Me not exercised: captcha enforced, session injected (#457)',
-      });
-      test.skip(
-        true,
-        'Remember Me needs the real SignInForm; captcha is enforced'
-      );
-    }
     // Sign in with Remember Me (already on sign-in page from beforeEach)
     const result = await performSignIn(page, testEmail, testPassword, {
       rememberMe: true,
