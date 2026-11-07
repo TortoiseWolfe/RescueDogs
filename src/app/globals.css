@@ -211,7 +211,7 @@
     -1px 0 0 #1e3a8a;
 }
 
-/* Desktop role-menu triggers (#269): white + navy outline at rest; navy fill on hover. */
+/* Desktop role-menu triggers (#269): white + navy outline at rest; cream pill with navy text on hover and open (10.02:1, WCAG AAA). */
 .site-header .nav-role-trigger {
   color: #ffffff;
 }
@@ -237,7 +237,9 @@
 
 .site-header .nav-role-trigger:hover,
 .site-header .nav-role-trigger.nav-role-trigger-active {
-  background-color: transparent;
+  /* Navy on the bare #f97316 header is 3.70:1. Same cream as the dropdown
+   * panel (#fdfbf7) so the hovered label sits on a surface that passes AAA. */
+  background-color: #fdfbf7;
 }
 
 .site-header .nav-role-trigger:hover .nav-role-prefix,
