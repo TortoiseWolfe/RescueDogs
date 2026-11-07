@@ -10,6 +10,7 @@ import type {
   AvailablePet,
   BrowsePet,
   BrowsePetDetail,
+  Pet,
   PetSpecies,
   ProfileSnapshot,
 } from '@/types/applications';
@@ -32,6 +33,22 @@ const BROWSE_PET_FIELDS =
 
 const BROWSE_SHELTER_FIELDS =
   'name, city, state, zip, transports, transport_states, transport_note';
+
+/** Homepage Meet-the-Pets needs only these columns (#324). */
+const MEET_PET_FIELDS =
+  'id, name, species, breed, age_years, photo_url, notes, status';
+
+export type MeetThePetRow = Pick<
+  Pet,
+  | 'id'
+  | 'name'
+  | 'species'
+  | 'breed'
+  | 'age_years'
+  | 'photo_url'
+  | 'notes'
+  | 'status'
+>;
 
 /** Union of the local and transport result sets, de-duplicated, sorted by name. */
 function mergeBrowsePets(local: BrowsePet[], transported: BrowsePet[]) {
@@ -132,6 +149,29 @@ export class ApplicationService {
     });
 
     return mergeBrowsePets(local, transported);
+  }
+
+  /**
+   * Homepage Meet-the-Pets (#165 / #324): a short slice of one species, photos
+   * only. The homepage shows three cards, so it must not download the whole
+   * catalogue on every visit. `limit` leaves room for the seed demo pets that
+   * composeMeetThePets() drops client-side.
+   */
+  async getMeetThePets(
+    species: PetSpecies,
+    limit = 12
+  ): Promise<MeetThePetRow[]> {
+    const { data, error } = await this.supabase
+      .from('pets')
+      .select(MEET_PET_FIELDS)
+      .eq('status', 'available')
+      .eq('species', species)
+      .not('photo_url', 'is', null)
+      .order('name')
+      .limit(limit);
+
+    if (error) throw error;
+    return (data ?? []) as unknown as MeetThePetRow[];
   }
 
   /** One browse round trip; `transportState` switches to the transport match. */
