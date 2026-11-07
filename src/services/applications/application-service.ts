@@ -54,6 +54,8 @@ export interface ApplicationSubmitInput {
   snapshotOmitQuestionIds?: string[];
   /** Extra / edited bank answers to upsert before insert. */
   answers?: Record<string, unknown>;
+  /** Saved bank answers the adopter withdrew; deleted before insert (#513 / #514). */
+  removeAnswerIds?: string[];
 }
 
 export interface AdopterAnswerRow {
@@ -299,6 +301,22 @@ export class ApplicationService {
     if (error) throw error;
   }
 
+  /** Delete saved bank answers the adopter withdrew (#513 / #514). Own rows only under RLS. */
+  async deleteAdopterAnswers(
+    userId: string,
+    questionIds: string[]
+  ): Promise<void> {
+    if (questionIds.length === 0) return;
+
+    const { error } = await this.supabase
+      .from('adopter_answers')
+      .delete()
+      .eq('adopter_id', userId)
+      .in('question_id', questionIds);
+
+    if (error) throw error;
+  }
+
   /**
    * Submit an application: refresh the reusable profile (and optional bank
    * answers), then insert. Postgres freezes answers_snapshot on insert.
@@ -309,6 +327,10 @@ export class ApplicationService {
   ): Promise<Application> {
     if (input.answers && Object.keys(input.answers).length > 0) {
       await this.upsertAdopterAnswers(userId, input.answers);
+    }
+
+    if (input.removeAnswerIds && input.removeAnswerIds.length > 0) {
+      await this.deleteAdopterAnswers(userId, input.removeAnswerIds);
     }
 
     const { error: profileError } = await this.supabase
