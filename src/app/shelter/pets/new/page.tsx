@@ -38,6 +38,27 @@ interface PetDraft {
   applicationTags: PetTag[];
 }
 
+/** What an untouched form holds. A form equal to this is not worth keeping as a draft. */
+const EMPTY_PET_DRAFT: PetDraft = {
+  name: '',
+  species: 'dog',
+  breed: '',
+  sex: '',
+  ageYearsPart: 0,
+  ageMonthsPart: 0,
+  size: '',
+  notes: '',
+  videoUrl: '',
+  transportable: true,
+  applicationTags: [],
+};
+
+function isPetDraftWorthSaving(value: PetDraft): boolean {
+  return (Object.keys(EMPTY_PET_DRAFT) as (keyof PetDraft)[]).some(
+    (key) => JSON.stringify(value[key]) !== JSON.stringify(EMPTY_PET_DRAFT[key])
+  );
+}
+
 /**
  * Create a pet for the staff member's shelter (#110).
  */
@@ -80,7 +101,8 @@ export default function NewShelterPetPage() {
   };
   const { restored, savedAt, clearDraft } = useFormDraft(
     `shelter:${shelterId}:pet:new`,
-    draftValue
+    draftValue,
+    { shouldSave: isPetDraftWorthSaving }
   );
   const [restoredFromDraft, setRestoredFromDraft] = useState(false);
   const appliedDraft = useRef(false);
@@ -355,6 +377,7 @@ export default function NewShelterPetPage() {
             setNotes('');
             setVideoUrl('');
             setTransportable(true);
+            setApplicationTags([]);
           }}
         />
 
