@@ -4766,6 +4766,17 @@ DECLARE
   v_result JSONB;
   v_omit TEXT[] := COALESCE(p_omit_ids, '{}'::text[]);
 BEGIN
+  -- An adopter may decline to share only unlocked third-party answers (today
+  -- that is ref.personal). Any other id in the list is ignored, so a forged
+  -- insert cannot drop locked-core or red-flag questions from the rescue's
+  -- copy (#458).
+  SELECT COALESCE(array_agg(oq.id), '{}'::text[])
+    INTO v_omit
+    FROM application_questions oq
+    WHERE oq.id = ANY (v_omit)
+      AND NOT oq.is_locked
+      AND oq.sensitivity = 'third_party';
+
   SELECT species, name, application_tags
     INTO v_species, v_pet_name, v_tags
     FROM pets WHERE id = p_pet;
@@ -4853,12 +4864,14 @@ END;
 $$;
 
 COMMENT ON FUNCTION build_application_answers_snapshot(UUID, UUID, UUID, TEXT, TEXT[]) IS
-  'Principle III (#337): locked + rescue-shown questions for the pet''s species, with the adopter''s answers. p_omit_ids drops questions the adopter declined to share (#446). The only path by which saved answers reach a rescue.';
+  'Principle III (#337): locked + rescue-shown questions for the pet''s species, with the adopter''s answers. p_omit_ids drops only unlocked third-party questions the adopter declined to share (#446); any other id in it is ignored (#458). The only path by which saved answers reach a rescue.';
 
 REVOKE ALL ON FUNCTION build_application_answers_snapshot(UUID, UUID, UUID, TEXT, TEXT[]) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION adopter_profile_answers(adopter_profiles) FROM PUBLIC, anon, authenticated;
 
--- Always overwrite: a client cannot add, drop, or edit snapshot answers.
+-- Always overwrite: a client cannot add, drop, or edit snapshot answers. The one
+-- thing a client chooses is snapshot_omit_question_ids, and the builder honours
+-- only the unlocked third-party ids in it (#458).
 -- A failure must never block a submission; the legacy profile_snapshot is
 -- still written by the client, so the warning path loses nothing.
 CREATE OR REPLACE FUNCTION set_application_answers_snapshot()
