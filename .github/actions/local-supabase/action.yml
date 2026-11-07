@@ -1,0 +1,120 @@
+name: Local Supabase for E2E
+description: >-
+  Brings up a throwaway Supabase stack inside the job, loads the repo's one
+  monolithic migration unchanged, and seeds the E2E users and the rescue demo
+  data. No repository secrets are read. Every key is the public Supabase
+  self-hosting demo key from .env.local-supabase, so nothing here can reach the
+  live database. Used by both e2e.yml and local-supabase.yml, so the start and
+  seed steps exist once. Run it after `pnpm install` (the user seed is a tsx
+  script).
+
+inputs:
+  start-stack:
+    description: >-
+      'false' only exports the environment (the build job needs the URL and the
+      public key to bake into the static export, but no database).
+    required: false
+    default: 'true'
+  admin-demo:
+    description: >-
+      'true' also seeds supabase/seed-admin-demo.sql and exports
+      SUPABASE_ADMIN_URL, which switches on the admin dashboard specs.
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Local demo env (compose, build and tests share one set of keys)
+      shell: bash
+      env:
+        ADMIN_DEMO: ${{ inputs.admin-demo }}
+      run: |
+        # .env.local-supabase is tracked and holds only the public demo keys.
+        cp .env.local-supabase .env
+        sed -i 's|host\.docker\.internal|localhost|g' .env
+        grep -E '^(NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY|TEST_USER_)' .env.local-supabase >> "$GITHUB_ENV"
+        {
+          echo "NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321"
+          echo "E2E_MAIL_SINK_DOMAIN=sink.example.test"
+          echo "E2E_LOCAL_SUPABASE=true"
+        } >> "$GITHUB_ENV"
+        if [ "$ADMIN_DEMO" = "true" ]; then
+          echo "SUPABASE_ADMIN_URL=http://localhost:54321" >> "$GITHUB_ENV"
+        fi
+
+    - name: Bring up local Supabase
+      if: inputs.start-stack == 'true'
+      shell: bash
+      run: |
+        docker compose --profile supabase up -d \
+          supabase-db supabase-kong supabase-auth supabase-rest \
+          supabase-realtime supabase-storage
+
+    - name: Wait for the stack to answer
+      if: inputs.start-stack == 'true'
+      shell: bash
+      run: |
+        set +e
+        for i in $(seq 1 60); do
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 \
+            -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+            http://localhost:54321/auth/v1/health)
+          [ "$code" = "200" ] && { echo "auth ready after ${i} attempt(s)"; exit 0; }
+          sleep 3
+        done
+        echo "::error::local Supabase never became ready (last=$code)"
+        docker compose --profile supabase logs --tail=100
+        exit 1
+
+    - name: Assert schema fidelity before trusting any result
+      if: inputs.start-stack == 'true'
+      shell: bash
+      run: |
+        # docker-compose.yml mounts the SAME monolithic migration production
+        # uses. If that silently stops applying, every test would run against
+        # an empty database.
+        n=$(docker compose exec -T supabase-db psql -U postgres -d postgres -tAc \
+              "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'")
+        echo "public tables: $n"
+        [ "$n" -ge 17 ] || { echo "::error::expected >=17 public tables, got $n; the migration did not apply"; exit 1; }
+
+    - name: Seed the E2E users
+      if: inputs.start-stack == 'true'
+      shell: bash
+      run: pnpm exec tsx scripts/seed-test-users.ts
+
+    - name: Seed the admin demo data
+      if: inputs.start-stack == 'true' && inputs.admin-demo == 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        docker compose exec -T supabase-db \
+          psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+          < supabase/seed-admin-demo.sql
+
+        # NON-VACUITY. The seed is idempotent (ON CONFLICT DO NOTHING), so a
+        # no-op run and a successful one look the same. admin-user-pagination
+        # needs more than PAGE_SIZE (50) non-admin profiles, and the search
+        # specs need the NAMES to have landed, not just the rows.
+        n=$(docker compose exec -T supabase-db psql -U postgres -d postgres -tAc \
+          "SELECT count(*) FROM user_profiles WHERE is_admin = FALSE;")
+        alice=$(docker compose exec -T supabase-db psql -U postgres -d postgres -tAc \
+          "SELECT count(*) FROM user_profiles WHERE username = 'alice' AND display_name = 'Alice Johnson';")
+        admin=$(docker compose exec -T supabase-db psql -U postgres -d postgres -tAc \
+          "SELECT count(*) FROM auth.users WHERE email = 'admin@rescuedogs.com' AND (raw_app_meta_data->>'is_admin')::boolean;")
+        echo "non-admin profiles: $n, alice: $alice, admin with claim: $admin"
+        if [ "$n" -le 50 ] || [ "$alice" -ne 1 ] || [ "$admin" -ne 1 ]; then
+          echo "::error::admin demo seed incomplete (need >50 non-admin profiles, alice, and an admin with the is_admin claim)"
+          exit 1
+        fi
+
+    - name: Seed the rescue demo data
+      if: inputs.start-stack == 'true'
+      shell: bash
+      run: |
+        # tests/rls/application-rls.test.ts builds on the demo shelter
+        # (2222...01) and its adopter and staff accounts.
+        docker compose exec -T supabase-db \
+          psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+          < supabase/seed-rescue-demo.sql
