@@ -42,6 +42,37 @@ export const AUTH_SIGN_UP_RATE_LIMIT_MESSAGE =
 export const AUTH_PASSWORD_RESET_RATE_LIMIT_MESSAGE =
   'Too many password-reset requests from this network. Wait a few minutes and try again.';
 
+/** Shown when the limiter itself could not be reached and gave no reason. */
+export const RATE_LIMIT_UNAVAILABLE_MESSAGE =
+  "We couldn't reach the sign-in service. Please try again in a moment.";
+
+/**
+ * A genuine lockout from `check_rate_limit` ALWAYS carries `locked_until`.
+ * A blocked result without one means the check itself failed (the fail-closed
+ * paths in `checkRateLimit`), so the visitor is not locked out (#395).
+ */
+export function isRateLimitInfraFailure(result: RateLimitResult): boolean {
+  return !result.allowed && !result.locked_until;
+}
+
+/**
+ * The message for a blocked `RateLimitResult`. A real lockout uses the form's
+ * own copy with the formatted wait; an outage says to try again shortly and
+ * never claims the account is locked. Fail-closed is unchanged: the caller
+ * still stops the attempt either way.
+ */
+export function getRateLimitBlockedMessage(
+  result: RateLimitResult,
+  lockoutCopy: (timeUntilReset: string) => string
+): string {
+  if (isRateLimitInfraFailure(result)) {
+    return result.reason || RATE_LIMIT_UNAVAILABLE_MESSAGE;
+  }
+  return lockoutCopy(
+    result.locked_until ? formatLockoutTime(result.locked_until) : 'shortly'
+  );
+}
+
 /**
  * Per-email failed-attempt cap in `check_rate_limit` (monolithic SQL).
  * Keep E2E/integration expectations in sync with this value — not with

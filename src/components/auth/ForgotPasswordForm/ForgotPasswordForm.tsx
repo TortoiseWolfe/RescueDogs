@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import {
   checkRateLimit,
   recordFailedAttempt,
-  formatLockoutTime,
+  getRateLimitBlockedMessage,
   isAuthRequestRateLimited,
   AUTH_PASSWORD_RESET_RATE_LIMIT_MESSAGE,
 } from '@/lib/auth/rate-limit-check';
@@ -58,11 +58,12 @@ export default function ForgotPasswordForm({
     const rateLimit = await checkRateLimit(email, 'password_reset');
 
     if (!rateLimit.allowed) {
-      const timeUntilReset = rateLimit.locked_until
-        ? formatLockoutTime(rateLimit.locked_until)
-        : '15 minutes';
       setError(
-        `Too many password reset attempts. Please try again in ${timeUntilReset}.`
+        getRateLimitBlockedMessage(
+          rateLimit,
+          (timeUntilReset) =>
+            `Too many password reset attempts. Please try again in ${timeUntilReset}.`
+        )
       );
       return;
     }
