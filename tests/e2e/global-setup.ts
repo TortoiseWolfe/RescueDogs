@@ -16,6 +16,10 @@ import {
   obtainAuthSession,
   isCaptchaProtectionError,
 } from '../fixtures/captcha-auth';
+import {
+  describeBackendError,
+  retryWhileTransient,
+} from '../fixtures/transient-backend';
 
 interface PrerequisiteError {
   category: string;
@@ -83,12 +87,27 @@ async function globalSetup(): Promise<void> {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // Test connectivity by listing users (requires service role)
-    const { error } = await adminClient.auth.admin.listUsers({ perPage: 1 });
-    if (error) {
+    // Test connectivity by listing users (requires service role). All 24
+    // shards do this within seconds of each other and the hosted gateway
+    // sometimes answers the burst with an HTML error page or an empty error,
+    // so retry those; a wrong key or a stopped project fails at once.
+    const client = adminClient;
+    const connectError = await retryWhileTransient(
+      async () => {
+        const { error } = await client.auth.admin.listUsers({ perPage: 1 });
+        return error ? describeBackendError(error) : undefined;
+      },
+      {
+        onRetry: (attempt, message) =>
+          console.warn(
+            `⚠️  Supabase connectivity check attempt ${attempt} failed (${message}); retrying...`
+          ),
+      }
+    );
+    if (connectError) {
       errors.push({
         category: 'Supabase Connection',
-        message: `Failed to connect: ${error.message}`,
+        message: `Failed to connect: ${connectError}`,
         fix: 'Verify SUPABASE_SERVICE_ROLE_KEY is correct and Supabase project is active',
       });
     } else {

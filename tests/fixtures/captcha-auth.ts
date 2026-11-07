@@ -13,6 +13,11 @@
  */
 
 import { createClient, type Session, type User } from '@supabase/supabase-js';
+import {
+  describeBackendError,
+  isTransientBackendError,
+  transientBackoffMs,
+} from './transient-backend';
 
 export function isCaptchaProtectionError(message: string | undefined): boolean {
   if (!message) return false;
@@ -85,10 +90,21 @@ export async function obtainAuthSession(
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const { data, error } = await anon.auth.signInWithPassword({
+  let { data, error } = await anon.auth.signInWithPassword({
     email,
     password,
   });
+
+  // A gateway hiccup answers with an HTML page or an empty error, not a
+  // captcha message. Try again before treating it as a real failure.
+  for (
+    let retry = 1;
+    retry < 4 && error && isTransientBackendError(describeBackendError(error));
+    retry += 1
+  ) {
+    await sleep(transientBackoffMs(retry));
+    ({ data, error } = await anon.auth.signInWithPassword({ email, password }));
+  }
 
   if (!error && data.session && data.user) {
     return {
@@ -100,7 +116,10 @@ export async function obtainAuthSession(
   }
 
   if (!isCaptchaProtectionError(error?.message)) {
-    return { ok: false, error: error?.message || 'sign-in failed' };
+    return {
+      ok: false,
+      error: error ? describeBackendError(error) : 'sign-in failed',
+    };
   }
 
   if (!serviceKey) {
@@ -130,7 +149,11 @@ export async function obtainAuthSession(
 
     const hashedToken = linkData?.properties?.hashed_token;
     if (linkError || !hashedToken) {
-      lastError = linkError?.message || 'no hashed_token';
+      lastError = linkError
+        ? describeBackendError(linkError)
+        : 'no hashed_token';
+      if (isTransientBackendError(lastError))
+        await sleep(transientBackoffMs(1));
       continue;
     }
 
@@ -148,11 +171,14 @@ export async function obtainAuthSession(
       };
     }
 
-    lastError = otpError?.message || 'no session';
+    lastError = otpError ? describeBackendError(otpError) : 'no session';
+    const transient = isTransientBackendError(lastError);
     const retryable =
+      transient ||
       /invalid|expired|otp/i.test(lastError) ||
       lastError.toLowerCase().includes('link');
     if (!retryable) break;
+    if (transient) await sleep(transientBackoffMs(1));
   }
 
   return {

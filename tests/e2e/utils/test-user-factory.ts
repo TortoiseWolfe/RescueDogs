@@ -15,6 +15,10 @@ import { expect, type Page, type Browser } from '@playwright/test';
 import { KeyDerivationService } from '@/lib/messaging/key-derivation';
 import { findAuthUserByEmail } from './find-auth-user';
 import {
+  describeBackendError,
+  retryWhileTransient,
+} from '../../fixtures/transient-backend';
+import {
   obtainAuthSession,
   isSupabaseCaptchaEnforced,
 } from '../../fixtures/captcha-auth';
@@ -174,37 +178,54 @@ export async function createTestUser(
   // Create user with email confirmed.
   // app_metadata.e2e stops the #316 rescue-welcome trigger/Edge Function from
   // calling Resend on the shared Cloud project (E2E would burn the free quota).
-  const { data, error } = await client.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true, // Auto-confirm email
-    user_metadata: options?.metadata,
-    app_metadata: { e2e: true },
+  // A gateway hiccup is retried; a retry that finds the user already there
+  // means the first attempt did land, so that user is used.
+  let createdUser: User | null = null;
+  let tries = 0;
+  const failure = await retryWhileTransient(async () => {
+    tries += 1;
+    const { data, error } = await client.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: options?.metadata,
+      app_metadata: { e2e: true },
+    });
+    if (error) {
+      if (
+        tries > 1 &&
+        /already (been )?registered|already exists/i.test(error.message ?? '')
+      ) {
+        createdUser = await findAuthUserByEmail(client, email);
+        return createdUser ? undefined : describeBackendError(error);
+      }
+      return describeBackendError(error);
+    }
+    createdUser = data.user ?? null;
+    return undefined;
   });
 
-  if (error) {
-    console.error(
-      `createTestUser: Failed to create user ${email}:`,
-      error.message
-    );
+  if (failure) {
+    console.error(`createTestUser: Failed to create user ${email}:`, failure);
     return null;
   }
 
-  if (!data.user) {
+  if (!createdUser) {
     console.error(`createTestUser: No user returned for ${email}`);
     return null;
   }
+  const user: User = createdUser;
 
-  console.log(`createTestUser: Created user ${email} with id ${data.user.id}`);
+  console.log(`createTestUser: Created user ${email} with id ${user.id}`);
 
   // Create user_profiles record if requested
   if (options?.createProfile !== false) {
     const username = options?.username || email.split('@')[0];
-    await createUserProfile(data.user.id, username);
+    await createUserProfile(user.id, username);
   }
 
   return {
-    id: data.user.id,
+    id: user.id,
     email,
     password,
   };

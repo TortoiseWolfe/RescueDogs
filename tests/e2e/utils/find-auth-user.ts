@@ -8,6 +8,10 @@
  */
 
 import type { SupabaseClient, User } from '@supabase/supabase-js';
+import {
+  describeBackendError,
+  retryWhileTransient,
+} from '../../fixtures/transient-backend';
 
 const PAGE_SIZE = 1000;
 const MAX_PAGES = 20;
@@ -19,20 +23,26 @@ export async function findAuthUserByEmail(
   const target = email.toLowerCase();
 
   for (let page = 1; page <= MAX_PAGES; page++) {
-    const { data, error } = await client.auth.admin.listUsers({
-      page,
-      perPage: PAGE_SIZE,
+    // Retry gateway hiccups so a brief outage is not read as "no such user".
+    let users: User[] = [];
+    const failure = await retryWhileTransient(async () => {
+      const { data, error } = await client.auth.admin.listUsers({
+        page,
+        perPage: PAGE_SIZE,
+      });
+      if (error) return describeBackendError(error);
+      users = data?.users ?? [];
+      return undefined;
     });
 
-    if (error) {
+    if (failure) {
       console.error(
         `findAuthUserByEmail: listUsers failed on page ${page}:`,
-        error.message
+        failure
       );
       return null;
     }
 
-    const users = data?.users ?? [];
     const match = users.find((u) => u.email?.toLowerCase() === target);
     if (match) return match;
 
