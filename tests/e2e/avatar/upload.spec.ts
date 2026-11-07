@@ -235,8 +235,21 @@ test.describe('Avatar Upload Flow', () => {
 
       const cropModal = page.getByRole('dialog', { name: /crop/i });
       await expect(cropModal).toBeVisible({ timeout: 5000 });
+      // Let the upload settle (session refresh and profile refetch) before
+      // removing, as US1.2 does, so those calls cannot overlap the removal.
+      const sessionRefreshed = page.waitForResponse((r) =>
+        r.url().includes('/auth/v1/token?grant_type=refresh_token')
+      );
+      const profileRefetched = page.waitForResponse(
+        (r) =>
+          r.request().method() === 'GET' &&
+          r.url().includes('/rest/v1/user_profiles?select=*')
+      );
       await page.getByRole('button', { name: /save/i }).click();
       await expect(cropModal).toBeHidden({ timeout: 60000 });
+      await sessionRefreshed;
+      await profileRefetched;
+      await page.waitForLoadState('networkidle');
       await expect(accountAvatar).toBeVisible({ timeout: 10000 });
     }
 
@@ -254,12 +267,24 @@ test.describe('Avatar Upload Flow', () => {
       await dialog.accept();
     });
 
+    // Removing takes three calls to the backend: the auth metadata update, the
+    // profile row update and the file delete. Watch the last two rather than
+    // the button, because the button
+    // also disappears while a profile refetch from the earlier upload shows the
+    // loading spinner, which let the reload below cut the removal short.
+    const profileCleared = page.waitForResponse(
+      (r) =>
+        r.request().method() === 'PATCH' &&
+        r.url().includes('/rest/v1/user_profiles')
+    );
+    const fileDeleted = page.waitForResponse(
+      (r) =>
+        r.request().method() === 'DELETE' &&
+        r.url().includes('/storage/v1/object/avatars')
+    );
     await removeButton.click();
-
-    // Wait for removal to complete before reloading. Removing takes three
-    // calls to the backend (profile update, table update, file delete), and a
-    // reload after a fixed 1 s cut them short on a slow backend, leaving the
-    // old avatar in place. The button disappears once all three have finished.
+    await profileCleared;
+    await fileDeleted;
     await expect(removeButton).toBeHidden({ timeout: 20000 });
     await page.reload();
     await page.waitForLoadState('networkidle');
