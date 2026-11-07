@@ -163,24 +163,36 @@ export async function createTestUser(
     return null;
   }
 
-  // Check if user already exists
-  const existingUser = await findAuthUserByEmail(client, email);
-
-  if (existingUser) {
-    console.log(`createTestUser: User ${email} already exists, deleting first`);
-    await deleteTestUser(existingUser.id);
-  }
-
   // Create user with email confirmed.
   // app_metadata.e2e stops the #316 rescue-welcome trigger/Edge Function from
   // calling Resend on the shared Cloud project (E2E would burn the free quota).
-  const { data, error } = await client.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true, // Auto-confirm email
-    user_metadata: options?.metadata,
-    app_metadata: { e2e: true },
-  });
+  const create = () =>
+    client.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: options?.metadata,
+      app_metadata: { e2e: true },
+    });
+
+  // Create first. Looking the email up beforehand pages through every account
+  // in the project (up to 20 pages of 1000), and almost every email here is new,
+  // so the lookup only runs when the create says the email is taken.
+  let { data, error } = await create();
+
+  if (
+    error &&
+    /already (been )?registered|already exists/i.test(error.message)
+  ) {
+    const existingUser = await findAuthUserByEmail(client, email);
+    if (existingUser) {
+      console.log(
+        `createTestUser: User ${email} already exists, deleting first`
+      );
+      await deleteTestUser(existingUser.id);
+      ({ data, error } = await create());
+    }
+  }
 
   if (error) {
     console.error(
