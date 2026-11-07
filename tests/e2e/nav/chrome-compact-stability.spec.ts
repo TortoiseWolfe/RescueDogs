@@ -21,7 +21,19 @@ test('header chrome-compact flag settles and stays settled (#185)', async ({
 
   const row = page.locator('[data-chrome-compact]').first();
   await expect(row).toBeVisible();
-  await page.waitForTimeout(300);
+
+  // The flag legitimately flips false -> true when the session lands (the
+  // measure effect keys on `user`) and again if the webfont swaps in. Wait for
+  // both real preconditions instead of a blind 300ms (#240), then let the
+  // measure effect run its frame before sampling.
+  await expect(page.getByRole('link', { name: 'Messages' })).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      )
+  );
 
   const settled = await row.getAttribute('data-chrome-compact');
   const samples: (string | null)[] = [];
