@@ -187,6 +187,20 @@ describe('AdopterApplicationFlow draft', () => {
     expect(screen.getByText('Enter a whole number from 1 to 20')).toBeTruthy();
     expect(screen.queryByRole('heading', { name: 'New answers' })).toBeNull();
   });
+
+  it('waits for Review before showing a limit message on a new answer (#515)', () => {
+    renderFlow();
+    fireEvent.change(screen.getByLabelText(/Full name/), {
+      target: { value: 'J' },
+    });
+    expect(
+      screen.queryByText('Enter a name between 2 and 100 characters')
+    ).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Review application' }));
+    expect(
+      screen.getByText('Enter a name between 2 and 100 characters')
+    ).toBeTruthy();
+  });
 });
 
 const hasCurrentQuestion: ApplicationQuestion = {
