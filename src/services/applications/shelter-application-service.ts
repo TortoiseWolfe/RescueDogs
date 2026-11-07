@@ -12,7 +12,7 @@ import type {
   ShelterFlagRule,
   ShelterRole,
 } from '@/types/applications';
-import { normalizeTransportStates } from '@/lib/browse/transport';
+import { normalizeTransportStates } from '@/lib/browse/transport-states';
 
 const PET_EMBED = 'pets(id, name, species, breed, photo_url, status)';
 
