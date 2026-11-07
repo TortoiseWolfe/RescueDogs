@@ -72,9 +72,13 @@ test.describe('Payment Dashboard Real-Time Updates', () => {
       timeout: 5000,
     });
 
-    // Payment History heading should be visible
+    // Payment History heading should be visible. Two headings match: the
+    // page's "Step 4: Payment History" and, once the list has loaded, the
+    // component's own "Payment History". Which of them exists when the
+    // assertion runs depends on timing, so a bare locator tripped strict mode
+    // on Firefox. The first match is always the page's step heading.
     await expect(
-      page.getByRole('heading', { name: /Payment History/i })
+      page.getByRole('heading', { name: /Payment History/i }).first()
     ).toBeVisible();
   });
 
