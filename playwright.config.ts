@@ -67,6 +67,10 @@ const MSG_ISO_TIMEOUT = 180_000;
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
+const localSupabaseOnly = process.env.E2E_LOCAL_SUPABASE
+  ? undefined
+  : /@local-supabase/;
+
 export default defineConfig({
   testDir: './tests/e2e',
   /* Global setup runs once before all tests - validates prerequisites */
@@ -122,6 +126,11 @@ export default defineConfig({
     },
   },
 
+  /* Tests titled @local-supabase need Supabase Bot Protection (captcha) off, so
+   * they run only in the Local Supabase workflow, which sets
+   * E2E_LOCAL_SUPABASE. Excluded here, in the projects themselves, because
+   * Playwright runs a project's dependencies unfiltered and the command-line
+   * --grep-invert would not keep them out of the rate-limiting job. */
   /* Configure projects with ordered execution for rate-limiting isolation */
   /* Note: storageState is set per-project (setup uses base, others use authenticated) */
   projects: [
@@ -148,6 +157,7 @@ export default defineConfig({
       name: 'rate-limiting',
       testDir: './tests/e2e/auth',
       testMatch: /rate-limiting\.spec\.ts/,
+      grepInvert: localSupabaseOnly,
       use: {
         ...devices['Desktop Chrome'],
         storageState: './tests/e2e/fixtures/storage-state.json',
@@ -171,6 +181,7 @@ export default defineConfig({
       name: 'signup',
       testDir: './tests/e2e/auth',
       testMatch: /sign-up\.spec\.ts/,
+      grepInvert: localSupabaseOnly,
       dependencies: ['brute-force'],
       use: {
         ...devices['Desktop Chrome'],
