@@ -85,8 +85,9 @@ test.describe('WCAG AAA color-contrast-enhanced (violations only)', () => {
             runOnly: { type: 'rule', values: ['color-contrast-enhanced'] },
             resultTypes: ['violations', 'incomplete'],
             // #269: owner-approved nav labels on orange — white fill + navy shadow /
-            // stroke at rest, navy on hover. Axe measures flat fg/bg and cannot
-            // credit the shadow/stroke (same class as .brand-logo).
+            // stroke at rest. Axe measures flat fg/bg and cannot credit the
+            // shadow/stroke (same class as .brand-logo). The hovered/open state
+            // has no halo, so it is measured for real in the last describe block.
             exclude: ['.site-header .nav-role-trigger'],
           })
         );
@@ -122,5 +123,48 @@ test.describe('WCAG AAA color-contrast-enhanced (violations only)', () => {
         ).toHaveLength(0);
       });
     }
+  }
+});
+
+// The rest state is excluded above because axe cannot credit its stroke and
+// halo. Hover and open have neither, so measure them directly (#269).
+test.describe('WCAG AAA color-contrast-enhanced: hovered role-menu triggers', () => {
+  test.use({ viewport: { width: 1280, height: 1024 } });
+
+  for (const theme of THEMES) {
+    test(`${theme} - hovered triggers`, async ({ page }) => {
+      await page.addInitScript(
+        (t) => window.localStorage.setItem('theme', t),
+        theme
+      );
+      await page.goto('/', { waitUntil: 'networkidle' });
+      await page.waitForTimeout(3000);
+      await page.evaluate(axeSource);
+
+      const triggers = page.locator('.site-header .nav-role-trigger');
+      const count = await triggers.count();
+      expect(count).toBeGreaterThan(0);
+
+      for (let i = 0; i < count; i++) {
+        await triggers.nth(i).hover();
+        await page.waitForTimeout(300); // let the 150ms background transition finish
+
+        const results = await page.evaluate<AxeResults>(() =>
+          // @ts-expect-error - axe is injected as a global by the line above
+          axe.run(
+            { include: ['.site-header .nav-role-trigger-active'] },
+            {
+              runOnly: { type: 'rule', values: ['color-contrast-enhanced'] },
+              resultTypes: ['violations'],
+            }
+          )
+        );
+
+        expect(
+          results.violations.flatMap((v) => v.nodes.map((n) => n.html)),
+          `AAA violations on hovered trigger ${i} [${theme}]`
+        ).toHaveLength(0);
+      }
+    });
   }
 });
