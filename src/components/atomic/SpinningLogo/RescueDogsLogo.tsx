@@ -5,7 +5,7 @@ import Image from 'next/image';
  * The static Raised Paws mark.
  *
  * It pointed at `/rescuedogs-logo.svg`, which despite the filename was
- * ScriptHammer's artwork inherited at the fork (#233). The `alt` text already
+ * ScriptHammer's artwork inherited at the fork (#233). The `alt` text already rebrand:keep
  * said "Raised Paws Logo" — only the image was someone else's.
  */
 

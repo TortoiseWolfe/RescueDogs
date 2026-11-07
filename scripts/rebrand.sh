@@ -17,14 +17,20 @@
 #   --dry-run             Show what would change without modifying files
 #   --keep-cname          Do not update public/CNAME file (keep existing domain)
 #   --preserve-ssh        Keep SSH format for git remote (if currently SSH)
-#   --preserve-attribution Keep RescueDogs attribution link in Footer
+#   --preserve-attribution Keep the upstream attribution link in Footer
+#   --from NAME           Upstream name to replace (default: the upstream template)
 #   --help                Show this help message
 #
 # Exit Codes:
 #   0  Success
-#   1  Invalid arguments
+#   1  Invalid arguments (including a source name equal to the target name)
 #   2  Re-rebrand declined by user
 #   3  Git error (not a repo, git not installed)
+#   4  Upstream references remain after the rebrand
+#
+# Files and lines the rebrand never touches:
+#   scripts/rebrand.sh, CLAUDE.md, .specify/memory/constitution.md,
+#   and any line containing the marker  rebrand:keep
 #
 # Examples:
 #   ./scripts/rebrand.sh MyApp myuser "My awesome application"
@@ -60,17 +66,22 @@ KEEP_CNAME=false
 PRESERVE_SSH=false
 PRESERVE_ATTRIBUTION=false
 
-# Original project name to search for
-ORIGINAL_NAME="RescueDogs"
-ORIGINAL_NAME_LOWER="rescuedogs"
+# Upstream project name to search for. It is written as two literals joined
+# together so that none of this script's own replace passes can match it and
+# rewrite it into the fork's name (#375). Override it with --from.
+ORIGINAL_NAME="Script""Hammer"
+ORIGINAL_NAME_LOWER=""   # derived from ORIGINAL_NAME after argument parsing
 ORIGINAL_OWNER="TortoiseWolfe"
+
+# A line containing this marker is neither rewritten nor reported as a leftover.
+KEEP_MARKER="rebrand:keep"
 
 # =============================================================================
 # Helper Functions
 # =============================================================================
 
 show_help() {
-    sed -n '2,35p' "$0" | sed 's/^# //' | sed 's/^#//'
+    sed -n '2,40p' "$0" | sed 's/^# //' | sed 's/^#//'
     exit 0
 }
 
@@ -207,6 +218,68 @@ detect_previous_rebrand() {
 # File Operations
 # =============================================================================
 
+# Files the rebrand rewrites, NUL-delimited. One list feeds both the rewrite
+# and the leftover check, so they can never disagree. The script itself and the
+# two fork-owned notes files are excluded: they name the upstream on purpose.
+list_brandable_files() {
+    find "$REPO_ROOT" -type f \( \
+        -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \
+        -o -name "*.json" -o -name "*.md" -o -name "*.yml" -o -name "*.yaml" \
+        -o -name "*.sh" -o -name "*.html" -o -name "*.css" \
+        \) \
+        ! -path "*/node_modules/*" \
+        ! -path "*/.next/*" \
+        ! -path "*/out/*" \
+        ! -path "*/.git/*" \
+        ! -path "$REPO_ROOT/scripts/rebrand.sh" \
+        ! -path "$REPO_ROOT/CLAUDE.md" \
+        ! -path "$REPO_ROOT/.specify/memory/constitution.md" \
+        ! -name "pnpm-lock.yaml" \
+        ! -name "package-lock.json" \
+        -print0
+}
+
+# True if a file has an untagged line containing the search text (exact case)
+has_untagged_match() {
+    local search="$1"
+    local file="$2"
+    grep -v -F "$KEEP_MARKER" "$file" 2>/dev/null | grep -q -F "$search"
+}
+
+# After a real run: fail when the upstream name is still in the rewritten set.
+# Exact-case leftovers fail the run (exit 4); other casings only warn.
+check_residue() {
+    local leftovers=()
+    local warnings=()
+    local file rel
+
+    while IFS= read -r -d '' file; do
+        rel="${file#$REPO_ROOT/}"
+        if [ "$PRESERVE_ATTRIBUTION" = true ] && [[ "$file" == *"Footer"* ]]; then
+            continue
+        fi
+        if has_untagged_match "$ORIGINAL_NAME" "$file"; then
+            leftovers+=("$rel")
+        elif [[ "$rel" == src/* || "$rel" == public/* ]] && \
+            grep -v -F "$KEEP_MARKER" "$file" 2>/dev/null | grep -q -i -F "$ORIGINAL_NAME"; then
+            warnings+=("$rel")
+        fi
+    done < <(list_brandable_files)
+
+    if [ ${#warnings[@]} -gt 0 ]; then
+        log_warning "Other casings of \"$ORIGINAL_NAME\" are still in shipped files:"
+        printf '  %s\n' "${warnings[@]}"
+    fi
+
+    if [ ${#leftovers[@]} -gt 0 ]; then
+        log_error "\"$ORIGINAL_NAME\" is still in ${#leftovers[@]} file(s) after the rebrand:"
+        printf '  %s\n' "${leftovers[@]}" >&2
+        echo "Rewrite those lines by hand, or tag a line that should keep the name with: $KEEP_MARKER" >&2
+        return 1
+    fi
+    return 0
+}
+
 # Replace content in files
 replace_in_files() {
     local search="$1"
@@ -221,28 +294,17 @@ replace_in_files() {
                 continue
             fi
 
-            if grep -q "$search" "$file" 2>/dev/null; then
+            if has_untagged_match "$search" "$file"; then
                 if [ "$DRY_RUN" = true ]; then
                     log_verbose "[DRY-RUN] Would update: ${file#$REPO_ROOT/}"
                 else
-                    sed "${SED_INPLACE[@]}" "s|$search|$replace|g" "$file"
+                    sed "${SED_INPLACE[@]}" "/$KEEP_MARKER/!s|$search|$replace|g" "$file"
                     log_verbose "Updated: ${file#$REPO_ROOT/}"
                 fi
                 ((FILES_MODIFIED++)) || true
             fi
         fi
-    done < <(find "$REPO_ROOT" -type f \( \
-        -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \
-        -o -name "*.json" -o -name "*.md" -o -name "*.yml" -o -name "*.yaml" \
-        -o -name "*.sh" -o -name "*.html" -o -name "*.css" \
-        \) \
-        ! -path "*/node_modules/*" \
-        ! -path "*/.next/*" \
-        ! -path "*/out/*" \
-        ! -path "*/.git/*" \
-        ! -name "pnpm-lock.yaml" \
-        ! -name "package-lock.json" \
-        -print0)
+    done < <(list_brandable_files)
 }
 
 # Rename files containing original name
@@ -481,6 +543,14 @@ main() {
                 PRESERVE_ATTRIBUTION=true
                 shift
                 ;;
+            --from)
+                if [ $# -lt 2 ] || [ -z "$2" ]; then
+                    log_error "--from needs a name"
+                    exit 1
+                fi
+                ORIGINAL_NAME="$2"
+                shift 2
+                ;;
             -*)
                 log_error "Unknown option: $1"
                 echo "Use --help for usage information"
@@ -516,6 +586,16 @@ main() {
     if [ -z "$SANITIZED_NAME" ]; then
         log_error "Project name sanitizes to empty string"
         echo "Please provide a valid project name with at least one alphanumeric character"
+        exit 1
+    fi
+
+    # Lowercase form of the upstream name, now that --from has been read
+    ORIGINAL_NAME_LOWER=$(echo "$ORIGINAL_NAME" | tr '[:upper:]' '[:lower:]')
+
+    # A rebrand from a name to itself changes nothing and would still report success
+    if [ "$ORIGINAL_NAME" = "$DISPLAY_NAME" ] || [ "$ORIGINAL_NAME_LOWER" = "$SANITIZED_NAME" ]; then
+        log_error "Source and target names are identical (\"$ORIGINAL_NAME\"). Nothing to rebrand."
+        echo "Use --from NAME to say which upstream name to replace."
         exit 1
     fi
 
@@ -607,6 +687,11 @@ main() {
         echo -e "${YELLOW}DRY-RUN COMPLETE${NC} - No files were actually modified"
         echo "Run without --dry-run to apply changes"
     else
+        if ! check_residue; then
+            echo ""
+            echo -e "${RED}REBRAND INCOMPLETE${NC} - upstream references remain (see above)"
+            exit 4
+        fi
         echo -e "${GREEN}REBRAND COMPLETE${NC}"
         echo ""
         echo "Next steps:"

@@ -3,7 +3,7 @@
 **Purpose:** Capture the original product brainstorm, the strategic choice we made,
 and what is in active build vs intentionally deferred. Use this when onboarding,
 prioritizing features, or checking whether new work aligns with the rescue-first
-bet — not the full ScriptHammer template surface.
+bet — not the full ScriptHammer template surface. <!-- rebrand:keep -->
 
 **Related docs:**
 
@@ -576,9 +576,9 @@ organizations that keep animals and their people supported**.
 
 ---
 
-## ScriptHammer template vs RescueDogs product
+## ScriptHammer template vs RescueDogs product <!-- rebrand:keep -->
 
-RescueDogs is a **fork of ScriptHammer** (Next.js, Supabase, Docker, SpecKit).
+RescueDogs is a **fork of ScriptHammer** (Next.js, Supabase, Docker, SpecKit). <!-- rebrand:keep -->
 The template ships many features that are **infrastructure or carryover**, not
 part of the five-pillar rescue vision:
 

@@ -10,10 +10,10 @@ import { detectedConfig } from '@/config/project-detected';
  *
  * WHY THIS IS ONE LAYER AND NOT THREE (#233). It used to compose three images:
  * a static printing mallet behind, a rotating silver gear carrying a wordmark,
- * and script-tag brackets in front. All three were ScriptHammer's artwork,
+ * and script-tag brackets in front. All three were ScriptHammer's artwork, rebrand:keep
  * inherited at the fork and never replaced — `rescuedogs-logo.svg` was
  * byte-identical to upstream's mark and still carried the comment "Your
- * ScriptHammer logo with correct orientation and larger scale". A mallet and a
+ * ScriptHammer logo with correct orientation and larger scale". A mallet and a rebrand:keep
  * pair of angle brackets say "this is a code template"; they say nothing about
  * adopting a dog.
  *

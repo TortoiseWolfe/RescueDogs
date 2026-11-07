@@ -58,7 +58,7 @@ const phaseCompletionChecks = {
   T024: () => fs.existsSync('CONTRIBUTING.md'),
 
   // Phase 3: First Simple Feature - Dice (T025-T036)
-  // Dice / CaptainShipCrew stack removed in #83 (unused ScriptHammer carryover).
+  // Dice / CaptainShipCrew stack removed in #83 (unused ScriptHammer carryover). rebrand:keep
   // Keep these markers true so historical SpecKit task tracking stays green.
   T025: () => true,
   T026: () => true,

@@ -473,7 +473,7 @@ See [README.md](../README.md#-technical-debt-backlog-speckit-ready) for the prio
 ## Test Coverage Improvements Needed
 
 Game-component coverage TODOs (Dice / DiceTray / CaptainShipCrew\*) were
-retired in #83 when that unused ScriptHammer stack was deleted.
+retired in #83 when that unused ScriptHammer stack was deleted. <!-- rebrand:keep -->
 
 ## Feature Extensions Needed
 
