@@ -71,7 +71,25 @@ function generateSignUpEmail(prefix: string): string {
 // Check if email configuration is valid
 function isEmailConfigValid(): boolean {
   const baseEmail = process.env.TEST_USER_PRIMARY_EMAIL || '';
+  // A sink domain is enough on its own: sign-up addresses are built from it, and
+  // a local stack never mails anyone, so the seeded @example.com users are fine.
+  if (process.env.E2E_MAIL_SINK_DOMAIN) return true;
   return baseEmail.includes('@') && !baseEmail.includes('@example.com');
+}
+
+/**
+ * The two UI sign-up tests below tag themselves `@local-supabase`. Supabase Bot
+ * Protection (Turnstile) is on for the hosted project, and CI cannot get a live
+ * token, so e2e.yml leaves them out (`--grep-invert @local-supabase`) and the
+ * local Supabase lane runs them where captcha is off (#302). Reaching one
+ * against a captcha-enforcing project is a setup error, not a reason to skip.
+ */
+async function requireOpenCaptchaStack(): Promise<void> {
+  if (await isSupabaseCaptchaEnforced()) {
+    throw new Error(
+      'This test needs a Supabase project with Bot Protection off (the local stack); run it through the @local-supabase lane'
+    );
+  }
 }
 
 test.describe('Sign-up E2E Tests (Feature 027)', () => {
@@ -94,16 +112,12 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     }
   });
 
-  test('should complete sign-up with valid credentials', async ({ page }) => {
+  test('should complete sign-up with valid credentials @local-supabase', async ({
+    page,
+  }) => {
     // Production Turnstile does not solve on GitHub Actions IPs; anon signUp
     // without a token is rejected once Bot Protection is on (#302).
-    if (await isSupabaseCaptchaEnforced()) {
-      test.skip(
-        true,
-        'Supabase captcha enforced — UI sign-up cannot complete in CI without a live Turnstile token'
-      );
-      return;
-    }
+    await requireOpenCaptchaStack();
 
     // Generate email from TEST_USER_PRIMARY_EMAIL domain
     const testEmail = generateSignUpEmail('valid');
@@ -142,9 +156,7 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     if (hasError) {
       const errorText = await page.locator('.alert-error').textContent();
       console.log('Sign-up error:', errorText);
-      // Rate limiting or other temporary issues shouldn't fail the test permanently
-      test.skip(true, `Sign-up error: ${errorText}`);
-      return;
+      throw new Error(`Sign-up error: ${errorText}`);
     }
 
     if (!redirected) {
@@ -157,31 +169,21 @@ test.describe('Sign-up E2E Tests (Feature 027)', () => {
     console.log('Sign-up successful - redirected to:', url);
   });
 
-  test('should show error when signing up with existing email', async ({
+  test('should show error when signing up with existing email @local-supabase', async ({
     page,
   }) => {
-    if (await isSupabaseCaptchaEnforced()) {
-      test.skip(
-        true,
-        'Supabase captcha enforced — UI sign-up cannot complete in CI without a live Turnstile token'
-      );
-      return;
-    }
+    await requireOpenCaptchaStack();
 
-    // Skip if admin client not available
-    if (!isAdminClientAvailable()) {
-      test.skip(true, 'SUPABASE_SERVICE_ROLE_KEY not configured');
-      return;
-    }
+    // This test seeds its own user, so it needs the admin client.
+    expect(
+      isAdminClientAvailable(),
+      'SUPABASE_SERVICE_ROLE_KEY not configured'
+    ).toBe(true);
 
     // Create a user first
     const existingEmail = generateSignUpEmail('existing');
     const user = await createTestUser(existingEmail, DEFAULT_TEST_PASSWORD);
-
-    if (!user) {
-      test.skip(true, 'Could not create test user');
-      return;
-    }
+    expect(user, 'Could not create test user').toBeTruthy();
 
     createdEmails.push(existingEmail);
 
