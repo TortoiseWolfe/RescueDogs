@@ -73,6 +73,10 @@ const localSupabaseOnly = process.env.E2E_LOCAL_SUPABASE
 
 export default defineConfig({
   testDir: './tests/e2e',
+  /* Same exclusion for every project, so a @local-supabase test inside a
+   * general project (for example Remember Me in session-persistence) is left
+   * out of the hosted run instead of being collected and skipped. */
+  grepInvert: localSupabaseOnly,
   /* Global setup runs once before all tests - validates prerequisites */
   globalSetup: './tests/e2e/global-setup.ts',
   /* Run test files sequentially on CI to avoid parallel database contention.

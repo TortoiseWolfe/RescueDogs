@@ -214,6 +214,37 @@ jobs:
               sys.exit('sign-up lane: need >=6 passing tests with 0 failed, 0 flaky, 0 skipped')
           PY
 
+      - name: Remember Me E2E (needs the real sign-in form, so bot protection off)
+        run: |
+          # Tagged @local-supabase (#457). With the captcha on, the sign-in
+          # helper can only write a session and cannot tick Remember Me; here
+          # the real form runs. The admin step above wrote the signed-out
+          # storage state this spec starts from, hence --no-deps.
+          pnpm exec playwright test \
+            tests/e2e/auth/session-persistence.spec.ts \
+            --project=chromium-gen --no-deps \
+            --grep @local-supabase --reporter=line,json
+        env:
+          CI: 'true'
+          AUTH_SETUP_JOB: 'true'
+          SKIP_WEBSERVER: 'true'
+          BASE_URL: http://localhost:3000
+          E2E_LOCAL_SUPABASE: 'true'
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results-remember-me.json
+
+      - name: The Remember Me spec must have run, and none may be skipped
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          r = json.load(open('results-remember-me.json'))
+          s = r['stats']
+          print(f"expected={s['expected']} unexpected={s['unexpected']} flaky={s['flaky']} skipped={s['skipped']}")
+          ok = s['expected'] >= 1 and s['unexpected'] == 0 and s['flaky'] == 0 and s['skipped'] == 0
+          if not ok:
+              sys.exit('remember-me lane: need >=1 passing test with 0 failed, 0 flaky, 0 skipped')
+          PY
+
       - name: Dump stack logs on failure
         if: failure()
         run: docker compose --profile supabase logs --tail=200

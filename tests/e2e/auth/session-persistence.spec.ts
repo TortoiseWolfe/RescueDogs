@@ -38,7 +38,13 @@ test.describe('Session Persistence E2E', () => {
     await dismissCookieBanner(page);
   });
 
-  test('should extend session duration with Remember Me checked', async ({
+  // Tagged @local-supabase (#457). The hosted project enforces a captcha, so
+  // performSignIn can only write a session there and cannot tick the box; it
+  // now refuses rememberMe on that path, so this test would fail loudly if it
+  // ever ran against the hosted project. The Local Supabase workflow has the
+  // captcha off, so the real sign-in form runs and the checkbox is exercised.
+  // The hosted run leaves this test out (playwright.config.ts grepInvert).
+  test('should extend session duration with Remember Me checked @local-supabase', async ({
     page,
   }) => {
     // Sign in with Remember Me (already on sign-in page from beforeEach)
@@ -133,12 +139,12 @@ test.describe('Session Persistence E2E', () => {
     });
     const page = await context.newPage();
 
-    // Sign in with Remember Me
+    // Persistence across a restart does not depend on the checkbox (the app
+    // ignores it today, see #394), so do not claim Remember Me here: that
+    // would be refused when the session is injected under captcha.
     await page.goto('/sign-in', { waitUntil: 'domcontentloaded' });
     await dismissCookieBanner(page);
-    const result = await performSignIn(page, testEmail, testPassword, {
-      rememberMe: true,
-    });
+    const result = await performSignIn(page, testEmail, testPassword);
     if (!result.success) {
       await context.close();
       throw new Error(`Sign-in failed: ${result.error}`);
