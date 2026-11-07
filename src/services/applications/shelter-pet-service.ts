@@ -2,6 +2,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { OPEN_STATUSES } from '@/types/applications';
+import { PetPhotoService } from './pet-photo-service';
 import type {
   Pet,
   PetSex,
@@ -173,10 +174,26 @@ export class ShelterPetService {
   }
 
   async deletePet(petId: string): Promise<void> {
+    // The photo rows cascade away with the pet, so read their urls first and
+    // remove the files only after the delete succeeds (#372).
+    const [gallery, primary] = await Promise.all([
+      this.supabase.from('pet_photos').select('url').eq('pet_id', petId),
+      this.supabase
+        .from('pets')
+        .select('photo_url')
+        .eq('id', petId)
+        .maybeSingle(),
+    ]);
+    const urls = [
+      ...((gallery.data ?? []) as { url: string }[]).map((row) => row.url),
+      (primary.data as { photo_url?: string | null } | null)?.photo_url,
+    ];
+
     const { error } = await this.supabase.from('pets').delete().eq('id', petId);
 
     if (error) {
       throw new Error(`Failed to delete pet: ${error.message}`);
     }
+    await new PetPhotoService(this.supabase).removeStoredPhotos(urls);
   }
 }

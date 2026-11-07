@@ -2,6 +2,11 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PetPhoto } from '@/types/applications';
+import { extractPetPhotoPathFromUrl } from '@/lib/pet-photos/upload';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('pet-photos:service');
+const PET_PHOTO_BUCKET = 'pet-photos';
 
 export const MAX_PET_PHOTOS = 4;
 
@@ -101,9 +106,48 @@ export class PetPhotoService {
     };
   }
 
+  /**
+   * Delete the image files behind these public URLs from the `pet-photos`
+   * bucket (#372). Best effort: the database row is the source of truth, so a
+   * Storage failure is logged and never thrown. URLs that are empty or not in
+   * the bucket are skipped.
+   */
+  async removeStoredPhotos(
+    urls: ReadonlyArray<string | null | undefined>
+  ): Promise<void> {
+    const paths = [
+      ...new Set(
+        urls
+          .filter((url): url is string => Boolean(url))
+          .map((url) => extractPetPhotoPathFromUrl(url))
+          .filter(Boolean)
+      ),
+    ];
+    if (paths.length === 0) return;
+    try {
+      const { error } = await this.supabase.storage
+        .from(PET_PHOTO_BUCKET)
+        .remove(paths);
+      if (error) {
+        logger.warn('Could not remove pet photo files', {
+          error: error.message,
+          paths,
+        });
+      }
+    } catch (err) {
+      logger.warn('Could not remove pet photo files', { error: err, paths });
+    }
+  }
+
   async deletePhoto(photoId: string): Promise<void> {
     if (isLegacyPetPhotoId(photoId)) {
       const petId = photoId.slice('legacy-'.length);
+      // Read the url first: it is gone from the row once we null it.
+      const { data: current } = await this.supabase
+        .from('pets')
+        .select('photo_url')
+        .eq('id', petId)
+        .maybeSingle();
       const { error } = await this.supabase
         .from('pets')
         .update({ photo_url: null })
@@ -112,13 +156,17 @@ export class PetPhotoService {
       if (error) {
         throw new Error(`Failed to remove photo: ${error.message}`);
       }
+      await this.removeStoredPhotos([
+        (current as { photo_url?: string | null } | null)?.photo_url,
+      ]);
       return;
     }
 
-    const { error } = await this.supabase
+    const { data, error } = await this.supabase
       .from('pet_photos')
       .delete()
-      .eq('id', photoId);
+      .eq('id', photoId)
+      .select('url');
 
     if (error) {
       if (isPetPhotosTableMissing(error)) {
@@ -128,6 +176,9 @@ export class PetPhotoService {
       }
       throw new Error(`Failed to delete pet photo: ${error.message}`);
     }
+    await this.removeStoredPhotos(
+      ((data ?? []) as { url: string }[]).map((row) => row.url)
+    );
   }
 
   /**

@@ -216,30 +216,68 @@ describe('ShelterPetService', () => {
     ]);
   });
 
-  it('deletes a pet by id (#223)', async () => {
-    const builder: Record<string, unknown> = {};
-    const self = () => builder;
-    builder.delete = vi.fn(self);
-    builder.eq = vi.fn().mockResolvedValue({ error: null });
-    const supabase = { from: vi.fn().mockReturnValue(builder) } as any;
-    const service = new ShelterPetService(supabase);
-    await service.deletePet('pet-2');
-    expect(supabase.from).toHaveBeenCalledWith('pets');
-    expect(builder.delete).toHaveBeenCalled();
-    expect(builder.eq).toHaveBeenCalledWith('id', 'pet-2');
-  });
+  describe('deletePet (#223, #372)', () => {
+    const base = 'https://x.supabase.co/storage/v1/object/public/pet-photos';
 
-  it('throws when deletePet fails (#223)', async () => {
-    const builder: Record<string, unknown> = {};
-    const self = () => builder;
-    builder.delete = vi.fn(self);
-    builder.eq = vi.fn().mockResolvedValue({
-      error: { message: 'permission denied' },
+    /** One builder per table; each awaited chain resolves to that table's result. */
+    function setup(opts: {
+      photoRows?: { url: string }[];
+      petPhotoUrl?: string | null;
+      deleteError?: { message: string } | null;
+    }) {
+      const make = (result: { data: unknown; error: unknown }) => {
+        const b: Record<string, unknown> = {};
+        for (const m of ['select', 'delete', 'eq']) b[m] = vi.fn(() => b);
+        b.maybeSingle = vi.fn().mockResolvedValue(result);
+        b.then = (resolve: (r: unknown) => unknown) => resolve(result);
+        return b;
+      };
+      const petPhotos = make({ data: opts.photoRows ?? [], error: null });
+      const pets = make({ data: null, error: opts.deleteError ?? null });
+      pets.maybeSingle = vi.fn().mockResolvedValue({
+        data: { photo_url: opts.petPhotoUrl ?? null },
+        error: null,
+      });
+      const remove = vi.fn().mockResolvedValue({ error: null });
+      const supabase = {
+        from: vi.fn((table: string) =>
+          table === 'pet_photos' ? petPhotos : pets
+        ),
+        storage: { from: vi.fn().mockReturnValue({ remove }) },
+      } as any;
+      return { supabase, pets, remove };
+    }
+
+    it('deletes a pet by id', async () => {
+      const { supabase, pets } = setup({});
+      await new ShelterPetService(supabase).deletePet('pet-2');
+      expect(supabase.from).toHaveBeenCalledWith('pets');
+      expect(pets.delete).toHaveBeenCalled();
+      expect(pets.eq).toHaveBeenCalledWith('id', 'pet-2');
     });
-    const supabase = { from: vi.fn().mockReturnValue(builder) } as any;
-    const service = new ShelterPetService(supabase);
-    await expect(service.deletePet('pet-2')).rejects.toThrow(
-      /Failed to delete pet: permission denied/
-    );
+
+    it('throws when the delete fails, and keeps the files', async () => {
+      const { supabase, remove } = setup({
+        photoRows: [{ url: `${base}/s/p/1.webp` }],
+        deleteError: { message: 'permission denied' },
+      });
+      await expect(
+        new ShelterPetService(supabase).deletePet('pet-2')
+      ).rejects.toThrow(/Failed to delete pet: permission denied/);
+      expect(remove).not.toHaveBeenCalled();
+    });
+
+    it('removes every gallery file and the primary photo once the pet is gone', async () => {
+      const { supabase, remove } = setup({
+        photoRows: [
+          { url: `${base}/s/p/1.webp` },
+          { url: `${base}/s/p/2.webp` },
+        ],
+        petPhotoUrl: `${base}/s/p/1.webp`,
+      });
+      await new ShelterPetService(supabase).deletePet('pet-2');
+      expect(remove).toHaveBeenCalledTimes(1);
+      expect(remove).toHaveBeenCalledWith(['s/p/1.webp', 's/p/2.webp']);
+    });
   });
 });
