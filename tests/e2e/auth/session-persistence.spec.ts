@@ -294,10 +294,17 @@ test.describe('Session Persistence E2E', () => {
     // flaked from a stale client render while storage was empty, this would
     // diverge; if both fail together, the session survived sign-out (reading 1).
     if (authSynced) {
-      const sharedStorage = await page1.evaluate(() =>
-        JSON.stringify(window.localStorage)
-      );
-      expect(sharedStorage).not.toMatch(/"access_token":"[^"]/);
+      // The sign-out redirect can still be settling a second navigation when the
+      // URL and link assertions above pass, which destroys the page's execution
+      // context mid-evaluate ("Execution context was destroyed"). Re-read until
+      // a read lands on a settled document; the final value is still asserted.
+      await expect(async () => {
+        await page1.waitForLoadState('load');
+        const sharedStorage = await page1.evaluate(() =>
+          JSON.stringify(window.localStorage)
+        );
+        expect(sharedStorage).not.toMatch(/"access_token":"[^"]/);
+      }).toPass({ timeout: 15000 });
 
       await expect(async () => {
         await page2.reload({ waitUntil: 'domcontentloaded' });
