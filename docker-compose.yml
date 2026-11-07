@@ -230,6 +230,14 @@ services:
     profiles: [supabase]
     image: supabase/realtime:v2.34.47
     restart: unless-stopped
+    # Realtime reads the tenant name from the first label of the Host header.
+    # Kong must reach it as realtime-dev.supabase-realtime (the tenant that
+    # SEED_SELF_HOST creates), or every websocket join fails with
+    # TenantNotFound. Same alias the official Supabase self-hosting stack uses.
+    networks:
+      default:
+        aliases:
+          - realtime-dev.supabase-realtime
     depends_on:
       supabase-db:
         condition: service_healthy
