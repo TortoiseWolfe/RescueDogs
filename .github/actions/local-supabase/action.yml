@@ -41,6 +41,12 @@ runs:
         } >> "$GITHUB_ENV"
         if [ "$ADMIN_DEMO" = "true" ]; then
           echo "SUPABASE_ADMIN_URL=http://localhost:54321" >> "$GITHUB_ENV"
+        else
+          # .env names the Docker-internal host supabase-kong, which the runner
+          # cannot resolve. Set the variable empty so dotenv does not inject it
+          # and global-setup falls back to NEXT_PUBLIC_SUPABASE_URL. Empty also
+          # keeps the admin specs uncollected here, as before.
+          echo "SUPABASE_ADMIN_URL=" >> "$GITHUB_ENV"
         fi
 
     - name: Bring up local Supabase
