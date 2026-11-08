@@ -721,6 +721,17 @@ jobs:
           BASE_URL: http://localhost:3000
         run: pnpm exec playwright test --project=setup --reporter=list --timeout=180000
 
+      # #564: WebKit sometimes dies with "WebKit encountered an internal error".
+      # Sample the runner's memory every 5 seconds while the tests run, so the
+      # report step after the tests can say whether the runner ran short.
+      - name: Sample runner memory during the run
+        run: |
+          nohup bash -c 'while true; do
+            echo "$(date +%T) $(free -m | awk "/^Mem:/ {print \$3, \$7}") $(pgrep -fc ms-playwright || true)" >> "$RUNNER_TEMP/memlog.txt"
+            sleep 5
+          done' > /dev/null 2>&1 &
+          echo "memory sampler started"
+
       - name: Run E2E tests
         env:
           CI: true
@@ -744,6 +755,20 @@ jobs:
             --trace=on-first-retry \
             --no-deps \
             $WORKERS_FLAG
+      - name: Report runner memory and out-of-memory kills
+        if: always()
+        run: |
+          echo "columns: time, MB used, MB available, browser processes"
+          if [ -f "$RUNNER_TEMP/memlog.txt" ]; then
+            echo "samples: $(wc -l < "$RUNNER_TEMP/memlog.txt")"
+            echo "lowest available MB: $(awk '{print $3}' "$RUNNER_TEMP/memlog.txt" | sort -n | head -1)"
+            echo "highest used MB: $(awk '{print $2}' "$RUNNER_TEMP/memlog.txt" | sort -n | tail -1)"
+            echo "most browser processes at once: $(awk '{print $4}' "$RUNNER_TEMP/memlog.txt" | sort -n | tail -1)"
+          fi
+          echo "--- out-of-memory lines from the kernel log ---"
+          sudo dmesg 2>/dev/null | grep -i -E "out of memory|oom-kill|killed process" | tail -20 || true
+          echo "--- end ---"
+          free -m
       - name: Upload blob report
         if: always()
         uses: actions/upload-artifact@v6
@@ -863,6 +888,17 @@ jobs:
           BASE_URL: http://localhost:3000
         run: pnpm exec playwright test --project=setup --reporter=list --timeout=180000
 
+      # #564: WebKit sometimes dies with "WebKit encountered an internal error".
+      # Sample the runner's memory every 5 seconds while the tests run, so the
+      # report step after the tests can say whether the runner ran short.
+      - name: Sample runner memory during the run
+        run: |
+          nohup bash -c 'while true; do
+            echo "$(date +%T) $(free -m | awk "/^Mem:/ {print \$3, \$7}") $(pgrep -fc ms-playwright || true)" >> "$RUNNER_TEMP/memlog.txt"
+            sleep 5
+          done' > /dev/null 2>&1 &
+          echo "memory sampler started"
+
       - name: Run E2E tests
         env:
           CI: true
@@ -886,6 +922,20 @@ jobs:
             --trace=on-first-retry \
             --no-deps \
             $WORKERS_FLAG
+      - name: Report runner memory and out-of-memory kills
+        if: always()
+        run: |
+          echo "columns: time, MB used, MB available, browser processes"
+          if [ -f "$RUNNER_TEMP/memlog.txt" ]; then
+            echo "samples: $(wc -l < "$RUNNER_TEMP/memlog.txt")"
+            echo "lowest available MB: $(awk '{print $3}' "$RUNNER_TEMP/memlog.txt" | sort -n | head -1)"
+            echo "highest used MB: $(awk '{print $2}' "$RUNNER_TEMP/memlog.txt" | sort -n | tail -1)"
+            echo "most browser processes at once: $(awk '{print $4}' "$RUNNER_TEMP/memlog.txt" | sort -n | tail -1)"
+          fi
+          echo "--- out-of-memory lines from the kernel log ---"
+          sudo dmesg 2>/dev/null | grep -i -E "out of memory|oom-kill|killed process" | tail -20 || true
+          echo "--- end ---"
+          free -m
       - name: Upload blob report
         if: always()
         uses: actions/upload-artifact@v6
