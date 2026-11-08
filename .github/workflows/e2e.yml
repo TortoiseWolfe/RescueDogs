@@ -34,27 +34,22 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # Repo-wide mutex: every E2E run shares one Supabase project, and concurrent
-  # runs race each other's beforeAll cleanupOldMessages hooks (run 25769955636
-  # on 2026-05-13 was cancelled at 60 min after PR #88's run, started 3 min
-  # later, wiped its data). Serialize across all refs; do not cancel a running
-  # job to make room for a queued one.
-  group: e2e-supabase-${{ github.repository }}
-  cancel-in-progress: false
+  # Each job owns a throwaway database, so concurrent runs cannot wipe each
+  # other's data (the reason for the old repo-wide mutex, run 25769955636 on
+  # 2026-05-13). A newer push to the same pull request replaces its older run;
+  # pushes to main, the weekly run and manual runs are never cancelled.
+  group: e2e-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # GitHub's ubuntu-latest became Ubuntu 26.04 (Oct–Nov 2026). Playwright 1.55
 # has no Chromium/Firefox/WebKit builds for ubuntu26.04-x64, so `playwright
 # install` dies before any spec runs. Pin 24.04 until we upgrade Playwright
 # to >= 1.61 and re-check WebKit on 26.04.
 
-env:
-  # NOTE: the build + most jobs read these from `vars.*`. The per-browser REST
-  # health-check curls (see the `secrets.NEXT_PUBLIC_SUPABASE_*` usages below)
-  # read the SAME names from `secrets.*` — keep BOTH copies pointed at the same
-  # (current) Supabase project. They drifted apart during the 2026-06 backend
-  # cutover and silently failed the firefox/webkit jobs against the dead project.
-  NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+# No Supabase URL, key or test-user secret is read here any more. Every job
+# starts its own throwaway Supabase stack through .github/actions/local-supabase
+# (the same start and seed steps local-supabase.yml uses), so a test run never
+# touches the live database behind raisedpaws.com.
 
 jobs:
   # ============================================
@@ -146,6 +141,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Local Supabase address and public key (no database in this job)
+        uses: ./.github/actions/local-supabase
+        with:
+          start-stack: 'false'
 
       - name: Build application
         run: pnpm build
@@ -256,6 +256,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Local Supabase (start, migrate, seed users and rescue demo)
+        uses: ./.github/actions/local-supabase
+
       - name: Install Playwright (chromium only)
         run: |
           for i in 1 2 3; do
@@ -305,7 +308,7 @@ jobs:
 
           echo "serve is responding on http://localhost:3000"
 
-      - name: Run smoke tests (sign-up only - auth tests run after auth-setup)
+      - name: Run smoke tests (sign-up only)
         run: |
           pnpm exec playwright test \
             tests/e2e/auth/sign-up.spec.ts \
@@ -317,14 +320,6 @@ jobs:
           CI: true
           SKIP_WEBSERVER: true
           BASE_URL: http://localhost:3000
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
-          E2E_MAIL_SINK_DOMAIN: ${{ vars.E2E_MAIL_SINK_DOMAIN }}
-          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
-          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
-          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
-          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
-          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
 
       - name: Smoke test summary
         if: always()
@@ -357,6 +352,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Local Supabase (start, migrate, seed users and rescue demo)
+        uses: ./.github/actions/local-supabase
 
       - name: Install Playwright (chromium only)
         run: |
@@ -414,128 +412,14 @@ jobs:
           PLAYWRIGHT_BROWSER: chromium
           SKIP_WEBSERVER: true
           BASE_URL: http://localhost:3000
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
-          E2E_MAIL_SINK_DOMAIN: ${{ vars.E2E_MAIL_SINK_DOMAIN }}
-          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
-          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
-          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
-          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
-          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
 
   # ============================================
-  # STEP 4: Auth Setup (runs ONCE, shares state)
-  # ============================================
-  auth-setup:
-    name: Auth Setup
-    runs-on: ubuntu-24.04
-    needs: smoke
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 10.16.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: 20.x
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright (chromium only for auth)
-        run: |
-          for i in 1 2 3; do
-            pnpm exec playwright install --with-deps chromium && break
-            echo "Retry $i: playwright install failed, retrying in 10s..."
-            sleep 10
-          done
-
-      - name: Download build
-        uses: actions/download-artifact@v8
-        with:
-          name: build-output
-          path: out/
-
-      - name: Start server
-        run: |
-          set -euo pipefail
-          npx serve out -l 3000 > serve.log 2>&1 &
-          SERVE_PID=$!
-          echo "serve started, PID=$SERVE_PID"
-
-          # Brief grace period for the child to spawn; wait-on does the real polling.
-          sleep 2
-
-          # Verify serve didn't already exit (port in use, missing out/, etc.).
-          if ! kill -0 "$SERVE_PID" 2>/dev/null; then
-            echo "::error::serve exited immediately after launch"
-            echo "--- serve.log ---"
-            cat serve.log || true
-            exit 1
-          fi
-
-          # Explicit exit-code propagation. Don't rely on -e interacting cleanly
-          # with backgrounded jobs.
-          if ! npx wait-on http://localhost:3000 --timeout 60000 --verbose; then
-            echo "::error::wait-on timed out — serve never bound to port 3000 within 60s"
-            echo "--- serve.log ---"
-            cat serve.log || true
-            echo "--- listening sockets ---"
-            ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || true
-            echo "--- serve process state ---"
-            ps -fp "$SERVE_PID" 2>/dev/null || echo "serve process $SERVE_PID is gone"
-            echo "--- direct curl attempt ---"
-            curl -v --max-time 5 http://localhost:3000/ 2>&1 || true
-            exit 1
-          fi
-
-          echo "serve is responding on http://localhost:3000"
-
-      - name: Run auth setup
-        run: pnpm exec playwright test --project=setup --reporter=list --timeout=180000
-        env:
-          CI: true
-          AUTH_SETUP_JOB: true
-          SKIP_WEBSERVER: true
-          BASE_URL: http://localhost:3000
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
-          E2E_MAIL_SINK_DOMAIN: ${{ vars.E2E_MAIL_SINK_DOMAIN }}
-          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
-          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
-          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
-          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
-          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
-
-      - name: Upload auth state
-        uses: actions/upload-artifact@v6
-        with:
-          name: auth-state
-          # Include both the primary (USER_A / PRIMARY) and User B (TERTIARY)
-          # pre-authenticated fixtures. Multi-user messaging and security
-          # specs load storage-state-auth-b.json into a second browser
-          # context instead of calling performSignIn live, which cumulatively
-          # exceeded Supabase GoTrue's 5-attempt brute-force lockout.
-          path: |
-            tests/e2e/fixtures/storage-state-auth.json
-            tests/e2e/fixtures/storage-state-auth-b.json
-          retention-days: 1
-
-  # ============================================
-  # STEP 5: Full E2E tests (sharded, parallel)
+  # STEP 4: Full E2E tests (sharded, parallel; each shard has its own database)
   # ============================================
   e2e:
     name: E2E (${{ matrix.project }} ${{ matrix.shard }})
     runs-on: ubuntu-24.04
-    needs: [smoke, rate-limiting, auth-setup]
+    needs: [smoke, rate-limiting]
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -599,12 +483,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Local Supabase (start, migrate, seed users and rescue demo)
+        uses: ./.github/actions/local-supabase
+
       - name: Install Playwright browsers
         env:
           BROWSER: ${{ matrix.browser }}
         run: |
           for i in 1 2 3; do
-            pnpm exec playwright install --with-deps "$BROWSER" && break
+            pnpm exec playwright install --with-deps "$BROWSER" chromium && break
             echo "Retry $i: $BROWSER install failed, retrying in 10s..."
             sleep 10
           done
@@ -614,12 +501,6 @@ jobs:
         with:
           name: build-output
           path: out/
-
-      - name: Download auth state
-        uses: actions/download-artifact@v8
-        with:
-          name: auth-state
-          path: tests/e2e/fixtures/
 
       - name: Start server
         run: |
@@ -658,35 +539,13 @@ jobs:
         env:
           CI: true
 
-      - name: Prime Supabase connection pool
+      - name: Set up the test users' sessions and messaging keys (own database)
         env:
-          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-        run: |
-          # Wake Supabase free tier and warm the connection pool.
-          # Without this, the first query from each shard takes 10-30s.
-          curl -sf "${SUPABASE_URL}/rest/v1/user_profiles?select=id&limit=1" \
-            -H "apikey: ${SUPABASE_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_KEY}" \
-            > /dev/null 2>&1 || true
-          echo "✓ Supabase connection pool primed"
-
-      - name: Stagger shards within batch to reduce Supabase contention
-        env:
-          PROJECT: ${{ matrix.project }}
-          SHARD: ${{ matrix.shard }}
-        run: |
-          SHARD_NUM=$(echo "$SHARD" | cut -d/ -f1)
-          # max-parallel: 8 already serializes browsers. Within each batch
-          # of 8, stagger by 5-10 seconds to spread the initial connection
-          # burst on Supabase.
-          if echo "$PROJECT" | grep -q "msg"; then
-            DELAY=$(((SHARD_NUM - 1) * 10))
-          else
-            DELAY=$(((SHARD_NUM - 1) * 5))
-          fi
-          echo "$PROJECT shard $SHARD_NUM: waiting ${DELAY}s"
-          sleep $DELAY
+          CI: true
+          AUTH_SETUP_JOB: true
+          SKIP_WEBSERVER: true
+          BASE_URL: http://localhost:3000
+        run: pnpm exec playwright test --project=setup --reporter=list --timeout=180000
 
       - name: Run E2E tests (${{ matrix.project }} ${{ matrix.shard }})
         env:
@@ -694,14 +553,6 @@ jobs:
           SKIP_WEBSERVER: true
           BASE_URL: http://localhost:3000
           DEBUG: pw:api
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
-          E2E_MAIL_SINK_DOMAIN: ${{ vars.E2E_MAIL_SINK_DOMAIN }}
-          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
-          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
-          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
-          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
-          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
           PROJECT: ${{ matrix.project }}
           SHARD: ${{ matrix.shard }}
           # Per-job worker override (only set for the *-msg-iso slice). Empty
@@ -712,11 +563,9 @@ jobs:
           # matrix value, never user input.
           FAIL_ON_FLAKY: ${{ matrix.failOnFlaky }}
         run: |
-          # --no-deps: skip the 'setup' project dependency. The auth-setup
-          # job already ran setup once (with chromium) and uploaded the
-          # auth-state artifact, which we downloaded above. Without --no-deps,
-          # Playwright tries to re-run setup with the matrix browser, which
-          # fails because firefox/webkit shards don't install chromium.
+          # --no-deps: the 'setup' project already ran in the step above, once,
+          # against this job's own database. Without --no-deps Playwright would
+          # run it a second time before the shard.
           WORKERS_FLAG=""
           if [ -n "$WORKERS" ]; then
             WORKERS_FLAG="--workers=$WORKERS"
@@ -751,7 +600,7 @@ jobs:
     runs-on: ubuntu-24.04
     # Lever 1: depends only on the build/auth artifacts (same as e2e/chromium),
     # NOT on the chromium job — so all 3 browsers run in parallel.
-    needs: [smoke, rate-limiting, auth-setup, ci-config-changed]
+    needs: [smoke, rate-limiting, ci-config-changed]
     # Lever 2 (#294): chromium gates every PR *and* every push to main; firefox
     # + webkit run on the weekly cron and workflow_dispatch. Pushes to main used
     # to run all 24 shards, which was 71% of all shard-runs and the reason Supabase
@@ -770,7 +619,6 @@ jobs:
     if: >-
       needs.smoke.result == 'success' &&
       needs['rate-limiting'].result == 'success' &&
-      needs['auth-setup'].result == 'success' &&
       (github.event_name == 'schedule' ||
        github.event_name == 'workflow_dispatch' ||
        contains(github.event.pull_request.labels.*.name, 'full-e2e') ||
@@ -812,12 +660,15 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Local Supabase (start, migrate, seed users and rescue demo)
+        uses: ./.github/actions/local-supabase
       - name: Install Playwright browsers
         env:
           BROWSER: ${{ matrix.browser }}
         run: |
           for i in 1 2 3; do
-            pnpm exec playwright install --with-deps "$BROWSER" && break
+            pnpm exec playwright install --with-deps "$BROWSER" chromium && break
             echo "Retry $i: $BROWSER install failed, retrying in 10s..."
             sleep 10
           done
@@ -826,11 +677,6 @@ jobs:
         with:
           name: build-output
           path: out/
-      - name: Download auth state
-        uses: actions/download-artifact@v8
-        with:
-          name: auth-state
-          path: tests/e2e/fixtures/
       - name: Start server
         run: |
           set -euo pipefail
@@ -867,41 +713,31 @@ jobs:
           echo "serve is responding on http://localhost:3000"
         env:
           CI: true
-      - name: Prime Supabase connection pool
+      - name: Set up the test users' sessions and messaging keys (own database)
         env:
-          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          CI: true
+          AUTH_SETUP_JOB: true
+          SKIP_WEBSERVER: true
+          BASE_URL: http://localhost:3000
+        run: pnpm exec playwright test --project=setup --reporter=list --timeout=180000
+
+      # #564: WebKit sometimes dies with "WebKit encountered an internal error".
+      # Sample the runner's memory every 5 seconds while the tests run, so the
+      # report step after the tests can say whether the runner ran short.
+      - name: Sample runner memory during the run
         run: |
-          curl -sf "${SUPABASE_URL}/rest/v1/user_profiles?select=id&limit=1" \
-            -H "apikey: ${SUPABASE_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_KEY}" \
-            > /dev/null 2>&1 || true
-      - name: Stagger shards within batch
-        env:
-          PROJECT: ${{ matrix.project }}
-          SHARD: ${{ matrix.shard }}
-        run: |
-          SHARD_NUM=$(echo "$SHARD" | cut -d/ -f1)
-          if echo "$PROJECT" | grep -q "msg"; then
-            DELAY=$(((SHARD_NUM - 1) * 10))
-          else
-            DELAY=$(((SHARD_NUM - 1) * 5))
-          fi
-          sleep $DELAY
+          nohup bash -c 'while true; do
+            echo "$(date +%T) $(free -m | awk "/^Mem:/ {print \$3, \$7}") $(pgrep -fc ms-playwright || true)" >> "$RUNNER_TEMP/memlog.txt"
+            sleep 5
+          done' > /dev/null 2>&1 &
+          echo "memory sampler started"
+
       - name: Run E2E tests
         env:
           CI: true
           SKIP_WEBSERVER: true
           BASE_URL: http://localhost:3000
           DEBUG: pw:api
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
-          E2E_MAIL_SINK_DOMAIN: ${{ vars.E2E_MAIL_SINK_DOMAIN }}
-          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
-          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
-          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
-          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
-          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
           PROJECT: ${{ matrix.project }}
           SHARD: ${{ matrix.shard }}
           # Per-job worker override (set only for the *-msg-iso slice). Empty
@@ -919,6 +755,20 @@ jobs:
             --trace=on-first-retry \
             --no-deps \
             $WORKERS_FLAG
+      - name: Report runner memory and out-of-memory kills
+        if: always()
+        run: |
+          echo "columns: time, MB used, MB available, browser processes"
+          if [ -f "$RUNNER_TEMP/memlog.txt" ]; then
+            echo "samples: $(wc -l < "$RUNNER_TEMP/memlog.txt")"
+            echo "lowest available MB: $(awk '{print $3}' "$RUNNER_TEMP/memlog.txt" | sort -n | head -1)"
+            echo "highest used MB: $(awk '{print $2}' "$RUNNER_TEMP/memlog.txt" | sort -n | tail -1)"
+            echo "most browser processes at once: $(awk '{print $4}' "$RUNNER_TEMP/memlog.txt" | sort -n | tail -1)"
+          fi
+          echo "--- out-of-memory lines from the kernel log ---"
+          sudo dmesg 2>/dev/null | grep -i -E "out of memory|oom-kill|killed process" | tail -20 || true
+          echo "--- end ---"
+          free -m
       - name: Upload blob report
         if: always()
         uses: actions/upload-artifact@v6
@@ -934,14 +784,13 @@ jobs:
     name: E2E (${{ matrix.project }} ${{ matrix.shard }})
     runs-on: ubuntu-24.04
     # Lever 1: depends only on build/auth artifacts, NOT firefox — all 3 parallel.
-    needs: [smoke, rate-limiting, auth-setup, ci-config-changed]
+    needs: [smoke, rate-limiting, ci-config-changed]
     # Lever 2 (#294): see e2e-firefox above — skipped on PRs *and* on pushes to
     # main (chromium gates both); runs on the weekly cron, workflow_dispatch, the
     # `full-e2e` label, and any PR that edits the browser matrix.
     if: >-
       needs.smoke.result == 'success' &&
       needs['rate-limiting'].result == 'success' &&
-      needs['auth-setup'].result == 'success' &&
       (github.event_name == 'schedule' ||
        github.event_name == 'workflow_dispatch' ||
        contains(github.event.pull_request.labels.*.name, 'full-e2e') ||
@@ -978,12 +827,15 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Local Supabase (start, migrate, seed users and rescue demo)
+        uses: ./.github/actions/local-supabase
       - name: Install Playwright browsers
         env:
           BROWSER: ${{ matrix.browser }}
         run: |
           for i in 1 2 3; do
-            pnpm exec playwright install --with-deps "$BROWSER" && break
+            pnpm exec playwright install --with-deps "$BROWSER" chromium && break
             echo "Retry $i: $BROWSER install failed, retrying in 10s..."
             sleep 10
           done
@@ -992,11 +844,6 @@ jobs:
         with:
           name: build-output
           path: out/
-      - name: Download auth state
-        uses: actions/download-artifact@v8
-        with:
-          name: auth-state
-          path: tests/e2e/fixtures/
       - name: Start server
         run: |
           set -euo pipefail
@@ -1033,41 +880,31 @@ jobs:
           echo "serve is responding on http://localhost:3000"
         env:
           CI: true
-      - name: Prime Supabase connection pool
+      - name: Set up the test users' sessions and messaging keys (own database)
         env:
-          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          CI: true
+          AUTH_SETUP_JOB: true
+          SKIP_WEBSERVER: true
+          BASE_URL: http://localhost:3000
+        run: pnpm exec playwright test --project=setup --reporter=list --timeout=180000
+
+      # #564: WebKit sometimes dies with "WebKit encountered an internal error".
+      # Sample the runner's memory every 5 seconds while the tests run, so the
+      # report step after the tests can say whether the runner ran short.
+      - name: Sample runner memory during the run
         run: |
-          curl -sf "${SUPABASE_URL}/rest/v1/user_profiles?select=id&limit=1" \
-            -H "apikey: ${SUPABASE_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_KEY}" \
-            > /dev/null 2>&1 || true
-      - name: Stagger shards within batch
-        env:
-          PROJECT: ${{ matrix.project }}
-          SHARD: ${{ matrix.shard }}
-        run: |
-          SHARD_NUM=$(echo "$SHARD" | cut -d/ -f1)
-          if echo "$PROJECT" | grep -q "msg"; then
-            DELAY=$(((SHARD_NUM - 1) * 10))
-          else
-            DELAY=$(((SHARD_NUM - 1) * 5))
-          fi
-          sleep $DELAY
+          nohup bash -c 'while true; do
+            echo "$(date +%T) $(free -m | awk "/^Mem:/ {print \$3, \$7}") $(pgrep -fc ms-playwright || true)" >> "$RUNNER_TEMP/memlog.txt"
+            sleep 5
+          done' > /dev/null 2>&1 &
+          echo "memory sampler started"
+
       - name: Run E2E tests
         env:
           CI: true
           SKIP_WEBSERVER: true
           BASE_URL: http://localhost:3000
           DEBUG: pw:api
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          TEST_USER_PRIMARY_EMAIL: ${{ vars.TEST_USER_PRIMARY_EMAIL }}
-          E2E_MAIL_SINK_DOMAIN: ${{ vars.E2E_MAIL_SINK_DOMAIN }}
-          TEST_USER_PRIMARY_PASSWORD: ${{ secrets.TEST_USER_PRIMARY_PASSWORD }}
-          TEST_USER_SECONDARY_EMAIL: ${{ vars.TEST_USER_SECONDARY_EMAIL }}
-          TEST_USER_SECONDARY_PASSWORD: ${{ secrets.TEST_USER_SECONDARY_PASSWORD }}
-          TEST_USER_TERTIARY_EMAIL: ${{ vars.TEST_USER_TERTIARY_EMAIL }}
-          TEST_USER_TERTIARY_PASSWORD: ${{ secrets.TEST_USER_TERTIARY_PASSWORD }}
           PROJECT: ${{ matrix.project }}
           SHARD: ${{ matrix.shard }}
           # Per-job worker override (set only for the *-msg-iso slice). Empty
@@ -1085,6 +922,20 @@ jobs:
             --trace=on-first-retry \
             --no-deps \
             $WORKERS_FLAG
+      - name: Report runner memory and out-of-memory kills
+        if: always()
+        run: |
+          echo "columns: time, MB used, MB available, browser processes"
+          if [ -f "$RUNNER_TEMP/memlog.txt" ]; then
+            echo "samples: $(wc -l < "$RUNNER_TEMP/memlog.txt")"
+            echo "lowest available MB: $(awk '{print $3}' "$RUNNER_TEMP/memlog.txt" | sort -n | head -1)"
+            echo "highest used MB: $(awk '{print $2}' "$RUNNER_TEMP/memlog.txt" | sort -n | tail -1)"
+            echo "most browser processes at once: $(awk '{print $4}' "$RUNNER_TEMP/memlog.txt" | sort -n | tail -1)"
+          fi
+          echo "--- out-of-memory lines from the kernel log ---"
+          sudo dmesg 2>/dev/null | grep -i -E "out of memory|oom-kill|killed process" | tail -20 || true
+          echo "--- end ---"
+          free -m
       - name: Upload blob report
         if: always()
         uses: actions/upload-artifact@v6

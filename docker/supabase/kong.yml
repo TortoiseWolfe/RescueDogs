@@ -122,7 +122,7 @@ services:
 
   # ── Realtime ─────────────────────────────────────────────────────────
   - name: realtime-v1-ws
-    url: http://supabase-realtime:4000/socket
+    url: http://realtime-dev.supabase-realtime:4000/socket
     protocol: ws
     routes:
       - name: realtime-v1-ws
@@ -139,7 +139,7 @@ services:
           allow: [admin, anon]
 
   - name: realtime-v1-rest
-    url: http://supabase-realtime:4000/api
+    url: http://realtime-dev.supabase-realtime:4000/api
     routes:
       - name: realtime-v1-rest
         strip_path: true
