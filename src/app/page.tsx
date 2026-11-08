@@ -34,7 +34,7 @@ const STEPS = [
     number: '2',
     title: 'Apply Online',
     detail: 'Send one application and track every update in real time.',
-    bg: 'bg-[#f97316] text-white',
+    bg: 'bg-accent text-accent-content',
   },
   {
     number: '3',
@@ -234,14 +234,14 @@ export default function Home() {
         aria-labelledby="live-loop-heading"
         className="bg-base-100 px-4 pb-12 sm:px-6 lg:px-8"
       >
-        <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#f97316] p-8 text-white shadow-2xl sm:p-10">
+        <div className="bg-accent text-accent-content mx-auto max-w-6xl rounded-[2rem] p-8 shadow-2xl sm:p-10">
           <h2
             id="live-loop-heading"
             className="font-display text-2xl font-bold tracking-tight sm:text-3xl"
           >
             Want to see the live rescue loop?
           </h2>
-          <p className="mt-3 w-full text-base font-semibold text-[#172554] sm:text-lg">
+          <p className="mt-3 w-full text-base font-semibold sm:text-lg">
             Choose the adopter or shelter door, sign in with a prefilled demo
             account, then walk the real loop: submit or review an application,
             move statuses in the shelter pipeline, and watch updates sync live
