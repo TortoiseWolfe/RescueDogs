@@ -5,10 +5,9 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { ApplicationService } from '@/services/applications';
 import type { BrowsePetDetail, PetSpecies } from '@/types/applications';
-import { formatPetAgeLabel } from '@/lib/pet-age';
 import { formatPetSexLabel } from '@/lib/pet-sex';
 import { petDetailPath, speciesBrowsePath } from '@/lib/browse/pet-links';
-import { locationLabel } from './browse-labels';
+import { basicsParts, locationLabel } from './browse-labels';
 import { transportStatesSummary } from '@/lib/browse/transport';
 import PetDetailSearchParamsReader from './PetDetailSearchParamsReader';
 import type { SpeciesBrowseKind } from './SpeciesBrowseView';
@@ -37,16 +36,6 @@ function galleryUrls(pet: BrowsePetDetail): string[] {
   if (fromGallery.length > 0) return fromGallery;
   if (pet.photo_url) return [pet.photo_url];
   return [];
-}
-
-function traitsLine(pet: BrowsePetDetail): string {
-  const parts = [
-    pet.breed,
-    formatPetSexLabel(pet.sex),
-    pet.size,
-    formatPetAgeLabel(pet.age_years),
-  ].filter(Boolean);
-  return parts.length > 0 ? parts.join(' · ') : 'Details coming soon';
 }
 
 function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
@@ -149,6 +138,9 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
 
   const photos = galleryUrls(pet);
   const place = locationLabel(pet);
+  const basics = basicsParts(pet);
+  const sex = formatPetSexLabel(pet.sex);
+  const hasFacts = Boolean(basics.breed || sex || basics.size || basics.age);
   const shelterName = pet.shelters?.name?.trim() ?? null;
   const transportSummary = transportStatesSummary(pet.shelters);
   const shelterListingHref = speciesBrowsePath(dbSpecies, pet.shelter_id);
@@ -173,9 +165,47 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
             <h1 className="font-display mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
               {pet.name}
             </h1>
-            <p className="text-base-content/80 mt-2 text-lg">
-              {traitsLine(pet)}
-            </p>
+            {hasFacts ? (
+              <dl className="text-base-content/80 mt-2 leading-tight">
+                {basics.breed ? (
+                  <div>
+                    <dt className="sr-only">Breed</dt>
+                    <dd className="text-sm font-medium">{basics.breed}</dd>
+                  </div>
+                ) : null}
+                {sex ? (
+                  <div>
+                    <dt className="sr-only">Sex</dt>
+                    <dd className="text-xs">
+                      <span className="text-base-content/50">Sex: </span>
+                      {sex}
+                    </dd>
+                  </div>
+                ) : null}
+                {basics.size ? (
+                  <div>
+                    <dt className="sr-only">Size</dt>
+                    <dd className="text-xs">
+                      <span className="text-base-content/50">Size: </span>
+                      {basics.size}
+                    </dd>
+                  </div>
+                ) : null}
+                {basics.age ? (
+                  <div>
+                    <dt className="sr-only">Age</dt>
+                    <dd className="text-xs">
+                      <span className="text-base-content/50">Age: </span>
+                      {basics.age}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            ) : (
+              <p className="text-base-content/80 mt-2 text-sm">
+                Details coming soon
+              </p>
+            )}
             {shelterName && (
               <p className="text-base-content/70 mt-2 text-sm">
                 From{' '}
