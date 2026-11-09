@@ -22,7 +22,8 @@
   .animate-spin,
   .animate-bounce,
   .animate-pulse,
-  .animate-ping {
+  .animate-ping,
+  .hero-float {
     animation: none !important;
   }
 }
@@ -30,6 +31,7 @@
 [data-reduce-motion='true'] .animate-spin,
 [data-reduce-motion='true'] .animate-bounce,
 [data-reduce-motion='true'] .animate-pulse,
-[data-reduce-motion='true'] .animate-ping {
+[data-reduce-motion='true'] .animate-ping,
+[data-reduce-motion='true'] .hero-float {
   animation: none !important;
 }

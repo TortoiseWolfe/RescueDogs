@@ -398,6 +398,11 @@ body {
   }
 }
 
+/* Homepage hero: the pre-#518 bob. A named class so reduced-motion can stop it. */
+.hero-float {
+  animation: floaty 5s ease-in-out infinite;
+}
+
 h1,
 h2,
 h3,

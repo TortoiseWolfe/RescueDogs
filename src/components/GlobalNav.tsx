@@ -374,9 +374,9 @@ export function GlobalNav() {
     <>
       <header className="site-header bg-primary text-primary-content sticky top-0 z-50">
         {/* Below lg: logo + Raised Paws left; Messages / hamburger / theme right.
-            No chrome Sign In (hamburger Account). lg+: role band unchanged (#132).
-            Desktop: no lg:container — full-width row with side buffer so brand
-            stays left and chrome stays right on wide screens (#148). */}
+            No chrome Sign In (hamburger Account). lg+: role titles centered on
+            the page (#132). Desktop: no lg:container — full-width row with side
+            buffer so brand stays left and chrome stays right (#148). */}
         <nav
           className="mx-auto w-full px-2 max-lg:pr-1 lg:px-6 lg:pr-6 xl:px-8"
           aria-label="Main"
@@ -426,31 +426,6 @@ export function GlobalNav() {
                   />
                 </span>
               </Link>
-            </div>
-
-            <div
-              className="hidden min-w-0 flex-1 self-stretch lg:block"
-              aria-hidden="true"
-            />
-            <div className="hidden self-stretch lg:flex lg:items-center lg:pr-3">
-              <div className="-ml-5 flex min-h-11 items-center gap-1 px-2">
-                <RoleDropdown
-                  prefixWord="Browse"
-                  accentWord="Pets"
-                  links={browseMenuLinks}
-                  className="mr-2 -ml-1"
-                />
-                <RoleDropdown
-                  prefixWord="For"
-                  accentWord="Adopters"
-                  links={desktopAdopterLinks}
-                />
-                <RoleDropdown
-                  prefixWord="For"
-                  accentWord="Shelters"
-                  links={desktopShelterLinks}
-                />
-              </div>
             </div>
 
             {/* Orange chrome — flush right; hamburger left of theme (#132). */}
@@ -836,6 +811,29 @@ export function GlobalNav() {
             </div>
           </div>
         </nav>
+        {/* Role titles sit on the page center. The bar ignores clicks so the
+            logo and right-side icons stay usable. */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 hidden h-16 items-center justify-center lg:flex">
+          <div className="pointer-events-auto flex min-h-11 items-center gap-1 px-2">
+            <RoleDropdown
+              prefixWord="Browse"
+              accentWord="Pets"
+              links={browseMenuLinks}
+              // 1px right of the old mr-2 / -ml-1 optical gap.
+              className="mr-[7px] -ml-[3px]"
+            />
+            <RoleDropdown
+              prefixWord="For"
+              accentWord="Adopters"
+              links={desktopAdopterLinks}
+            />
+            <RoleDropdown
+              prefixWord="For"
+              accentWord="Shelters"
+              links={desktopShelterLinks}
+            />
+          </div>
+        </div>
       </header>
 
       {messagesSignInOpen && (

@@ -145,9 +145,9 @@ export default function Home() {
               - Photo size: `max-w-md` / `xl:max-w-[640px]` on the column
           */}
           <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 xl:-mt-8 xl:max-w-[640px] xl:items-stretch">
-            <div className="relative aspect-[4/3] w-full xl:mt-2">
-              <div className="absolute inset-0 rotate-1 rounded-[1.5rem] border-4 border-[#f97316] bg-white shadow-xl" />
-              <div className="absolute inset-1 rotate-1 overflow-hidden rounded-[1.25rem]">
+            <div className="hero-float relative aspect-[4/3] w-full xl:mt-2">
+              <div className="absolute inset-0 rotate-1 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl sm:rotate-3" />
+              <div className="absolute inset-2 rotate-1 overflow-hidden rounded-[1.625rem] sm:rotate-3">
                 <Image
                   src={`${detectedConfig.basePath}/hero-held-paws.png`}
                   alt="A smiling adopter with a rescued dog and cat in a sunny park"

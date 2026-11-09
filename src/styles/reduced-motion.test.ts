@@ -39,6 +39,10 @@ describe('reduced-motion.css', () => {
     }
   });
 
+  it('stops the homepage hero bob under both triggers', () => {
+    expect(css.match(/\.hero-float/g)?.length).toBeGreaterThanOrEqual(2);
+  });
+
   it('disables the animation (animation: none) under both triggers', () => {
     // Both selector blocks must set animation: none. Counting twice is the
     // simplest way to assert the rule appears in both branches without
