@@ -14,15 +14,15 @@ export const metadata: Metadata = {
 export default function ForSheltersPage() {
   return (
     <main className="bg-base-100 min-h-full">
-      <section className="bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-20">
+      <section className="page-hero px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
         <div className="mx-auto max-w-3xl text-center lg:text-left">
-          <p className="font-friendly text-sm font-bold tracking-wide text-[#f97316] uppercase">
+          <p className="hero-subcopy font-friendly text-sm font-bold tracking-wide uppercase">
             For Shelters &amp; Rescues
           </p>
           <h1 className="font-display mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
             A simple pipeline that keeps adopters in the loop
           </h1>
-          <p className="mt-4 text-lg leading-relaxed text-white/90 sm:text-xl">
+          <p className="mt-4 text-lg leading-relaxed opacity-90 sm:text-xl">
             Whether you run a brick-and-mortar shelter or a foster-based rescue,
             Raised Paws is your anti-ghosting adoption platform: one application
             in, a clear pipeline, and live status for applicants. So your team
@@ -39,7 +39,7 @@ export default function ForSheltersPage() {
               Try Demo
             </Link>
           </div>
-          <p className="mt-4 text-sm text-white/80">
+          <p className="mt-4 text-sm">
             Create an account, then create your shelter or rescue at the shelter
             portal to list pets. Or email{' '}
             <a

@@ -116,6 +116,28 @@
   --brand-ink: #f97316;
 }
 
+/* Public page heroes: cream in light, deep navy in dark. The dark page
+ * itself stays near-black, so the navy band is what sets the hero apart. */
+.page-hero {
+  background-color: var(--color-base-200);
+  color: var(--color-base-content);
+}
+
+[data-theme='trusted-care-dark'] .page-hero {
+  background-color: #172554;
+  color: #f8fafc;
+}
+
+/* Accent line on a page hero. --brand-ink is short of 7:1 on both hero
+ * surfaces (6.44:1 light, 6.49:1 dark). 8.26:1 light, 8.71:1 dark. */
+.hero-subcopy {
+  color: #7c2d12;
+}
+
+[data-theme='trusted-care-dark'] .hero-subcopy {
+  color: #fdba74;
+}
+
 /*
  * #291 — Adopter StatusTimeline steps (dark only).
  * trusted-care-dark sets --color-base-300 and --color-primary to the same
@@ -145,7 +167,7 @@
 
 [data-theme='trusted-care-light'] .btn,
 [data-theme='trusted-care-dark'] .btn {
-  font-family: var(--font-fredoka), var(--font-nunito), system-ui, sans-serif;
+  font-family: var(--font-nunito), system-ui, sans-serif;
   font-weight: 600;
   box-shadow:
     0 4px 10px color-mix(in oklch, var(--color-primary) 14%, transparent),
@@ -328,9 +350,7 @@
   --font-sans:
     var(--font-nunito), system-ui, -apple-system, BlinkMacSystemFont,
     'Segoe UI', sans-serif;
-  --font-display:
-    var(--font-nunito), system-ui, -apple-system, BlinkMacSystemFont,
-    'Segoe UI', sans-serif;
+  --font-display: var(--font-fraunces), Georgia, 'Times New Roman', serif;
   --font-friendly:
     var(--font-nunito), system-ui, -apple-system, BlinkMacSystemFont,
     'Segoe UI', sans-serif;

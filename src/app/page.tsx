@@ -19,7 +19,7 @@ const STATS = [
   {
     value: '4',
     label: 'shelters & rescues',
-    tone: 'text-[#5da8e0]',
+    tone: 'text-info',
   },
 ];
 
@@ -28,7 +28,7 @@ const STEPS = [
     number: '1',
     title: 'Browse & Pick',
     detail: 'Meet our pets and find the one that makes your heart melt.',
-    bg: 'bg-[#1e3a8a] text-white',
+    bg: 'bg-primary text-primary-content',
   },
   {
     number: '2',
@@ -52,7 +52,15 @@ const STEPS = [
 const HERO_COPY_NUDGE_LEFT_PX = 64;
 
 const HERO_SPECIES_PILL_CLASS =
-  'font-friendly border-accent inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full border-2 bg-transparent px-3 py-1 text-xs font-bold text-white shadow-none transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] focus-visible:-translate-y-0.5 focus-visible:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base';
+  'font-friendly border-accent inline-flex min-h-8 w-auto items-center justify-center gap-1.5 rounded-full border-2 text-base-content bg-transparent px-3 py-1 text-xs font-bold shadow-none transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] focus-visible:-translate-y-0.5 focus-visible:shadow-[0_0_0_3px_rgba(249,115,22,0.55),0_8px_22px_rgba(249,115,22,0.4)] sm:min-h-11 sm:gap-2 sm:px-5 sm:py-2 sm:text-base';
+
+/**
+ * Orange button with deep navy text. Navy on #f97316 is 5.24:1, which only
+ * passes AAA as large text, so the label must stay at least 19px bold.
+ * `!font-bold`: the theme `.btn` rule in globals.css sets weight 600.
+ */
+const ORANGE_BTN_CLASS =
+  'btn border-0 bg-[#f97316] text-[1.1875rem] !font-bold text-[#172554] hover:bg-[#fb8a3c]';
 
 export default function Home() {
   return (
@@ -68,7 +76,7 @@ export default function Home() {
       <section
         id="main-content"
         aria-labelledby="hero-heading"
-        className="relative bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-10 text-white sm:px-6 sm:py-16 lg:px-8 lg:py-24"
+        className="page-hero relative px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24"
       >
         <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 xl:flex-row xl:items-center xl:gap-12">
           <div className="w-full min-w-0 flex-1 xl:-translate-y-4">
@@ -87,10 +95,7 @@ export default function Home() {
                   aria-label="Browse dogs"
                   className={HERO_SPECIES_PILL_CLASS}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="inline-block brightness-0 invert"
-                  >
+                  <span aria-hidden="true" className="inline-block">
                     🐾
                   </span>
                   Dogs
@@ -100,10 +105,7 @@ export default function Home() {
                   aria-label="Browse cats"
                   className={HERO_SPECIES_PILL_CLASS}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="inline-block brightness-0 invert"
-                  >
+                  <span aria-hidden="true" className="inline-block">
                     🐾
                   </span>
                   Cats
@@ -111,12 +113,12 @@ export default function Home() {
               </div>
               <h1
                 id="hero-heading"
-                className="font-display mb-5 text-3xl leading-tight font-bold tracking-tight break-normal text-white sm:text-4xl sm:leading-tight xl:text-5xl"
+                className="font-display text-base-content mb-5 text-3xl leading-tight font-bold tracking-tight break-normal sm:text-4xl sm:leading-tight xl:text-5xl"
               >
                 Track your pet adoption applications.
               </h1>
 
-              <p className="mb-8 text-lg leading-relaxed font-medium break-normal text-[#f97316] sm:text-xl">
+              <p className="hero-subcopy mb-8 text-lg leading-relaxed font-medium break-normal sm:text-xl">
                 Apply once, watch every status update live, and give shelters
                 &amp; rescues a simple pipeline.
               </p>
@@ -124,13 +126,13 @@ export default function Home() {
               <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center">
                 <Link
                   href="/get-started?choose=1&intent=signup"
-                  className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_6px_14px_rgba(249,115,22,0.3),0_2px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_8px_18px_rgba(249,115,22,0.35),0_3px_0_#ea580c] sm:w-auto sm:text-base"
+                  className={`${ORANGE_BTN_CLASS} min-h-11 w-full px-6 sm:w-auto`}
                 >
                   Create Account
                 </Link>
                 <Link
                   href="/get-started?demo=1&choose=1"
-                  className="btn min-h-11 w-full border-0 bg-white px-6 text-sm font-bold text-[#1e3a8a] !shadow-[0_6px_14px_rgba(249,115,22,0.3),0_2px_0_#ea580c] hover:bg-[#e8edf7] hover:!shadow-[0_8px_18px_rgba(249,115,22,0.35),0_3px_0_#ea580c] sm:w-auto sm:text-base"
+                  className="btn border-base-content text-base-content hover:bg-base-100 min-h-11 w-full border-2 bg-transparent px-6 text-[1.1875rem] !font-bold sm:w-auto"
                 >
                   Try Demo
                 </Link>
@@ -234,14 +236,14 @@ export default function Home() {
         aria-labelledby="live-loop-heading"
         className="bg-base-100 px-4 pb-12 sm:px-6 lg:px-8"
       >
-        <div className="bg-accent text-accent-content mx-auto max-w-6xl rounded-[2rem] p-8 shadow-2xl sm:p-10">
+        <div className="mx-auto max-w-6xl rounded-[2rem] bg-[#172554] p-8 shadow-2xl sm:p-10">
           <h2
             id="live-loop-heading"
-            className="font-display text-2xl font-bold tracking-tight sm:text-3xl"
+            className="font-display text-2xl font-bold tracking-tight text-[#fdfbf7] sm:text-3xl"
           >
             Want to see the live rescue loop?
           </h2>
-          <p className="mt-3 w-full text-base font-semibold sm:text-lg">
+          <p className="mt-3 w-full text-base font-semibold text-[#dbe4f3] sm:text-lg">
             Choose the adopter or shelter door, sign in with a prefilled demo
             account, then walk the real loop: submit or review an application,
             move statuses in the shelter pipeline, and watch updates sync live
@@ -252,7 +254,7 @@ export default function Home() {
           <div className="mt-5 flex justify-center">
             <Link
               href="/get-started?demo=1&choose=1"
-              className="btn min-h-12 bg-white px-8 text-base font-bold text-[#1e3a8a] hover:bg-[#e8edf7]"
+              className={`${ORANGE_BTN_CLASS} min-h-12 px-8`}
             >
               Try Demo
             </Link>

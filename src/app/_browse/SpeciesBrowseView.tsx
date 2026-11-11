@@ -226,7 +226,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
     <>
       <BrowseSearchParamsReader onParams={handleUrlParams} />
       <main className="bg-base-100 min-h-full">
-        <section className="bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-5 text-white sm:px-6 lg:px-8">
+        <section className="page-hero px-4 py-5 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl text-center lg:text-left">
             {shelterName ? (
               <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
@@ -236,11 +236,10 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
             ) : (
               <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
                 <span aria-hidden="true">{copy.emoji} </span>
-                Browse{' '}
-                <span className="text-[#f97316]">{copy.speciesLabel}</span>
+                Browse <span className="hero-subcopy">{copy.speciesLabel}</span>
               </h1>
             )}
-            <p className="mt-1 hidden text-sm leading-snug text-white/85 sm:block sm:text-base">
+            <p className="mt-1 hidden text-sm leading-snug opacity-90 sm:block sm:text-base">
               {shelterName
                 ? `Available ${copy.petNoun}s from ${shelterName} on Raised Paws.`
                 : copy.description}

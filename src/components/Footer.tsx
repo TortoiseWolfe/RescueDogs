@@ -10,9 +10,9 @@ import { RAISED_PAWS_SOCIALS } from '@/config/raised-paws-socials';
 
 /** Same white/navy pill chrome as the header — invert when pressed / current. */
 const footerNavPill =
-  'btn btn-sm border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
+  'btn btn-sm border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#1e3a8a] active:!text-white';
 const footerNavPillSelected =
-  '!bg-[#172554] !text-white hover:!bg-[#1e3a8a] hover:!text-white active:!bg-[#172554] active:!text-white';
+  '!bg-[#1e3a8a] !text-white ring-2 ring-white hover:!bg-[#1e3a8a] hover:!text-white active:!bg-[#1e3a8a] active:!text-white';
 
 /** 44px AAA touch target at every width; the row wraps rather than shrinking. */
 const footerSocialBtn =
@@ -48,7 +48,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="mt-auto bg-[#1e3a8a] py-5 text-white shadow-[0_-8px_24px_rgba(30,58,138,0.35)] sm:py-6">
+    <footer className="mt-auto border-t-4 border-[#f97316] bg-[#172554] py-5 text-white shadow-[0_-8px_24px_rgba(23,37,84,0.35)] sm:py-6">
       {/*
         Mobile: brand → socials → credit → pills → legal.
         lg+: equal 1fr | auto | 1fr so logo + tagline sit on the true bar

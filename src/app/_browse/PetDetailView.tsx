@@ -158,7 +158,7 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
           </Link>
 
           <header className="mb-6">
-            <p className="font-friendly text-sm font-bold tracking-wide text-[#f97316] uppercase">
+            <p className="hero-subcopy font-friendly text-sm font-bold tracking-wide uppercase">
               <span aria-hidden="true">{copy.emoji} </span>
               Available for adoption
             </p>
