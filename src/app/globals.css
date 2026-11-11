@@ -208,7 +208,9 @@
 [data-theme='trusted-care-light'] .site-header {
   --color-primary: #f97316;
   --color-primary-content: #ffffff;
-  --noise: 0; /* flat orange header face — no grain on chrome band */
+  --noise: 0; /* flat header face — no grain on the chrome band */
+  background-color: #172554;
+  border-bottom: 4px solid #f97316;
   box-shadow: 0 8px 24px rgba(30, 58, 138, 0.12);
 }
 
@@ -216,6 +218,8 @@
   --color-primary: #f97316;
   --color-primary-content: #ffffff;
   --noise: 0;
+  background-color: #172554;
+  border-bottom: 4px solid #f97316;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
@@ -252,7 +256,7 @@
 }
 
 .site-header .nav-role-trigger .nav-role-chevron {
-  color: #1e3a8a;
+  color: #ffffff;
   -webkit-text-stroke: 0;
   text-shadow: none;
 }
