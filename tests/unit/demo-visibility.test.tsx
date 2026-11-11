@@ -31,21 +31,23 @@ describe('Demo visibility pages (#67 / #74)', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('lower demo band puts dark ink on the orange fill (#241, was #74)', () => {
+  it('lower demo band keeps light text on navy, not white on orange (#241, #571)', () => {
     render(<Home />);
 
     const heading = screen.getByRole('heading', {
       name: /want to see the live rescue loop/i,
     });
-    // White on #f97316 is 2.80:1; accent-content (#040c14) is 7.02:1.
+    // White on #f97316 is 2.80:1. The band is navy instead: #fdfbf7 on
+    // #172554 is 14.22:1, and the support line #dbe4f3 on #172554 is 11.48:1.
     const band = heading.parentElement as HTMLElement;
-    expect(band.className).toMatch(/\bbg-accent\b/);
-    expect(band.className).toMatch(/\btext-accent-content\b/);
-    expect(band.className).not.toMatch(/text-white/);
+    expect(band.className).toMatch(/\bbg-\[#172554\]/);
+    expect(band.className).not.toMatch(/\bbg-accent\b/);
+    expect(heading.className).toMatch(/\btext-\[#fdfbf7\]/);
+    expect(heading.className).not.toMatch(/text-white/);
 
-    // The support line inherits the band's ink instead of its own navy.
     const support = screen.getByText(/choose the adopter or shelter door/i);
-    expect(support.className).not.toMatch(/text-\[#/);
+    expect(support.className).toMatch(/\btext-\[#dbe4f3\]/);
+    expect(support.className).not.toMatch(/text-white/);
   });
 
   it('for-adopters exposes Try Demo', () => {
