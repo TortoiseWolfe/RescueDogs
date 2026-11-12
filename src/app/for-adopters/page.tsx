@@ -14,15 +14,15 @@ export const metadata: Metadata = {
 export default function ForAdoptersPage() {
   return (
     <main className="bg-base-100 min-h-full">
-      <section className="bg-gradient-to-b from-[#172554] to-[#1e3a8a] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-20">
+      <section className="page-hero px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
         <div className="mx-auto max-w-3xl text-center lg:text-left">
-          <p className="font-friendly text-sm font-bold tracking-wide text-[#f97316] uppercase">
+          <p className="hero-subcopy font-friendly text-sm font-bold tracking-wide uppercase">
             For Adopters
           </p>
           <h1 className="font-display mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
             Track your application, so you&apos;re never ghosted
           </h1>
-          <p className="mt-4 text-lg leading-relaxed text-white/90 sm:text-xl">
+          <p className="mt-4 text-lg leading-relaxed opacity-90 sm:text-xl">
             Raised Paws is an adoption application tracker: apply once, watch
             every status update live, and know where you stand without chasing
             the shelter or rescue for news.

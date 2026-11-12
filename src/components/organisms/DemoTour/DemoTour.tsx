@@ -232,7 +232,7 @@ export default function DemoTour({
         >
           <div className="card-body gap-3 p-4 sm:flex-row sm:items-start sm:gap-4">
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold tracking-wide text-[var(--brand-ink)] uppercase">
+              <p className="hero-subcopy text-xs font-semibold tracking-wide uppercase">
                 Demo tour · {roleLabel} · Step {clampedIndex + 1} of{' '}
                 {steps.length}
               </p>

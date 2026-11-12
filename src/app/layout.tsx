@@ -46,24 +46,15 @@ const nunito = localFont({
   ],
 });
 
-const fredoka = localFont({
+const fraunces = localFont({
   src: [
-    { path: './fonts/fredoka-400.woff2', weight: '400', style: 'normal' },
-    { path: './fonts/fredoka-500.woff2', weight: '500', style: 'normal' },
-    { path: './fonts/fredoka-600.woff2', weight: '600', style: 'normal' },
-    { path: './fonts/fredoka-700.woff2', weight: '700', style: 'normal' },
+    { path: './fonts/fraunces-600.woff2', weight: '600', style: 'normal' },
+    { path: './fonts/fraunces-700.woff2', weight: '700', style: 'normal' },
   ],
-  variable: '--font-fredoka',
+  variable: '--font-fraunces',
   display: 'swap',
   preload: true,
-  fallback: [
-    'system-ui',
-    '-apple-system',
-    'BlinkMacSystemFont',
-    '"Segoe UI"',
-    'Roboto',
-    'sans-serif',
-  ],
+  fallback: ['Georgia', '"Times New Roman"', 'serif'],
 });
 
 const geistMono = localFont({
@@ -151,9 +142,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    // Font variables go on <html> because globals.css reads them in :root.
+    <html
+      lang="en"
+      className={`${nunito.variable} ${fraunces.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
       <body
-        className={`${nunito.variable} ${fredoka.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
+        className="flex min-h-screen flex-col antialiased"
         suppressHydrationWarning
       >
         <ThemeScript />

@@ -42,7 +42,7 @@ export default function ContactPage() {
 
       <div className="relative mx-auto max-w-4xl">
         <div className="mb-8 text-center">
-          <h1 className="font-display mb-3 !text-2xl font-bold tracking-tight text-[#1e3a8a] sm:!text-3xl md:!text-4xl">
+          <h1 className="font-display text-base-content mb-3 !text-2xl font-bold tracking-tight sm:!text-3xl md:!text-4xl">
             Contact Raised Paws
           </h1>
           <p className="text-base-content/85 text-base sm:text-lg md:text-xl">
@@ -95,7 +95,7 @@ export default function ContactPage() {
                   Prefer mail?{' '}
                   <a
                     href={`mailto:${publicEmail}`}
-                    className="link font-semibold text-[var(--brand-ink)]"
+                    className="link hero-subcopy font-semibold"
                   >
                     {publicEmail}
                   </a>
@@ -112,7 +112,7 @@ export default function ContactPage() {
                   Prefer the phone?{' '}
                   <a
                     href={`tel:${publicPhoneTel}`}
-                    className="link font-semibold text-[var(--brand-ink)]"
+                    className="link hero-subcopy font-semibold"
                   >
                     {publicPhoneDisplay}
                   </a>
@@ -142,7 +142,7 @@ export default function ContactPage() {
 function CheckIcon() {
   return (
     <svg
-      className="mt-1 mr-2 h-5 w-5 flex-shrink-0 text-[#f97316]"
+      className="hero-subcopy mt-1 mr-2 h-5 w-5 flex-shrink-0"
       fill="currentColor"
       viewBox="0 0 20 20"
       aria-hidden="true"

@@ -71,8 +71,9 @@ export function AccessibilityProvider({
 
     // Font families
     const fontFamilies: Record<FontFamily, string> = {
-      'sans-serif':
-        'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      // The default choice keeps the site font (Nunito); --font-sans falls
+      // back to the system stack in globals.css.
+      'sans-serif': 'var(--font-sans)',
       serif: 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif',
       mono: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
     };
