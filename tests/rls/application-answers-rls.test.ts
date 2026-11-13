@@ -58,6 +58,8 @@ const LOCKED_CORE = [
 ];
 const ANY_SPECIES_EXTRA = 'lif.hours_alone';
 const DOG_ONLY_EXTRA = 'hou.insurance_breed';
+// Not locked, shown by the rescue, and flaggable: a red-flag rule can key on it.
+const RED_FLAG_QUESTION = 'elg.cruelty_conviction';
 
 const SNAPSHOT = {
   full_name: 'RLS 337 Adopter',
@@ -89,7 +91,8 @@ describe.skipIf(!hasRlsTestEnvironment())(
 
     async function apply(
       petId: string,
-      forged?: { question_id: string; wording: string; value: string }[]
+      forged?: { question_id: string; wording: string; value: string }[],
+      omitIds?: string[]
     ) {
       const client = await createAuthenticatedClient(ADOPTER_EMAIL, PASSWORD);
       const { data, error } = await client
@@ -101,6 +104,7 @@ describe.skipIf(!hasRlsTestEnvironment())(
           profile_snapshot: SNAPSHOT,
           why_this_pet: 'We love this one',
           ...(forged ? { answers_snapshot: forged } : {}),
+          ...(omitIds ? { snapshot_omit_question_ids: omitIds } : {}),
         })
         .select('id')
         .single();
@@ -472,6 +476,44 @@ describe.skipIf(!hasRlsTestEnvironment())(
         (e) => e.question_id
       );
       expect(catIds).not.toContain('pts.sight.leash_only');
+    });
+
+    it('an omit list can drop only unlocked third-party answers (#458)', async () => {
+      const managerClient = await createAuthenticatedClient(
+        MANAGER_EMAIL,
+        PASSWORD
+      );
+      const { error } = await managerClient.rpc(
+        'set_shelter_application_questions',
+        {
+          p_shelter_id: SHELTER_ID,
+          p_question_ids: [ANY_SPECIES_EXTRA, 'ref.personal', RED_FLAG_QUESTION],
+        }
+      );
+      expect(error).toBeNull();
+
+      const service = createServiceClient();
+      await service
+        .from('applications')
+        .delete()
+        .eq('adopter_id', adopter.id)
+        .eq('pet_id', CAT);
+
+      // A forged insert tries to hide a locked question, a red-flag question
+      // and the saved references. Only the references may go.
+      const ids = (
+        await snapshotOf(
+          await apply(CAT, undefined, [
+            'hou.landlord_allows',
+            RED_FLAG_QUESTION,
+            'ref.personal',
+          ])
+        )
+      ).map((e) => e.question_id);
+
+      expect(ids).toContain('hou.landlord_allows');
+      expect(ids).toContain(RED_FLAG_QUESTION);
+      expect(ids).not.toContain('ref.personal');
     });
   }
 );
