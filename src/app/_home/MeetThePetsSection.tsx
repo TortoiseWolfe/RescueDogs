@@ -30,8 +30,8 @@ export default function MeetThePetsSection() {
       try {
         const service = new ApplicationService(supabase);
         const [dogs, cats] = await Promise.all([
-          service.getBrowsePets('dog'),
-          service.getBrowsePets('cat'),
+          service.getMeetThePets('dog'),
+          service.getMeetThePets('cat'),
         ]);
         if (cancelled) return;
         setPets(composeMeetThePets([...dogs, ...cats]));
@@ -85,6 +85,10 @@ export default function MeetThePetsSection() {
                       <img
                         src={pet.portrait}
                         alt={pet.portraitAlt}
+                        width={176}
+                        height={176}
+                        loading="lazy"
+                        decoding="async"
                         className="h-44 w-44 rounded-2xl object-cover drop-shadow-lg"
                       />
                     ) : (
