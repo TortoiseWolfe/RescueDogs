@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   checkRateLimit,
   recordFailedAttempt,
-  formatLockoutTime,
+  getRateLimitBlockedMessage,
   isAuthRequestRateLimited,
   AUTH_SIGN_UP_RATE_LIMIT_MESSAGE,
 } from '@/lib/auth/rate-limit-check';
@@ -81,11 +81,12 @@ export default function SignUpForm({
     const rateLimit = await checkRateLimit(email, 'sign_up');
 
     if (!rateLimit.allowed) {
-      const timeUntilReset = rateLimit.locked_until
-        ? formatLockoutTime(rateLimit.locked_until)
-        : '15 minutes';
       setError(
-        `Too many sign-up attempts. Please try again in ${timeUntilReset}.`
+        getRateLimitBlockedMessage(
+          rateLimit,
+          (timeUntilReset) =>
+            `Too many sign-up attempts. Please try again in ${timeUntilReset}.`
+        )
       );
       return;
     }

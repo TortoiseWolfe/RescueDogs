@@ -8,10 +8,56 @@ import { resolve } from 'node:path';
 import {
   formatLockoutTime,
   isAuthRequestRateLimited,
+  isRateLimitInfraFailure,
+  getRateLimitBlockedMessage,
+  RATE_LIMIT_UNAVAILABLE_MESSAGE,
   AUTH_REQUEST_RATE_LIMIT_MESSAGE,
 } from '../rate-limit-check';
 
 describe('Rate Limiting - Unit Tests', () => {
+  describe('outage vs lockout (#395)', () => {
+    const outage = {
+      allowed: false,
+      remaining: 0,
+      locked_until: null,
+      reason: 'Rate limit check unavailable. Please try again shortly.',
+    };
+    const lockedUntil = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+    const locked = { allowed: false, remaining: 0, locked_until: lockedUntil };
+    const copy = (wait: string) => `locked, wait ${wait}`;
+
+    it('treats a blocked result with no locked_until as an outage', () => {
+      expect(isRateLimitInfraFailure(outage)).toBe(true);
+    });
+
+    it('does not treat a real lockout or an allowed result as an outage', () => {
+      expect(isRateLimitInfraFailure(locked)).toBe(false);
+      expect(
+        isRateLimitInfraFailure({
+          allowed: true,
+          remaining: 5,
+          locked_until: null,
+        })
+      ).toBe(false);
+    });
+
+    it('uses the limiter reason for an outage, never the lockout copy', () => {
+      expect(getRateLimitBlockedMessage(outage, copy)).toBe(outage.reason);
+    });
+
+    it('falls back to a plain message when an outage has no reason', () => {
+      expect(
+        getRateLimitBlockedMessage({ ...outage, reason: undefined }, copy)
+      ).toBe(RATE_LIMIT_UNAVAILABLE_MESSAGE);
+    });
+
+    it('uses the lockout copy with the formatted wait for a real lockout', () => {
+      expect(getRateLimitBlockedMessage(locked, copy)).toBe(
+        'locked, wait 5 minutes'
+      );
+    });
+  });
+
   describe('formatLockoutTime', () => {
     it('should format time remaining correctly', () => {
       const oneMinute = new Date(Date.now() + 60 * 1000).toISOString();
