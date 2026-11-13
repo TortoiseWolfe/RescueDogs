@@ -32,4 +32,17 @@ describe('PasswordField', () => {
       screen.getByRole('button', { name: /show password/i })
     ).toBeDisabled();
   });
+
+  it('keeps the toggle icon and focus ring at 3:1 or better (#472)', () => {
+    // jsdom cannot compute colour, so pin the classes. On trusted-care-light
+    // (#1e3a8a over #fdfbf7) 45% opacity measured 2.40:1 and 70% is 4.42:1.
+    // The primary focus ring was 1.71:1 on the dark field; base-content is not.
+    render(<PasswordField aria-label="Password" />);
+    const toggle = screen.getByRole('button', { name: /show password/i });
+    expect(toggle).toHaveClass('text-base-content/70');
+    expect(toggle).toHaveClass('hover:text-base-content');
+    expect(toggle).toHaveClass('focus-visible:ring-base-content');
+    expect(toggle).not.toHaveClass('text-base-content/45');
+    expect(toggle).not.toHaveClass('focus-visible:ring-primary');
+  });
 });
