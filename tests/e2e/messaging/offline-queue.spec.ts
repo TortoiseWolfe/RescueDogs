@@ -330,10 +330,12 @@ test.describe('Offline Message Queue', () => {
       // already concedes the point above: "Queue drain + 3 INSERTs can exceed
       // 5s under shared-Supabase CI load."
       //
-      // The floors are what carry the meaning and they cannot flake — a timer
-      // never fires early. They already encode the doubling on their own:
-      // 900 for the first retry, 1800 for the second. Remove the backoff and
-      // both still fail.
+      // The floors catch the backoff being removed (a timer never fires early),
+      // and they cannot flake. They do NOT encode the doubling: a constant
+      // 2000ms backoff would pass both. A timing-only test cannot prove
+      // doubling without flaking, so the ceilings below are deliberately
+      // loose: they only catch a runaway delay. The sleep itself is
+      // `networkDelays = [1000, 2000, 4000]` in message-service.ts.
       //
       // Deliberately NOT asserting delay2 > delay1 * 1.5 instead. Under load a
       // slow SELECT in the first gap and a fast one in the second can invert
@@ -343,6 +345,8 @@ test.describe('Offline Message Queue', () => {
         const delay1 = retryTimestamps[1] - retryTimestamps[0];
         // First retry backoff is 1000ms; 100ms margin for timer granularity.
         expect(delay1).toBeGreaterThanOrEqual(900);
+        // Generous ceiling (about 2x the worst CI delta seen in #207, 4171ms).
+        expect(delay1).toBeLessThan(8000);
       }
 
       if (retryTimestamps.length >= 3) {
@@ -350,6 +354,7 @@ test.describe('Offline Message Queue', () => {
         // Second retry backoff is 2000ms — 2x the first, which is the property
         // under test.
         expect(delay2).toBeGreaterThanOrEqual(1800);
+        expect(delay2).toBeLessThan(12000);
       }
     } finally {
       await viewer.close();
