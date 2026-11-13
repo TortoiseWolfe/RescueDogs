@@ -222,10 +222,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
+        # A slow apt mirror does not fail the install, it just keeps going until
+        # the 15-minute job limit cancels the whole job (#505), so the retry loop
+        # never fires. Each attempt gets 3 minutes (a healthy one takes 40-80 s),
+        # so a stalled download is cut off and retried: worst case about 10 minutes.
         run: |
           for i in 1 2 3; do
-            pnpm exec playwright install --with-deps chromium firefox webkit && break
-            echo "Retry $i: playwright install failed, retrying in 10s..."
+            timeout 180 pnpm exec playwright install --with-deps chromium firefox webkit && break
+            echo "Retry $i: playwright install failed or stalled, retrying in 10s..."
             sleep 10
           done
 
