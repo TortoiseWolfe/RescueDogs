@@ -57,8 +57,10 @@ export function useShelterMembership(): ShelterMembershipInfo {
  *   redirect to `/`).
  * - `cancelled` flag: async membership resolution must not setState after
  *   the effect cleaned up (user switched, unmount).
- * - Dep array `[user, authLoading]`: a `user` change re-runs the
- *   check against the new user.
+ * - Dep array `[userId, authLoading, retryNonce]`: only a different user (or an
+ *   explicit retry) re-runs the check. AuthContext replaces the `user` object on
+ *   every TOKEN_REFRESHED / SIGNED_IN event, so keying on it would reset
+ *   memberships and unmount every /shelter page each time the token refreshes.
  */
 export function ShelterGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading: authLoading } = useAuth();
@@ -90,16 +92,18 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
     }
   }, [activeMembership, resolvedList]);
 
+  const userId = user?.id;
+
   useEffect(() => {
     if (authLoading) return;
-    if (!user) return; // ProtectedRoute renders the sign-in card path
+    if (!userId) return; // ProtectedRoute renders the sign-in card path
     let cancelled = false;
     setMemberships(undefined);
     setFetchError(null);
     (async () => {
       try {
         const service = new ShelterApplicationService(supabase);
-        const list = await service.listMyShelterMemberships(user.id);
+        const list = await service.listMyShelterMemberships(userId);
         if (cancelled) return;
         if (list.length === 0) {
           setMemberships(null);
@@ -122,7 +126,7 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading, retryNonce]);
+  }, [userId, authLoading, retryNonce]);
 
   function handleShelterChange(shelterId: string) {
     setActiveShelterId(shelterId);
