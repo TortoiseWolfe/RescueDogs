@@ -10,7 +10,7 @@
 
 import { test, expect } from '@playwright/test';
 import { dismissCookieBanner } from '../utils/test-user-factory';
-import { clearAllRateLimits } from '../utils/rate-limit-admin';
+import { clearTestRateLimits } from '../utils/rate-limit-admin';
 import { isSupabaseCaptchaEnforced } from '../../fixtures/captcha-auth';
 
 // Run tests in serial - rate limiting is IP-based, so tests must coordinate
@@ -63,12 +63,16 @@ test.describe('Rate Limiting - User Experience @local-supabase', () => {
   let rateLimitTriggered = false;
 
   test.beforeAll(async () => {
-    // Clear application-level rate limits to ensure clean slate
-    // This uses service role to delete from rate_limit_attempts table
-    await clearAllRateLimits();
+    // Clear leftover rows from killed runs. Only rows with this spec's
+    // generated identifiers are deleted; the project is shared with production.
+    await clearTestRateLimits();
 
     // Generate ONE email for all rate limit tests
     rateLimitEmail = generateRateLimitEmail('serial');
+  });
+
+  test.afterAll(async () => {
+    await clearTestRateLimits();
   });
 
   test.beforeEach(async ({ page }) => {

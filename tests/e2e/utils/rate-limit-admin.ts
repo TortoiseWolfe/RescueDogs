@@ -1,7 +1,7 @@
 /**
  * Rate Limit Admin Utilities for E2E Tests
  *
- * Uses service role to clear rate_limit_attempts table before tests.
+ * Uses service role to clear the rate_limit_attempts rows the tests created.
  * This ensures rate-limiting tests start with a clean slate.
  *
  * IMPORTANT: Only use in E2E tests. Never use in production code.
@@ -28,12 +28,24 @@ function getAdminClient() {
 }
 
 /**
- * Clear all rate limit attempts from the database.
- * Use in test.beforeAll() to ensure a clean slate.
+ * Matches only the identifiers the rate-limit E2E specs generate:
+ * `ratelimit-<prefix>-<13-digit ms>-<rand>@...` and `bf-<prefix>-...@...`,
+ * optionally behind a `user+` sub-address. Case-insensitive (prefixes such as
+ * "userA" are mixed case). The same string is used as a PostgREST `imatch`
+ * (POSIX regex) and, with the `i` flag, as a JavaScript RegExp in unit tests.
+ */
+export const TEST_RATE_LIMIT_IDENTIFIER_PATTERN =
+  '^([^@]*\\+)?(ratelimit|bf)-[a-z-]+-[0-9]{13}-[0-9a-z]{1,6}@';
+
+/**
+ * Clear only the rate limit rows that the E2E specs created.
+ * The Supabase project is shared with production, so a table-wide delete would
+ * also reset real sign-in, sign-up, password-reset and contact-form throttling.
+ * Use in test.beforeAll() (leftovers from killed runs) and test.afterAll().
  *
  * @returns true if cleared successfully, false if skipped (no admin client)
  */
-export async function clearAllRateLimits(): Promise<boolean> {
+export async function clearTestRateLimits(): Promise<boolean> {
   const client = getAdminClient();
 
   if (!client) {
@@ -47,7 +59,9 @@ export async function clearAllRateLimits(): Promise<boolean> {
     const { error } = await client
       .from('rate_limit_attempts')
       .delete()
-      .gte('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+      // supabase-js 1.21 has no typed imatch(); filter() sends the same
+      // PostgREST operator (identifier=imatch.<pattern>).
+      .filter('identifier', 'imatch', TEST_RATE_LIMIT_IDENTIFIER_PATTERN);
 
     if (error) {
       // Table might not exist or RLS might block - log but don't fail
@@ -55,7 +69,7 @@ export async function clearAllRateLimits(): Promise<boolean> {
       return false;
     }
 
-    console.log('✅ Cleared all rate limit attempts');
+    console.log('✅ Cleared test rate limit attempts');
     return true;
   } catch (err) {
     console.warn('⚠️ Error clearing rate limits:', err);
