@@ -15,9 +15,9 @@
  * The source here is a real mark, and a fork points `--source` at its own.
  *
  * WHY THIS FILE EXISTS IN RescueDogs (#232). It did not, and that is exactly how
- * raisedpaws.com came to serve ScriptHammer's printing mallet as its favicon and
+ * raisedpaws.com came to serve ScriptHammer's printing mallet as its favicon and rebrand:keep
  * its home-screen install icon. `public/favicon.svg` was byte-identical to
- * ScriptHammer's `cce27a395cb3…`. Upstream `rebrand.sh` sweeps
+ * ScriptHammer's `cce27a395cb3…`. Upstream `rebrand.sh` sweeps rebrand:keep
  * `.ts .tsx .js .jsx .json .md .yml .yaml .sh .html .css` and cannot see `.svg`,
  * `.png` or `.ico`, so the one asset class it is blind to is the one that shipped.
  *
@@ -55,7 +55,7 @@ let SOURCE_SVG = null;
 /**
  * The default mark. `favicon.svg` is the printing mallet over angle brackets —
  * a symbol, not a wordmark, which is the only kind that survives 72px.
- * `scripthammer-logo.svg` is deliberately NOT used: it wraps "ScriptHammer.com"
+ * `scripthammer-logo.svg` is deliberately NOT used: it wraps "ScriptHammer.com" rebrand:keep
  * around a saw blade, and that text is illegible below about 256px.
  */
 const DEFAULT_SOURCE = 'public/raised-paws-logo.png';
@@ -140,7 +140,7 @@ const TARGETS = [
   { file: 'favicon.svg', size: 512, kind: 'svg', inset: ANY_INSET },
   // schema.org `publisher.logo` on every blog post. Google wants a raster for
   // this, so it cannot just point at one of the SVGs above. It previously
-  // pointed at `apple-icon.png` — a 3.5MB 1200x630 ScriptHammer social card
+  // pointed at `apple-icon.png` — a 3.5MB 1200x630 ScriptHammer social card rebrand:keep
   // showing a jazz saxophonist, which structured data was reporting to search
   // engines as the Raised Paws organisation logo (#232).
   { file: 'logo-512.png', size: 512, kind: 'png', inset: ANY_INSET },

@@ -62,7 +62,7 @@ vi.mock('@/styles/prism-override.css', () => ({}));
 // with no window dependency, killing the race for every test at once. Local map
 // tests keep their own `vi.mock('leaflet', …)` (local mocks override this one); this
 // is the safety net for every un-mocked path (e.g. MapContainer.accessibility.test).
-// Port of ScriptHammer#300 / PR #314.
+// Port of ScriptHammer#300 / PR #314. rebrand:keep
 const leafletStub = {
   map: vi.fn(() => ({
     addLayer: vi.fn(),

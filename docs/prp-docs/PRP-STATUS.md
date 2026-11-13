@@ -43,7 +43,7 @@ Top-level summary: [`STATUS.md`](../../STATUS.md)
 ### All Features by Tier
 
 | Tier | ID                               | Name                           | Real Status                   | Stated Status (stale) | Tracking                         |
-| ---- | -------------------------------- | ------------------------------ | ----------------------------- | --------------------- | -------------------------------- |
+| ---- | -------------------------------- | ------------------------------ | ----------------------------- | --------------------- | -------------------------------- | --------------------- |
 | 1    | 000-brand-identity               | Brand Identity                 | **Shipped**                   | Draft                 | —                                |
 | 1    | 000-landing-page                 | Landing Page                   | **Shipped**                   | Draft                 | —                                |
 | 1    | 000-rls-implementation           | RLS Implementation             | **Shipped**                   | Draft                 | —                                |
@@ -90,7 +90,7 @@ Top-level summary: [`STATUS.md`](../../STATUS.md)
 | 7    | 034-blog-library-tests           | Blog Library Tests             | **Shipped** (was Not Started) | Specified             | — (commit c9f728d 2026-04-20)    |
 | 7    | 035-messaging-service-tests      | Messaging Service Tests        | Partial                       | Specified             | gap-audit (4 of 8 services)      |
 | 7    | 036-auth-component-tests         | Auth Component Tests           | **Shipped**                   | Specified             | —                                |
-| 7    | 037-game-a11y-tests              | Game A11y Tests                | **Removed (#83)**             | Spec deleted          | unused ScriptHammer dice stack   |
+| 7    | 037-game-a11y-tests              | Game A11y Tests                | **Removed (#83)**             | Spec deleted          | unused ScriptHammer dice stack   | <!-- rebrand:keep --> |
 | 8    | 044-error-handler-integrations   | Error Handler Integrations     | **Not Started**               | Specified             | gap-audit                        |
 | 8    | 045-disqus-theme                 | Disqus Theme                   | Partial                       | Specified             | gap-audit                        |
 

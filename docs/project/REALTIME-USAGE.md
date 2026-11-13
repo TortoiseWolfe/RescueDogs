@@ -88,7 +88,7 @@ The sibling file already knows this is wrong. `useConversationList.ts:365-367` d
 
 All 7 sites unsubscribe correctly — there is **no leak**. But `useUnreadCount`'s effect is keyed on the `user` object identity, and `AuthContext.tsx:261` replaces that object on every auth event including `TOKEN_REFRESHED`, so the channel is torn down and re-created roughly hourly per session. That is resubscribe churn, not accumulation.
 
-**Upstream ScriptHammer has the identical unfiltered binding.** Any fix here is worth sending upstream.
+**Upstream ScriptHammer has the identical unfiltered binding.** Any fix here is worth sending upstream. <!-- rebrand:keep -->
 
 ---
 
@@ -177,7 +177,7 @@ The repo-wide E2E mutex still cites it as its justification (`e2e.yml:36-41`):
 - the monolithic migration is applied automatically on first boot, via a deliberate single-file mount whose comment documents the two bugs that made a directory mount fail
 - `playwright.config.ts` only sets `baseURL` — the Supabase URL is pure env, so redirecting E2E is an env swap plus a compose step
 
-**One gap blocks it.** Realtime resolves its tenant from the _first label of the Host header_, and `docker/supabase/kong.yml:125,142` points at `http://supabase-realtime:4000` — a single-label host with no tenant, so the socket can never join. Upstream ScriptHammer fixed exactly this in **#649**: `realtime-dev.supabase-realtime` as both the Kong upstream and the `container_name`, plus a `command:` that runs the Ecto migrations and seeds the tenant. Our `kong.yml` has not changed since March.
+**One gap blocks it.** Realtime resolves its tenant from the _first label of the Host header_, and `docker/supabase/kong.yml:125,142` points at `http://supabase-realtime:4000` — a single-label host with no tenant, so the socket can never join. Upstream ScriptHammer fixed exactly this in **#649**: `realtime-dev.supabase-realtime` as both the Kong upstream and the `container_name`, plus a `command:` that runs the Ecto migrations and seeds the tenant. Our `kong.yml` has not changed since March. <!-- rebrand:keep -->
 
 > ### Correction (2026-09-07): this said "**it is a two-file cherry-pick**". That was wrong by roughly an order of magnitude.
 >
@@ -192,7 +192,7 @@ The repo-wide E2E mutex still cites it as its justification (`e2e.yml:36-41`):
 
 Effect if fully done: CI's Realtime contribution → **zero**. (This originally also claimed it retires the §7 mutex — see the correction there; a second destructive `beforeAll` keeps the mutex necessary until it is fixed.)
 
-One hazard to plan for: `container_name` is **global**, not namespaced by `COMPOSE_PROJECT_NAME`. A local RescueDogs stack would collide with a running ScriptHammer one. Harmless in CI, which is isolated per runner.
+One hazard to plan for: `container_name` is **global**, not namespaced by `COMPOSE_PROJECT_NAME`. A local RescueDogs stack would collide with a running ScriptHammer one. Harmless in CI, which is isolated per runner. <!-- rebrand:keep -->
 
 ### Secondary — scope the unfiltered subscriptions
 
@@ -216,15 +216,15 @@ If the local stack proves unstable in CI. Needs the migration and seeds kept in 
 >
 > **And that is currently blocked.** `ACCOUNTS.md` (workspace root, verified 2026-09-07 by live API call) states the binding rule, with Supabase's own refusal text quoted: the free limit is **2 ACTIVE projects per USER**, counted across every org where that user is Owner or Administrator — _not_ per org. _"Spreading across orgs does not raise it."_
 >
-> | account                  | owned-active           | headroom         |
-> | ------------------------ | ---------------------- | ---------------- |
-> | `spoketowork@gmail.com`  | 2 (SpokeToWork, runit) | **0 — at limit** |
-> | `jonpohlner@gmail.com`   | 1 (geoLARP)            | 1                |
-> | `person28@example.com` | 1 (ScriptHammer)       | 1                |
+> | account                 | owned-active                           | headroom         |
+> | ----------------------- | -------------------------------------- | ---------------- |
+> | `spoketowork@gmail.com` | 2 (SpokeToWork, runit)                 | **0 — at limit** |
+> | `jonpohlner@gmail.com`  | 1 (geoLARP)                            | 1                |
+> | `person28@example.com`  | 1 (ScriptHammer <!-- rebrand:keep -->) | 1                |
 >
 > So the real options are: use one of the other two accounts' single slot (against the file's own placement principle — a project belongs to the account matching its domain), or relocate `runit`, which `ACCOUNTS.md` names as _"the remaining thing standing between `spoketowork@gmail.com` and any headroom."_
 >
-> **Read `ACCOUNTS.md` before reasoning about this option again.** Two Supabase orgs are named `ScriptHammer` and two are named `geoLARP`, on different accounts — always disambiguate by org id.
+> **Read `ACCOUNTS.md` before reasoning about this option again.** Two Supabase orgs are named `ScriptHammer` and two are named `geoLARP`, on different accounts — always disambiguate by org id. <!-- rebrand:keep -->
 
 ### Rejected — Pro plan (ticket option D)
 
@@ -232,7 +232,7 @@ At 4.4% over, $25/month treats a symptom. Revisit only if §2's dashboard number
 
 ### Upstream (ticket option E)
 
-Send items 1-3 to ScriptHammer. The unfiltered `useUnreadCount` binding is byte-identical there.
+Send items 1-3 to ScriptHammer. The unfiltered `useUnreadCount` binding is byte-identical there. <!-- rebrand:keep -->
 
 ---
 

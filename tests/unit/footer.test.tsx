@@ -38,8 +38,8 @@ describe('Footer (#74 / #65)', () => {
     expect(credit).toHaveAttribute('target', '_blank');
     expect(credit).toHaveAttribute('rel', expect.stringContaining('noopener'));
 
-    const hammer = screen.getByRole('link', { name: /scripthammer/i });
-    expect(hammer).toHaveAttribute('href', 'https://scripthammer.com');
+    const hammer = screen.getByRole('link', { name: /scripthammer/i }); // rebrand:keep
+    expect(hammer).toHaveAttribute('href', 'https://scripthammer.com'); // rebrand:keep
     expect(hammer).toHaveAttribute('target', '_blank');
     expect(hammer).toHaveAttribute('rel', expect.stringContaining('noopener'));
 
