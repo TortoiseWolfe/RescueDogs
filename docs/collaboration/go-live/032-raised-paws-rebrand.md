@@ -37,8 +37,11 @@ shards).
 
 ## Gotchas
 
-- **Localhost 500 after push** — pre-push hook runs `clean:next` while dev server
-  is running. Fix: `docker compose down`, remove `.next` in container, restart.
+- **Localhost 500 after push** — fixed (#401). `pnpm test` no longer runs
+  `clean:next`, and `clean:next` now empties only `NEXT_DIST_DIR` (default
+  `.next`), so the pre-push hook leaves the running dev server's `.next` alone.
+  If an older checkout still shows it: `docker compose down`, remove `.next` in
+  the container, restart.
 - **DaisyUI token overrides** — styling the Install button with navy/orange
   fought theme tokens (orange-on-orange visibility). Reverting PWA experiments
   was the right call for this ticket.
