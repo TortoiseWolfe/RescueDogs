@@ -26,7 +26,9 @@ vi.mock('@/services/admin/admin-auth-service', () => ({
 }));
 
 vi.mock('@/components/atomic/AnimatedLogo', () => ({
-  AnimatedLogo: ({ text }: { text: string }) => <span>{text}</span>,
+  AnimatedLogo: ({ text, className }: { text: string; className?: string }) => (
+    <span className={className}>{text}</span>
+  ),
 }));
 
 vi.mock('@/components/atomic/AvatarDisplay', () => ({
@@ -396,7 +398,7 @@ describe('GlobalNav role menus (#65)', () => {
     );
   });
 
-  it('hides the wordmark on narrow signed-in chrome so four icons cannot overlap it', () => {
+  it('keeps the wordmark visible on narrow signed-in chrome (#576)', () => {
     mockUseAuth.mockReturnValue({
       user: {
         id: 'user-1',
@@ -408,10 +410,18 @@ describe('GlobalNav role menus (#65)', () => {
       isAuthenticated: true,
     });
 
-    render(<GlobalNav />);
+    const { container } = render(<GlobalNav />);
+    const wordmark = screen.getByTestId('brand-wordmark');
 
-    expect(screen.getByTestId('brand-wordmark').className).toMatch(/invisible/);
-    expect(screen.getByTestId('brand-wordmark').className).toMatch(/absolute/);
+    expect(wordmark.className).not.toMatch(/invisible/);
+    expect(wordmark.className).not.toMatch(/absolute/);
+    expect(wordmark.className).toMatch(/whitespace-nowrap/);
+    expect(wordmark.querySelector('.brand-logo')?.className).toMatch(
+      /!text-sm/
+    );
+    expect(
+      container.querySelector('img[alt="Raised Paws home"]')?.className
+    ).toMatch(/\bh-8\b/);
     expect(
       screen.getByRole('link', { name: /raised paws home/i })
     ).toBeInTheDocument();

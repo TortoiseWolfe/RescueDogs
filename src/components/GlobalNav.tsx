@@ -197,9 +197,9 @@ export function GlobalNav() {
 
   // Measure brand vs row — compact only on phones where S9+/Lumia-class widths
   // collide (~320–360px). Wider phones keep full 44px targets (#132).
-  // Collision math always includes the wordmark width, even when we take it
-  // out of flow. Compact still shrinks the live logo/type, so we cache the
-  // last full-size brand width and compare against that (#185).
+  // Collision math always includes the wordmark. Compact shrinks the live
+  // logo and type, so we cache the last full-size brand width and compare
+  // against that (#185). The title stays on screen (#576).
   useLayoutEffect(() => {
     const row = navRowRef.current;
     const brand = brandRef.current;
@@ -393,7 +393,9 @@ export function GlobalNav() {
             >
               <Link
                 href="/"
-                className="relative flex min-h-11 min-w-0 items-center gap-1.5 transition-opacity hover:opacity-80 sm:gap-2"
+                className={`relative flex min-h-11 min-w-0 items-center transition-opacity hover:opacity-80 ${
+                  chromeCompact ? 'gap-0.5' : 'gap-1.5 sm:gap-2'
+                }`}
               >
                 <Image
                   src={`${projectConfig.basePath}/raised-paws-logo-white-paw.webp`}
@@ -402,24 +404,22 @@ export function GlobalNav() {
                   height={44}
                   className={
                     chromeCompact
-                      ? 'h-9 w-9 shrink-0 drop-shadow-[0_1px_2px_rgba(23,37,84,0.45)]'
+                      ? 'h-8 w-8 shrink-0 drop-shadow-[0_1px_2px_rgba(23,37,84,0.45)]'
                       : 'h-10 w-10 shrink-0 drop-shadow-[0_1px_2px_rgba(23,37,84,0.45)] sm:h-11 sm:w-11'
                   }
                   priority
                 />
-                {/* Icon-only only when signed-in chrome actually collides. */}
+                {/* Stay in the row when signed-in chrome is tight (#576). */}
                 <span
                   ref={wordmarkRef}
                   data-testid="brand-wordmark"
-                  className={
-                    user && chromeCompact ? 'invisible absolute' : 'min-w-0'
-                  }
+                  className="min-w-0 whitespace-nowrap"
                 >
                   <AnimatedLogo
                     text={projectConfig.projectDisplayName}
                     className={
                       chromeCompact
-                        ? 'brand-logo !text-base font-bold'
+                        ? 'brand-logo !text-sm font-bold'
                         : 'brand-logo !text-lg font-bold sm:!text-xl'
                     }
                     animationSpeed="normal"
