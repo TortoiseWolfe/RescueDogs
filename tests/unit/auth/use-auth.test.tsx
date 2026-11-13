@@ -394,4 +394,77 @@ describe('useAuth', () => {
       expect(loc.href).toBe(hrefBefore);
     });
   });
+
+  describe('unfinished adoption application on sign-out (#516)', () => {
+    const DRAFT_KEY = 'draft:v1:adopt:application:user-1';
+    const OTHER_KEY = 'draft:v1:adopt:application:user-2';
+
+    const stubLocation = () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          href: 'http://localhost:3000/adopt/',
+          origin: 'http://localhost:3000',
+          pathname: '/adopt/',
+        },
+        writable: true,
+        configurable: true,
+      });
+    };
+
+    const signInAs = async () => {
+      let authStateCallback: any;
+      vi.mocked(supabase.auth.onAuthStateChange).mockImplementation(
+        (callback) => {
+          authStateCallback = callback;
+          return {
+            data: { subscription: { unsubscribe: vi.fn() } },
+          } as any;
+        }
+      );
+      const hook = renderHook(() => useAuth(), { wrapper: AuthProvider });
+      await waitFor(() => {
+        expect(hook.result.current.isLoading).toBe(false);
+      });
+      await authStateCallback('SIGNED_IN', {
+        user: { id: 'user-1', email: 'a@example.com' },
+        access_token: 'tok',
+      });
+      await waitFor(() => {
+        expect(hook.result.current.user?.id).toBe('user-1');
+      });
+      return { ...hook, authStateCallback };
+    };
+
+    beforeEach(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+      stubLocation();
+      sessionStorage.setItem(DRAFT_KEY, '{"address":"12 Elm St"}');
+      sessionStorage.setItem(OTHER_KEY, '{"address":"someone else"}');
+    });
+
+    it('removes the draft when the adopter clicks Sign out', async () => {
+      const { result } = await signInAs();
+
+      await result.current.signOut();
+
+      expect(sessionStorage.getItem(DRAFT_KEY)).toBeNull();
+    });
+
+    it('removes the draft when another tab signs the adopter out', async () => {
+      const { authStateCallback } = await signInAs();
+
+      await authStateCallback('SIGNED_OUT', null);
+
+      expect(sessionStorage.getItem(DRAFT_KEY)).toBeNull();
+    });
+
+    it("leaves a different account's draft alone", async () => {
+      const { result } = await signInAs();
+
+      await result.current.signOut();
+
+      expect(sessionStorage.getItem(OTHER_KEY)).not.toBeNull();
+    });
+  });
 });
