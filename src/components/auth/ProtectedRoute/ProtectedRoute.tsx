@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 
@@ -39,6 +39,15 @@ export default function ProtectedRoute({
   const router = useRouter();
   const pathname = usePathname() || '/';
   const wasAuthenticated = useRef(false);
+  // The static export keys detail pages by query string (?id=, ?pet=,
+  // ?conversation=) and usePathname() drops it (#366). Read it after mount
+  // instead of useSearchParams so the build needs no Suspense boundary and
+  // the server-rendered markup stays the same for every visitor.
+  const [search, setSearch] = useState('');
+  useEffect(() => {
+    setSearch(window.location.search);
+  }, [pathname]);
+  const returnPath = `${pathname}${search}`;
 
   useEffect(() => {
     if (isAuthenticated) wasAuthenticated.current = true;
@@ -54,8 +63,12 @@ export default function ProtectedRoute({
     // to abort the pending navigation with NS_BINDING_ABORTED.
     if (wasAuthenticated.current) return;
 
-    const returnUrl = encodeURIComponent(pathname);
     const timer = setTimeout(() => {
+      // Read the query string when the redirect fires, so a deep link is
+      // never sent back to the bare path.
+      const returnUrl = encodeURIComponent(
+        `${pathname}${window.location.search}`
+      );
       router.push(`${redirectTo}?returnUrl=${returnUrl}`);
     }, AUTH_FLIP_DEBOUNCE_MS);
 
@@ -102,13 +115,13 @@ export default function ProtectedRoute({
 
             <div className="card-actions flex w-full flex-col gap-3 sm:flex-row">
               <Link
-                href={`${redirectTo}?returnUrl=${encodeURIComponent(pathname)}`}
+                href={`${redirectTo}?returnUrl=${encodeURIComponent(returnPath)}`}
                 className="btn btn-primary min-h-11 flex-1"
               >
                 Sign In
               </Link>
               <Link
-                href={`/sign-up?returnUrl=${encodeURIComponent(pathname)}`}
+                href={`/sign-up?returnUrl=${encodeURIComponent(returnPath)}`}
                 className="btn btn-neutral btn-outline min-h-11 flex-1"
               >
                 Sign Up
