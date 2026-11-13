@@ -315,6 +315,73 @@ describe('OfflineQueueService', () => {
     });
   });
 
+  describe('plaintext is never stored (#358)', () => {
+    const legacyRow = (id: string, extra: Record<string, unknown> = {}) =>
+      ({
+        id,
+        conversation_id: 'conv-123',
+        sender_id: 'user-123',
+        encrypted_content: 'cipher',
+        initialization_vector: 'iv',
+        status: 'pending',
+        synced: 0,
+        retries: 0,
+        created_at: Date.now(),
+        ...extra,
+      }) as unknown as QueuedMessage;
+
+    it('rejects plaintext in its parameter type (enforced by type-check)', async () => {
+      await service.queueMessage({
+        id: 'msg-typed',
+        conversation_id: 'conv-123',
+        sender_id: 'user-123',
+        encrypted_content: 'cipher',
+        initialization_vector: 'iv',
+        // @ts-expect-error queueMessage must not accept the plaintext
+        content: 'secret text',
+      });
+
+      expect(
+        await messagingDb.messaging_queued_messages.get('msg-typed')
+      ).toBeDefined();
+    });
+
+    it('scrubPlaintext removes content and plaintext_content from old rows', async () => {
+      await messagingDb.messaging_queued_messages.bulkAdd([
+        legacyRow('old-1', { content: 'secret one' }),
+        legacyRow('old-2', {
+          plaintext_content: 'secret two',
+          synced: 1,
+          status: 'sent',
+        }),
+        legacyRow('clean-1'),
+      ]);
+
+      const scrubbed = await service.scrubPlaintext();
+
+      expect(scrubbed).toBe(2);
+      const rows = await messagingDb.messaging_queued_messages.toArray();
+      expect(rows).toHaveLength(3);
+      for (const row of rows) {
+        expect(row).not.toHaveProperty('content');
+        expect(row).not.toHaveProperty('plaintext_content');
+        expect(row.encrypted_content).toBe('cipher');
+      }
+    });
+
+    it('syncQueue scrubs old rows even when the sync itself fails', async () => {
+      await messagingDb.messaging_queued_messages.add(
+        legacyRow('old-3', { content: 'secret three' })
+      );
+
+      await service.syncQueue().catch(() => undefined);
+
+      const row = await messagingDb.messaging_queued_messages.get('old-3');
+      expect(row).toBeDefined();
+      expect(row).not.toHaveProperty('content');
+    });
+  });
+
   describe('clearQueue', () => {
     it('should clear entire queue', async () => {
       await service.queueMessage({

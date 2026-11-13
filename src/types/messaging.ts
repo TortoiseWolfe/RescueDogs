@@ -92,9 +92,14 @@ export interface QueuedMessage {
   sender_id: string; // User ID who sent the message
   encrypted_content: string;
   initialization_vector: string;
-  /** Plaintext — for UI rendering while queued. Client-only, never synced. */
+  /**
+   * Legacy plaintext fields. Builds before #358 saved the cleartext here.
+   * Nothing writes them now; syncQueue strips them from old rows, and the
+   * pending bubble keeps its text in React state instead.
+   * @deprecated
+   */
   content?: string;
-  /** Plaintext content for deferred encryption during sync. Client-only. */
+  /** @deprecated Legacy plaintext, see `content`. */
   plaintext_content?: string;
   status: QueueStatus; // Queue status
   /**
