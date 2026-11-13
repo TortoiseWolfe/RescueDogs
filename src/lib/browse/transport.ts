@@ -1,33 +1,16 @@
 import type { BrowsePet, ShelterTransportInfo } from '@/types/applications';
-import { US_STATE_OPTIONS } from './location-filters';
 import { filterBrowsePetsByRadius, normalizeCenterZip } from './distance';
+import {
+  STATE_CODES,
+  explicitTransportState,
+  normalizeTransportStates,
+  stateName,
+} from './transport-states';
 import zipcodes from 'zipcodes';
 
-const STATE_CODES = new Set(US_STATE_OPTIONS.map((option) => option.code));
-
-const STATE_NAMES = new Map(
-  US_STATE_OPTIONS.map((option) => [option.code, option.name])
-);
-
-/** Full state name for a code, falling back to the code itself. */
-export function stateName(code?: string | null): string {
-  const normalized = code?.trim().toUpperCase();
-  if (!normalized) return '';
-  return STATE_NAMES.get(normalized) ?? normalized;
-}
-
-/** Uppercase, validate, de-duplicate and sort transport state codes (#331). */
-export function normalizeTransportStates(
-  raw?: ReadonlyArray<string | null | undefined> | null
-): string[] {
-  if (!raw) return [];
-  const codes = new Set<string>();
-  for (const entry of raw) {
-    const code = entry?.trim().toUpperCase();
-    if (code && STATE_CODES.has(code)) codes.add(code);
-  }
-  return Array.from(codes).sort();
-}
+// The pure helpers live in transport-states.ts so the services layer can use
+// them without importing the ZIP database. Re-exported for existing callers.
+export { normalizeTransportStates, stateName };
 
 /**
  * The adopter's state for transport matching (#331). An explicit State filter
@@ -38,8 +21,8 @@ export function transportStateFor(
   state?: string | null,
   centerZip?: string | null
 ): string | undefined {
-  const explicit = state?.trim().toUpperCase();
-  if (explicit && STATE_CODES.has(explicit)) return explicit;
+  const explicit = explicitTransportState(state);
+  if (explicit) return explicit;
 
   const zip = normalizeCenterZip(centerZip);
   if (!zip) return undefined;
