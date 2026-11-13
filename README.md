@@ -134,7 +134,7 @@ bounces non-staff accounts back to the home page (that's the gate working).
 
 ### The two-window demo (the whole point)
 
-1. Window 1: sign in as **staff** → open Tiger's review page.
+1. Window 1: sign in as **staff** �� open Tiger's review page.
 2. Window 2 (incognito / second profile): sign in as the **adopter** → open
    Tiger's tracker at
    `https://raisedpaws.com/applications/status/?id=55555555-5555-5555-5555-555555555501`.
@@ -610,8 +610,8 @@ Custom RescueDogs theme (dark default + light variant) built on the existing Dai
 | 2     | Custom DaisyUI themes (dark + light, WCAG AAA)       | Complete |
 | 3     | Theme template system (CUSTOM-THEME.md + rebrand.sh) | Complete |
 | 4     | Redesign atomic components                           | Complete |
-| 5     | Rebuild molecular & organism components              | Next     |
-| 6     | Page-by-page polish                                  | Pending  |
+| 5     | Rebuild molecular & organism components              | Complete |
+| 6     | Page-by-page polish                                  | Complete |
 
 Current component hierarchy: 22 atomic, 17 molecular, 8 organisms.
 
