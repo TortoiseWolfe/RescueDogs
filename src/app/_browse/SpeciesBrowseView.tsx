@@ -478,7 +478,12 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                 return (
                   <li key={pet.id}>
                     <article className="card bg-base-200 h-full shadow-sm">
-                      <Link href={detailHref} className="block">
+                      <Link
+                        href={detailHref}
+                        className="block"
+                        aria-hidden="true"
+                        tabIndex={-1}
+                      >
                         <figure className="bg-base-300 aspect-[4/3] overflow-hidden">
                           {pet.photo_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
