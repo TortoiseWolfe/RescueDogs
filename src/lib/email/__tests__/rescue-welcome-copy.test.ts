@@ -1,40 +1,23 @@
 /**
  * Unit coverage for rescue welcome email copy (#316).
- * Mirrors supabase/functions/_shared/email-templates.ts rescue_welcome branch
- * so CI catches regressions without Deno.
+ * Imports the shipped rescue_welcome branch from
+ * supabase/functions/_shared/email-templates.ts (no imports there, so Vitest
+ * loads it directly) so an edit to the real copy is seen by this test.
  */
 
 import { describe, it, expect } from 'vitest';
-
-type RescueWelcomeEmailData = {
-  display_name: string;
-  shelter_url: string;
-  add_pet_url: string;
-  contact_url: string;
-  help_email: string;
-  site_url: string;
-};
+import {
+  getEmailSubject,
+  getEmailText,
+  type RescueWelcomeEmailData,
+} from '../../../../supabase/functions/_shared/email-templates';
 
 function getSubject(): string {
-  return 'Welcome to Raised Paws — next steps for your rescue';
+  return getEmailSubject('rescue_welcome');
 }
 
 function getText(d: RescueWelcomeEmailData): string {
-  return [
-    'Welcome to Raised Paws',
-    '',
-    `Hi ${d.display_name},`,
-    '',
-    'Your account is active. Here’s how to get your rescue set up:',
-    '',
-    `1. Complete your rescue profile: ${d.shelter_url}`,
-    `2. Add your first pet: ${d.add_pet_url}`,
-    '3. How adoption works: adopters apply from the pet page; you update status in the shelter dashboard so they can track progress.',
-    '',
-    `Need help? ${d.contact_url} or ${d.help_email}`,
-    '',
-    `Raised Paws · ${d.site_url}`,
-  ].join('\n');
+  return getEmailText('rescue_welcome', d);
 }
 
 describe('rescue welcome email copy (#316)', () => {
