@@ -60,7 +60,20 @@ vi.mock('@/lib/supabase/client', () => ({ supabase: {} }));
 const photoServiceMocks = vi.hoisted(() => ({
   reorderPhotos: vi.fn(),
   listPhotos: vi.fn(),
+  addPhoto: vi.fn(),
+  removeStoredPhotos: vi.fn(),
 }));
+
+vi.mock('@/lib/pet-photos/upload', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/lib/pet-photos/upload')>();
+  return {
+    ...actual,
+    uploadPetPhotoBlob: vi.fn(async () => ({
+      url: 'https://x.supabase.co/storage/v1/object/public/pet-photos/s/p/1.webp',
+    })),
+  };
+});
 
 vi.mock('@/services/applications/pet-photo-service', async (importOriginal) => {
   const actual =
@@ -72,14 +85,15 @@ vi.mock('@/services/applications/pet-photo-service', async (importOriginal) => {
     PetPhotoService: vi.fn().mockImplementation(() => ({
       reorderPhotos: photoServiceMocks.reorderPhotos,
       listPhotos: photoServiceMocks.listPhotos,
-      addPhoto: vi.fn(),
+      addPhoto: photoServiceMocks.addPhoto,
+      removeStoredPhotos: photoServiceMocks.removeStoredPhotos,
       deletePhoto: vi.fn(),
       syncPrimaryPhotoUrl: vi.fn(),
     })),
   };
 });
 
-import { PetPhotoManager } from './PetPhotoManager';
+import { PetPhotoManager, type PetPhotoManagerHandle } from './PetPhotoManager';
 import {
   saveStagedPhotos,
   loadStagedPhotos,
@@ -406,3 +420,82 @@ describe('PetPhotoManager order arrows', FLOW_TIMEOUT, () => {
     expect(photoServiceMocks.reorderPhotos).not.toHaveBeenCalled();
   });
 });
+
+describe(
+  'PetPhotoManager cleans up a file whose row failed (#372)',
+  FLOW_TIMEOUT,
+  () => {
+    const uploadedUrl =
+      'https://x.supabase.co/storage/v1/object/public/pet-photos/s/p/1.webp';
+
+    beforeEach(() => {
+      photoServiceMocks.addPhoto.mockReset();
+      photoServiceMocks.removeStoredPhotos.mockReset();
+    });
+
+    function pickOne(container: HTMLElement) {
+      const input = container.querySelector(
+        'input[type="file"]'
+      ) as HTMLInputElement;
+      fireEvent.change(input, {
+        target: { files: [new File(['x'], 'a.jpg', { type: 'image/jpeg' })] },
+      });
+    }
+
+    it('removes the uploaded file when saving the row fails on an existing pet', async () => {
+      photoServiceMocks.addPhoto.mockRejectedValue(new Error('row failed'));
+      const { container } = render(
+        <PetPhotoManager shelterId="s" petId="pet-1" />
+      );
+
+      pickOne(container);
+      await clickWhenEnabled('Use photo');
+
+      await waitFor(() => {
+        expect(photoServiceMocks.removeStoredPhotos).toHaveBeenCalledWith([
+          uploadedUrl,
+        ]);
+      });
+    });
+
+    it('removes the uploaded file when saving a staged photo fails after Save', async () => {
+      photoServiceMocks.addPhoto.mockRejectedValue(new Error('row failed'));
+      const ref = React.createRef<PetPhotoManagerHandle>();
+      const { container } = render(
+        <PetPhotoManager ref={ref} shelterId="s" petId={null} />
+      );
+
+      pickOne(container);
+      await clickWhenEnabled('Use photo');
+      await waitFor(() => expect(ref.current?.hasStagedPhotos()).toBe(true));
+
+      await expect(ref.current!.uploadStaged('pet-9')).rejects.toThrow(
+        'row failed'
+      );
+      expect(photoServiceMocks.removeStoredPhotos).toHaveBeenCalledWith([
+        uploadedUrl,
+      ]);
+    });
+
+    it('keeps the file when the row was saved', async () => {
+      photoServiceMocks.addPhoto.mockResolvedValue({
+        id: 'photo-1',
+        pet_id: 'pet-1',
+        url: uploadedUrl,
+        sort_order: 0,
+        created_at: '2026-01-01T00:00:00Z',
+      });
+      const { container } = render(
+        <PetPhotoManager shelterId="s" petId="pet-1" />
+      );
+
+      pickOne(container);
+      await clickWhenEnabled('Use photo');
+
+      await waitFor(() =>
+        expect(photoServiceMocks.addPhoto).toHaveBeenCalled()
+      );
+      expect(photoServiceMocks.removeStoredPhotos).not.toHaveBeenCalled();
+    });
+  }
+);

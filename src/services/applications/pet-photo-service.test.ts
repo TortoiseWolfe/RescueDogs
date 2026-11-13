@@ -182,4 +182,117 @@ describe('PetPhotoService (#273)', () => {
       'The photos changed since this page loaded. Refresh and try again.'
     );
   });
+
+  describe('removes the stored image files too (#372)', () => {
+    const base = 'https://x.supabase.co/storage/v1/object/public/pet-photos';
+    const urlA = `${base}/shelter-1/pet-1/111.webp`;
+    const urlB = `${base}/shelter-1/pet-1/222.webp`;
+
+    function storageMock(result: { error: unknown } = { error: null }) {
+      const remove = vi.fn().mockResolvedValue(result);
+      const storage = { from: vi.fn().mockReturnValue({ remove }) };
+      return { remove, storage };
+    }
+
+    /** Query builder whose awaited result is `result`, for any chain. */
+    function chain(result: { data: unknown; error: unknown }) {
+      const b: Record<string, unknown> = {};
+      for (const m of ['select', 'update', 'delete', 'eq']) {
+        b[m] = vi.fn(() => b);
+      }
+      b.maybeSingle = vi.fn().mockResolvedValue(result);
+      b.then = (resolve: (r: unknown) => unknown) => resolve(result);
+      return b;
+    }
+
+    it('removeStoredPhotos sends bucket paths to Storage', async () => {
+      const { remove, storage } = storageMock();
+      const service = new PetPhotoService({ storage } as any);
+
+      await service.removeStoredPhotos([urlA, urlB]);
+
+      expect(storage.from).toHaveBeenCalledWith('pet-photos');
+      expect(remove).toHaveBeenCalledWith([
+        'shelter-1/pet-1/111.webp',
+        'shelter-1/pet-1/222.webp',
+      ]);
+    });
+
+    it('removeStoredPhotos skips empty and foreign urls without calling Storage', async () => {
+      const { remove, storage } = storageMock();
+      const service = new PetPhotoService({ storage } as any);
+
+      await service.removeStoredPhotos([
+        '',
+        null,
+        'https://example.com/cat.png',
+      ]);
+
+      expect(remove).not.toHaveBeenCalled();
+    });
+
+    it('removeStoredPhotos logs a Storage failure and does not throw', async () => {
+      const { storage } = storageMock({ error: { message: 'boom' } });
+      const service = new PetPhotoService({ storage } as any);
+
+      await expect(service.removeStoredPhotos([urlA])).resolves.toBeUndefined();
+    });
+
+    it('deletePhoto removes the file after the row is gone', async () => {
+      const rows = chain({ data: [{ url: urlA }], error: null });
+      const { remove, storage } = storageMock();
+      const supabase = {
+        from: vi.fn().mockReturnValue(rows),
+        storage,
+      } as any;
+
+      await new PetPhotoService(supabase).deletePhoto('photo-1');
+
+      expect(rows.select).toHaveBeenCalledWith('url');
+      expect(remove).toHaveBeenCalledWith(['shelter-1/pet-1/111.webp']);
+    });
+
+    it('deletePhoto keeps the file when the database delete fails', async () => {
+      const rows = chain({ data: null, error: { message: 'denied' } });
+      const { remove, storage } = storageMock();
+      const supabase = {
+        from: vi.fn().mockReturnValue(rows),
+        storage,
+      } as any;
+
+      await expect(
+        new PetPhotoService(supabase).deletePhoto('photo-1')
+      ).rejects.toThrow(/Failed to delete pet photo/);
+      expect(remove).not.toHaveBeenCalled();
+    });
+
+    it('deletePhoto does not report failure when the file removal fails', async () => {
+      const rows = chain({ data: [{ url: urlA }], error: null });
+      const { storage } = storageMock({ error: { message: 'boom' } });
+      const supabase = {
+        from: vi.fn().mockReturnValue(rows),
+        storage,
+      } as any;
+
+      await expect(
+        new PetPhotoService(supabase).deletePhoto('photo-1')
+      ).resolves.toBeUndefined();
+    });
+
+    it('deletePhoto on a legacy id reads photo_url first, then removes that file', async () => {
+      const pets = chain({ data: { photo_url: urlA }, error: null });
+      const { remove, storage } = storageMock();
+      const supabase = {
+        from: vi.fn().mockReturnValue(pets),
+        storage,
+      } as any;
+
+      await new PetPhotoService(supabase).deletePhoto(
+        legacyPetPhotoId('pet-1')
+      );
+
+      expect(pets.update).toHaveBeenCalledWith({ photo_url: null });
+      expect(remove).toHaveBeenCalledWith(['shelter-1/pet-1/111.webp']);
+    });
+  });
 });
