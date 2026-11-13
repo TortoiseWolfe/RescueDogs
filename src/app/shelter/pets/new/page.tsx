@@ -360,7 +360,7 @@ export default function NewShelterPetPage() {
 
         <button
           type="submit"
-          className={`btn btn-primary min-h-11${busy ? 'loading' : ''}`}
+          className="btn btn-primary min-h-11"
           disabled={busy}
         >
           {redirecting ? 'Redirecting…' : saving ? 'Saving…' : 'Save Pet'}
