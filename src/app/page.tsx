@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { detectedConfig } from '@/config/project-detected';
+import HeroStatusCard from './_home/HeroStatusCard';
 import MeetThePetsSection from './_home/MeetThePetsSection';
 
 /** Early-stage placeholders (#79) — not live shelter counts. */
@@ -137,24 +138,25 @@ export default function Home() {
                   Try Demo
                 </Link>
               </div>
+              <HeroStatusCard />
             </div>
           </div>
 
-          {/* Right column: hero image
+          {/* Right column: square painting (1024×1024).
               Tune these Tailwind knobs:
               - Whole column up/down: `xl:-mt-*` on this outer div (negative = higher)
               - Photo up/down: `xl:-mt-*` on the image wrapper
-              - Photo size: `max-w-md` / `xl:max-w-[640px]` on the column
+              - Photo size: `max-w-md` / `xl:max-w-[520px]` on the column
           */}
-          <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 xl:-mt-8 xl:max-w-[640px] xl:items-stretch">
-            <div className="hero-float relative aspect-[4/3] w-full xl:mt-2">
+          <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 xl:-mt-8 xl:max-w-[520px] xl:items-stretch">
+            <div className="hero-float relative aspect-square w-full xl:mt-2">
               <div className="absolute inset-0 rotate-1 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl sm:rotate-3" />
               <div className="absolute inset-2 rotate-1 overflow-hidden rounded-[1.625rem] sm:rotate-3">
                 <Image
-                  src={`${detectedConfig.basePath}/hero-held-paws.png`}
-                  alt="A smiling adopter with a rescued dog and cat in a sunny park"
+                  src={`${detectedConfig.basePath}/hero-park-paws.jpg`}
+                  alt="An adopter kneeling in an autumn park, holding a golden retriever’s paw and an orange tabby’s paw"
                   fill
-                  sizes="(max-width: 1024px) 100vw, 640px"
+                  sizes="(max-width: 1024px) 100vw, 520px"
                   className="object-cover"
                   priority
                 />

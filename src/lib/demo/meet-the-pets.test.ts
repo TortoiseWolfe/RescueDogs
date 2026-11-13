@@ -24,6 +24,7 @@ function liveDog(
     species: 'dog',
     breed: 'Mix',
     age_years: 3,
+    size: null,
     photo_url: 'https://example.com/dog.jpg',
     notes: null,
     status: 'available',
@@ -38,6 +39,7 @@ function liveCat(
     species: 'cat',
     breed: 'DSH',
     age_years: 2,
+    size: null,
     photo_url: 'https://example.com/cat.jpg',
     notes: null,
     status: 'available',
@@ -75,7 +77,8 @@ describe('MEET_THE_PETS_POOL identity lock', () => {
     expect(byName.Tiger?.species).toBe('dog');
     expect(byName.Rocky?.species).toBe('dog');
     expect(byName.Rocky?.portrait).toBe('/demo-pets/rocky.webp');
-    expect(byName.Rocky?.detail).toMatch(/German Shepherd/);
+    expect(byName.Rocky?.breed).toBe('German Shepherd');
+    expect(byName.Rocky?.size).toBeNull();
   });
 
   it('binds each pet name to its own portrait path', () => {
@@ -124,7 +127,25 @@ describe('isSeedDemoPetId', () => {
 });
 
 describe('composeMeetThePets (#324)', () => {
-  it('fills dog|cat|dog from live pets and falls back to cartoons', () => {
+  it('shows three real dogs when no cat is listed (#574)', () => {
+    const composed = composeMeetThePets(
+      [
+        liveDog({ id: 'dog-1', name: 'Bubba' }),
+        liveDog({ id: 'dog-2', name: 'Duke' }),
+        liveDog({ id: 'dog-3', name: 'Dallys' }),
+        liveCat({ id: 'cat-1', name: 'Muffin', status: 'adopted' }),
+      ],
+      { random: identityRandom }
+    );
+
+    expect(composed.map((p) => p.name)).toEqual(['Bubba', 'Duke', 'Dallys']);
+    expect(
+      composed.every((p) => p.source === 'live' && p.species === 'dog')
+    ).toBe(true);
+    expect(composed[0].href).toContain('/dogs/detail?id=dog-1');
+  });
+
+  it('keeps a real cat when there is still a seat', () => {
     const composed = composeMeetThePets(
       [
         liveDog({ id: 'dog-1', name: 'Bubba' }),
@@ -134,13 +155,12 @@ describe('composeMeetThePets (#324)', () => {
       { random: identityRandom }
     );
 
-    expect(composed.map((p) => p.name)).toEqual(['Bubba', 'Muffin', 'Duke']);
+    expect(composed.map((p) => p.name)).toEqual(['Bubba', 'Duke', 'Muffin']);
     expect(composed.every((p) => p.source === 'live')).toBe(true);
-    expect(composed[0].href).toContain('/dogs/detail?id=dog-1');
-    expect(composed[1].href).toContain('/cats/detail?id=cat-1');
+    expect(composed[2].href).toContain('/cats/detail?id=cat-1');
   });
 
-  it('uses a cartoon cat when no real cat has a photo', () => {
+  it('fills an empty seat from the cartoon pool', () => {
     const composed = composeMeetThePets(
       [
         liveDog({ id: 'dog-1', name: 'Bubba' }),
@@ -149,12 +169,9 @@ describe('composeMeetThePets (#324)', () => {
       { random: identityRandom }
     );
 
-    expect(composed[0].name).toBe('Bubba');
+    expect(composed.map((p) => p.name).slice(0, 2)).toEqual(['Bubba', 'Duke']);
     expect(composed[0].source).toBe('live');
-    expect(composed[1].species).toBe('cat');
-    expect(composed[1].source).toBe('demo');
-    expect(composed[2].name).toBe('Duke');
-    expect(composed[2].source).toBe('live');
+    expect(composed[2].source).toBe('demo');
   });
 
   it('ignores seed UUID pets so demo storage art does not win', () => {
@@ -181,6 +198,27 @@ describe('composeMeetThePets (#324)', () => {
     );
     expect(card.source).toBe('live');
     expect(card.href).toBe('/dogs/detail?id=abc');
-    expect(card.detail).toContain('Good boy');
+    expect(card.notes).toBe('Good boy');
+    expect(card.breed).toBe('Mix');
+    expect(card.size).toBeNull();
+  });
+
+  it('stacks breed, size, and age instead of one run-on line (#574)', () => {
+    const card = browsePetToMeetCard(
+      liveDog({
+        id: 'abc',
+        name: 'Bubba',
+        breed: 'bully mix',
+        size: 'large',
+        age_years: 2,
+        notes:
+          'Good boy who loves tennis balls and long walks around the block',
+      })
+    );
+    expect(card.breed).toBe('Bully Mix');
+    expect(card.size).toBe('Large');
+    expect(card.age).toBe('2 years');
+    expect(card.notes).toContain('tennis balls');
+    expect(card).not.toHaveProperty('detail');
   });
 });
