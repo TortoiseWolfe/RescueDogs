@@ -15,9 +15,9 @@ import {
 } from '@/lib/demo/meet-the-pets';
 
 /**
- * Homepage Meet-the-Pets (#165 / #324): SSR shows the default cartoon
- * trio; after mount, prefer live available listings with photos
- * (2 dogs + 1 cat), filling gaps from the demo cartoon pool.
+ * Homepage Meet-the-Pets (#165 / #324 / #574): SSR shows the default cartoon
+ * trio; after mount, prefer up to three live available listings with
+ * photos, any species. Cartoon cards fill only the seats that are left.
  */
 export default function MeetThePetsSection() {
   const [pets, setPets] = useState<readonly MeetPetCard[]>(
@@ -103,9 +103,41 @@ export default function MeetThePetsSection() {
                     >
                       {pet.name}
                     </h3>
-                    <p className={`font-semibold ${MEET_PET_DETAIL_TEXT}`}>
-                      {pet.detail}
-                    </p>
+                    <dl
+                      className={`leading-tight font-semibold ${MEET_PET_DETAIL_TEXT}`}
+                    >
+                      {pet.breed ? (
+                        <div>
+                          <dt className="sr-only">Breed</dt>
+                          <dd className="text-sm">{pet.breed}</dd>
+                        </div>
+                      ) : null}
+                      {pet.size ? (
+                        <div>
+                          <dt className="sr-only">Size</dt>
+                          <dd className="text-xs">
+                            <span className="font-medium">Size: </span>
+                            {pet.size}
+                          </dd>
+                        </div>
+                      ) : null}
+                      {pet.age ? (
+                        <div>
+                          <dt className="sr-only">Age</dt>
+                          <dd className="text-xs">
+                            <span className="font-medium">Age: </span>
+                            {pet.age}
+                          </dd>
+                        </div>
+                      ) : null}
+                    </dl>
+                    {pet.notes ? (
+                      <p
+                        className={`mt-1 line-clamp-2 text-xs leading-snug font-semibold ${MEET_PET_DETAIL_TEXT}`}
+                      >
+                        {pet.notes}
+                      </p>
+                    ) : null}
                   </div>
                   <Link
                     href={pet.href}
