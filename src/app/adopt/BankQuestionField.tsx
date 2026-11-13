@@ -6,6 +6,16 @@ import { fieldsForQuestion } from '@/lib/applications/application-flow';
 
 type Choice = { value?: unknown; label?: unknown };
 
+// Answer types that are answered with several controls. The wording names the
+// whole group (fieldset + legend) because a <label for> can only name one control.
+const GROUP_ANSWER_TYPES: ReadonlyArray<ApplicationQuestion['answer_type']> = [
+  'multi_choice',
+  'address',
+  'contact',
+  'group',
+  'repeat',
+];
+
 function choiceOptions(question: ApplicationQuestion): Array<{
   value: string;
   label: string;
@@ -46,19 +56,36 @@ export function BankQuestionField({
   const id = `bank-${question.id.replace(/\./g, '-')}`;
   const required = !question.always_optional;
   const options = choiceOptions(question);
+  const isGroup = GROUP_ANSWER_TYPES.includes(question.answer_type);
+  const errorId = `${id}-error`;
+  const describedBy = error ? errorId : undefined;
+  const wording = (
+    <>
+      {question.wording}
+      {required ? (
+        <>
+          <span className="text-error ml-1" aria-hidden="true">
+            *
+          </span>
+          {isGroup ? <span className="sr-only"> (required)</span> : null}
+        </>
+      ) : null}
+    </>
+  );
+  const Wrapper = isGroup ? 'fieldset' : 'div';
 
   return (
-    <div className="form-control w-full">
-      <label htmlFor={id} className="label">
-        <span className="label-text">
-          {question.wording}
-          {required ? (
-            <span className="text-error ml-1" aria-hidden="true">
-              *
-            </span>
-          ) : null}
-        </span>
-      </label>
+    <Wrapper
+      className="form-control w-full"
+      aria-describedby={isGroup ? describedBy : undefined}
+    >
+      {isGroup ? (
+        <legend className="label">{wording}</legend>
+      ) : (
+        <label htmlFor={id} className="label">
+          <span className="label-text">{wording}</span>
+        </label>
+      )}
 
       {question.answer_type === 'long_text' ? (
         <textarea
@@ -70,6 +97,7 @@ export function BankQuestionField({
           onChange={(event) => onChange(event.target.value)}
           aria-required={required || undefined}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
       ) : null}
 
@@ -90,6 +118,7 @@ export function BankQuestionField({
           onChange={(event) => onChange(event.target.value)}
           aria-required={required || undefined}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
       ) : null}
 
@@ -106,6 +135,7 @@ export function BankQuestionField({
           }
           aria-required={required || undefined}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
       ) : null}
 
@@ -136,6 +166,7 @@ export function BankQuestionField({
           onChange={(event) => onChange(event.target.value || null)}
           aria-required={required || undefined}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         >
           <option value="">Select…</option>
           {options.map((option) => (
@@ -189,6 +220,7 @@ export function BankQuestionField({
           }
           aria-required={required || undefined}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
       ) : null}
 
@@ -213,11 +245,11 @@ export function BankQuestionField({
       ) : null}
 
       {error ? (
-        <p className="text-error mt-1 text-sm" role="alert">
+        <p id={errorId} className="text-error mt-1 text-sm" role="alert">
           {error}
         </p>
       ) : null}
-    </div>
+    </Wrapper>
   );
 }
 
@@ -239,6 +271,7 @@ function ObjectFields({
         id={id}
         className="textarea textarea-bordered w-full"
         rows={3}
+        aria-label="Your answer"
         value={typeof value.note === 'string' ? value.note : ''}
         onChange={(event) =>
           onChange(
@@ -312,6 +345,8 @@ function RepeatFields({
       {rows.map((row, index) => (
         <div
           key={`${id}-row-${index}`}
+          role="group"
+          aria-label={`Entry ${index + 1}`}
           className="border-base-300 space-y-2 rounded-lg border p-3"
         >
           <ObjectFields
@@ -327,6 +362,7 @@ function RepeatFields({
           <button
             type="button"
             className="btn btn-ghost btn-sm min-h-11"
+            aria-label={`Remove entry ${index + 1}`}
             onClick={() => {
               const nextRows = rows.filter((_, i) => i !== index);
               onChange(
