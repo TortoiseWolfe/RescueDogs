@@ -23,6 +23,19 @@ export function pickLatestApplication<T extends { status_changed_at: string }>(
 }
 
 /**
+ * Homepage card input. A shelter login can also have submitted applications,
+ * so membership never hides the card. An application whose pet row is missing
+ * is skipped so one bad embed cannot blank the rest.
+ */
+export function applicationForHeroCard<
+  T extends { status_changed_at: string; pets: { name: string } | null },
+>(applications: readonly T[]): T | null {
+  return pickLatestApplication(
+    applications.filter((application) => Boolean(application.pets?.name))
+  );
+}
+
+/**
  * Compact pipeline for the homepage card. The full StatusTimeline also
  * renders the update history, which is too tall to sit under the hero
  * buttons, so this keeps the same labels and the same terminal-step swap.
