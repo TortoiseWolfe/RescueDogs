@@ -223,18 +223,17 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-/* Brand title on orange header: white fill + navy outline (#142).
+/* Brand title on the navy header: white fill + thin orange stroke (#576).
  * AnimatedLogo uses text-primary (orange inside .site-header), so override. */
 .site-header .brand-logo {
   color: #ffffff;
-  -webkit-text-stroke: 1.25px #1e3a8a;
+  -webkit-text-stroke: 1px #f97316;
   paint-order: stroke fill;
   text-shadow:
-    0 0 1px #1e3a8a,
-    0 1px 0 #1e3a8a,
-    0 -1px 0 #1e3a8a,
-    1px 0 0 #1e3a8a,
-    -1px 0 0 #1e3a8a;
+    0 1px 0 #f97316,
+    0 -1px 0 #f97316,
+    1px 0 0 #f97316,
+    -1px 0 0 #f97316;
 }
 
 /* Desktop role-menu triggers (#269): white + navy outline at rest; cream pill with navy text on hover and open (10.02:1, WCAG AAA). */
