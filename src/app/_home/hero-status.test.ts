@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { heroStatusSteps, pickLatestApplication } from './hero-status';
+import {
+  applicationForHeroCard,
+  heroStatusSteps,
+  pickLatestApplication,
+} from './hero-status';
 
 describe('pickLatestApplication', () => {
   it('returns null when the adopter has no applications', () => {
@@ -18,6 +22,31 @@ describe('pickLatestApplication', () => {
     expect(pickLatestApplication([olderUpdate, newerUpdate])?.id).toBe(
       'old-file'
     );
+  });
+});
+
+describe('applicationForHeroCard', () => {
+  it('keeps an application even when the account is also shelter staff', () => {
+    const submitted = {
+      id: 'app-1',
+      status_changed_at: '2026-11-12T00:00:00.000Z',
+      pets: { name: 'Dallys' },
+    };
+    expect(applicationForHeroCard([submitted])?.id).toBe('app-1');
+  });
+
+  it('skips an application whose pet embed is missing', () => {
+    const missingPet = {
+      id: 'orphan',
+      status_changed_at: '2026-11-13T00:00:00.000Z',
+      pets: null,
+    };
+    const withPet = {
+      id: 'real',
+      status_changed_at: '2026-11-12T00:00:00.000Z',
+      pets: { name: 'Duke-a-Roni' },
+    };
+    expect(applicationForHeroCard([missingPet, withPet])?.id).toBe('real');
   });
 });
 
