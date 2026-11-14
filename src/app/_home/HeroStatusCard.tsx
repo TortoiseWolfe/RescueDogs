@@ -4,12 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase/client';
-import {
-  ApplicationService,
-  ShelterApplicationService,
-} from '@/services/applications';
+import { ApplicationService } from '@/services/applications';
 import type { ApplicationStatus } from '@/types/applications';
-import { heroStatusSteps, pickLatestApplication } from './hero-status';
+import { applicationForHeroCard, heroStatusSteps } from './hero-status';
 
 interface HeroStatusSummary {
   petName: string;
@@ -25,9 +22,10 @@ const DOT_CLASS = {
 } as const;
 
 /**
- * Real application card for a signed-in adopter. Signed-out visitors,
- * adopters with no applications, and shelter staff get nothing — staff
- * use the queue at /shelter. The full timeline stays on the status page.
+ * The signed-in person's latest application, under the hero actions.
+ * Signed-out visitors and people with no applications see nothing. A shelter
+ * login that has also submitted applications still sees this card. The full
+ * timeline stays on the status page.
  */
 export default function HeroStatusCard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -44,18 +42,10 @@ export default function HeroStatusCard() {
     (async () => {
       try {
         const applications = new ApplicationService(supabase);
-        const shelters = new ShelterApplicationService(supabase);
-        const [mine, membership] = await Promise.all([
-          applications.getMyApplications(userId),
-          shelters.getMyShelterMembership(userId),
-        ]);
+        const mine = await applications.getMyApplications(userId);
         if (cancelled) return;
-        if (membership) {
-          setSummary(null);
-          return;
-        }
-        const latest = pickLatestApplication(mine);
-        if (!latest) {
+        const latest = applicationForHeroCard(mine);
+        if (!latest?.pets?.name) {
           setSummary(null);
           return;
         }
@@ -63,7 +53,9 @@ export default function HeroStatusCard() {
           petName: latest.pets.name,
           status: latest.status,
           applicationId: latest.id,
-          hasMore: mine.length > 1,
+          hasMore:
+            mine.filter((application) => Boolean(application.pets?.name))
+              .length > 1,
         });
       } catch {
         if (!cancelled) setSummary(null);
