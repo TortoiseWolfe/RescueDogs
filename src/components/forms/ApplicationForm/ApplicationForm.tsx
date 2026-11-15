@@ -549,7 +549,7 @@ export default function ApplicationForm({
 
       {draftKey && draftSavedAt !== null && (
         <div
-          className="text-base-content/70 flex flex-wrap items-center justify-between gap-2 text-sm"
+          className="text-base-content/80 flex flex-wrap items-center justify-between gap-2 text-sm"
           data-testid="draft-notice"
         >
           <span>

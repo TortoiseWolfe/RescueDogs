@@ -77,7 +77,7 @@ export default function ForSheltersPage() {
             .
           </li>
         </ul>
-        <p className="text-base-content/70 mt-8 text-sm">
+        <p className="text-base-content/80 mt-8 text-sm">
           Adopting instead?{' '}
           <Link href="/for-adopters" className="link link-primary">
             For Adopters

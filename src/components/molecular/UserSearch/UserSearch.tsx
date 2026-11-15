@@ -168,7 +168,7 @@ export default function UserSearch({
                           {user.display_name || user.username || 'Unknown User'}
                         </p>
                         {user.username && user.display_name && (
-                          <p className="text-base-content/70 text-sm">
+                          <p className="text-base-content/80 text-sm">
                             @{user.username}
                           </p>
                         )}

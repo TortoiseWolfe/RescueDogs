@@ -163,7 +163,7 @@ export default function ShelterQuestionsPreviewPage() {
             {PET_TAG_LABELS[tag]}
           </button>
         ))}
-        <span className="text-base-content/70 ml-auto">
+        <span className="text-base-content/80 ml-auto">
           {visible.length} {visible.length === 1 ? 'question' : 'questions'} for
           a {species}
         </span>
@@ -195,7 +195,7 @@ export default function ShelterQuestionsPreviewPage() {
           <section className="bg-base-200 rounded-box p-4">
             <h2 className="text-lg font-semibold">
               {CATEGORY_LABELS[openGroup.category]}
-              <span className="text-base-content/70 ml-2 font-normal">
+              <span className="text-base-content/80 ml-2 font-normal">
                 · {openGroup.questions.length} questions
               </span>
             </h2>

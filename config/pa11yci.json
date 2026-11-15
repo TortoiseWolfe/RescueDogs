@@ -68,6 +68,51 @@
       "url": "http://localhost:3000/shelter",
       "screenCapture": ".pa11y-screenshots/shelter.png",
       "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/dogs",
+      "screenCapture": ".pa11y-screenshots/dogs.png",
+      "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/cats",
+      "screenCapture": ".pa11y-screenshots/cats.png",
+      "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/for-adopters",
+      "screenCapture": ".pa11y-screenshots/for-adopters.png",
+      "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/for-shelters",
+      "screenCapture": ".pa11y-screenshots/for-shelters.png",
+      "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/follow",
+      "screenCapture": ".pa11y-screenshots/follow.png",
+      "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/contact",
+      "screenCapture": ".pa11y-screenshots/contact.png",
+      "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/sign-in",
+      "screenCapture": ".pa11y-screenshots/sign-in.png",
+      "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/privacy",
+      "screenCapture": ".pa11y-screenshots/privacy.png",
+      "actions": ["wait for element footer to be visible"]
+    },
+    {
+      "url": "http://localhost:3000/terms",
+      "screenCapture": ".pa11y-screenshots/terms.png",
+      "actions": ["wait for element footer to be visible"]
     }
   ]
 }

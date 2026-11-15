@@ -53,7 +53,7 @@ export default function FollowPage() {
           <InterestForm />
         </div>
 
-        <p className="text-base-content/70 mt-8 text-center text-sm">
+        <p className="text-base-content/80 mt-8 text-center text-sm">
           Shelter or rescue wanting to talk pilot?{' '}
           <Link
             href="/contact?role=shelter"

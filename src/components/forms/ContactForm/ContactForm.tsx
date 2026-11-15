@@ -30,7 +30,7 @@ export const ContactForm: React.FC<ContactFormProps> = (props) => {
       fallback={
         <div className="mx-auto w-full max-w-2xl" aria-busy="true">
           <h2 className="mb-6 text-3xl font-bold">Contact Us</h2>
-          <p className="text-base-content/70">Loading form…</p>
+          <p className="text-base-content/80">Loading form…</p>
         </div>
       }
     >

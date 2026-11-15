@@ -83,7 +83,7 @@ export default function TeamList({ refreshKey }: { refreshKey: number }) {
       <div className="card-body gap-3">
         <h2 className="card-title text-lg">Your Team</h2>
         {loading ? (
-          <p className="text-base-content/70 text-sm">Loading team…</p>
+          <p className="text-base-content/80 text-sm">Loading team…</p>
         ) : error && members.length === 0 ? (
           <div role="alert" className="alert alert-error">
             <span>{error}</span>
@@ -113,11 +113,11 @@ export default function TeamList({ refreshKey }: { refreshKey: number }) {
                     <div className="min-w-0">
                       <p className="font-medium">{name}</p>
                       {member.displayName?.trim() && member.email ? (
-                        <p className="text-base-content/70 text-sm">
+                        <p className="text-base-content/80 text-sm">
                           {member.email}
                         </p>
                       ) : null}
-                      <p className="text-base-content/60 mt-1 text-sm">
+                      <p className="text-base-content/80 mt-1 text-sm">
                         Joined {formatJoined(member.joinedAt)}
                       </p>
                     </div>

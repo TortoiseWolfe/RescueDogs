@@ -82,7 +82,7 @@ export default function ApplicationCard({
           <div>
             <h3 className="card-title text-lg">{pet.name}</h3>
             {petDetails && (
-              <p className="text-base-content/70 text-sm">{petDetails}</p>
+              <p className="text-base-content/80 text-sm">{petDetails}</p>
             )}
           </div>
           <StatusBadge status={application.status} />
@@ -90,7 +90,7 @@ export default function ApplicationCard({
 
         <div className="card-actions mt-2 items-center justify-between">
           {updatedRelative && (
-            <span className="text-base-content/60 text-sm">
+            <span className="text-base-content/80 text-sm">
               Updated {updatedRelative}
             </span>
           )}

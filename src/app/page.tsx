@@ -204,7 +204,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <p className="text-base-content/70 mt-10 text-sm">
+          <p className="text-base-content/80 mt-10 text-sm">
             Building with us from the sidelines?{' '}
             <Link href="/follow" className="link link-primary">
               Join the early interest list
@@ -229,7 +229,7 @@ export default function Home() {
             </div>
           ))}
         </div>
-        <p className="text-base-content/70 mx-auto mt-6 max-w-xl text-center text-sm font-medium">
+        <p className="text-base-content/80 mx-auto mt-6 max-w-xl text-center text-sm font-medium">
           Demo / early numbers — growing with our shelters &amp; rescues.
         </p>
       </section>

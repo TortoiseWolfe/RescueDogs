@@ -247,7 +247,7 @@ export default function A11yDevOverlay({
 
       <ul className="flex-1 overflow-y-auto" aria-live="polite">
         {visibleViolations.length === 0 ? (
-          <li className="text-base-content/60 p-4 text-center text-sm">
+          <li className="text-base-content/80 p-4 text-center text-sm">
             {violations.length === 0
               ? 'No accessibility violations 🎉'
               : 'No violations match the current filters.'}

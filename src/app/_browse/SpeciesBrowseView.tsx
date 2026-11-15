@@ -379,7 +379,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                 {mismatchNote}
               </p>
             )}
-            <p className="text-base-content/60 mt-2 text-xs leading-snug">
+            <p className="text-base-content/80 mt-2 text-xs leading-snug">
               {filterHint}
               {draftMaxMiles
                 ? ' Distance is approximate from your ZIP centroid, not driving miles.'
@@ -441,7 +441,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                 <p className="text-base-content/80 max-w-md">
                   {copy.emptyBody}
                 </p>
-                <p className="text-base-content/70 max-w-md text-sm">
+                <p className="text-base-content/80 max-w-md text-sm">
                   Prefer a guided tour with demo data?{' '}
                   <Link
                     href="/get-started?demo=1&choose=1"
@@ -478,7 +478,16 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                 return (
                   <li key={pet.id}>
                     <article className="card bg-base-200 h-full shadow-sm">
-                      <Link href={detailHref} className="block">
+                      {/* The heading below links to the same page and names the
+                          animal, so this picture link is hidden from assistive
+                          technology and the tab order rather than announced as
+                          an unnamed duplicate (WCAG 2.4.4, 4.1.2). */}
+                      <Link
+                        href={detailHref}
+                        className="block"
+                        aria-hidden="true"
+                        tabIndex={-1}
+                      >
                         <figure className="bg-base-300 aspect-[4/3] overflow-hidden">
                           {pet.photo_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
@@ -493,7 +502,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                             />
                           ) : (
                             <div
-                              className="text-base-content/40 flex h-full w-full items-center justify-center text-sm"
+                              className="text-base-content/80 flex h-full w-full items-center justify-center text-sm"
                               aria-hidden
                             >
                               No photo yet
@@ -521,7 +530,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                               <div>
                                 <dt className="sr-only">Size</dt>
                                 <dd className="text-xs">
-                                  <span className="text-base-content/50">
+                                  <span className="text-base-content/80">
                                     Size:{' '}
                                   </span>
                                   {basics.size}
@@ -532,7 +541,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                               <div>
                                 <dt className="sr-only">Age</dt>
                                 <dd className="text-xs">
-                                  <span className="text-base-content/50">
+                                  <span className="text-base-content/80">
                                     Age:{' '}
                                   </span>
                                   {basics.age}
@@ -546,7 +555,7 @@ function SpeciesBrowseContent({ species }: { species: SpeciesBrowseKind }) {
                           </p>
                         )}
                         {pet.notes?.trim() ? (
-                          <p className="text-base-content/50 mt-1 line-clamp-2 text-[0.7rem] leading-snug">
+                          <p className="text-base-content/80 mt-1 line-clamp-2 text-[0.7rem] leading-snug">
                             {pet.notes.trim()}
                           </p>
                         ) : null}

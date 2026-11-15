@@ -150,12 +150,12 @@ export default function StatusTimeline({
       {/* div, not a landmark: pages may render several timelines and
           duplicate landmark labels violate axe landmark-unique. */}
       <div className="mt-6" data-testid="status-history">
-        <h3 className="text-base-content/70 text-sm font-semibold tracking-wide uppercase">
+        <h3 className="text-base-content/80 text-sm font-semibold tracking-wide uppercase">
           Updates
         </h3>
         {sortedHistory.length === 0 ? (
           <p
-            className="text-base-content/60 mt-2 text-sm"
+            className="text-base-content/80 mt-2 text-sm"
             data-testid="history-empty"
           >
             No updates yet.
@@ -172,7 +172,7 @@ export default function StatusTimeline({
                   <StatusBadge status={entry.to_status} className="badge-sm" />
                   <time
                     dateTime={entry.created_at}
-                    className="text-base-content/60 text-xs"
+                    className="text-base-content/80 text-xs"
                   >
                     {formatDate(entry.created_at)}
                   </time>

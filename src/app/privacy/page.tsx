@@ -220,7 +220,7 @@ export default function PrivacyPolicyPage() {
             </Link>
             .
           </p>
-          <p className="text-base-content/70 text-sm">
+          <p className="text-base-content/80 text-sm">
             Related:{' '}
             <Link href="/terms" className="link link-primary">
               Terms of Use

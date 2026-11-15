@@ -154,7 +154,7 @@ export const InterestForm: React.FC<InterestFormProps> = ({
         <div>
           <label htmlFor="interest-name" className="label">
             <span className="label-text font-semibold">
-              Name <span className="font-normal opacity-70">(optional)</span>
+              Name <span className="font-normal">(optional)</span>
             </span>
           </label>
           <input

@@ -73,7 +73,7 @@ function MyApplicationsContent() {
               complete the reusable universal application so shelters can review
               you without the silence.
             </p>
-            <p className="text-base-content/70 max-w-md text-sm">
+            <p className="text-base-content/80 max-w-md text-sm">
               Your legal name and contact details go in the application (private
               to the shelter). A friendly{' '}
               <Link href="/account" className="link link-primary">

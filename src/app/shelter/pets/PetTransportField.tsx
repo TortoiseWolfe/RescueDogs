@@ -36,7 +36,7 @@ export function PetTransportField({
       />
       <span className="label-text">
         Available for transport
-        <span className="text-base-content/60 block text-xs">
+        <span className="text-base-content/80 block text-xs">
           Untick if this pet cannot travel. Your rescue transports to{' '}
           {stateCount} {stateCount === 1 ? 'state' : 'states'} —{' '}
           <Link href="/shelter/settings" className="link link-primary">
