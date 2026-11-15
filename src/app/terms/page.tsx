@@ -160,7 +160,7 @@ export default function TermsOfUsePage() {
             </Link>
             .
           </p>
-          <p className="text-base-content/70 text-sm">
+          <p className="text-base-content/80 text-sm">
             See also our{' '}
             <Link href="/privacy" className="link link-primary">
               Privacy Policy

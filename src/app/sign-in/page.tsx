@@ -111,7 +111,7 @@ export default function SignInPage() {
           </div>
         ) : null}
         {switchFrom && demoSwitch && portal ? (
-          <p className="text-base-content/60 mb-4 text-center text-xs">
+          <p className="text-base-content/80 mb-4 text-center text-xs">
             Coming from the {switchFrom} demo session.
           </p>
         ) : null}

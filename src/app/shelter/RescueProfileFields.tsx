@@ -179,7 +179,7 @@ export function RescueTransportFields({
         />
         <span className="label-text">
           We transport animals out of state
-          <span className="text-base-content/60 block text-xs">
+          <span className="text-base-content/80 block text-xs">
             Adopters in the states you pick will see your animals when they
             include transportable pets in their search.
           </span>
@@ -191,7 +191,7 @@ export function RescueTransportFields({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-semibold">
               States we transport to
-              <span className="text-base-content/60 ml-2 font-normal">
+              <span className="text-base-content/80 ml-2 font-normal">
                 {selected.size} selected
               </span>
             </p>
@@ -245,7 +245,7 @@ export function RescueTransportFields({
               placeholder="e.g. Transport fee $300, ground transport twice a month."
               disabled={disabled}
             />
-            <span className="label-text-alt text-base-content/60 mt-1 whitespace-normal">
+            <span className="label-text-alt text-base-content/80 mt-1 whitespace-normal">
               Shown to adopters on every listing you transport.
             </span>
           </label>

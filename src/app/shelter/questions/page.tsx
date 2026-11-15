@@ -279,7 +279,7 @@ export default function ShelterQuestionsPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-xl font-semibold">Application questions</h2>
-          <p className="text-base-content/70">
+          <p className="text-base-content/80">
             {totals.locked} locked + {totals.extra} you chose = {totals.total}{' '}
             {totals.total === 1 ? 'question' : 'questions'} on your application
           </p>
@@ -341,7 +341,7 @@ export default function ShelterQuestionsPage() {
       ) : null}
 
       {dirty && isManager ? (
-        <p className="text-base-content/70 text-sm">
+        <p className="text-base-content/80 text-sm">
           Unsaved changes stay until you close this window. Save to apply them
           to new applications.
         </p>
@@ -373,7 +373,7 @@ export default function ShelterQuestionsPage() {
                   <span className="text-sm font-semibold">
                     {CATEGORY_LABELS[category]}
                   </span>
-                  <span className="text-base-content/70 mt-0.5 block !text-xs leading-snug">
+                  <span className="text-base-content/80 mt-0.5 block !text-xs leading-snug">
                     <span className="block">
                       Shown: {counts.shown} of {counts.total}
                     </span>
@@ -403,7 +403,7 @@ export default function ShelterQuestionsPage() {
           <h3 className="text-lg font-semibold">
             {CATEGORY_LABELS[openCategory]}
           </h3>
-          <p className="text-base-content/70 mb-4">
+          <p className="text-base-content/80 mb-4">
             Changes apply to applications sent after you save.
           </p>
           <ul className="divide-base-300 divide-y">
@@ -438,7 +438,7 @@ export default function ShelterQuestionsPage() {
                   )}
                   <div
                     className={`min-w-0 flex-1 ${
-                      shown ? '' : 'text-base-content/60'
+                      shown ? '' : 'text-base-content/80'
                     } ${
                       question.parent_id
                         ? 'border-base-300 border-l-2 pl-3'

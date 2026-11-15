@@ -177,7 +177,7 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
                   <div>
                     <dt className="sr-only">Sex</dt>
                     <dd className="text-xs">
-                      <span className="text-base-content/50">Sex: </span>
+                      <span className="text-base-content/80">Sex: </span>
                       {sex}
                     </dd>
                   </div>
@@ -186,7 +186,7 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
                   <div>
                     <dt className="sr-only">Size</dt>
                     <dd className="text-xs">
-                      <span className="text-base-content/50">Size: </span>
+                      <span className="text-base-content/80">Size: </span>
                       {basics.size}
                     </dd>
                   </div>
@@ -195,7 +195,7 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
                   <div>
                     <dt className="sr-only">Age</dt>
                     <dd className="text-xs">
-                      <span className="text-base-content/50">Age: </span>
+                      <span className="text-base-content/80">Age: </span>
                       {basics.age}
                     </dd>
                   </div>
@@ -207,7 +207,7 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
               </p>
             )}
             {shelterName && (
-              <p className="text-base-content/70 mt-2 text-sm">
+              <p className="text-base-content/80 mt-2 text-sm">
                 From{' '}
                 <Link href={shelterListingHref} className="link link-primary">
                   {shelterName}
@@ -239,7 +239,7 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
             </div>
           ) : (
             <div
-              className="bg-base-200 text-base-content/50 mb-8 flex aspect-[4/3] items-center justify-center rounded-xl text-sm"
+              className="bg-base-200 text-base-content/80 mb-8 flex aspect-[4/3] items-center justify-center rounded-xl text-sm"
               aria-hidden
             >
               No photo yet
@@ -277,7 +277,7 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
                   : '.'}
               </p>
               {pet.transportable !== false && pet.shelters?.transport_note ? (
-                <p className="text-base-content/70 mt-2 text-sm leading-relaxed">
+                <p className="text-base-content/80 mt-2 text-sm leading-relaxed">
                   {pet.shelters.transport_note.trim()}
                 </p>
               ) : null}
@@ -304,7 +304,7 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
             >
               Apply to Adopt {pet.name}
             </Link>
-            <p className="text-base-content/60 mt-2 text-center text-xs sm:text-sm">
+            <p className="text-base-content/80 mt-2 text-center text-xs sm:text-sm">
               You&apos;ll complete one universal application — no duplicate
               forms for every pet.
             </p>

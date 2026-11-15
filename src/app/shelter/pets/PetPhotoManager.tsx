@@ -536,7 +536,7 @@ export const PetPhotoManager = forwardRef<
                 <span className="badge badge-primary badge-sm absolute top-1 left-1">
                   Profile
                 </span>
-                <p className="bg-base-100/90 text-base-content/70 p-2 text-xs">
+                <p className="bg-base-100/90 text-base-content/80 p-2 text-xs">
                   Add a photo below to manage the gallery.
                 </p>
               </div>
@@ -642,12 +642,12 @@ export const PetPhotoManager = forwardRef<
             <h3 id="pet-crop-title" className="mb-4 text-lg font-bold">
               Crop photo for listing
               {queueSize > 1 && (
-                <span className="text-base-content/70 ml-2 text-base font-normal">
+                <span className="text-base-content/80 ml-2 text-base font-normal">
                   Photo {queuePosition} of {queueSize}
                 </span>
               )}
             </h3>
-            <p className="text-base-content/70 mb-3 text-sm">
+            <p className="text-base-content/80 mb-3 text-sm">
               Drag to reposition. Zoom out to include more of the photo — saved
               images use the same 4:3 shape as browse cards.
             </p>

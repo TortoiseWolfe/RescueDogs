@@ -164,7 +164,7 @@ function PaymentResultContent() {
           aria-live="polite"
         >
           <span className="loading loading-spinner loading-lg"></span>
-          <p className="text-base-content/70">Verifying payment status...</p>
+          <p className="text-base-content/80">Verifying payment status...</p>
           <span className="sr-only">Loading payment status</span>
         </div>
       </main>
@@ -280,7 +280,7 @@ export default function PaymentResultPage() {
               aria-live="polite"
             >
               <span className="loading loading-spinner loading-lg"></span>
-              <p className="text-base-content/70">Loading...</p>
+              <p className="text-base-content/80">Loading...</p>
             </div>
           </main>
         }

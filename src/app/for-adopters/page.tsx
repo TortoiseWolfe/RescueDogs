@@ -69,7 +69,7 @@ export default function ForAdoptersPage() {
             silence, more clarity while you wait for your match.
           </li>
         </ul>
-        <p className="text-base-content/70 mt-8 text-sm">
+        <p className="text-base-content/80 mt-8 text-sm">
           Looking for the shelter or rescue side instead?{' '}
           <Link href="/for-shelters" className="link link-primary">
             For Shelters

@@ -63,7 +63,7 @@ export function PetTagsField({
   return (
     <fieldset>
       <legend className="text-base font-semibold">Pet tags</legend>
-      <p className="text-base-content/70 mb-3 text-sm">
+      <p className="text-base-content/80 mb-3 text-sm">
         Adds question groups only for this pet. Leave blank if none apply.
       </p>
       <div className="flex flex-wrap gap-2">
@@ -86,7 +86,7 @@ export function PetTagsField({
       {selected.length > 0 ? (
         <p className="mt-3 text-sm">
           <span className="font-semibold">Shown on applications for {who}</span>
-          <span className="text-base-content/70 block">
+          <span className="text-base-content/80 block">
             {selected
               .map((tag) => {
                 const count = counts[tag];

@@ -95,7 +95,7 @@ export default function ShelterPetsPage() {
       ) : null}
 
       {transports ? (
-        <p className="text-base-content/70 text-sm">
+        <p className="text-base-content/80 text-sm">
           Your rescue transports to {transportStates.length}{' '}
           {transportStates.length === 1 ? 'state' : 'states'}. Every pet below
           is offered for transport unless you untick it.{' '}
@@ -106,7 +106,7 @@ export default function ShelterPetsPage() {
       ) : null}
 
       {pets.length === 0 ? (
-        <p className="text-base-content/70">
+        <p className="text-base-content/80">
           No pets yet. Add the first animal so adopters can apply.
         </p>
       ) : (
@@ -130,12 +130,12 @@ export default function ShelterPetsPage() {
               )}
               <div className="min-w-0 flex-1">
                 <p className="font-medium">{pet.name}</p>
-                <p className="text-base-content/70 text-sm capitalize">
+                <p className="text-base-content/80 text-sm capitalize">
                   {pet.species}
                   {pet.breed ? ` · ${pet.breed}` : ''} · {pet.status}
                 </p>
                 {pet.notes?.trim() ? (
-                  <p className="text-base-content/60 mt-1 line-clamp-2 text-sm">
+                  <p className="text-base-content/80 mt-1 line-clamp-2 text-sm">
                     {pet.notes.trim()}
                   </p>
                 ) : null}

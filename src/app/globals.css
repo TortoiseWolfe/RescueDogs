@@ -202,6 +202,23 @@
   color: color-mix(in oklab, var(--color-base-content) 92%, transparent);
 }
 
+/* DaisyUI's .label ships base-content at 60% alpha: 3.29:1 on the light page
+ * (#f5f0e8) for "Remember Me" and the form field labels, short of the 4.5:1
+ * WCAG 1.4.3 floor (#579). 80% is 5.5:1 on light and well above 4.5:1 on
+ * dark, and still reads as quieter than the field's own text. */
+[data-theme='trusted-care-light'] .label,
+[data-theme='trusted-care-dark'] .label {
+  color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
+}
+
+/* In the dark theme --color-primary is navy (#1e3a8a), a button FILL colour.
+ * .link-primary paints link TEXT with it: 1.7:1 on the dark page, so "Contact
+ * us" and the cookie banner's "Learn more" were nearly invisible (#579).
+ * Light blue reads on the dark page (9:1) and on navy panels (6:1). */
+[data-theme='trusted-care-dark'] .link-primary {
+  color: #93c5fd;
+}
+
 /* Menu bar: orange background in both light and dark modes.
  * Remap primary tokens at header scope (chrome / borders). Brand title is
  * styled separately (#142). Nav chrome buttons use navy in GlobalNav. */
@@ -243,15 +260,12 @@
 
 .site-header .nav-role-trigger .nav-role-prefix,
 .site-header .nav-role-trigger .nav-role-accent {
+  /* Plain white on the #172554 header (14:1). The navy outline this used to
+   * carry was nearly invisible on that header (#1e3a8a on #172554) and made
+   * axe read the outline colour as the text colour: 1.21:1, WCAG 1.4.3 (#579). */
   color: #ffffff;
-  -webkit-text-stroke: 0.6px #1e3a8a;
-  paint-order: stroke fill;
-  text-shadow:
-    0 0 1px #1e3a8a,
-    0 1px 0 #1e3a8a,
-    0 -1px 0 #1e3a8a,
-    1px 0 0 #1e3a8a,
-    -1px 0 0 #1e3a8a;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
 }
 
 .site-header .nav-role-trigger .nav-role-chevron {

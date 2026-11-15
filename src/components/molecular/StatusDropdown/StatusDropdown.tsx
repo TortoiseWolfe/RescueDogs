@@ -59,7 +59,7 @@ export default function StatusDropdown({
   if (targets.length === 0) {
     return (
       <p
-        className={`text-base-content/60 text-sm italic ${className}`.trim()}
+        className={`text-base-content/80 text-sm italic ${className}`.trim()}
         data-testid="status-dropdown-no-actions"
       >
         No further actions

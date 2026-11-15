@@ -284,7 +284,7 @@ export default function DemoTour({
       )}
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-base-content/70 text-sm">
+        <p className="text-base-content/80 text-sm">
           {role === 'adopter'
             ? 'Next: switch to the shelter demo, change Tiger’s status, then switch back — you’ll see that update on the adopter pages in real time.'
             : 'After you change a status, switch back to the adopter demo and open the same application — the new status appears on the adopter tracker in real time.'}

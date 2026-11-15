@@ -63,7 +63,7 @@ export default function SignUpPage() {
           {heading}
         </h1>
         {portal === 'shelter' ? (
-          <p className="text-base-content/70 mb-4 text-center text-sm sm:mb-5">
+          <p className="text-base-content/80 mb-4 text-center text-sm sm:mb-5">
             This creates a login. After you sign in, open the shelter portal to
             create your shelter or rescue — or{' '}
             <Link href="/contact?role=shelter" className="link link-primary">
@@ -79,7 +79,7 @@ export default function SignUpPage() {
           }
         />
 
-        <p className="text-base-content/70 mt-4 text-center text-xs leading-relaxed sm:text-sm">
+        <p className="text-base-content/80 mt-4 text-center text-xs leading-relaxed sm:text-sm">
           By creating an account you agree to our{' '}
           <Link href="/terms" className="link link-primary">
             Terms of Use

@@ -106,7 +106,7 @@ export default function GetStartedPage() {
         demoPrefill={demoMode}
       />
 
-      <p className="text-base-content/70 mt-8 text-center text-sm">
+      <p className="text-base-content/80 mt-8 text-center text-sm">
         <Link href="/for-adopters" className="link link-primary">
           For Adopters
         </Link>

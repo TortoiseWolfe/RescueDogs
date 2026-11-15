@@ -386,7 +386,7 @@ function CreateRescueForm({ onCreated }: { onCreated: () => Promise<void> }) {
       >
         {submitting ? 'Creating…' : 'Create Shelter or Rescue'}
       </button>
-      <p className="text-base-content/60 text-xs">
+      <p className="text-base-content/80 text-xs">
         You can change any of this later under Settings.
       </p>
     </form>

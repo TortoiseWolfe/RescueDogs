@@ -408,7 +408,7 @@ function EditShelterPetContent() {
                 inputMode="url"
                 autoComplete="off"
               />
-              <span className="label-text-alt text-base-content/60 mt-1">
+              <span className="label-text-alt text-base-content/80 mt-1">
                 YouTube, TikTok, Vimeo, or any public video URL.
               </span>
             </label>

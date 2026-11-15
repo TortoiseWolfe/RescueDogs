@@ -73,7 +73,7 @@ export function RedFlagEditor({
 
         {kind === 'choices' ? (
           <fieldset className="mt-4">
-            <legend className="text-base-content/70 mb-2">
+            <legend className="text-base-content/80 mb-2">
               Raise a red flag when the answer is:
             </legend>
             <div className="flex flex-col gap-2">
@@ -109,7 +109,7 @@ export function RedFlagEditor({
 
         {kind === 'number' || kind === 'count' || kind === 'age' ? (
           <div className="mt-4">
-            <p className="text-base-content/70 mb-2">
+            <p className="text-base-content/80 mb-2">
               Raise a red flag when the answer is:
             </p>
             <div className="flex flex-wrap items-center gap-2">
@@ -181,7 +181,7 @@ export function RedFlagEditor({
           {draft.label.trim() || 'Red flag'}
         </span>
 
-        <p className="text-base-content/70 mt-4 text-sm">
+        <p className="text-base-content/80 mt-4 text-sm">
           A flag never rejects an application or changes its status. Only your
           staff see it; the adopter never does.
         </p>

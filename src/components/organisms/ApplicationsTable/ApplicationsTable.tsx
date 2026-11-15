@@ -146,7 +146,7 @@ export default function ApplicationsTable({
           data-testid="applications-empty"
         >
           <p>No applications yet — that is normal for a new shelter.</p>
-          <p className="text-base-content/60 max-w-md text-sm">
+          <p className="text-base-content/80 max-w-md text-sm">
             Add available pets so adopters can apply. Applications will show up
             here when they do.
           </p>
@@ -177,7 +177,7 @@ export default function ApplicationsTable({
                     <div className="min-w-0">
                       <div className="font-medium">{application.pets.name}</div>
                       {application.pets.breed ? (
-                        <div className="text-base-content/60 text-xs">
+                        <div className="text-base-content/80 text-xs">
                           {application.pets.breed}
                         </div>
                       ) : null}
@@ -194,7 +194,7 @@ export default function ApplicationsTable({
                     <StatusBadge status={application.status} />
                   </div>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-base-content/60 text-sm whitespace-nowrap">
+                    <span className="text-base-content/80 text-sm whitespace-nowrap">
                       Updated {formatShortDate(application.status_changed_at)}
                     </span>
                     <ApplicationReviewLink application={application} />
@@ -227,7 +227,7 @@ export default function ApplicationsTable({
                     <td>
                       <div className="font-medium">{application.pets.name}</div>
                       {application.pets.breed && (
-                        <div className="text-base-content/60 text-xs">
+                        <div className="text-base-content/80 text-xs">
                           {application.pets.breed}
                         </div>
                       )}
