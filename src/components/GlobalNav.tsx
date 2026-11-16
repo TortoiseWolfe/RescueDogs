@@ -197,9 +197,9 @@ export function GlobalNav() {
 
   // Measure brand vs row — compact only on phones where S9+/Lumia-class widths
   // collide (~320–360px). Wider phones keep full 44px targets (#132).
-  // Collision math always includes the wordmark. Compact shrinks the live
-  // logo and type, so we cache the last full-size brand width and compare
-  // against that (#185). The title stays on screen (#576).
+  // Collision math always includes the wordmark. Compact keeps the title
+  // at text-base and the paw at 36px, the size that fit (#582). The cached
+  // full-size width still keeps that shrink from flipping the flag (#185).
   useLayoutEffect(() => {
     const row = navRowRef.current;
     const brand = brandRef.current;
@@ -225,11 +225,9 @@ export function GlobalNav() {
       const brandGap = 6;
       const liveBrand =
         logoWidth + (wordmarkWidth > 0 ? brandGap + wordmarkWidth : 0);
-      // Compacting shrinks the brand we measure (logo 40→36px, wordmark
-      // 18→16px). Measuring the live brand makes the decision depend on
-      // its own output, so the ResizeObserver flips it every frame on
-      // ~377–400px viewports (#185). Only refresh the reference width
-      // while the brand is rendered at full size.
+      // A tighter logo-to-title gap changes the live brand width. Measuring
+      // that live width makes the flag depend on its own output (#185).
+      // Refresh the reference only while the row is at the wider gap.
       if (row.dataset.chromeCompact !== 'true') {
         fullBrandWidthRef.current = liveBrand;
       }
@@ -404,7 +402,7 @@ export function GlobalNav() {
                   height={44}
                   className={
                     chromeCompact
-                      ? 'h-8 w-8 shrink-0 drop-shadow-[0_1px_2px_rgba(23,37,84,0.45)]'
+                      ? 'h-9 w-9 shrink-0 drop-shadow-[0_1px_2px_rgba(23,37,84,0.45)]'
                       : 'h-10 w-10 shrink-0 drop-shadow-[0_1px_2px_rgba(23,37,84,0.45)] sm:h-11 sm:w-11'
                   }
                   priority
@@ -419,7 +417,7 @@ export function GlobalNav() {
                     text={projectConfig.projectDisplayName}
                     className={
                       chromeCompact
-                        ? 'brand-logo !text-sm font-bold'
+                        ? 'brand-logo !text-base font-bold'
                         : 'brand-logo !text-lg font-bold sm:!text-xl'
                     }
                     animationSpeed="normal"

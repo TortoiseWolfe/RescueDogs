@@ -61,18 +61,16 @@ function buildSteps(
     // Normal pipeline: submitted → … → approved
     const currentIdx = pipelineIndex(currentStatus);
     return STATUS_ORDER.map((status, idx) => {
-      const completed = idx <= currentIdx;
-      const isFinal = idx === STATUS_ORDER.length - 1;
-      const variant = completed
-        ? isFinal
-          ? ' step-success'
-          : ' step-primary'
-        : '';
+      const isCurrent = idx === currentIdx;
+      let variant = '';
+      if (isCurrent && status === 'approved') variant = ' step-success';
+      else if (isCurrent) variant = ' step-current';
+      else if (idx < currentIdx) variant = ' step-primary';
       return {
         key: status,
         label: STATUS_LABELS[status],
         className: `step${variant}`,
-        isCurrent: idx === currentIdx,
+        isCurrent,
       };
     });
   }

@@ -46,16 +46,21 @@ describe('StatusTimeline', () => {
         (status) => [status, STATUS_ORDER.indexOf(status)] as const
       )
     )(
-      'marks steps up to and including %s as step-primary',
+      'marks steps before %s as step-primary and that step as step-current',
       (status, currentIdx) => {
         render(<StatusTimeline currentStatus={status} history={[]} />);
         STATUS_ORDER.forEach((stage, idx) => {
           const step = screen.getByTestId(`step-${stage}`);
           expect(step).toHaveClass('step');
-          if (idx <= currentIdx) {
+          if (idx < currentIdx) {
             expect(step).toHaveClass('step-primary');
+            expect(step).not.toHaveClass('step-current');
+          } else if (idx === currentIdx) {
+            expect(step).toHaveClass('step-current');
+            expect(step).not.toHaveClass('step-primary');
           } else {
             expect(step).not.toHaveClass('step-primary');
+            expect(step).not.toHaveClass('step-current');
             expect(step).not.toHaveClass('step-success');
           }
         });

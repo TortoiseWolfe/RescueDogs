@@ -138,7 +138,6 @@ export default function Home() {
                   Try Demo
                 </Link>
               </div>
-              <HeroStatusCard />
             </div>
           </div>
 
@@ -148,7 +147,7 @@ export default function Home() {
               - Photo up/down: `xl:-mt-*` on the image wrapper
               - Photo size: `max-w-md` / `xl:max-w-[520px]` on the column
           */}
-          <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 xl:-mt-8 xl:max-w-[520px] xl:items-stretch">
+          <div className="relative flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 xl:-mt-8 xl:max-w-[520px] xl:items-stretch">
             <div className="hero-float relative aspect-square w-full xl:mt-2">
               <div className="absolute inset-0 rotate-1 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl sm:rotate-3" />
               <div className="absolute inset-2 rotate-1 overflow-hidden rounded-[1.625rem] sm:rotate-3">
@@ -162,6 +161,7 @@ export default function Home() {
                 />
               </div>
             </div>
+            <HeroStatusCard />
           </div>
         </div>
 

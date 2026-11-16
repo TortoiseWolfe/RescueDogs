@@ -417,11 +417,11 @@ describe('GlobalNav role menus (#65)', () => {
     expect(wordmark.className).not.toMatch(/absolute/);
     expect(wordmark.className).toMatch(/whitespace-nowrap/);
     expect(wordmark.querySelector('.brand-logo')?.className).toMatch(
-      /!text-sm/
+      /!text-base/
     );
     expect(
       container.querySelector('img[alt="Raised Paws home"]')?.className
-    ).toMatch(/\bh-8\b/);
+    ).toMatch(/\bh-9\b/);
     expect(
       screen.getByRole('link', { name: /raised paws home/i })
     ).toBeInTheDocument();
