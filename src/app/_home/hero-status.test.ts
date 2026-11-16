@@ -80,6 +80,14 @@ describe('heroStatusSteps', () => {
       'Home Visit',
       'Not Selected',
     ]);
-    expect(steps.at(-1)?.state).toBe('current');
+    expect(steps.at(-1)?.state).toBe('not_selected');
+  });
+
+  it('marks only Approved in green and the earlier stages done', () => {
+    const steps = heroStatusSteps('approved');
+    expect(steps.at(-1)?.state).toBe('approved');
+    expect(steps.slice(0, -1).every((step) => step.state === 'done')).toBe(
+      true
+    );
   });
 });

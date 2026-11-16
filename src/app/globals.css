@@ -157,6 +157,26 @@
   color: #f8fafc;
 }
 
+/* In-progress step (#582). Passed steps stay step-primary. The number on
+ * #f97316 is #040c14 (7.02:1). The bar before the current or ending step
+ * stays the primary trail. */
+.status-timeline-steps .step-current:after {
+  --step-bg: #f97316;
+  --step-fg: #040c14;
+  background-color: #f97316;
+  border-color: #f97316;
+  color: #040c14;
+}
+
+.status-timeline-steps .step-primary + .step-current:before,
+.status-timeline-steps .step-primary + .step-success:before,
+.status-timeline-steps .step-primary + .step-error:before,
+.status-timeline-steps .step-primary + .step-neutral:before {
+  --step-bg: var(--color-primary);
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 /* RescueDogs visual polish — Trusted Care light + dark */
 [data-theme='trusted-care-light'] .card,
 [data-theme='trusted-care-dark'] .card {
@@ -240,17 +260,13 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-/* Brand title on the navy header: white fill + thin orange stroke (#576).
- * AnimatedLogo uses text-primary (orange inside .site-header), so override. */
+/* Brand title on the navy header (#582). White fill, no stroke, no shadow.
+ * AnimatedLogo paints an inline soft drop-shadow; filter:none beats it. */
 .site-header .brand-logo {
   color: #ffffff;
-  -webkit-text-stroke: 1px #f97316;
-  paint-order: stroke fill;
-  text-shadow:
-    0 1px 0 #f97316,
-    0 -1px 0 #f97316,
-    1px 0 0 #f97316,
-    -1px 0 0 #f97316;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  filter: none !important;
 }
 
 /* Desktop role-menu triggers (#269): white + navy outline at rest; cream pill with navy text on hover and open (10.02:1, WCAG AAA). */

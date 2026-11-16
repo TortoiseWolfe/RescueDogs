@@ -12,20 +12,23 @@ interface HeroStatusSummary {
   petName: string;
   status: ApplicationStatus;
   applicationId: string;
-  hasMore: boolean;
 }
 
 const DOT_CLASS = {
   done: 'bg-[#1e3a8a]',
   current: 'bg-[#f97316]',
-  upcoming: 'border-2 border-[#1e3a8a] bg-transparent',
+  upcoming: 'border-2 border-[#1e3a8a]/35 bg-white',
+  approved: 'bg-[#16a34a]',
+  not_selected: 'bg-[#dc2626]',
+  withdrawn: 'bg-[#64748b]',
 } as const;
 
+const HERE = new Set(['current', 'approved', 'not_selected', 'withdrawn']);
+
 /**
- * The signed-in person's latest application, under the hero actions.
- * Signed-out visitors and people with no applications see nothing. A shelter
- * login that has also submitted applications still sees this card. The full
- * timeline stays on the status page.
+ * Latest application for a signed-in person. Signed-out visitors and people
+ * with no applications see nothing. A shelter login that has also applied
+ * still sees this card. The painting column positions it (#582).
  */
 export default function HeroStatusCard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -53,9 +56,6 @@ export default function HeroStatusCard() {
           petName: latest.pets.name,
           status: latest.status,
           applicationId: latest.id,
-          hasMore:
-            mine.filter((application) => Boolean(application.pets?.name))
-              .length > 1,
         });
       } catch {
         if (!cancelled) setSummary(null);
@@ -72,51 +72,43 @@ export default function HeroStatusCard() {
   const steps = heroStatusSteps(summary.status);
 
   return (
-    <article
-      className="mx-auto mt-6 w-full max-w-sm rounded-2xl bg-white p-4 text-left shadow-lg ring-1 ring-[#172554]/10"
+    <Link
+      href={`/applications/status?id=${summary.applicationId}`}
       aria-label={`Application for ${summary.petName}`}
+      className="z-10 -mt-8 block w-[16.25rem] rounded-2xl bg-white p-3 text-left shadow-lg ring-1 ring-[#172554]/10 max-xl:mx-auto xl:absolute xl:bottom-5 xl:left-5 xl:mt-0"
     >
-      <p className="text-xs font-semibold tracking-wide text-[#1e3a8a] uppercase">
+      <p className="text-[10px] font-semibold tracking-wide text-[#1e3a8a] uppercase">
         Your application
       </p>
-      <h2 className="font-display text-xl font-bold text-[#172554]">
+      <p className="font-display text-base leading-tight font-bold text-[#172554]">
         {summary.petName}
-      </h2>
-      <ul className="mt-3 space-y-1.5" aria-label="Application progress">
-        {steps.map((step) => (
+      </p>
+      <ul className="mt-2" aria-label="Application progress">
+        {steps.map((step, index) => (
           <li
             key={step.label}
-            className="flex items-center gap-2 text-sm font-semibold text-[#172554]"
-            aria-current={step.state === 'current' ? 'step' : undefined}
+            className="relative flex items-start gap-2 pb-1 last:pb-0"
+            aria-current={HERE.has(step.state) ? 'step' : undefined}
           >
+            {index < steps.length - 1 ? (
+              <span
+                aria-hidden="true"
+                className={`absolute top-2.5 left-[4px] h-[calc(100%-2px)] w-0.5 ${
+                  step.state === 'done' ? 'bg-[#1e3a8a]' : 'bg-[#e7e0d5]'
+                }`}
+              />
+            ) : null}
             <span
               aria-hidden="true"
-              className={`h-3 w-3 shrink-0 rounded-full ${DOT_CLASS[step.state]}`}
+              className={`relative z-10 mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full ${DOT_CLASS[step.state]}`}
             />
-            <span
-              className={step.state === 'current' ? 'font-bold' : undefined}
-            >
+            <span className="text-[13px] leading-4 font-semibold text-[#172554]">
               {step.label}
             </span>
           </li>
         ))}
       </ul>
-      <div className="mt-3 flex flex-col items-start">
-        <Link
-          href={`/applications/status?id=${summary.applicationId}`}
-          className="link inline-flex min-h-11 items-center font-semibold text-[#1e3a8a]"
-        >
-          View status
-        </Link>
-        {summary.hasMore ? (
-          <Link
-            href="/applications"
-            className="link inline-flex min-h-11 items-center font-semibold text-[#1e3a8a]"
-          >
-            All my applications
-          </Link>
-        ) : null}
-      </div>
-    </article>
+      <p className="mt-2 text-xs font-semibold text-[#1e3a8a]">View status</p>
+    </Link>
   );
 }

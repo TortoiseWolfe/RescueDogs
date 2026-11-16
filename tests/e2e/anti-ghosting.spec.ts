@@ -146,11 +146,11 @@ test.describe('anti-ghosting loop', () => {
       adopterPage.getByRole('heading', { name: /application for noodle/i })
     ).toBeVisible({ timeout: 20000 });
 
-    // Step 1 of the pipeline is current
+    // Step 1 of the pipeline is current (orange, #582)
     const submittedStep = adopterPage
       .locator('.steps .step')
       .filter({ hasText: 'Submitted' });
-    await expect(submittedStep).toHaveClass(/step-primary/);
+    await expect(submittedStep).toHaveClass(/step-current/);
   });
 
   test('staff sees the application and advances it — tracker updates live', async () => {
@@ -188,7 +188,7 @@ test.describe('anti-ghosting loop', () => {
     const underReviewStep = adopterPage
       .locator('.steps .step')
       .filter({ hasText: 'Under Review' });
-    await expect(underReviewStep).toHaveClass(/step-primary/, {
+    await expect(underReviewStep).toHaveClass(/step-current/, {
       timeout: 30000,
     });
     // The staff note reaches the adopter
@@ -206,7 +206,7 @@ test.describe('anti-ghosting loop', () => {
     const homeVisitStep = adopterPage
       .locator('.steps .step')
       .filter({ hasText: 'Home Visit' });
-    await expect(homeVisitStep).toHaveClass(/step-primary/, {
+    await expect(homeVisitStep).toHaveClass(/step-current/, {
       timeout: 30000,
     });
 

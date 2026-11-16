@@ -6,7 +6,13 @@ import {
 
 export interface HeroStatusStep {
   label: string;
-  state: 'done' | 'current' | 'upcoming';
+  state:
+    | 'done'
+    | 'current'
+    | 'upcoming'
+    | 'approved'
+    | 'not_selected'
+    | 'withdrawn';
 }
 
 /** Most recently updated application. The list query is newest-created, not newest-updated. */
@@ -47,7 +53,14 @@ export function heroStatusSteps(status: ApplicationStatus): HeroStatusStep[] {
       label: STATUS_LABELS[key],
       state: 'done' as const,
     }));
-    return [...prior, { label: STATUS_LABELS[status], state: 'current' }];
+    return [...prior, { label: STATUS_LABELS[status], state: status }];
+  }
+
+  if (status === 'approved') {
+    return STATUS_ORDER.map((key, idx) => ({
+      label: STATUS_LABELS[key],
+      state: idx === STATUS_ORDER.length - 1 ? 'approved' : 'done',
+    }));
   }
 
   const currentIdx = STATUS_ORDER.indexOf(status);
