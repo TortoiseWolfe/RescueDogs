@@ -34,16 +34,17 @@ import {
 
 /** White chrome pills — invert to navy/white on press and when current (#65). */
 const navChromeBtn =
-  'btn btn-sm header-wedge-btn min-h-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
+  'btn btn-sm header-wedge-btn nav-chrome-btn min-h-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
 const navChromeBtnSelected =
-  '!bg-[#172554] !text-white hover:!bg-[#1e3a8a] hover:!text-white active:!bg-[#172554] active:!text-white';
+  'nav-chrome-btn-selected !bg-[#172554] !text-white hover:!bg-[#1e3a8a] hover:!text-white active:!bg-[#172554] active:!text-white';
+/** lg+ restyles `nav-chrome-btn` as an outline control in globals.css (#576). */
 const navChromeIconBtn =
-  'btn btn-circle header-wedge-btn min-h-11 min-w-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
+  'btn btn-circle header-wedge-btn nav-chrome-btn min-h-11 min-w-11 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#172554] active:!text-white';
 /** Dark-mode variant of the same 44px chrome pill. Compact layouts (S9+ ~360px,
     Lumia ~320px) tighten the row gap and the brand, never the tap target —
     see docs/MOBILE-FIRST.md (#132). */
 const navChromeIconBtnDark =
-  'btn btn-circle min-h-11 min-w-11 border-0 !bg-[#1e3a8a] !text-white hover:!bg-[#172554] hover:!text-white active:!bg-[#172554] active:!text-white';
+  'btn btn-circle nav-chrome-btn min-h-11 min-w-11 border-0 !bg-[#1e3a8a] !text-white hover:!bg-[#172554] hover:!text-white active:!bg-[#172554] active:!text-white';
 
 const DEMO_ENTRY_HREF = '/get-started?demo=1&choose=1';
 const BROWSE_DOGS_HREF = '/dogs';
@@ -98,8 +99,8 @@ function blurActiveElement() {
 }
 
 /**
- * Role dropdowns on the orange desktop header (#269).
- * White labels + navy outline at rest; navy + thin outline on hover (Lovable).
+ * Role dropdowns on the navy desktop header (#269). White labels; hover and
+ * open draw a thin orange underline instead of a cream pill (#576).
  */
 function RoleDropdown({
   prefixWord,

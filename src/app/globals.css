@@ -152,11 +152,6 @@
   --color-base-300: #334155;
 }
 
-[data-theme='trusted-care-dark'] .status-timeline-steps .step-neutral:before {
-  background-color: #64748b;
-  color: #f8fafc;
-}
-
 /* In-progress step (#582). Passed steps stay step-primary. The number on
  * #f97316 is #040c14 (7.02:1). The bar before the current or ending step
  * stays the primary trail. */
@@ -166,6 +161,25 @@
   background-color: #f97316;
   border-color: #f97316;
   color: #040c14;
+}
+
+/* Withdrawn (#576): DaisyUI fills step-neutral with --color-neutral, which is
+ * #334155 light and #1e3a8a dark, so it read as one more finished navy step.
+ * A hollow slate ring keeps it an ending, not progress. */
+.status-timeline-steps .step-neutral:after {
+  --step-bg: #ffffff;
+  --step-fg: #334155;
+  background-color: #ffffff;
+  border: 2px solid #64748b;
+  color: #334155;
+}
+
+[data-theme='trusted-care-dark'] .status-timeline-steps .step-neutral:after {
+  --step-bg: #0c1929;
+  --step-fg: #e2e8f0;
+  background-color: #0c1929;
+  border-color: #94a3b8;
+  color: #e2e8f0;
 }
 
 .status-timeline-steps .step-primary + .step-current:before,
@@ -290,26 +304,51 @@
   text-shadow: none;
 }
 
-.site-header .nav-role-trigger:hover,
-.site-header .nav-role-trigger.nav-role-trigger-active {
-  /* Navy on the bare #f97316 header is 3.70:1. Same cream as the dropdown
-   * panel (#fdfbf7) so the hovered label sits on a surface that passes AAA. */
-  background-color: #fdfbf7;
+/* Hover and open (#576): labels stay white on #172554 (14:1). A 2px orange
+ * underline marks the active menu instead of the old cream pill. */
+.site-header .nav-role-trigger::after {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.45rem;
+  height: 2px;
+  border-radius: 1px;
+  background-color: #f97316;
+  transform: scaleX(0);
+  transition: transform 150ms ease;
 }
 
-.site-header .nav-role-trigger:hover .nav-role-prefix,
-.site-header .nav-role-trigger:hover .nav-role-accent,
-.site-header .nav-role-trigger.nav-role-trigger-active .nav-role-prefix,
-.site-header .nav-role-trigger.nav-role-trigger-active .nav-role-accent {
-  color: #1e3a8a;
-  -webkit-text-stroke: 0.35px #172554;
-  paint-order: stroke fill;
-  text-shadow: none;
+.site-header .nav-role-trigger:hover::after,
+.site-header .nav-role-trigger.nav-role-trigger-active::after {
+  transform: scaleX(1);
 }
 
-.site-header .nav-role-trigger:hover .nav-role-chevron,
-.site-header .nav-role-trigger.nav-role-trigger-active .nav-role-chevron {
-  color: #1e3a8a;
+/* Desktop chrome (#576): outline controls on the navy bar instead of solid
+ * white circles. Phones keep the white circles. !important beats the
+ * important `!bg-*` utilities on the dark-theme variant. */
+@media (min-width: 64rem) {
+  .site-header .nav-chrome-btn {
+    background-color: transparent !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35) !important;
+  }
+
+  .site-header .nav-chrome-btn:hover,
+  .site-header .nav-chrome-btn:focus-visible {
+    background-color: rgb(255 255 255 / 0.12) !important;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.6) !important;
+  }
+
+  .site-header .nav-chrome-btn:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
+
+  .site-header .nav-chrome-btn.nav-chrome-btn-selected {
+    background-color: #ffffff !important;
+    color: #172554 !important;
+  }
 }
 
 /* Desktop role dropdown panels (#269 / Lovable refinements). */

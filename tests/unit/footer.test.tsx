@@ -65,7 +65,7 @@ describe('Footer (#74 / #65)', () => {
     const contacts = screen.getAllByRole('link', { name: /^contact$/i });
     expect(contacts.length).toBeGreaterThanOrEqual(1);
     expect(contacts[0]).toHaveAttribute('href', '/contact');
-    expect(contacts[0].className).toMatch(/bg-white/);
+    expect(contacts[0].className).toMatch(/bg-transparent/);
   });
 
   it('links Privacy, Cookies, and Terms in the legal nav (#230)', () => {
@@ -91,7 +91,7 @@ describe('Footer (#74 / #65)', () => {
     const follows = screen.getAllByRole('link', { name: /^follow$/i });
     expect(follows.length).toBeGreaterThanOrEqual(1);
     expect(follows[0]).toHaveAttribute('href', '/follow');
-    expect(follows[0].className).toMatch(/bg-white/);
+    expect(follows[0].className).toMatch(/bg-transparent/);
   });
 
   it('marks Follow as current on /follow (#129)', () => {
@@ -126,8 +126,8 @@ describe('Footer (#74 / #65)', () => {
       screen.getByRole('link', { name: /raised paws on tiktok/i })
     ).toHaveAttribute('href', 'https://www.tiktok.com/@raisedpaws');
     expect(
-      screen.getByRole('link', { name: /raised paws on x/i })
-    ).toHaveAttribute('href', 'https://x.com/RaisedPaws');
+      screen.queryByRole('link', { name: /raised paws on x/i })
+    ).toBeNull();
 
     const instagram = screen.getByRole('link', {
       name: /raised paws on instagram/i,

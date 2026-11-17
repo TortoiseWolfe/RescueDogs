@@ -8,18 +8,25 @@ import SocialIcon from '@/components/atomic/SocialIcon';
 import { projectConfig } from '@/config/project.config';
 import { RAISED_PAWS_SOCIALS } from '@/config/raised-paws-socials';
 
-/** Same white/navy pill chrome as the header — invert when pressed / current. */
-const footerNavPill =
-  'btn btn-sm border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] active:!bg-[#1e3a8a] active:!text-white';
+/** Outline chrome, matching the desktop header (#576). White on #172554 is
+ *  14:1; the current page fills white with navy text so it still stands out. */
+const footerOutline =
+  'border-0 bg-transparent text-white shadow-[inset_0_0_0_1px_rgb(255_255_255/0.45)] hover:bg-white/10 hover:shadow-[inset_0_0_0_1px_rgb(255_255_255/0.7)] active:!bg-white active:!text-[#172554]';
+const footerNavPill = `btn btn-sm ${footerOutline}`;
 const footerNavPillSelected =
-  '!bg-[#1e3a8a] !text-white ring-2 ring-white hover:!bg-[#1e3a8a] hover:!text-white active:!bg-[#1e3a8a] active:!text-white';
+  '!bg-white !text-[#172554] hover:!bg-white hover:!text-[#172554]';
 
 /** 44px AAA touch target at every width; the row wraps rather than shrinking. */
-const footerSocialBtn =
-  'btn btn-circle shrink-0 border-0 bg-white text-[#1e3a8a] hover:bg-[#e8edf7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white h-11 w-11 min-h-11 min-w-11';
+const footerSocialBtn = `btn btn-circle shrink-0 ${footerOutline} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white h-11 w-11 min-h-11 min-w-11`;
 
 const legalLinkClass =
   'link inline-flex min-h-11 items-center text-xs text-white underline sm:text-sm';
+
+/** X wraps onto a second line in the footer row (#576). Keep the profile in
+ *  raised-paws-socials.ts; just don't render it here. */
+const footerSocials = RAISED_PAWS_SOCIALS.filter(
+  (social) => social.platform !== 'twitter'
+);
 
 /**
  * Copyright year, fixed at build time by next.config.ts. Deliberately not
@@ -83,13 +90,13 @@ export function Footer() {
           </p>
         </div>
 
-        {/* Left cluster — socials + Built by centered as a unit */}
+        {/* Left cluster — socials centered over Built by, pinned to the left edge */}
         <div className="flex max-w-full min-w-0 flex-col items-center gap-3 lg:col-start-1 lg:row-span-2 lg:translate-y-3 lg:justify-self-start">
           <ul
             className="m-0 flex list-none flex-wrap items-center justify-center gap-0.5 p-0 lg:gap-2"
             aria-label="Raised Paws on social media"
           >
-            {RAISED_PAWS_SOCIALS.map((social) => (
+            {footerSocials.map((social) => (
               <li key={social.platform} className="shrink-0">
                 <a
                   href={social.href}

@@ -17,10 +17,10 @@ interface HeroStatusSummary {
 const DOT_CLASS = {
   done: 'bg-[#1e3a8a]',
   current: 'bg-[#f97316]',
-  upcoming: 'border-2 border-[#1e3a8a]/35 bg-white',
+  upcoming: 'border-2 border-[#c9bfae] bg-white',
   approved: 'bg-[#16a34a]',
   not_selected: 'bg-[#dc2626]',
-  withdrawn: 'bg-[#64748b]',
+  withdrawn: 'border-2 border-[#64748b] bg-white',
 } as const;
 
 const HERE = new Set(['current', 'approved', 'not_selected', 'withdrawn']);
@@ -28,7 +28,8 @@ const HERE = new Set(['current', 'approved', 'not_selected', 'withdrawn']);
 /**
  * Latest application for a signed-in person. Signed-out visitors and people
  * with no applications see nothing. A shelter login that has also applied
- * still sees this card. The painting column positions it (#582).
+ * still sees this card. It sits under the painting, tucked against the
+ * bottom-right corner of the frame, so it never covers the picture (#576).
  */
 export default function HeroStatusCard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -75,7 +76,7 @@ export default function HeroStatusCard() {
     <Link
       href={`/applications/status?id=${summary.applicationId}`}
       aria-label={`Application for ${summary.petName}`}
-      className="z-10 -mt-8 block w-[16.25rem] rounded-2xl bg-white p-3 text-left shadow-lg ring-1 ring-[#172554]/10 max-xl:mx-auto xl:absolute xl:bottom-5 xl:left-5 xl:mt-0"
+      className="relative z-10 -mt-10 mr-1 block w-[16.25rem] self-end rounded-2xl bg-white p-3 text-left shadow-lg ring-1 ring-[#172554]/10"
     >
       <p className="text-[10px] font-semibold tracking-wide text-[#1e3a8a] uppercase">
         Your application
