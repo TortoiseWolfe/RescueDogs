@@ -2,8 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { buildSignUpHref } from '@/lib/portal/portal-preference';
 
+/** Main action: orange fill, #040c14 ink (7.02:1), same weight as the homepage pair. */
+const heroCtaPrimaryClassName =
+  'btn min-h-11 border-0 bg-[#f97316] px-4 text-[1rem] !font-bold text-[#040c14] hover:bg-[#fb8a3c]';
+
+/** Every other action: outline in the hero ink, so it follows light and dark. */
 const heroCtaClassName =
-  'btn min-h-11 border-0 bg-white px-6 text-base font-bold text-[#1e3a8a] hover:bg-[#e8edf7]';
+  'btn border-base-content text-base-content hover:bg-base-100 min-h-11 border-2 bg-transparent px-4 text-[1rem] !font-bold';
 
 export const metadata: Metadata = {
   title: 'For adopters - Raised Paws',
@@ -27,10 +32,10 @@ export default function ForAdoptersPage() {
             every status update live, and know where you stand without chasing
             the shelter or rescue for news.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
             <Link
               href={buildSignUpHref('adopter')}
-              className={heroCtaClassName}
+              className={heroCtaPrimaryClassName}
             >
               Create Account
             </Link>

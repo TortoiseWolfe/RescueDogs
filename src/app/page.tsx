@@ -79,18 +79,18 @@ export default function Home() {
         aria-labelledby="hero-heading"
         className="page-hero relative px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24"
       >
-        <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 xl:flex-row xl:items-center xl:gap-12">
-          <div className="w-full min-w-0 flex-1 xl:-translate-y-4">
-            {/* Centered copy stack, shifted left at xl+. Tweak HERO_COPY_NUDGE_LEFT_PX. */}
+        <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-10 xl:gap-12">
+          <div className="w-full min-w-0 flex-1 lg:-translate-y-2 xl:-translate-y-4">
+            {/* Copy on the left, painting on the right from lg up (#576). */}
             <div
-              className="mx-auto max-w-xl text-center xl:mx-0 xl:translate-x-[var(--hero-copy-nudge)]"
+              className="mx-auto max-w-xl text-center lg:mx-0 xl:translate-x-[var(--hero-copy-nudge)]"
               style={
                 {
                   ['--hero-copy-nudge']: `-${HERO_COPY_NUDGE_LEFT_PX}px`,
                 } as CSSProperties
               }
             >
-              <div className="mb-3 flex flex-row flex-wrap items-center justify-center gap-2 sm:mb-6 sm:gap-3">
+              <div className="mb-3 flex flex-row flex-wrap items-center justify-center gap-2 sm:mb-6 sm:gap-3 lg:mb-10">
                 <Link
                   href="/dogs"
                   aria-label="Browse dogs"
@@ -114,14 +114,20 @@ export default function Home() {
               </div>
               <h1
                 id="hero-heading"
-                className="font-display text-base-content mb-5 text-3xl leading-tight font-bold tracking-tight break-normal sm:text-4xl sm:leading-tight xl:text-5xl"
+                className="font-display text-base-content mb-5 text-3xl leading-tight font-bold tracking-tight break-normal sm:text-4xl sm:leading-tight lg:mb-8 xl:text-5xl xl:leading-tight"
               >
                 Track your pet adoption applications.
               </h1>
 
-              <p className="hero-subcopy mb-8 text-lg leading-relaxed font-medium break-normal sm:text-xl">
-                Apply once, watch every status update live, and give shelters
-                &amp; rescues a simple pipeline.
+              <p className="hero-subcopy mb-6 space-y-2 text-lg leading-relaxed font-medium break-normal sm:text-xl lg:mb-10 lg:space-y-4 xl:text-2xl xl:leading-relaxed">
+                <span className="block">
+                  <strong className="font-bold">Adopters:</strong> apply once
+                  and see every update.
+                </span>
+                <span className="block">
+                  <strong className="font-bold">Shelters &amp; Rescues:</strong>{' '}
+                  one pipeline, from application to decision.
+                </span>
               </p>
 
               <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center">
@@ -147,7 +153,7 @@ export default function Home() {
               - Photo up/down: `xl:-mt-*` on the image wrapper
               - Photo size: `max-w-md` / `xl:max-w-[520px]` on the column
           */}
-          <div className="relative flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 xl:-mt-8 xl:max-w-[520px] xl:items-stretch">
+          <div className="flex w-full max-w-md min-w-0 shrink-0 flex-col items-center gap-4 lg:-mt-4 xl:-mt-8 xl:max-w-[520px] xl:items-stretch">
             <div className="hero-float relative aspect-square w-full xl:mt-2">
               <div className="absolute inset-0 rotate-1 rounded-[2rem] border-[7px] border-[#f97316] bg-white shadow-2xl sm:rotate-3" />
               <div className="absolute inset-2 rotate-1 overflow-hidden rounded-[1.625rem] sm:rotate-3">
