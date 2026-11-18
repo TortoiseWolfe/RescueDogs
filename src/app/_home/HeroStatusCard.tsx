@@ -28,8 +28,9 @@ const HERE = new Set(['current', 'approved', 'not_selected', 'withdrawn']);
 /**
  * Latest application for a signed-in person. Signed-out visitors and people
  * with no applications see nothing. A shelter login that has also applied
- * still sees this card. It sits under the painting, tucked against the
- * bottom-right corner of the frame, so it never covers the picture (#576).
+ * still sees this card. On phones it sits centered under the painting.
+ * From lg up it pins to the bottom-right of the hero so it does not
+ * stretch the band or pull the left copy down (#594).
  */
 export default function HeroStatusCard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -76,7 +77,7 @@ export default function HeroStatusCard() {
     <Link
       href={`/applications/status?id=${summary.applicationId}`}
       aria-label={`Application for ${summary.petName}`}
-      className="relative z-10 -mt-10 mr-1 block w-[16.25rem] self-end rounded-2xl bg-white p-3 text-left shadow-lg ring-1 ring-[#172554]/10"
+      className="relative z-10 mx-auto mt-6 mb-2 block w-[16.25rem] rounded-2xl bg-white p-3 text-left shadow-lg ring-1 ring-[#172554]/10 lg:absolute lg:right-4 lg:bottom-10 lg:mx-0 lg:mt-0 lg:mb-0"
     >
       <p className="text-[10px] font-semibold tracking-wide text-[#1e3a8a] uppercase">
         Your application

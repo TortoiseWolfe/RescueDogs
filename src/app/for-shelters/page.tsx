@@ -38,7 +38,7 @@ export default function ForSheltersPage() {
               href="/contact?role=shelter"
               className={heroCtaPrimaryClassName}
             >
-              Talk to us about a pilot
+              Talk to us about a Pilot
             </Link>
             <Link
               href="/get-started?demo=1&choose=1"

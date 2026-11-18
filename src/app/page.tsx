@@ -167,9 +167,10 @@ export default function Home() {
                 />
               </div>
             </div>
-            <HeroStatusCard />
           </div>
         </div>
+
+        <HeroStatusCard />
 
         <svg
           viewBox="0 0 1440 60"

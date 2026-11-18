@@ -274,13 +274,16 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-/* Brand title on the navy header (#582). White fill, no stroke, no shadow.
- * AnimatedLogo paints an inline soft drop-shadow; filter:none beats it. */
+/* Brand title on the navy header (#594). White fill, Nunito, dark drop-shadow
+ * like the orange-bar era. No orange or navy stroke: orange is blurry and
+ * fails contrast; navy vanishes on #172554. !important beats AnimatedLogo's
+ * inline filter. */
 .site-header .brand-logo {
   color: #ffffff;
+  font-family: var(--font-friendly);
   -webkit-text-stroke: 0;
   text-shadow: none;
-  filter: none !important;
+  filter: drop-shadow(1px 2px 2px rgb(0 0 0 / 0.45)) !important;
 }
 
 /* Desktop role-menu triggers (#269): white + navy outline at rest; cream pill with navy text on hover and open (10.02:1, WCAG AAA). */

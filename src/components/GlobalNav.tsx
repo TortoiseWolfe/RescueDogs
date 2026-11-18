@@ -418,8 +418,8 @@ export function GlobalNav() {
                     text={projectConfig.projectDisplayName}
                     className={
                       chromeCompact
-                        ? 'brand-logo !text-base font-bold'
-                        : 'brand-logo !text-lg font-bold sm:!text-xl'
+                        ? 'brand-logo font-friendly !text-base font-bold'
+                        : 'brand-logo font-friendly !text-lg font-bold sm:!text-xl'
                     }
                     animationSpeed="normal"
                   />
