@@ -24,25 +24,40 @@ const STATS = [
   },
 ];
 
-const STEPS = [
+const STEP_CIRCLE = [
+  'bg-primary text-primary-content',
+  'bg-accent text-accent-content',
+  'bg-[#d7e6ff] text-[#1e3a8a]',
+] as const;
+
+const RESCUE_STEPS = [
   {
-    number: '1',
-    title: 'Browse & Pick',
-    detail: 'Meet our pets and find the one that makes your heart melt.',
-    bg: 'bg-primary text-primary-content',
+    title: 'Keep listing where you already are',
+    detail: 'Pets stay on Petfinder, ShelterLuv, Facebook, or your site.',
   },
   {
-    number: '2',
-    title: 'Apply Online',
-    detail: 'Send one application and track every update in real time.',
-    bg: 'bg-accent text-accent-content',
+    title: 'Send applicants here',
+    detail: 'One link or QR on the listing opens the Raised Paws application.',
   },
   {
-    number: '3',
-    title: 'Bring Them Home',
+    title: 'Run one pipeline',
     detail:
-      'Work with the shelter or rescue team and start your happily-ever-after.',
-    bg: 'bg-[#d7e6ff] text-[#1e3a8a]',
+      'Advance status in one place. Adopters see it live, so your team answers fewer “any news?” emails.',
+  },
+] as const;
+
+const ADOPTER_STEPS = [
+  {
+    title: 'Apply once',
+    detail: 'One form, not a new packet for every rescue.',
+  },
+  {
+    title: 'Watch every update',
+    detail: 'Submitted, in review, next steps, as the rescue moves them.',
+  },
+  {
+    title: 'Know where you stand',
+    detail: 'Less silence while you wait.',
   },
 ] as const;
 
@@ -62,6 +77,39 @@ const HERO_SPECIES_PILL_CLASS =
  */
 const ORANGE_BTN_CLASS =
   'btn border-0 bg-[#f97316] text-[1.1875rem] !font-bold text-[#172554] hover:bg-[#fb8a3c]';
+
+function HowItWorksRow({
+  heading,
+  steps,
+  className = '',
+}: {
+  heading: string;
+  steps: readonly { title: string; detail: string }[];
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <h3 className="font-friendly text-base-content mb-8 text-xl font-bold tracking-wide uppercase">
+        {heading}
+      </h3>
+      <div className="grid gap-8 md:grid-cols-3">
+        {steps.map((step, index) => (
+          <div key={step.title} className="px-3">
+            <div
+              className={`font-display mx-auto mb-5 grid h-16 w-16 place-items-center rounded-full text-3xl font-bold shadow-md ${STEP_CIRCLE[index]}`}
+            >
+              {index + 1}
+            </div>
+            <h4 className="font-friendly text-base-content text-xl font-bold">
+              {step.title}
+            </h4>
+            <p className="text-base-content/95 mt-2">{step.detail}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
@@ -119,15 +167,9 @@ export default function Home() {
                 Track your pet adoption applications.
               </h1>
 
-              <p className="hero-subcopy mb-6 space-y-2 text-lg leading-relaxed font-medium break-normal sm:text-xl lg:mb-10 lg:space-y-4 xl:text-2xl xl:leading-relaxed">
-                <span className="block">
-                  <strong className="font-bold">Adopters:</strong> apply once
-                  and see every update.
-                </span>
-                <span className="block">
-                  <strong className="font-bold">Shelters &amp; Rescues:</strong>{' '}
-                  one pipeline, from application to decision.
-                </span>
+              <p className="hero-subcopy mb-6 text-lg leading-relaxed font-medium break-normal sm:text-xl lg:mb-10 xl:text-2xl xl:leading-relaxed">
+                Adopters apply once and see every update, while Shelters and
+                Rescues run one pipeline from application to decision.
               </p>
 
               <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-center">
@@ -192,25 +234,25 @@ export default function Home() {
         <div className="mx-auto max-w-6xl text-center">
           <h2
             id="how-it-works-heading"
-            className="font-display text-base-content mb-10 text-3xl font-bold tracking-tight sm:text-4xl"
+            className="font-display text-base-content mb-4 text-3xl font-bold tracking-tight sm:text-4xl"
           >
-            How adopting works
+            How Raised Paws works
           </h2>
-          <div className="grid gap-8 md:grid-cols-3">
-            {STEPS.map((step) => (
-              <div key={step.number} className="px-3">
-                <div
-                  className={`font-display mx-auto mb-5 grid h-16 w-16 place-items-center rounded-full text-3xl font-bold shadow-md ${step.bg}`}
-                >
-                  {step.number}
-                </div>
-                <h3 className="font-friendly text-base-content text-xl font-bold">
-                  {step.title}
-                </h3>
-                <p className="text-base-content/95 mt-2">{step.detail}</p>
-              </div>
-            ))}
-          </div>
+          <p className="text-base-content mx-auto mb-12 max-w-3xl text-lg leading-relaxed">
+            Raised Paws is the application step, not another listing site. Keep
+            Petfinder, ShelterLuv, Facebook, and your website, and point people
+            here to apply. Small, foster-based rescues that have nowhere to
+            house applications are the best first partners.
+          </p>
+          <HowItWorksRow
+            heading="For shelters & rescues"
+            steps={RESCUE_STEPS}
+          />
+          <HowItWorksRow
+            heading="For adopters"
+            steps={ADOPTER_STEPS}
+            className="mt-12"
+          />
           <p className="text-base-content mt-10 text-sm">
             Building with us from the sidelines?{' '}
             <Link href="/follow" className="link link-primary">
@@ -237,7 +279,7 @@ export default function Home() {
           ))}
         </div>
         <p className="text-base-content mx-auto mt-6 max-w-xl text-center text-sm font-medium">
-          Demo / early numbers — growing with our shelters &amp; rescues.
+          Demo / early numbers, growing with our shelters &amp; rescues.
         </p>
       </section>
 
