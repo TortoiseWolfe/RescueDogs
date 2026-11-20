@@ -87,8 +87,8 @@ export default function SignInPage() {
   const switchMessage =
     demoSwitch && portal
       ? portal === 'shelter'
-        ? 'Switching to the shelter demo (Sam). Credentials are prefilled — sign in, change an application status, then switch back to the adopter to see that update on the tracker in real time.'
-        : 'Switching to the adopter demo (Dana). Credentials are prefilled — sign in and open the application tracker to see the shelter’s status updates in real time.'
+        ? 'Switching to the shelter demo (Sam). Credentials are prefilled. Sign in, change an application status, then switch back to the adopter to see that update on the tracker in real time.'
+        : 'Switching to the adopter demo (Dana). Credentials are prefilled. Sign in and open the application tracker to see the shelter’s status updates in real time.'
       : null;
 
   return (

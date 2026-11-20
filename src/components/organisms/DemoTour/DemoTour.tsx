@@ -48,7 +48,7 @@ const ADOPTER_STEPS: TourStep[] = [
   {
     id: 'apps',
     title: 'Start as the adopter',
-    body: 'This demo uses two logins. First, look at My Applications (Tiger, Pepper, Tank). Next you’ll switch to the shelter to change a status — then come back here and you’ll see that shelter update appear on the adopter pages in real time.',
+    body: 'This demo uses two logins. First, look at My Applications (Tiger, Pepper, Tank). Next you’ll switch to the shelter to change a status, then come back here and you’ll see that shelter update appear on the adopter pages in real time.',
     cta: {
       href: `/applications/status?id=${DEMO_TIGER_APPLICATION_ID}`,
       label: "Open Tiger's tracker",
@@ -58,13 +58,13 @@ const ADOPTER_STEPS: TourStep[] = [
   {
     id: 'tracker',
     title: 'Status tracker',
-    body: 'This timeline is what the adopter sees — current status and any notes from the shelter. Remember where Tiger stands now so you can compare after the shelter makes a change.',
+    body: 'This timeline is what the adopter sees: current status and any notes from the shelter. Remember where Tiger stands now so you can compare after the shelter makes a change.',
     match: (path) => path.startsWith('/applications/status'),
   },
   {
     id: 'live',
     title: 'Then switch to the shelter',
-    body: 'Use Switch to shelter demo below. As staff, advance Tiger’s status and add a note. Switch back to the adopter demo and reopen this tracker — the shelter’s update shows up here in real time.',
+    body: 'Use Switch to shelter demo below. As staff, advance Tiger’s status and add a note. Switch back to the adopter demo and reopen this tracker. The shelter’s update shows up here in real time.',
     match: (path) => path.startsWith('/applications/status'),
   },
 ];
@@ -83,7 +83,7 @@ const SHELTER_STEPS: TourStep[] = [
   {
     id: 'review',
     title: 'Review the snapshot',
-    body: "You're seeing the frozen application answers — not a live profile edit. Scroll the snapshot, then advance status when ready.",
+    body: "You're seeing the frozen application answers, not a live profile edit. Scroll the snapshot, then advance status when ready.",
     match: (path) => path.startsWith('/shelter/application'),
   },
   {
@@ -286,8 +286,8 @@ export default function DemoTour({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-base-content/80 text-sm">
           {role === 'adopter'
-            ? 'Next: switch to the shelter demo, change Tiger’s status, then switch back — you’ll see that update on the adopter pages in real time.'
-            : 'After you change a status, switch back to the adopter demo and open the same application — the new status appears on the adopter tracker in real time.'}
+            ? 'Next: switch to the shelter demo, change Tiger’s status, then switch back. You’ll see that update on the adopter pages in real time.'
+            : 'After you change a status, switch back to the adopter demo and open the same application. The new status appears on the adopter tracker in real time.'}
         </p>
         <button
           type="button"

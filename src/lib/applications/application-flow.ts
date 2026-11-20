@@ -145,7 +145,7 @@ export function reuseProgressLabel(
   totalCount: number
 ): string | null {
   if (answeredCount <= 0 || totalCount <= 0) return null;
-  return `We'll reuse ${answeredCount} of ${totalCount} answers — change anything that needs updating.`;
+  return `We'll reuse ${answeredCount} of ${totalCount} answers. Change anything that needs updating.`;
 }
 
 export const REFERENCE_QUESTION_ID = 'ref.personal';
@@ -166,7 +166,7 @@ export function formatAnswerForReview(
   question: ApplicationQuestion,
   value: unknown
 ): string {
-  if (!hasAnsweredValue(value)) return '—';
+  if (!hasAnsweredValue(value)) return 'Not answered';
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (typeof value === 'string' || typeof value === 'number') {
     return String(value);
@@ -204,19 +204,19 @@ export function formatAnswerForReview(
       return [record.level, record.describe]
         .filter((part) => hasAnsweredValue(part))
         .map(String)
-        .join(' — ');
+        .join(', ');
     }
     if ('value' in record) {
       const detail = record.detail ?? record.describe ?? record.follow_up;
       return detail && hasAnsweredValue(detail)
-        ? `${String(record.value)} — ${String(detail)}`
+        ? `${String(record.value)}, ${String(detail)}`
         : String(record.value);
     }
     try {
       return JSON.stringify(value);
     } catch {
-      return '—';
+      return 'Not answered';
     }
   }
-  return '—';
+  return 'Not answered';
 }

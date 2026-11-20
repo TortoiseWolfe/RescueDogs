@@ -132,7 +132,7 @@ describe('ApplicationForm', () => {
       renderForm();
 
       expect(
-        screen.getByRole('option', { name: 'Biscuit — Labrador Mix' })
+        screen.getByRole('option', { name: 'Biscuit, Labrador Mix' })
       ).toBeInTheDocument();
       expect(screen.getByRole('option', { name: 'Mochi' })).toBeInTheDocument();
       // placeholder + 2 pets

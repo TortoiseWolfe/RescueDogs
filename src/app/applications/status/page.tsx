@@ -52,9 +52,7 @@ function StatusTrackerContent() {
       setWithdrawError(null);
       await refetch();
     } catch {
-      setWithdrawError(
-        'Could not withdraw the application — please try again.'
-      );
+      setWithdrawError('Could not withdraw the application. Please try again.');
       await refetch();
     } finally {
       setWithdrawing(false);
@@ -105,7 +103,7 @@ function StatusTrackerContent() {
         {error && (
           <div role="alert" className="alert alert-warning mb-4">
             <span>
-              We can&apos;t confirm the latest status right now — what you see
+              We can&apos;t confirm the latest status right now. What you see
               may be out of date.
             </span>
             <button className="btn btn-sm" onClick={() => refetch()}>

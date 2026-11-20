@@ -498,7 +498,7 @@ export const PetPhotoManager = forwardRef<
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="label-text">
-          Photos ({totalCount}/{MAX_PET_PHOTOS}) — JPEG, PNG, or WebP, max{' '}
+          Photos ({totalCount}/{MAX_PET_PHOTOS}): JPEG, PNG, or WebP, max{' '}
           {PET_PHOTO_MAX_INPUT_MB}MB (large photos are resized automatically)
         </span>
         {canAddMore && (
@@ -648,7 +648,7 @@ export const PetPhotoManager = forwardRef<
               )}
             </h3>
             <p className="text-base-content/80 mb-3 text-sm">
-              Drag to reposition. Zoom out to include more of the photo — saved
+              Drag to reposition. Zoom out to include more of the photo. Saved
               images use the same 4:3 shape as browse cards.
             </p>
             <div className="bg-base-200 relative mb-4 h-80 overflow-hidden rounded-lg sm:h-[28rem]">

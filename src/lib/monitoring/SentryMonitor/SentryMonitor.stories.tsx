@@ -23,7 +23,7 @@ const SentryMonitorDoc = ({
       <p className="text-base-content/85 mt-2 text-sm">
         {active
           ? 'Sentry is initialized; handled errors report (PII-scrubbed).'
-          : 'Sentry is NOT initialized — no events are sent.'}
+          : 'Sentry is NOT initialized. No events are sent.'}
       </p>
     </div>
   );

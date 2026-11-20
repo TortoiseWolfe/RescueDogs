@@ -108,7 +108,7 @@ export const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({
         data: { session: cancelSession },
       } = await supabase.auth.getSession();
       if (!cancelSession?.access_token) {
-        throw new Error('No active session — sign in required');
+        throw new Error('No active session. Sign in required');
       }
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/cancel-subscription`,
@@ -158,7 +158,7 @@ export const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({
         data: { session: resumeSession },
       } = await supabase.auth.getSession();
       if (!resumeSession?.access_token) {
-        throw new Error('No active session — sign in required');
+        throw new Error('No active session. Sign in required');
       }
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/resume-subscription`,
@@ -388,7 +388,7 @@ export const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({
                           />
                         </svg>
                         <span>
-                          Payment failed — update your payment method
+                          Payment failed. Update your payment method
                           {daysLeft !== null && (
                             <>
                               {' '}

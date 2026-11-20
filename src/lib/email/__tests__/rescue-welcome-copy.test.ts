@@ -16,7 +16,7 @@ type RescueWelcomeEmailData = {
 };
 
 function getSubject(): string {
-  return 'Welcome to Raised Paws — next steps for your rescue';
+  return 'Welcome to Raised Paws: next steps for your rescue';
 }
 
 function getText(d: RescueWelcomeEmailData): string {

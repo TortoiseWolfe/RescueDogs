@@ -460,8 +460,7 @@ export const PaymentStatusDisplay: React.FC<PaymentStatusDisplayProps> = ({
                                 : ''
                             }
                           >
-                            Try again — payment failures are sometimes
-                            temporary.
+                            Try again. Payment failures are sometimes temporary.
                           </li>
                           <li>
                             Use a different payment method (Stripe, PayPal, Cash

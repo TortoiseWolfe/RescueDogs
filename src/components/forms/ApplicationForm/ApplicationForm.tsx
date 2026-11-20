@@ -46,7 +46,7 @@ export interface ApplicationFormProps {
 type ApplicationFormInput = z.input<typeof applicationSchema>;
 
 function petOptionLabel(pet: Pet): string {
-  return pet.breed ? `${pet.name} — ${pet.breed}` : pet.name;
+  return pet.breed ? `${pet.name}, ${pet.breed}` : pet.name;
 }
 
 interface TextFieldProps {

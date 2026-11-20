@@ -339,7 +339,7 @@ export async function retryFailedPayment(
 
   if (fetchError) throw fetchError;
   if (!parent) {
-    throw new Error('Cannot retry — original payment intent not found.');
+    throw new Error('Cannot retry. Original payment intent not found.');
   }
 
   // FR-009: cap retry attempts on this chain.
@@ -481,7 +481,7 @@ export async function getParentIntentForRetry(
 
   if (error) throw error;
   if (!parent) {
-    throw new Error('Cannot recover — original payment intent not found.');
+    throw new Error('Cannot recover. Original payment intent not found.');
   }
 
   if (parent.retry_count >= RETRY_LIMIT) {

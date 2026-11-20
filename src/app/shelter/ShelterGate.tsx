@@ -214,10 +214,10 @@ export function ShelterGate({ children }: { children: React.ReactNode }) {
                 >
                   Try Demo
                 </Link>{' '}
-                and pick the shelter door — sign-in prefills the staff account.
+                and pick the shelter door. Sign-in prefills the staff account.
               </li>
               <li>
-                Adopting instead? Use the adopter door — membership for shelters
+                Adopting instead? Use the adopter door. Membership for shelters
                 is separate from tracking an application.
               </li>
               <li>

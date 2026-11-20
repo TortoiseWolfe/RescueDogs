@@ -560,7 +560,7 @@ describe('PaymentStatusDisplay', () => {
       // "use a different payment method" appears as both a button label and a
       // recovery-list step, so assert that BOTH elements exist.
       expect(
-        screen.getByText(/try again — payment failures/i)
+        screen.getByText(/try again\. payment failures/i)
       ).toBeInTheDocument();
       expect(
         screen.getAllByText(/use a different payment method/i).length
@@ -585,7 +585,7 @@ describe('PaymentStatusDisplay', () => {
       });
       render(<PaymentStatusDisplay paymentResultId="test-id" />);
       // Retry step is struck through; support link is bold
-      const retryStep = screen.getByText(/try again — payment failures/i);
+      const retryStep = screen.getByText(/try again\. payment failures/i);
       expect(retryStep).toHaveClass('line-through');
     });
   });

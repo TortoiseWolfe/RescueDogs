@@ -16,7 +16,7 @@ const renterSnapshot: ProfileSnapshot = {
   zip: '97201',
   housing_type: 'rent_apartment',
   landlord_approval: true,
-  landlord_contact: 'Pat Property — landlord@example.com',
+  landlord_contact: 'Pat Property, landlord@example.com',
   has_yard: true,
   yard_fenced: false,
   household_adults: 2,
@@ -93,7 +93,7 @@ const renterApplication: ApplicationWithPetAndHistory = {
   profile_snapshot: renterSnapshot,
   answers_snapshot: null,
   why_this_pet:
-    'Bella matches our active household — we hike every weekend and want a smart, busy dog.',
+    'Bella matches our active household. We hike every weekend and want a smart, busy dog.',
   status_changed_at: '2026-06-05T16:00:00Z',
   created_at: '2026-06-01T12:00:00Z',
   pets: bella,

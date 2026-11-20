@@ -302,8 +302,8 @@ export function ReAuthModal({
               {mode === 'setup' ? (
                 <>
                   Since you signed in with {providerName || 'OAuth'}, you need a
-                  separate messaging password to encrypt your messages. Save it
-                  — losing it means losing access to old encrypted messages.
+                  separate messaging password to encrypt your messages. Save it.
+                  Losing it means losing access to old encrypted messages.
                 </>
               ) : oauthUser ? (
                 <>

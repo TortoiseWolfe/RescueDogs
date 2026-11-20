@@ -86,7 +86,7 @@ function ShelterApplicationContent() {
         setError(
           message.includes('already has an approved')
             ? 'This pet already has an approved application. Another approval is not allowed.'
-            : 'Could not update the status — it may have changed in another tab. Refreshing.'
+            : 'Could not update the status. It may have changed in another tab. Refreshing.'
         );
         // Let StatusDropdown see the failure so it keeps the staff note (#411).
         throw err;

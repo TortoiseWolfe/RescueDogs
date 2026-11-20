@@ -25,11 +25,11 @@ export function getEmailSubject(
 ): string {
   if (type === 'shelter_new_application') {
     const d = data as ShelterNewApplicationEmailData;
-    return `New adoption application for ${d.pet_name} — ${d.shelter_name}`;
+    return `New adoption application for ${d.pet_name}, ${d.shelter_name}`;
   }
 
   if (type === 'rescue_welcome') {
-    return 'Welcome to Raised Paws — next steps for your rescue';
+    return 'Welcome to Raised Paws: next steps for your rescue';
   }
 
   const subjects: Record<string, string> = {

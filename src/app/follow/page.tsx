@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Follow | Raised Paws',
     description:
-      'Occasional Raised Paws updates — no spam, no interruptive popups.',
+      'Occasional Raised Paws updates. No spam, no interruptive popups.',
     type: 'website',
   },
 };
@@ -42,7 +42,7 @@ export default function FollowPage() {
             Follow Raised Paws
           </h1>
           <p className="text-base-content/85 mx-auto mt-4 max-w-xl text-base sm:text-lg">
-            We are building an anti-ghosting adoption tracker — live status for
+            We are building an anti-ghosting adoption tracker: live status for
             adopters, a clearer pipeline for shelters and rescues. Leave your
             email for occasional updates when there is something real. No spam,
             and we will never block the site for a signup popup.

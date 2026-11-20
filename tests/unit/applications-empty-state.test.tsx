@@ -34,7 +34,7 @@ describe('My Applications empty state (#66)', () => {
 
     expect(
       await screen.findByRole('heading', {
-        name: /welcome — let's get you started/i,
+        name: /welcome\. let's get you started/i,
       })
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /browse dogs/i })).toHaveAttribute(
