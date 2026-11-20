@@ -145,7 +145,7 @@ export default function ApplicationsTable({
           className="text-base-content/80 flex flex-col items-center gap-4 py-8 text-center"
           data-testid="applications-empty"
         >
-          <p>No applications yet — that is normal for a new shelter.</p>
+          <p>No applications yet. That is normal for a new shelter.</p>
           <p className="text-base-content/80 max-w-md text-sm">
             Add available pets so adopters can apply. Applications will show up
             here when they do.

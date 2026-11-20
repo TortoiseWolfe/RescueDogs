@@ -75,7 +75,7 @@ describe('InterestForm (#129)', () => {
     vi.mocked(useWeb3FormsModule.useWeb3Forms).mockReturnValue({
       ...defaultHookReturn,
       isSuccess: true,
-      successMessage: "You're on the list — thank you.",
+      successMessage: "You're on the list. Thank you.",
     });
 
     render(<InterestForm />);

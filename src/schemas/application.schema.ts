@@ -40,10 +40,10 @@ export const HOUSING_TYPE_OPTIONS: Array<{
   value: HousingType;
   label: string;
 }> = [
-  { value: 'own_house', label: 'Own — house' },
-  { value: 'own_condo', label: 'Own — condo / townhome' },
-  { value: 'rent_house', label: 'Rent — house' },
-  { value: 'rent_apartment', label: 'Rent — apartment' },
+  { value: 'own_house', label: 'Own, house' },
+  { value: 'own_condo', label: 'Own, condo / townhome' },
+  { value: 'rent_house', label: 'Rent, house' },
+  { value: 'rent_apartment', label: 'Rent, apartment' },
   { value: 'other', label: 'Other' },
 ];
 

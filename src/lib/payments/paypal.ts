@@ -21,7 +21,7 @@ async function getAuthHeader(): Promise<Record<string, string>> {
   const { data } = await supabase.auth.getSession();
   const token = data?.session?.access_token;
   if (!token) {
-    throw new Error('No active session — sign in required for payments');
+    throw new Error('No active session. Sign in required for payments');
   }
   return { Authorization: `Bearer ${token}` };
 }

@@ -292,7 +292,7 @@ export default function NewShelterPetPage() {
             onChange={(e) => setNotes(e.target.value)}
             maxLength={2000}
             rows={4}
-            placeholder="Share this pet's story — personality, history, and what kind of home they need."
+            placeholder="Share this pet's story: personality, history, and what kind of home they need."
           />
         </label>
 

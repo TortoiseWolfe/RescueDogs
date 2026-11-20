@@ -88,7 +88,7 @@ export const MidPipeline: Story = {
       entry('submitted', '2026-05-20T09:15:00Z'),
       entry('under_review', '2026-05-22T14:30:00Z', {
         from_status: 'submitted',
-        note: "We're reviewing your application — expect an update within a few days.",
+        note: "We're reviewing your application. Expect an update within a few days.",
       }),
       entry('reference_check', '2026-05-27T10:05:00Z', {
         from_status: 'under_review',

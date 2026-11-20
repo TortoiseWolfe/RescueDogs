@@ -93,7 +93,7 @@ test.describe('anti-ghosting loop', () => {
     });
     await expect(
       adopterPage.getByText(
-        /We'll reuse \d+ of \d+ answers — change anything that needs updating/i
+        /We'll reuse \d+ of \d+ answers\. Change anything that needs updating/i
       )
     ).toBeVisible({ timeout: 20000 });
 

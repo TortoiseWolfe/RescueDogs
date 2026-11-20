@@ -36,7 +36,7 @@ vi.mock('@/components/molecular/StatusDropdown', () => ({
   ),
 }));
 
-const EM_DASH = '—';
+const EMPTY_VALUE = 'Not answered';
 
 const renterSnapshot: ProfileSnapshot = {
   full_name: 'Jane Renter',
@@ -287,7 +287,7 @@ describe('ApplicationDetail', () => {
         />
       );
       expect(getDefinition('Full name')).toHaveTextContent('Jane Renter');
-      expect(getDefinition('Email')).toHaveTextContent(EM_DASH);
+      expect(getDefinition('Email')).toHaveTextContent(EMPTY_VALUE);
       expect(getDefinition('Phone')).toHaveTextContent('555-0101');
       expect(getDefinition('Address')).toHaveTextContent(
         '12 Oak St, Portland, OR, 97201'
@@ -312,7 +312,7 @@ describe('ApplicationDetail', () => {
           onAdvance={vi.fn()}
         />
       );
-      expect(getDefinition('Housing')).toHaveTextContent('Rent — apartment');
+      expect(getDefinition('Housing')).toHaveTextContent('Rent, apartment');
       expect(getDefinition('Landlord approval')).toHaveTextContent('Yes');
       expect(getDefinition('Landlord contact')).toHaveTextContent(
         'landlord@example.com'
@@ -345,13 +345,15 @@ describe('ApplicationDetail', () => {
           onAdvance={vi.fn()}
         />
       );
-      expect(getDefinition('Phone')).toHaveTextContent(EM_DASH);
-      expect(getDefinition('Address')).toHaveTextContent(EM_DASH);
-      expect(getDefinition('Other pets')).toHaveTextContent(EM_DASH);
-      expect(getDefinition('Veterinarian')).toHaveTextContent(EM_DASH);
-      expect(getDefinition('Veterinarian phone')).toHaveTextContent(EM_DASH);
-      expect(getDefinition('Experience')).toHaveTextContent(EM_DASH);
-      expect(getDefinition('Housing')).toHaveTextContent('Own — house');
+      expect(getDefinition('Phone')).toHaveTextContent(EMPTY_VALUE);
+      expect(getDefinition('Address')).toHaveTextContent(EMPTY_VALUE);
+      expect(getDefinition('Other pets')).toHaveTextContent(EMPTY_VALUE);
+      expect(getDefinition('Veterinarian')).toHaveTextContent(EMPTY_VALUE);
+      expect(getDefinition('Veterinarian phone')).toHaveTextContent(
+        EMPTY_VALUE
+      );
+      expect(getDefinition('Experience')).toHaveTextContent(EMPTY_VALUE);
+      expect(getDefinition('Housing')).toHaveTextContent('Own, house');
     });
 
     it('hides landlord and yard-fenced rows for an owner without a yard', () => {

@@ -65,7 +65,7 @@ export default function SignUpPage() {
         {portal === 'shelter' ? (
           <p className="text-base-content/80 mb-4 text-center text-sm sm:mb-5">
             This creates a login. After you sign in, open the shelter portal to
-            create your shelter or rescue — or{' '}
+            create your shelter or rescue, or{' '}
             <Link href="/contact?role=shelter" className="link link-primary">
               contact us
             </Link>{' '}

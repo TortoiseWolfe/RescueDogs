@@ -24,7 +24,7 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
     title = displayName,
     description = projectConfig.projectDescription,
     path = '/',
-    image = '/hero-held-paws.png',
+    image = '/og-hero.jpg',
     type = 'website',
     publishedTime,
     modifiedTime,
@@ -35,7 +35,7 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
 
   const fullTitle =
     title === displayName
-      ? `${displayName} — ${projectConfig.projectTagline}`
+      ? `${displayName}: ${projectConfig.projectTagline}`
       : `${title} | ${displayName}`;
 
   const canonicalUrl = `${projectConfig.deployUrl}${path}`;
@@ -43,7 +43,7 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
   // For Open Graph images, we need absolute URLs
   let imageUrl: string;
   if (image.startsWith('/')) {
-    // For assets like hero-held-paws.png, construct the full URL
+    // For assets like og-hero.jpg, construct the full URL
     // The deployUrl already includes the project name for GitHub Pages
     imageUrl = `${projectConfig.deployUrl}${image}`;
   } else {
@@ -85,9 +85,9 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
       images: [
         {
           url: imageUrl,
-          // Match public/hero-held-paws.png (1024×558) — not 1200×630 (#89)
-          width: 1024,
-          height: 558,
+          // Match public/og-hero.jpg (1200×630 landscape crop of the park hero)
+          width: 1200,
+          height: 630,
           alt: `${title} - ${description}`,
         },
       ],
@@ -176,7 +176,7 @@ export function generateJsonLd(options: MetadataOptions = {}) {
       '@type': 'Article',
       headline: title,
       description,
-      image: `${projectConfig.deployUrl}/hero-held-paws.png`,
+      image: `${projectConfig.deployUrl}/og-hero.jpg`,
       datePublished: publishedTime,
       dateModified: modifiedTime || publishedTime,
       author: {

@@ -73,7 +73,7 @@ export default function ForSheltersPage() {
           </li>
           <li>
             <strong className="text-base-content">Live adopter tracker.</strong>{' '}
-            When you update an application, applicants see it—no silence.
+            When you update an application, applicants see it. No silence.
           </li>
           <li>
             <strong className="text-base-content">Staff access.</strong> Sign

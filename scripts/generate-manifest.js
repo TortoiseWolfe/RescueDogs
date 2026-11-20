@@ -21,7 +21,7 @@ let projectConfig = {
   // Repo slug — used only for GitHub URLs / packaging, not PWA branding
   projectName: 'RescueDogs',
   projectDisplayName: 'Raised Paws',
-  projectTagline: 'Pet Adoption Application Tracker',
+  projectTagline: 'A Pet Adoption Application Portal',
   projectDescription:
     'Pet adoption application tracker for shelters, adopters, and live status updates',
   projectOwner: 'TortoiseWolfe',
@@ -71,7 +71,7 @@ const displayName = projectConfig.projectDisplayName;
 // display: browser — intentionally not installable as a PWA (#162).
 // Chrome's Install mini-infobar requires standalone|fullscreen|minimal-ui.
 const manifest = {
-  name: `${displayName} — ${projectConfig.projectTagline}`,
+  name: `${displayName}: ${projectConfig.projectTagline}`,
   short_name: displayName,
   description: projectConfig.projectDescription,
   theme_color: '#1e3a8a',

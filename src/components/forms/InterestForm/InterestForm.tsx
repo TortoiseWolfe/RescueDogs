@@ -55,7 +55,7 @@ export const InterestForm: React.FC<InterestFormProps> = ({
   } = useWeb3Forms({
     onSuccess,
     onError,
-    successMessage: "You're on the list — thank you.",
+    successMessage: "You're on the list. Thank you.",
   });
 
   const honeypotValue = watch('_gotcha');
@@ -93,8 +93,8 @@ export const InterestForm: React.FC<InterestFormProps> = ({
           <div role="alert" className="alert alert-success">
             <span>
               {wasQueuedOffline
-                ? 'Saved offline — we will send it when you are back online.'
-                : successMessage || "You're on the list — thank you."}
+                ? 'Saved offline. We will send it when you are back online.'
+                : successMessage || "You're on the list. Thank you."}
             </span>
           </div>
         )}
@@ -108,7 +108,7 @@ export const InterestForm: React.FC<InterestFormProps> = ({
         {!isOnline && (
           <div role="status" className="alert alert-warning">
             <span>
-              You appear offline. You can still join — we will queue it.
+              You appear offline. You can still join. We will queue it.
             </span>
           </div>
         )}

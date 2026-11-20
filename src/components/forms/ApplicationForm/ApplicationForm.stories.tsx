@@ -103,7 +103,7 @@ export const PrefilledRenter: Story = {
       zip: '62704',
       housing_type: 'rent_apartment',
       landlord_approval: true,
-      landlord_contact: 'Pat Property — 555-0199',
+      landlord_contact: 'Pat Property, 555-0199',
       has_yard: false,
       household_adults: 2,
       household_children: 1,

@@ -164,7 +164,7 @@ export default function UserAuditTrail({
                     </span>
                   </td>
                   <td className="font-mono text-sm">
-                    {entry.ip_address ?? '—'}
+                    {entry.ip_address ?? 'Unknown'}
                   </td>
                 </tr>
               ))}

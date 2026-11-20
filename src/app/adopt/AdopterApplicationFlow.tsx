@@ -372,7 +372,7 @@ export function AdopterApplicationFlow({
             <option value="">Select a pet…</option>
             {pets.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.breed ? `${item.name} — ${item.breed}` : item.name}
+                {item.breed ? `${item.name}, ${item.breed}` : item.name}
               </option>
             ))}
           </select>

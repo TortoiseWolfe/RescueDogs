@@ -131,7 +131,7 @@ function AdoptContent() {
         const code = (err as { code?: string })?.code;
         setError(
           code === '23505'
-            ? 'You already have an application for this pet — check My Applications for its status.'
+            ? 'You already have an application for this pet. Check My Applications for its status.'
             : 'Could not submit your application. Please try again.'
         );
         setSubmitting(false);
@@ -154,7 +154,7 @@ function AdoptContent() {
       <header className="mb-6">
         <h1 className="text-2xl font-bold">Apply to Adopt</h1>
         <p className="text-sm opacity-70">
-          One application, every answer saved for next time — and you can watch
+          One application, every answer saved for next time, and you can watch
           its status live from the moment you submit.
         </p>
         {shelterName && (
@@ -176,7 +176,7 @@ function AdoptContent() {
         <div className="card bg-base-200">
           <div className="card-body items-center text-center">
             <h2 className="card-title">No pets available right now</h2>
-            <p>Check back soon — new rescues arrive all the time.</p>
+            <p>Check back soon. New rescues arrive all the time.</p>
           </div>
         </div>
       ) : (

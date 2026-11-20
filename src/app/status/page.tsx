@@ -89,13 +89,13 @@ export default function StatusPage() {
     ...LH.map(([k, label]): Check => {
       const n = lh?.[k];
       return typeof n !== 'number'
-        ? { group: 'Lighthouse · mobile · CI', label, value: '—', state: 'pending' }
+        ? { group: 'Lighthouse · mobile · CI', label, value: 'pending', state: 'pending' }
         : { group: 'Lighthouse · mobile · CI', label, value: String(n), state: rateLH(n) };
     }),
     ...VITALS.map((k): Check => {
       const m = vitals[k];
       return m == null
-        ? { group: 'Web Vitals · this page load', label: k, value: '—', state: 'pending' }
+        ? { group: 'Web Vitals · this page load', label: k, value: 'pending', state: 'pending' }
         : { group: 'Web Vitals · this page load', label: k,
             value: k === 'CLS' ? m.value.toFixed(3) : `${Math.round(m.value)} ms`,
             state: fromVital(m.rating) };

@@ -236,7 +236,7 @@ export default function Home() {
             id="how-it-works-heading"
             className="font-display text-base-content mb-4 text-3xl font-bold tracking-tight sm:text-4xl"
           >
-            How Raised Paws works
+            How Raised Paws Works
           </h2>
           <p className="text-base-content mx-auto mb-12 max-w-3xl text-lg leading-relaxed">
             Raised Paws is the application step, not another listing site. Keep

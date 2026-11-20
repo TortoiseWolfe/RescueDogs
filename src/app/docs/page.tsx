@@ -15,7 +15,7 @@ import { detectedConfig } from '@/config/project-detected';
 export const metadata: Metadata = {
   title: 'Documentation - Raised Paws',
   description:
-    'Documentation index for Raised Paws — fork, configure, build, ship.',
+    'Documentation index for Raised Paws: fork, configure, build, ship.',
 };
 
 const gh = (path: string) => `${detectedConfig.projectUrl}/blob/main/${path}`;

@@ -71,7 +71,7 @@ export function interestToContactPayload(
       `Who: ${roleLabel}`,
       data.name ? `Name: ${data.name}` : null,
       '',
-      'Promise on the page: occasional updates when there is something real for shelters or adopters — not a newsletter blast.',
+      'Promise on the page: occasional updates when there is something real for shelters or adopters, not a newsletter blast.',
     ]
       .filter(Boolean)
       .join('\n'),

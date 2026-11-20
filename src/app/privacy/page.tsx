@@ -49,30 +49,30 @@ export default function PrivacyPolicyPage() {
           </p>
           <ul className="mb-4 list-disc space-y-2 pl-6">
             <li>
-              <strong>Account information</strong> — email address, password
+              <strong>Account information:</strong> email address, password
               (stored hashed by our auth provider), and optional profile details
               you provide.
             </li>
             <li>
-              <strong>Shelter or rescue information</strong> — organization
-              name, location fields, and contact email when you create an
-              organization in the shelter portal.
+              <strong>Shelter or rescue information:</strong> organization name,
+              location fields, and contact email when you create an organization
+              in the shelter portal.
             </li>
             <li>
-              <strong>Adoption applications</strong> — answers you submit (for
+              <strong>Adoption applications:</strong> answers you submit (for
               example household and contact details) and status history for
               those applications.
             </li>
             <li>
-              <strong>Pet listings</strong> — details and photos that shelter
+              <strong>Pet listings:</strong> details and photos that shelter
               staff upload for animals available for adoption.
             </li>
             <li>
-              <strong>Contact and feedback</strong> — messages you send via our
+              <strong>Contact and feedback:</strong> messages you send via our
               contact form or email.
             </li>
             <li>
-              <strong>Technical and cookie data</strong> — device/browser basics
+              <strong>Technical and cookie data:</strong> device/browser basics
               and, if you consent, analytics events. See our{' '}
               <Link href="/cookies" className="link link-primary">
                 Cookie Policy
@@ -119,11 +119,11 @@ export default function PrivacyPolicyPage() {
           </h2>
           <ul className="mb-4 list-disc space-y-2 pl-6">
             <li>
-              <strong>You</strong> — your account and the applications you
+              <strong>You:</strong> your account and the applications you
               submit.
             </li>
             <li>
-              <strong>Shelter / rescue staff</strong> — staff linked to an
+              <strong>Shelter / rescue staff:</strong> staff linked to an
               organization can see applications and related profile snapshot
               data for pets they list, so they can review adopters.
             </li>

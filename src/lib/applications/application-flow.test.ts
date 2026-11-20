@@ -77,7 +77,7 @@ describe('partitionApplicationQuestions', () => {
     ]);
     expect(part.answeredCount).toBe(1);
     expect(reuseProgressLabel(part.answeredCount, part.totalCount)).toBe(
-      "We'll reuse 1 of 3 answers — change anything that needs updating."
+      "We'll reuse 1 of 3 answers. Change anything that needs updating."
     );
   });
 

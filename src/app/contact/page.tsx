@@ -47,7 +47,7 @@ export default function ContactPage() {
           </h1>
           <p className="text-base-content/85 text-base sm:text-lg md:text-xl">
             Questions about a pilot, product feedback, or help using the
-            tracker? Send a note — we read every message.
+            tracker? Send a note. We read every message.
           </p>
         </div>
 

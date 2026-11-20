@@ -305,8 +305,8 @@ function PetDetailContent({ species }: { species: SpeciesBrowseKind }) {
               Apply to Adopt {pet.name}
             </Link>
             <p className="text-base-content/80 mt-2 text-center text-xs sm:text-sm">
-              You&apos;ll complete one universal application — no duplicate
-              forms for every pet.
+              You&apos;ll complete one universal application. No duplicate forms
+              for every pet.
             </p>
           </div>
         </div>

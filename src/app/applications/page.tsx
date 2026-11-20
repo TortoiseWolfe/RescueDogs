@@ -66,7 +66,7 @@ function MyApplicationsContent() {
         <div className="card bg-base-200">
           <div className="card-body items-center gap-4 text-center">
             <h2 className="card-title text-2xl">
-              Welcome — let&apos;s get you started
+              Welcome. Let&apos;s get you started
             </h2>
             <p className="text-base-content/80 max-w-md">
               You do not have any adoption applications yet. Browse pets, then
@@ -79,7 +79,7 @@ function MyApplicationsContent() {
               <Link href="/account" className="link link-primary">
                 display name
               </Link>{' '}
-              in Account Settings is optional and used for messaging — it is
+              in Account Settings is optional and used for messaging. It is
               separate from your application full name.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">

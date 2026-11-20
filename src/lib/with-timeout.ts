@@ -10,7 +10,7 @@ export function withAsyncTimeout<T>(
     const timer = setTimeout(
       () =>
         reject(
-          new Error(`${label} timed out — check your connection and try again.`)
+          new Error(`${label} timed out. Check your connection and try again.`)
         ),
       ms
     );

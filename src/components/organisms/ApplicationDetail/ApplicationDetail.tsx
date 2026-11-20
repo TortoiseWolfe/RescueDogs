@@ -47,7 +47,7 @@ export interface ApplicationDetailProps {
   className?: string;
 }
 
-const EM_DASH = '—';
+const EMPTY_VALUE = 'Not answered';
 
 const SPECIES_LABELS: Record<PetSpecies, string> = {
   dog: 'Dog',
@@ -55,25 +55,25 @@ const SPECIES_LABELS: Record<PetSpecies, string> = {
 };
 
 function textOrDash(value: string | null | undefined): string {
-  return typeof value === 'string' && value.trim() !== '' ? value : EM_DASH;
+  return typeof value === 'string' && value.trim() !== '' ? value : EMPTY_VALUE;
 }
 
 function yesNoOrDash(value: boolean | null | undefined): string {
   if (value === true) return 'Yes';
   if (value === false) return 'No';
-  return EM_DASH;
+  return EMPTY_VALUE;
 }
 
 function countOrDash(value: number | null | undefined): string {
   return typeof value === 'number' && Number.isFinite(value)
     ? String(value)
-    : EM_DASH;
+    : EMPTY_VALUE;
 }
 
 function humanizeHousingType(
   value: ProfileSnapshot['housing_type'] | null | undefined
 ): string {
-  if (!value) return EM_DASH;
+  if (!value) return EMPTY_VALUE;
   return (
     HOUSING_TYPE_OPTIONS.find((option) => option.value === value)?.label ??
     value
@@ -89,14 +89,14 @@ function formatAddress(snapshot: Partial<ProfileSnapshot>): string {
   ].filter(
     (part): part is string => typeof part === 'string' && part.trim() !== ''
   );
-  return parts.length > 0 ? parts.join(', ') : EM_DASH;
+  return parts.length > 0 ? parts.join(', ') : EMPTY_VALUE;
 }
 
 function formatDate(iso: string | null | undefined): string {
-  if (!iso) return EM_DASH;
+  if (!iso) return EMPTY_VALUE;
   const date = new Date(iso);
   return Number.isNaN(date.getTime())
-    ? EM_DASH
+    ? EMPTY_VALUE
     : date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
@@ -230,10 +230,10 @@ export default function ApplicationDetail({
           )}
           <div className="min-w-0 flex-1">
             <h2 id={petHeadingId} className="card-title">
-              {pet?.name ?? EM_DASH}
+              {pet?.name ?? EMPTY_VALUE}
             </h2>
             {petSubtitle && <p className="text-sm opacity-70">{petSubtitle}</p>}
-            {applicantLabel !== EM_DASH && (
+            {applicantLabel !== EMPTY_VALUE && (
               <p className="mt-1 text-sm">
                 Applicant: <span className="font-medium">{applicantLabel}</span>
               </p>
@@ -248,7 +248,7 @@ export default function ApplicationDetail({
                 disabled={messaging}
                 data-testid="message-applicant"
                 aria-label={
-                  applicantLabel !== EM_DASH
+                  applicantLabel !== EMPTY_VALUE
                     ? `Message ${applicantLabel}`
                     : 'Message applicant'
                 }
